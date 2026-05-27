@@ -1,0 +1,27 @@
+node_modules/
+coverage/
+dist/
+.DS_Store
+*.log
+.env
+.env.local
+.env.production
+
+# Manter o exemplo de variáveis de ambiente
+!.env.example
+
+# Arquivos de debug/scratch (desenvolvimento local)
+scratch/
+scratch_*.js
+check_*.js
+test-*.ts
+test-*.js
+test_*.txt
+tbody_*.txt
+*.txt
+components.txt
+jsx_components.txt
+placar_components.txt
+
+# Arquivos temporários de desenvolvimento
+metadata.json

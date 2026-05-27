@@ -1,0 +1,17 @@
+<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Left tail -->
+  <path d="M 60 50 Q 30 40 10 60 L 20 75 Q 40 55 65 65 Z" fill="white" stroke="#4a4a4a" stroke-width="2" stroke-linejoin="round"/>
+  
+  <!-- Right tail -->
+  <path d="M 140 50 Q 170 40 190 60 L 180 75 Q 160 55 135 65 Z" fill="white" stroke="#4a4a4a" stroke-width="2" stroke-linejoin="round"/>
+  
+  <!-- Red Chart/Arrow -->
+  <path d="M 115 50 L 115 35 L 125 35 L 125 45 L 135 45 L 135 25 L 145 25 L 145 40 L 160 20 L 150 15 L 175 5 L 180 30 L 170 25 L 145 55 L 135 55 L 125 55 Z" fill="#b91c1c" />
+  
+  <!-- Knot -->
+  <path d="M 85 40 Q 75 35 70 50 Q 70 65 85 65 Q 100 65 115 55 Q 120 45 115 40 Q 100 35 85 40 Z" fill="white" stroke="#4a4a4a" stroke-width="2" stroke-linejoin="round"/>
+  
+  <!-- Knot details -->
+  <path d="M 75 45 Q 90 50 100 65" fill="none" stroke="#4a4a4a" stroke-width="2" stroke-linecap="round"/>
+  <path d="M 110 42 Q 95 50 90 65" fill="none" stroke="#4a4a4a" stroke-width="2" stroke-linecap="round"/>
+</svg>

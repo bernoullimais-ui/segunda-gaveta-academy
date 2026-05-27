@@ -1,0 +1,1 @@
+ALTER TABLE trilhas ADD COLUMN IF NOT EXISTS descricao TEXT;
