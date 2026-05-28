@@ -31,6 +31,55 @@ try {
   console.error("Failed to create GoogleGenAI client:", e);
 }
 
+async function generateContentWithRetry(config: {
+  contents: string | any[];
+  config?: any;
+}) {
+  const modelsToTry = ['gemini-2.5-flash', 'gemini-2.5-flash-lite'];
+  let lastError: any = null;
+
+  for (const model of modelsToTry) {
+    let retries = 3;
+    while (retries > 0) {
+      try {
+        console.log(`Attempting content generation with model: ${model}...`);
+        return await ai.models.generateContent({
+          model: model,
+          ...config
+        });
+      } catch (error: any) {
+        lastError = error;
+        const status = error.status || error.statusCode || (error.error && error.error.code);
+        const isTransient = status === 503 || status === 429 || 
+                            (error.message && (
+                              error.message.includes("503") || 
+                              error.message.includes("429") ||
+                              error.message.includes("high demand") ||
+                              error.message.includes("UNAVAILABLE") ||
+                              error.message.includes("exceeded your current quota") ||
+                              error.message.includes("RESOURCE_EXHAUSTED")
+                            ));
+
+        if (isTransient) {
+          retries--;
+          if (retries > 0) {
+            const delay = (4 - retries) * 1000;
+            console.warn(`Transient error on model ${model} (status ${status}). Retrying in ${delay}ms... Details:`, error.message);
+            await new Promise(resolve => setTimeout(resolve, delay));
+          } else {
+            console.warn(`Model ${model} failed after all retries. Trying next model...`);
+          }
+        } else {
+          console.error(`Permanent error with model ${model}:`, error.message);
+          retries = 0; // stop retrying this model
+        }
+      }
+    }
+  }
+
+  throw lastError || new Error("Failed to generate content with all models and retries.");
+}
+
 
 const app = express();
 const PORT = 3000;
@@ -68,8 +117,7 @@ app.post("/api/ai/generate-course-outline", async (req, res) => {
 Com base no título "${title}" e na descrição "${description || ''}", gere uma proposta de grade curricular estruturada em módulos e aulas para a plataforma de cursos Academia Digital.
 Cada módulo deve conter um título descritivo e uma lista de etapas/aulas. Cada aula deve ter um nome de conteúdo e um tipo (vídeo, artigo ou quiz).`;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash',
+    const response = await generateContentWithRetry({
       contents: prompt,
       config: {
         responseMimeType: 'application/json',
@@ -135,8 +183,7 @@ Conteúdo base: "${content || ''}"
 
 Cada questão deve ser focada e clara, contendo 4 opções e indicando qual é o índice correto (de '0' a '3').`;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash',
+    const response = await generateContentWithRetry({
       contents: prompt,
       config: {
         responseMimeType: 'application/json',
@@ -209,8 +256,7 @@ Aluno: ${user_message}
 
 Tutor:`;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash',
+    const response = await generateContentWithRetry({
       contents: prompt
     });
 
@@ -260,8 +306,7 @@ Responda em formato JSON com a seguinte estrutura:
   "aulaRecomendada": "Nome exato de uma das aulas listadas na grade curricular acima para o aluno revisar (opcional, apenas se houver uma aula fortemente relacionada no currículo)."
 }`;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash',
+    const response = await generateContentWithRetry({
       contents: prompt,
       config: {
         responseMimeType: 'application/json',
@@ -358,8 +403,7 @@ Por favor, gere a copy de vendas estruturada com base no framework selecionado. 
   "callToAction": "Um texto persuasivo de chamada para ação para fechar a compra."
 }`;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash',
+    const response = await generateContentWithRetry({
       contents: prompt,
       config: {
         responseMimeType: 'application/json',
