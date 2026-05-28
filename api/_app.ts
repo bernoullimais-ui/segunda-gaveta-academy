@@ -22,6 +22,84 @@ if (supabaseUrl && supabaseServiceKey) {
   }
 }
 
+import { 
+  notifyWelcome, 
+  notifyOnboarding, 
+  notifyAffiliateInvite, 
+  notifyAbandonedCart, 
+  notifyPaymentFailed 
+} from "./lib/notification.js";
+
+async function registerCheckout({
+  name,
+  email,
+  phone,
+  itemType,
+  itemId,
+  itemName,
+  amount,
+  checkoutUrl,
+  orgId
+}: {
+  name: string;
+  email: string;
+  phone?: string;
+  itemType: string;
+  itemId: string;
+  itemName: string;
+  amount: number;
+  checkoutUrl: string;
+  orgId?: string | null;
+}) {
+  if (!supabase) {
+    console.warn("[Notification Warning] Supabase client not initialized. Cannot register checkout.");
+    return;
+  }
+  try {
+    let finalOrgId = orgId;
+    if (!finalOrgId) {
+      if (itemType === 'trilha') {
+        const { data: trilha } = await supabase
+          .from('trilhas')
+          .select('organizacao_id')
+          .eq('id', itemId)
+          .maybeSingle();
+        if (trilha) finalOrgId = trilha.organizacao_id;
+      } else {
+        const { data: curso } = await supabase
+          .from('cursos')
+          .select('organizacao_id')
+          .eq('id', itemId)
+          .maybeSingle();
+        if (curso) finalOrgId = curso.organizacao_id;
+      }
+    }
+
+    const { error } = await supabase
+      .from('checkouts_abandonados')
+      .insert([{
+        nome: name,
+        email: email.trim().toLowerCase(),
+        telefone: phone || null,
+        item_tipo: itemType,
+        item_id: itemId,
+        item_nome: itemName,
+        valor: amount,
+        checkout_url: checkoutUrl,
+        organizacao_id: finalOrgId || null,
+        recuperado: false
+      }]);
+
+    if (error) {
+      console.error("[Notification] Error registering checkout:", error);
+    } else {
+      console.log(`[Notification] Checkout registered for ${email} (${itemName})`);
+    }
+  } catch (err) {
+    console.error("[Notification] Exception registering checkout:", err);
+  }
+}
+
 let ai: any = null;
 try {
   ai = new GoogleGenAI({
@@ -689,6 +767,19 @@ app.post("/api/pagarme/create-order", async (req, res) => {
       return res.status(response.status).json({ message: order.message || "Erro de validação", details: order });
     }
 
+    // Register checkout in checkouts_abandonados for recovery in background
+    const checkoutUrl = order.checkouts?.[0]?.payment_url || req.headers.referer || "https://segunda-gaveta-academy.vercel.app";
+    registerCheckout({
+      name: customer.name,
+      email: customer.email,
+      phone: customer.phone,
+      itemType: targetType || 'curso',
+      itemId: targetId,
+      itemName: items[0]?.description || "Inscrição",
+      amount: pagarmeAmount / 100,
+      checkoutUrl
+    }).catch(err => console.error("registerCheckout background error:", err));
+
     res.json({
       order_id: order.id,
       checkout_url: order.checkouts?.[0]?.payment_url
@@ -798,6 +889,20 @@ app.post("/api/pagarme/create-cc-order", async (req, res) => {
     });
     
     const result = await response.json();
+
+    // Register checkout in background
+    const checkoutUrl = req.headers.referer || "https://segunda-gaveta-academy.vercel.app";
+    registerCheckout({
+      name: customer.name,
+      email: customer.email,
+      phone: customer.phone,
+      itemType: targetType || 'curso',
+      itemId: targetId,
+      itemName: items[0]?.description || "Inscrição",
+      amount: pagarmeAmount / 100,
+      checkoutUrl
+    }).catch(err => console.error("registerCheckout cc background error:", err));
+
     if (!response.ok) return res.status(response.status).json(result);
     res.json(result);
   } catch (e: any) { res.status(500).json({ error: e.message }); }
@@ -935,6 +1040,31 @@ app.post("/api/pagarme/webhook", async (req, res) => {
           return res.status(500).send("Database onboarding status update failed");
         }
         console.log(`Successfully updated onboarding payment for ${onboarding_id}`);
+
+        // Fetch user & org info to trigger onboarding notification
+        try {
+          const { data: onbInfo } = await supabase
+            .from('especialistas_onboarding')
+            .select('id, usuarios(id, nome, email, telefone, organizacoes(nome))')
+            .eq('id', onboarding_id)
+            .maybeSingle();
+
+          if (onbInfo && onbInfo.usuarios) {
+            const user = onbInfo.usuarios as any;
+            const orgName = user.organizacoes?.nome || "Minha Instituição";
+            
+            console.log(`[Notification] Triggering onboarding notification for ${user.email}`);
+            await notifyOnboarding({
+              email: user.email,
+              name: user.nome || "Especialista",
+              phone: user.telefone || undefined,
+              orgName: orgName
+            });
+          }
+        } catch (errOnb) {
+          console.error("[Notification Error] Failed to send onboarding notification:", errOnb);
+        }
+
         return res.json({ success: true });
       }
       
@@ -1195,12 +1325,343 @@ app.post("/api/pagarme/webhook", async (req, res) => {
           console.error("Failed to insert into compras table:", purchaseErr);
         }
       }
+
+      // 4. Update checkouts_abandonados table & Trigger Welcome Notification
+      if (customerEmail && targetItemId) {
+        try {
+          // A. Mark matching checkout as recuperado
+          const { error: updErr } = await supabase
+            .from('checkouts_abandonados')
+            .update({ recuperado: true })
+            .eq('email', customerEmail)
+            .eq('item_id', targetItemId);
+          
+          if (updErr) {
+            console.error("[Notification Warning] Failed to update checkouts_abandonados status:", updErr);
+          } else {
+            console.log(`[Notification] Marked checkout for ${customerEmail} as recuperado`);
+          }
+
+          // B. Get Course/Trilha name
+          let itemName = "Curso";
+          if (targetType === 'trilha') {
+            const { data: trilha } = await supabase
+              .from('trilhas')
+              .select('titulo')
+              .eq('id', targetItemId)
+              .maybeSingle();
+            if (trilha) itemName = trilha.titulo;
+          } else {
+            const { data: curso } = await supabase
+              .from('cursos')
+              .select('nome')
+              .eq('id', targetItemId)
+              .maybeSingle();
+            if (curso) itemName = curso.nome;
+          }
+
+          // C. Get Phone number (with fallback to checkouts_abandonados)
+          let customerPhone = "";
+          if (order.customer?.phones?.mobile_phone) {
+            const mp = order.customer.phones.mobile_phone;
+            // Handle dummy numbers
+            if (mp.number && mp.number !== '999999999') {
+              customerPhone = `+${mp.country_code || '55'}${mp.area_code || '11'}${mp.number}`;
+            }
+          }
+          if (!customerPhone) {
+            const { data: latestCheckout } = await supabase
+              .from('checkouts_abandonados')
+              .select('telefone')
+              .eq('email', customerEmail)
+              .order('criado_em', { ascending: false })
+              .limit(1)
+              .maybeSingle();
+            if (latestCheckout?.telefone) {
+              customerPhone = latestCheckout.telefone;
+            }
+          }
+
+          // D. Dispatch Welcome Notification
+          console.log(`[Notification] Dispatching welcome notification to ${customerEmail}`);
+          await notifyWelcome({
+            email: customerEmail,
+            name: customerName,
+            phone: customerPhone || undefined,
+            courseName: itemName
+          });
+        } catch (errWelcome) {
+          console.error("[Notification Error] Failed to send welcome notification:", errWelcome);
+        }
+      }
+    } else if (event.type === "order.payment_failed" || event.type === "charge.failed") {
+      const dataObj = event.data;
+      const metadata = dataObj.metadata || dataObj.order?.metadata || {};
+      const customer = dataObj.customer || dataObj.order?.customer || {};
+      
+      const customerEmail = customer.email?.toLowerCase()?.trim();
+      const customerName = customer.name || "Aluno";
+      const targetItemId = metadata.id || metadata.curso_id || metadata.course_id;
+      const targetType = metadata.type || 'curso';
+      
+      if (customerEmail && targetItemId) {
+        try {
+          // A. Get Course/Trilha name
+          let itemName = "Curso";
+          if (targetType === 'trilha') {
+            const { data: trilha } = await supabase
+              .from('trilhas')
+              .select('titulo')
+              .eq('id', targetItemId)
+              .maybeSingle();
+            if (trilha) itemName = trilha.titulo;
+          } else {
+            const { data: curso } = await supabase
+              .from('cursos')
+              .select('nome')
+              .eq('id', targetItemId)
+              .maybeSingle();
+            if (curso) itemName = curso.nome;
+          }
+
+          // B. Get Phone (checking fallback)
+          let customerPhone = "";
+          if (customer.phones?.mobile_phone) {
+            const mp = customer.phones.mobile_phone;
+            if (mp.number && mp.number !== '999999999') {
+              customerPhone = `+${mp.country_code || '55'}${mp.area_code || '11'}${mp.number}`;
+            }
+          }
+          if (!customerPhone) {
+            const { data: latestCheckout } = await supabase
+              .from('checkouts_abandonados')
+              .select('telefone')
+              .eq('email', customerEmail)
+              .order('criado_em', { ascending: false })
+              .limit(1)
+              .maybeSingle();
+            if (latestCheckout?.telefone) {
+              customerPhone = latestCheckout.telefone;
+            }
+          }
+
+          // C. Reconstruct Checkout Link
+          const checkoutLink = metadata.success_url 
+            ? metadata.success_url.split('/pagamento-sucesso')[0] 
+            : `https://segunda-gaveta-academy.vercel.app/${targetType}/${targetItemId}`;
+
+          console.log(`[Notification] Dispatching payment failed notification to ${customerEmail}`);
+          await notifyPaymentFailed({
+            email: customerEmail,
+            name: customerName,
+            phone: customerPhone || undefined,
+            itemName,
+            checkoutLink
+          });
+        } catch (errFail) {
+          console.error("[Notification Error] Failed to send payment failed notification:", errFail);
+        }
+      }
     }
 
     res.status(200).send("Webhook received");
   } catch (error: any) {
     console.error("Webhook Error:", error);
     res.status(500).send(error.message);
+  }
+});
+
+app.post("/api/cron/recover-carts", async (req, res) => {
+  return handleCartRecovery(req, res);
+});
+
+app.get("/api/cron/recover-carts", async (req, res) => {
+  return handleCartRecovery(req, res);
+});
+
+async function handleCartRecovery(req: express.Request, res: express.Response) {
+  if (!supabase) {
+    return res.status(500).json({ error: "Supabase client not initialized" });
+  }
+
+  try {
+    console.log("[Cron] Running recover-carts job...");
+    const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000).toISOString();
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+
+    // Query unrecovered checkouts between 15m and 24h old
+    const { data: abandonados, error: errFetch } = await supabase
+      .from('checkouts_abandonados')
+      .select('*')
+      .eq('recuperado', false)
+      .lt('criado_em', fifteenMinutesAgo)
+      .gt('criado_em', twentyFourHoursAgo);
+
+    if (errFetch) {
+      console.error("[Cron] Error fetching checkouts:", errFetch);
+      return res.status(500).json({ error: errFetch.message });
+    }
+
+    console.log(`[Cron] Found ${abandonados?.length || 0} potentially abandoned checkouts`);
+
+    if (!abandonados || abandonados.length === 0) {
+      return res.json({ success: true, processed: 0 });
+    }
+
+    let processedCount = 0;
+    let recoveredCount = 0;
+
+    for (const checkout of abandonados) {
+      const emailClean = checkout.email.trim().toLowerCase();
+      let alreadyPurchased = false;
+
+      // 1. Find user by email
+      const { data: userRecord } = await supabase
+        .from('usuarios')
+        .select('id')
+        .eq('email', emailClean)
+        .maybeSingle();
+
+      if (userRecord) {
+        // 2. Check compras
+        const { data: purchase } = await supabase
+          .from('compras')
+          .select('id')
+          .eq('usuario_id', userRecord.id)
+          .eq('item_id', checkout.item_id)
+          .eq('status', 'pago')
+          .maybeSingle();
+
+        if (purchase) {
+          alreadyPurchased = true;
+        } else {
+          // 3. Check enrollment status
+          const table = checkout.item_tipo === 'trilha' ? 'trilha_participantes' : 'curso_participantes';
+          const idField = checkout.item_tipo === 'trilha' ? 'trilha_id' : 'curso_id';
+          const { data: enrollment } = await supabase
+            .from(table)
+            .select('id')
+            .eq('usuario_id', userRecord.id)
+            .eq(idField, checkout.item_id)
+            .in('status', checkout.item_tipo === 'trilha' ? ['pago'] : ['inscrito', 'pago'])
+            .maybeSingle();
+
+          if (enrollment) {
+            alreadyPurchased = true;
+          }
+        }
+      }
+
+      if (alreadyPurchased) {
+        console.log(`[Cron] Customer ${emailClean} already purchased ${checkout.item_nome}. Marking as recovered.`);
+        await supabase
+          .from('checkouts_abandonados')
+          .update({ recuperado: true })
+          .eq('id', checkout.id);
+        continue;
+      }
+
+      // Customer did not purchase yet -> Send recovery notification
+      console.log(`[Cron] Sending recovery notification to ${emailClean} for ${checkout.item_nome}`);
+      
+      await notifyAbandonedCart({
+        email: checkout.email,
+        name: checkout.nome,
+        phone: checkout.telefone || undefined,
+        itemName: checkout.item_nome,
+        checkoutLink: checkout.checkout_url
+      });
+
+      // Mark checkout as recuperado (attempted) so we don't spam them
+      await supabase
+        .from('checkouts_abandonados')
+        .update({ recuperado: true })
+        .eq('id', checkout.id);
+
+      processedCount++;
+      recoveredCount++;
+    }
+
+    res.json({
+      success: true,
+      processed: processedCount,
+      notifications_sent: recoveredCount
+    });
+  } catch (error: any) {
+    console.error("[Cron Error] Exception in recover-carts job:", error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
+app.post("/api/notifications/test", async (req, res) => {
+  const { type, email, name, phone, courseName, inviteLink, commission, checkoutLink, orgName } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ error: "Email is required" });
+  }
+
+  try {
+    console.log(`[Test Endpoint] Triggering notification test for ${email} type ${type}`);
+    let success = false;
+
+    switch (type) {
+      case 'welcome':
+        await notifyWelcome({
+          email,
+          name: name || "Aluno Teste",
+          phone: phone || undefined,
+          courseName: courseName || "Curso de Teste"
+        });
+        success = true;
+        break;
+      case 'onboarding':
+        await notifyOnboarding({
+          email,
+          name: name || "Especialista Teste",
+          phone: phone || undefined,
+          orgName: orgName || "Instituição de Teste"
+        });
+        success = true;
+        break;
+      case 'affiliate_invite':
+        await notifyAffiliateInvite({
+          email,
+          name: name || "Afiliado Teste",
+          phone: phone || undefined,
+          courseName: courseName || "Curso de Teste",
+          inviteLink: inviteLink || "https://segunda-gaveta-academy.vercel.app/invite-test",
+          commission: commission || 30
+        });
+        success = true;
+        break;
+      case 'abandoned_cart':
+        await notifyAbandonedCart({
+          email,
+          name: name || "Cliente Teste",
+          phone: phone || undefined,
+          itemName: courseName || "Curso de Teste",
+          checkoutLink: checkoutLink || "https://segunda-gaveta-academy.vercel.app/checkout-test"
+        });
+        success = true;
+        break;
+      case 'payment_failed':
+        await notifyPaymentFailed({
+          email,
+          name: name || "Cliente Teste",
+          phone: phone || undefined,
+          itemName: courseName || "Curso de Teste",
+          checkoutLink: checkoutLink || "https://segunda-gaveta-academy.vercel.app/checkout-test"
+        });
+        success = true;
+        break;
+      default:
+        return res.status(400).json({ error: `Invalid notification type: ${type}. Choose from 'welcome', 'onboarding', 'affiliate_invite', 'abandoned_cart', 'payment_failed'` });
+    }
+
+    res.json({ success, message: `Notification of type '${type}' sent successfully to ${email}` });
+  } catch (error: any) {
+    console.error("[Test Endpoint Error] Failed to send test notification:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 
