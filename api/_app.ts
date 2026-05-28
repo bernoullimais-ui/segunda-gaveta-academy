@@ -69,7 +69,7 @@ Com base no título "${title}" e na descrição "${description || ''}", gere uma
 Cada módulo deve conter um título descritivo e uma lista de etapas/aulas. Cada aula deve ter um nome de conteúdo e um tipo (vídeo, artigo ou quiz).`;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-1.5-flash',
       contents: prompt,
       config: {
         responseMimeType: 'application/json',
@@ -136,7 +136,7 @@ Conteúdo base: "${content || ''}"
 Cada questão deve ser focada e clara, contendo 4 opções e indicando qual é o índice correto (de '0' a '3').`;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-1.5-flash',
       contents: prompt,
       config: {
         responseMimeType: 'application/json',
@@ -210,7 +210,7 @@ Aluno: ${user_message}
 Tutor:`;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-1.5-flash',
       contents: prompt
     });
 
@@ -261,7 +261,7 @@ Responda em formato JSON com a seguinte estrutura:
 }`;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-1.5-flash',
       contents: prompt,
       config: {
         responseMimeType: 'application/json',
@@ -359,7 +359,7 @@ Por favor, gere a copy de vendas estruturada com base no framework selecionado. 
 }`;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-1.5-flash',
       contents: prompt,
       config: {
         responseMimeType: 'application/json',
