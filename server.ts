@@ -1,7 +1,6 @@
 import express from "express";
 import path from "path";
 import fs from "fs";
-import { createServer as createViteServer } from "vite";
 import { fileURLToPath } from "url";
 import { createClient } from "@supabase/supabase-js";
 import { GoogleGenAI } from '@google/genai';
@@ -1157,13 +1156,14 @@ app.post("/api/pagarme/webhook", async (req, res) => {
 async function setupApp() {
   const distPath = path.resolve(process.cwd(), "dist");
 
-  if (process.env.NODE_ENV !== "production") {
+  if (process.env.NODE_ENV !== "production" && !process.env.VERCEL) {
+    const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
     });
     app.use(vite.middlewares);
-  } else if (fs.existsSync(distPath)) {
+  } else if (!process.env.VERCEL && fs.existsSync(distPath)) {
     app.use(express.static(distPath, {
       maxAge: '1h',
       setHeaders: (res, path) => {
