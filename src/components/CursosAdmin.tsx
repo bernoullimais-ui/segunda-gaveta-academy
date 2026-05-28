@@ -644,8 +644,10 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Erro ao gerar o currículo.');
+        const rawText = await response.text();
+        let errorMsg = 'Erro ao gerar o currículo.';
+        try { errorMsg = JSON.parse(rawText).error || errorMsg; } catch { errorMsg = rawText.substring(0, 200) || errorMsg; }
+        throw new Error(errorMsg);
       }
 
       const data = await response.json();
@@ -704,8 +706,10 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Erro ao gerar questões.');
+        const rawText = await response.text();
+        let errorMsg = 'Erro ao gerar questões.';
+        try { errorMsg = JSON.parse(rawText).error || errorMsg; } catch { errorMsg = rawText.substring(0, 200) || errorMsg; }
+        throw new Error(errorMsg);
       }
 
       const data = await response.json();
