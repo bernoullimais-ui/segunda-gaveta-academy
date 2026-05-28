@@ -3,20 +3,33 @@ import { createClient } from "@supabase/supabase-js";
 import { GoogleGenAI } from '@google/genai';
 import 'dotenv/config';
 
-let supabaseUrl = process.env.VITE_SUPABASE_URL!;
-supabaseUrl = supabaseUrl.trim().replace(/\/$/, '');
-if (supabaseUrl.endsWith('/rest/v1')) {
-  supabaseUrl = supabaseUrl.replace(/\/rest\/v1$/, '');
+let supabaseUrl = process.env.VITE_SUPABASE_URL || "";
+if (supabaseUrl) {
+  supabaseUrl = supabaseUrl.trim().replace(/\/$/, '');
+  if (supabaseUrl.endsWith('/rest/v1')) {
+    supabaseUrl = supabaseUrl.replace(/\/rest\/v1$/, '');
+  }
 }
 
-const supabase = createClient(
-  supabaseUrl,
-  process.env.SUPABASE_SERVICE_ROLE_KEY! // Necessário para atualizar status via server sem bypassar RLS
-);
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY || ''
-});
+let supabase: any = null;
+if (supabaseUrl && supabaseServiceKey) {
+  try {
+    supabase = createClient(supabaseUrl, supabaseServiceKey);
+  } catch (e) {
+    console.error("Failed to create Supabase client:", e);
+  }
+}
+
+let ai: any = null;
+try {
+  ai = new GoogleGenAI({
+    apiKey: process.env.GEMINI_API_KEY || ''
+  });
+} catch (e) {
+  console.error("Failed to create GoogleGenAI client:", e);
+}
 
 
 const app = express();
