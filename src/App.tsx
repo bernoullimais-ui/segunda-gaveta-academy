@@ -869,29 +869,38 @@ export default function App() {
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto p-4 md:p-8 bg-slate-50">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentView}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.2 }}
-              className="h-full"
-            >
-              <React.Suspense fallback={<AdminLoadingFallback />}>
-                <RenderContent 
-                  view={currentView} 
-                  user={loggedUser} 
-                  role={loggedRole} 
-                  showToast={showToast}
-                  onOrgUpdate={handleOrgUpdate}
-                  communityInitialTab={communityInitialTab}
-                  communityInitialPostId={communityInitialPostId}
-                  communityInitialRecipientId={communityInitialRecipientId}
-                />
-              </React.Suspense>
-            </motion.div>
-          </AnimatePresence>
+        <div className="flex-1 overflow-y-auto p-4 md:p-8 bg-slate-50 flex flex-col">
+          <div className="flex-1">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentView}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2 }}
+                className="h-full"
+              >
+                <React.Suspense fallback={<AdminLoadingFallback />}>
+                  <RenderContent 
+                    view={currentView} 
+                    user={loggedUser} 
+                    role={loggedRole} 
+                    showToast={showToast}
+                    onOrgUpdate={handleOrgUpdate}
+                    communityInitialTab={communityInitialTab}
+                    communityInitialPostId={communityInitialPostId}
+                    communityInitialRecipientId={communityInitialRecipientId}
+                  />
+                </React.Suspense>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* Minimalist Footer */}
+          <footer className="mt-8 pt-4 border-t border-slate-200 text-center flex-shrink-0">
+            <p className="text-xs text-slate-400 font-medium tracking-wide">
+              By <span className="text-slate-500 font-bold">Segunda Gaveta Academy</span>
+            </p>
+          </footer>
         </div>
       </main>
 
