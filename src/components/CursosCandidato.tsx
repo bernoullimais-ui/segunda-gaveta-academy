@@ -8,15 +8,6 @@ import remarkGfm from 'remark-gfm';
 import ReactPlayer from 'react-player/youtube';
 import { motion, AnimatePresence } from 'motion/react';
 
-    // rel=0 restricts related videos to the same channel
-    // modestbranding=1 removes the YouTube logo from the control bar
-    // controls=0 hides the player controls
-    // disablekb=1 disables keyboard controls (arrows, spacebar, etc)
-    // iv_load_policy=3 hides video annotations
-    formattedUrl += `${separator}rel=0&modestbranding=1&controls=0&disablekb=1&iv_load_policy=3&cc_load_policy=0`;
-  }
-  return formattedUrl;
-};
 
 export function CursosCandidato({ 
   previewCourseId, 
