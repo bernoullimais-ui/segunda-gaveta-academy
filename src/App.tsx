@@ -5,9 +5,9 @@ import { PerfisAdmin } from './components/PerfisAdmin';
 import { Community } from './components/Community';
 import { CursosCandidato } from './components/CursosCandidato';
 import { DashboardCenso } from './components/DashboardCenso';
-
 import { DadosRecebimento } from './components/DadosRecebimento';
 import { AreaAfiliados } from './components/AreaAfiliados';
+import { Toast } from './components/Toast';
 
 const CursosAdmin = React.lazy(() => 
   import('./components/CursosAdmin').then(module => ({ default: module.CursosAdmin }))
@@ -33,10 +33,6 @@ import {
   Ghost,
   DollarSign,
   Share2,
-  Copy,
-  Check,
-  Award,
-  TrendingUp
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -627,21 +623,7 @@ export default function App() {
             onFirstAccess={handleFirstAccess}
             isLoading={isLoading}
           />
-          {toastMessage && (
-            <AnimatePresence>
-              <motion.div 
-                initial={{ opacity: 0, y: 50 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 50 }}
-                className={`fixed bottom-8 right-8 px-6 py-4 rounded-xl shadow-2xl text-white transform transition-all flex items-center gap-3 z-50 ${
-                  toastMessage.type === 'error' ? 'bg-red-600' : 
-                  toastMessage.type === 'success' ? 'bg-green-600' : 'bg-indigo-600'
-                }`}
-              >
-                <span>{toastMessage.text}</span>
-              </motion.div>
-            </AnimatePresence>
-          )}
+          <Toast message={toastMessage} onClose={() => setToastMessage(null)} />
         </>
       );
     }
@@ -655,21 +637,7 @@ export default function App() {
             isLoading={isLoading}
             inviteConfig={inviteConfig}
           />
-          {toastMessage && (
-            <AnimatePresence>
-              <motion.div 
-                initial={{ opacity: 0, y: 50 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 50 }}
-                className={`fixed bottom-8 right-8 px-6 py-4 rounded-xl shadow-2xl text-white transform transition-all flex items-center gap-3 z-50 ${
-                  toastMessage.type === 'error' ? 'bg-red-600' : 
-                  toastMessage.type === 'success' ? 'bg-green-600' : 'bg-indigo-600'
-                }`}
-              >
-                <span>{toastMessage.text}</span>
-              </motion.div>
-            </AnimatePresence>
-          )}
+          <Toast message={toastMessage} onClose={() => setToastMessage(null)} />
         </>
       );
     } else if (publicInviteSlug && isValidInvite === false) {
@@ -723,21 +691,7 @@ export default function App() {
           isLoading={isLoading}
           activeOrg={activeOrg}
         />
-        {toastMessage && (
-          <AnimatePresence>
-            <motion.div 
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 50 }}
-              className={`fixed bottom-8 right-8 px-6 py-4 rounded-xl shadow-2xl text-white transform transition-all flex items-center gap-3 z-50 ${
-                toastMessage.type === 'error' ? 'bg-red-600' : 
-                toastMessage.type === 'success' ? 'bg-green-600' : 'bg-indigo-600'
-              }`}
-            >
-              <span>{toastMessage.text}</span>
-            </motion.div>
-          </AnimatePresence>
-        )}
+        <Toast message={toastMessage} onClose={() => setToastMessage(null)} />
       </>
     );
   }
@@ -750,21 +704,7 @@ export default function App() {
           onOnboarding={handleOnboarding}
           isLoading={isLoading}
         />
-        {toastMessage && (
-          <AnimatePresence>
-            <motion.div 
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 50 }}
-              className={`fixed bottom-8 right-8 px-6 py-4 rounded-xl shadow-2xl text-white transform transition-all flex items-center gap-3 z-50 ${
-                toastMessage.type === 'error' ? 'bg-red-650' : 
-                toastMessage.type === 'success' ? 'bg-green-600' : 'bg-indigo-600'
-              }`}
-            >
-              <span>{toastMessage.text}</span>
-            </motion.div>
-          </AnimatePresence>
-        )}
+        <Toast message={toastMessage} onClose={() => setToastMessage(null)} />
       </>
     );
   }
@@ -791,21 +731,7 @@ export default function App() {
     return (
       <>
         <AreaAluno loggedUser={loggedUser} userRole={loggedRole!} onLogout={handleLogout} />
-        {toastMessage && (
-          <AnimatePresence>
-            <motion.div 
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 50 }}
-              className={`fixed bottom-8 right-8 px-6 py-4 rounded-xl shadow-2xl text-white transform transition-all flex items-center gap-3 z-50 ${
-                toastMessage.type === 'error' ? 'bg-red-600' : 
-                toastMessage.type === 'success' ? 'bg-green-600' : 'bg-indigo-600'
-              }`}
-            >
-              <span>{toastMessage.text}</span>
-            </motion.div>
-          </AnimatePresence>
-        )}
+        <Toast message={toastMessage} onClose={() => setToastMessage(null)} />
       </>
     );
   }
@@ -958,21 +884,7 @@ export default function App() {
       </main>
 
       {/* Toast Notification */}
-      {toastMessage && (
-        <AnimatePresence>
-          <motion.div 
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 50 }}
-            className={`fixed bottom-8 right-8 px-6 py-4 rounded-xl shadow-2xl text-white transform transition-all flex items-center gap-3 z-50 ${
-              toastMessage.type === 'error' ? 'bg-red-600' : 
-              toastMessage.type === 'success' ? 'bg-green-600' : 'bg-indigo-600'
-            }`}
-          >
-            <span>{toastMessage.text}</span>
-          </motion.div>
-        </AnimatePresence>
-      )}
+      <Toast message={toastMessage} onClose={() => setToastMessage(null)} />
     </div>
   );
 }

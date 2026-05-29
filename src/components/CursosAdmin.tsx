@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Settings, Users, BarChart2, BookOpen, Clock, Lock, PlayCircle, Plus, Eye, Share2, Download, Search, Filter, MoreHorizontal, MessageSquare, Award, CheckCircle, ChevronLeft, Calendar, FileText, Gift, DollarSign, Loader2, Image as ImageIcon, Minus, Code, Video as VideoIcon, ShoppingBag, User, CalendarCheck, List, Paperclip, Volume2, Pencil, Trash2, Check, X, Table, Bold, Italic, Underline, ListOrdered, GripVertical, AlertTriangle, Database, Upload, LayoutDashboard, Sparkles } from 'lucide-react';
-import { motion, Reorder } from 'motion/react';
+import { Settings, Users, BarChart2, BookOpen, Clock, Lock, PlayCircle, Plus, Eye, Share2, Download, Search, Filter, MoreHorizontal, MessageSquare, Award, CheckCircle, ChevronLeft, Calendar, FileText, Gift, DollarSign, Loader2, Image as ImageIcon, Minus, Code, Video as VideoIcon, ShoppingBag, User, CalendarCheck, List, Paperclip, Volume2, Pencil, Trash2, Check, X, Table, Bold, Italic, Underline, ListOrdered, GripVertical, AlertTriangle, Database, Upload, LayoutDashboard, Sparkles, AlertCircle, Info } from 'lucide-react';
+import { motion, AnimatePresence, Reorder } from 'motion/react';
 import { MarketingLinksModal } from './MarketingLinksModal';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { supabase } from '../lib/supabase';
@@ -9,26 +9,12 @@ import { generateCertificatePDF } from '../lib/certificateUtils';
 import CertificateDesigner, { CertificateTemplate } from './CertificateDesigner';
 import { TrilhaModal } from './TrilhaModal';
 import { FinanceiroAdmin } from './FinanceiroAdmin';
-
 import { ActionModal } from './ActionModal';
+import { getFormattedVideoUrl } from '../lib/videoUtils';
 
-const getFormattedVideoUrl = (url: string) => {
-  if (!url) return '';
-  let formattedUrl = url;
-  if (formattedUrl.includes('youtube.com/watch?v=')) {
-    formattedUrl = formattedUrl.replace('watch?v=', 'embed/');
-  } else if (formattedUrl.includes('youtube.com/live/')) {
-    formattedUrl = formattedUrl.replace('youtube.com/live/', 'youtube.com/embed/');
-  } else if (formattedUrl.includes('youtu.be/')) {
-    formattedUrl = formattedUrl.replace('youtu.be/', 'youtube.com/embed/');
-  }
-  
-  if (formattedUrl.includes('youtube.com/embed/')) {
-    const separator = formattedUrl.includes('?') ? '&' : '?';
-    formattedUrl += `${separator}rel=0&modestbranding=1`;
-  }
-  return formattedUrl;
-};
+// getFormattedVideoUrl migrado para src/lib/videoUtils.ts
+// A função é re-exportada aqui para compatibilidade com código interno ainda não migrado
+export { getFormattedVideoUrl };
 
 interface CursosAdminProps {
   loggedUser?: any;
@@ -36,6 +22,13 @@ interface CursosAdminProps {
 }
 
 export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
+  // Toast system — substitui todos os alert() nativos do componente
+  const [toast, setToast] = useState<{ text: string; type: 'success' | 'error' | 'info' } | null>(null);
+  const showToast = (text: string, type: 'success' | 'error' | 'info' = 'info') => {
+    setToast({ text, type });
+    setTimeout(() => setToast(null), 5000);
+  };
+
   const [view, setView] = useState<'list' | 'create_wizard' | 'course_dashboard'>('list');
   const [wizardStep, setWizardStep] = useState(1);
   const [createdCourseName, setCreatedCourseName] = useState('Tutorial DOJO TV');
@@ -194,7 +187,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
       setGeneratedCopyResult(data);
     } catch (err: any) {
       console.error(err);
-      alert('Erro ao gerar copy: ' + err.message);
+      showToast('Erro ao gerar copy: ' + err.message, 'error');
     } finally {
       setIsGeneratingCopy(false);
     }
@@ -245,9 +238,12 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
       const { data, error } = await supabase.from('curso_participantes').select('*, usuarios(nome, email)').eq('curso_id', cursoId);
       if (error) {
         if (error.code === 'PGRST200') {
-          alert(`Erro de relacionamento no banco de dados. Execute no SQL Editor:\n\nALTER TABLE curso_participantes DROP CONSTRAINT IF EXISTS curso_participantes_usuario_id_fkey;\nALTER TABLE curso_participantes ADD CONSTRAINT curso_participantes_usuario_id_fkey FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE;\nNOTIFY pgrst, 'reload schema';`);
+          // Log detalhes técnicos apenas no console (não exibir SQL para usuário final)
+          console.error('[DB] Erro de relacionamento em curso_participantes:', error);
+          showToast('Erro de configuração no banco de dados. Entre em contato com o suporte.', 'error');
         } else if (error.code === '42P01' || error.message?.includes('does not exist') || error.message?.includes('Could not find the of') || error.message?.includes('quiz_scores')) {
-          alert(`Erro no banco de dados. Execute no SQL Editor para criar a tabela ou adicionar as colunas:\n\nCREATE TABLE IF NOT EXISTS curso_participantes (\n  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,\n  curso_id UUID REFERENCES cursos(id) ON DELETE CASCADE,\n  usuario_id UUID REFERENCES usuarios(id) ON DELETE CASCADE,\n  status TEXT DEFAULT 'andamento',\n  progresso NUMERIC DEFAULT 0,\n  completed_steps JSONB DEFAULT '[]'::jsonb,\n  quiz_scores JSONB DEFAULT '{}'::jsonb,\n  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,\n  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,\n  UNIQUE(curso_id, usuario_id)\n);\n\nALTER TABLE curso_participantes ADD COLUMN IF NOT EXISTS quiz_scores JSONB DEFAULT '{}'::jsonb;\n\nALTER TABLE curso_participantes ENABLE ROW LEVEL SECURITY;\nDROP POLICY IF EXISTS "Todos podem ver participantes" ON curso_participantes;\nCREATE POLICY "Todos podem ver participantes" ON curso_participantes FOR SELECT USING (true);\nDROP POLICY IF EXISTS "Usuarios gerenciam sua participacao" ON curso_participantes;\nCREATE POLICY "Usuarios gerenciam sua participacao" ON curso_participantes FOR ALL USING (auth.uid() = usuario_id);\nNOTIFY pgrst, 'reload schema';`);
+          console.error('[DB] Tabela ou coluna ausente:', error);
+          showToast('Tabela de participantes não encontrada. Execute as migrações do banco de dados.', 'error');
         } else {
           console.error("Erro ao carregar estatísticas", error);
         }
@@ -512,10 +508,10 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
       // Update local state
       const nextCursos = cursos.map(c => c.id === createdCourseId ? { ...c, configuracao_json: newConfig } : c);
       setCursos(nextCursos);
-      alert('Página de venda salva com sucesso!');
+      showToast('Página de venda salva com sucesso!', 'success');
     } catch (err: any) {
       console.error('Error saving landing page:', err);
-      alert('Erro ao salvar página de venda: ' + err.message);
+      showToast('Erro ao salvar página de venda: ' + err.message, 'error');
     } finally {
       setIsSaving(false);
     }
@@ -543,10 +539,10 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
       setCursos(nextCursos);
       setCourseSplits(newSplits);
       setAffiliateCommission(affiliateComm);
-      alert('Configuração de split e comissão salva com sucesso!');
+      showToast('Configuração de split e comissão salva com sucesso!', 'success');
     } catch (err: any) {
       console.error('Error saving splits:', err);
-      alert('Erro ao salvar split: ' + err.message);
+      showToast('Erro ao salvar split: ' + err.message, 'error');
     } finally {
       setIsSaving(false);
     }
@@ -555,7 +551,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
   const handleDownloadParticipantCertificate = async (participant: any) => {
     const activeCurso = (cursos || []).find(c => c.id === createdCourseId);
     if (!activeCurso?.certificado_template) {
-      alert('Este curso não possui um template de certificado configurado.');
+      showToast('Este curso não possui um template de certificado configurado.', 'error');
       return;
     }
 
@@ -571,7 +567,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
       await generateCertificatePDF(activeCurso.certificado_template, participantData);
     } catch (error) {
       console.error('Error downloading certificate:', error);
-      alert('Erro ao gerar o certificado. Tente novamente.');
+      showToast('Erro ao gerar o certificado. Tente novamente.', 'error');
     }
   };
 
@@ -583,7 +579,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
     const sizeInMB = payloadSize / 1024 / 1024;
     
     if (sizeInMB > 8) {
-      alert(`⚠️ ERRO CRÍTICO: O currículo está pesado demais (${sizeInMB.toFixed(2)} MB).\n\nO limite máximo recomendado é 2 MB. Remova imagens coladas diretamente no texto ou reduza o conteúdo antes de tentar salvar novamente.`);
+      showToast(`⚠️ ERRO CRÍTICO: O currículo está pesado demais (${sizeInMB.toFixed(2)} MB).\n\nO limite máximo recomendado é 2 MB. Remova imagens coladas diretamente no texto ou reduza o conteúdo antes de tentar salvar novamente.`, 'error');
       return false;
     }
 
@@ -601,9 +597,9 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
         console.error('Error saving curriculum:', error);
         
         if (error.code === '57014' || error.message.includes('timeout')) {
-          alert('Erro de tempo limite: O currículo está muito grande para salvar. Isso geralmente acontece quando há muitas imagens pesadas coladas no texto. Tente remover imagens grandes e salvar novamente.');
+          showToast('Erro de tempo limite: O currículo está muito grande para salvar. Isso geralmente acontece quando há muitas imagens pesadas coladas no texto. Tente remover imagens grandes e salvar novamente.', 'error');
         } else {
-          alert('Erro ao salvar no banco de dados: ' + error.message);
+          showToast('Erro ao salvar no banco de dados: ' + error.message, 'error');
         }
         return false;
       }
@@ -614,7 +610,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
       return true;
     } catch (err: any) {
       console.error('Failed to save curriculum:', err);
-      alert('Falha crítica ao salvar: ' + err.message);
+      showToast('Falha crítica ao salvar: ' + err.message, 'error');
       return false;
     } finally {
       setIsSaving(false);
@@ -623,7 +619,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
 
   const handleGenerateOutlineWithAI = async () => {
     if (!createdCourseId || !activeCurso) {
-      alert("Curso não encontrado ou não selecionado.");
+      showToast("Curso não encontrado ou não selecionado.", 'error');
       return;
     }
     
@@ -683,11 +679,11 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
       const success = await saveCurriculo(generatedSections);
       if (success) {
         setSections(generatedSections);
-        alert('Grade curricular gerada com sucesso pela Inteligência Artificial!');
+        showToast('Grade curricular gerada com sucesso pela Inteligência Artificial!', 'success');
       }
     } catch (err: any) {
       console.error('Error generating AI outline:', err);
-      alert('Falha ao gerar grade com IA: ' + err.message);
+      showToast('Falha ao gerar grade com IA: ' + err.message, 'error');
     } finally {
       setIsGeneratingOutline(false);
     }
@@ -748,10 +744,10 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
 
       // Refresh available questions list
       await fetchQuestoes();
-      alert(`${newQuestionsPayload.length} questões teóricas geradas com sucesso pela Inteligência Artificial e adicionadas ao banco!`);
+      showToast(`${newQuestionsPayload.length} questões teóricas geradas com sucesso pela Inteligência Artificial e adicionadas ao banco!`, 'success');
     } catch (err: any) {
       console.error('Error generating AI quiz questions:', err);
-      alert('Falha ao gerar questões com IA: ' + err.message);
+      showToast('Falha ao gerar questões com IA: ' + err.message, 'error');
     } finally {
       setIsGeneratingQuiz(false);
     }
@@ -986,7 +982,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
   const handleSaveCertificate = async (template: CertificateTemplate) => {
     console.log('handleSaveCertificate (Curso) called', { createdCourseId, template });
     if (!createdCourseId) {
-      alert('Erro: ID do curso não encontrado. Tente recarregar o curso.');
+      showToast('Erro: ID do curso não encontrado. Tente recarregar o curso.', 'error');
       return;
     }
 
@@ -994,7 +990,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
     const templateStr = JSON.stringify(template);
     const sizeMB = templateStr.length / 1024 / 1024;
     if (sizeMB > 3) {
-      alert(`⚠️ AVISO: O template do certificado está muito grande (${sizeMB.toFixed(2)} MB).\n\nIsso pode causar lentidão. Por favor:\n1. Use uma imagem de fundo menor (máx. 300KB recomendado)\n2. Certifique-se de que o bucket "certificados" está criado no Supabase Storage para upload automático.`);
+      showToast(`⚠️ AVISO: O template do certificado está muito grande (${sizeMB.toFixed(2)} MB).\n\nIsso pode causar lentidão. Por favor:\n1. Use uma imagem de fundo menor (máx. 300KB recomendado)\n2. Certifique-se de que o bucket "certificados" está criado no Supabase Storage para upload automático.`, 'error');
     }
 
     try {
@@ -1006,7 +1002,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
       
       if (error) throw error;
       
-      alert('Template de certificado salvo com sucesso!');
+      showToast('Template de certificado salvo com sucesso!', 'success');
       setIsCertificateModalOpen(false);
       // Update local state only (don't re-fetch all courses with heavy payload)
       setCursos(prev => prev.map(c => 
@@ -1015,9 +1011,9 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
     } catch (err: any) {
       console.error('Error saving certificate template:', err);
       if (err.code === '57014') {
-        alert('Erro: Tempo limite excedido (DB Timeout). A imagem de fundo do certificado é muito grande.\n\nSolução:\n1. Crie o bucket "certificados" no Supabase Storage (Storage → New Bucket → "certificados" → Public)\n2. Tente fazer o upload novamente — o sistema fará upload automático para o Storage.');
+        showToast('Erro: Tempo limite excedido (DB Timeout). A imagem de fundo do certificado é muito grande.\n\nSolução:\n1. Crie o bucket "certificados" no Supabase Storage (Storage → New Bucket → "certificados" → Public)\n2. Tente fazer o upload novamente — o sistema fará upload automático para o Storage.', 'error');
       } else {
-        alert('Erro ao salvar template do certificado: ' + (err.message || 'Erro desconhecido'));
+        showToast('Erro ao salvar template do certificado: ' + (err.message || 'Erro desconhecido', 'error'));
       }
     } finally {
       setIsSaving(false);
@@ -1078,7 +1074,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                     }
                   } catch (err: any) {
                     console.error('Erro ao criar curso:', err);
-                    alert('Erro ao criar curso: ' + (err.message || 'Erro desconhecido'));
+                    showToast('Erro ao criar curso: ' + (err.message || 'Erro desconhecido', 'error'));
                   }
                 }}
                 className="px-4 py-2 bg-blue-600 text-white rounded-full font-medium hover:bg-blue-700 flex items-center gap-2"
@@ -1194,7 +1190,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                                     fetchCursos();
                                   } catch (err: any) {
                                     console.error('Error updating course status:', err);
-                                    alert('Erro ao atualizar status: ' + (err.message || 'Erro desconhecido'));
+                                    showToast('Erro ao atualizar status: ' + (err.message || 'Erro desconhecido', 'error'));
                                   }
                                 }}
                                 className="p-1.5 text-slate-400 hover:text-emerald-600 rounded-lg hover:bg-emerald-50 transition-colors"
@@ -1231,7 +1227,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                                         fetchCursos();
                                       } catch (err: any) {
                                         console.error('Error deleting course:', err);
-                                        alert('Erro ao excluir curso: ' + (err.message || 'Erro desconhecido'));
+                                        showToast('Erro ao excluir curso: ' + (err.message || 'Erro desconhecido', 'error'));
                                       }
                                     }
                                   });
@@ -1265,13 +1261,13 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                                        .eq('id', item.id);
                                      if (error) throw error;
                                      if (count === 0) {
-                                       alert(`Permissão negada (RLS). Verifique as políticas da tabela trilhas.`);
+                                       showToast(`Permissão negada (RLS). Verifique as políticas da tabela trilhas.`, 'error');
                                        return;
                                      }
                                      fetchCursos();
                                    } catch (err: any) {
                                      console.error('Error updating trilha status:', err);
-                                     alert('Erro ao atualizar status da trilha: ' + (err.message || 'Erro desconhecido'));
+                                     showToast('Erro ao atualizar status da trilha: ' + (err.message || 'Erro desconhecido', 'error'));
                                    }
                                  }}
                                  className="p-1.5 text-slate-400 hover:text-emerald-600 rounded-lg hover:bg-emerald-50 transition-colors"
@@ -1304,7 +1300,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                                          fetchCursos();
                                        } catch (err: any) {
                                          console.error('Error deleting trilha:', err);
-                                         alert('Erro ao excluir trilha: ' + (err.message || 'Erro desconhecido'));
+                                         showToast('Erro ao excluir trilha: ' + (err.message || 'Erro desconhecido', 'error'));
                                        }
                                      }
                                    });
@@ -1535,12 +1531,12 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                       const userId = select.value;
                       const pct = parseInt(input.value);
                       if (!userId || isNaN(pct) || pct <= 0 || pct > 100) {
-                        alert('Por favor, selecione um especialista e digite uma porcentagem válida.');
+                        showToast('Por favor, selecione um especialista e digite uma porcentagem válida.', 'error');
                         return;
                       }
                       const totalCurrent = courseSplits.reduce((acc, s) => acc + s.porcentagem, 0);
                       if (totalCurrent + pct > 100) {
-                        alert(`A soma das porcentagens não pode ultrapassar 100% (atual: ${totalCurrent}% + novo: ${pct}% = ${totalCurrent + pct}%).`);
+                        showToast(`A soma das porcentagens não pode ultrapassar 100% (atual: ${totalCurrent}% + novo: ${pct}% = ${totalCurrent + pct}%).`, 'error');
                         return;
                       }
                       const nextSplits = [...courseSplits, { usuario_id: userId, porcentagem: pct }];
@@ -1702,7 +1698,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
               <button 
                 onClick={() => {
                   if (editingTrilha) {
-                      alert('Abrir edição de trilha no modal');
+                      showToast('Abrir edição de trilha no modal', 'info');
                   } else {
                     setCreatedCourseId(activeCurso?.id || '');
                     setEditingSettingsData({
@@ -1738,7 +1734,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                     onClick={() => {
                       const url = `${window.location.origin}/?inscricao_curso=${createdCourseId}`;
                       navigator.clipboard.writeText(url);
-                      alert('Link de inscrição copiado para a área de transferência!');
+                      showToast('Link de inscrição copiado para a área de transferência!', 'success');
                     }}
                     className="flex items-center gap-2 text-blue-600 text-sm font-medium hover:underline"
                   >
@@ -3951,7 +3947,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                               });
                               fullText += `### Chamada para Ação\n${generatedCopyResult.callToAction}`;
                               setLpData({...lpData, about: fullText});
-                              alert("Estrutura de vendas aplicada na seção 'Sobre o Programa' com sucesso!");
+                              showToast("Estrutura de vendas aplicada na seção 'Sobre o Programa' com sucesso!", 'success');
                             }}
                             className="mt-3 w-full py-2 border border-blue-200 text-blue-600 rounded-lg text-xs font-bold hover:bg-blue-50 transition-all cursor-pointer text-center block"
                           >
@@ -4427,17 +4423,17 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                     } catch (err: any) {
                       console.error('Error updating course settings:', err);
                       if (err.code === '57014' || (err.message && err.message.includes('timeout'))) {
-                         alert('Erro de tempo limite: As configurações do curso estão muito grandes para salvar. Tente reduzir o texto da descrição ou remover imagens embutidas.');
+                         showToast('Erro de tempo limite: As configurações do curso estão muito grandes para salvar. Tente reduzir o texto da descrição ou remover imagens embutidas.', 'error');
                       } else if (err.message && (err.message.includes("does not exist") || err.code === 'PGRST204' || err.message.includes("Could not find the"))) {
-                        alert(`Erro no banco de dados: ${err.message}\n\nExecute no SQL Editor para adicionar a coluna faltante:\n\nALTER TABLE cursos ADD COLUMN IF NOT EXISTS thumbnail_url text;\nALTER TABLE cursos ADD COLUMN IF NOT EXISTS professor_nome text;\nALTER TABLE cursos ADD COLUMN IF NOT EXISTS professor_titulo text;\nALTER TABLE cursos ADD COLUMN IF NOT EXISTS professor_foto_url text;\nALTER TABLE cursos ADD COLUMN IF NOT EXISTS descricao text;\nALTER TABLE cursos ADD COLUMN IF NOT EXISTS carga_horaria text;\nNOTIFY pgrst, 'reload schema';`);
+                        showToast(`Erro no banco de dados: ${err.message}\n\nExecute no SQL Editor para adicionar a coluna faltante:\n\nALTER TABLE cursos ADD COLUMN IF NOT EXISTS thumbnail_url text;\nALTER TABLE cursos ADD COLUMN IF NOT EXISTS professor_nome text;\nALTER TABLE cursos ADD COLUMN IF NOT EXISTS professor_titulo text;\nALTER TABLE cursos ADD COLUMN IF NOT EXISTS professor_foto_url text;\nALTER TABLE cursos ADD COLUMN IF NOT EXISTS descricao text;\nALTER TABLE cursos ADD COLUMN IF NOT EXISTS carga_horaria text;\nNOTIFY pgrst, 'reload schema';`, 'error');
                       } else {
-                        alert('Erro ao atualizar. Tente novamente.');
+                        showToast('Erro ao atualizar. Tente novamente.', 'error');
                         throw err;
                       }
                     }
                   } catch (err) {
                     console.error('Error updating course settings:', err);
-                    alert('Erro ao atualizar. Tente novamente.');
+                    showToast('Erro ao atualizar. Tente novamente.', 'error');
                   } finally {
                     setIsSaving(false);
                   }
@@ -4843,20 +4839,20 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                               });
                               const { error: error2 } = await supabase.from('questoes_teoricas').insert(sanitized);
                               if (!error2) {
-                                alert(`${newQuestions.length} questões importadas com sucesso!`);
+                                showToast(`${newQuestions.length} questões importadas com sucesso!`, 'success');
                                 fetchQuestoes();
                               } else {
-                                alert('Erro ao importar questões: ' + error2.message);
+                                showToast('Erro ao importar questões: ' + error2.message, 'error');
                               }
                             } else {
-                              alert('Erro ao importar questões: ' + error.message);
+                              showToast('Erro ao importar questões: ' + error.message, 'error');
                             }
                           } else {
-                            alert(`${newQuestions.length} questões importadas com sucesso!`);
+                            showToast(`${newQuestions.length} questões importadas com sucesso!`, 'success');
                             fetchQuestoes();
                           }
                         } catch (err: any) {
-                          alert('Erro ao importar questões: ' + err.message);
+                          showToast('Erro ao importar questões: ' + err.message, 'error');
                         }
                       }
                     };
@@ -4998,13 +4994,13 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                                    try {
                                      const { error } = await supabase.from('questoes_teoricas').delete().eq('id', q.id);
                                      if (error) {
-                                       alert('Erro ao excluir: ' + error.message);
+                                       showToast('Erro ao excluir: ' + error.message, 'error');
                                      } else {
-                                       alert('Questão excluída do banco com sucesso!');
+                                       showToast('Questão excluída do banco com sucesso!', 'success');
                                        await fetchQuestoes();
                                      }
                                    } catch (err: any) {
-                                     alert('Erro inesperado ao excluir: ' + err.message);
+                                     showToast('Erro inesperado ao excluir: ' + err.message, 'error');
                                    }
                                  }
                                }}
@@ -5111,7 +5107,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                  onClick={async () => {
                    const currentEnunciado = editingQuestion.enunciado || editingQuestion.texto;
                    if (!currentEnunciado || !editingQuestion.opcoes[0]) {
-                     alert('Preencha a pergunta e ao menos a primeira opção.');
+                     showToast('Preencha a pergunta e ao menos a primeira opção.', 'error');
                      return;
                    }
                    
@@ -5126,10 +5122,10 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                    
                    if (editingQuestion.id) {
                      const { error } = await supabase.from('questoes_teoricas').update(questionData).eq('id', editingQuestion.id);
-                     if (error) alert(error.message);
+                     if (error) showToast(error.message, 'error');
                    } else {
                      const { error } = await supabase.from('questoes_teoricas').insert([questionData]);
-                     if (error) alert(error.message);
+                     if (error) showToast(error.message, 'error');
                    }
                    
                    fetchQuestoes();
@@ -5186,7 +5182,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
               <button 
                 onClick={() => {
                   if (!convidarEmails.trim()) {
-                    alert('Por favor, informe ao menos um e-mail.');
+                    showToast('Por favor, informe ao menos um e-mail.', 'error');
                     return;
                   }
                   setIsEnviandoConvites(true);
@@ -5195,7 +5191,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                     setIsEnviandoConvites(false);
                     setIsConvidarModalOpen(false);
                     setConvidarEmails('');
-                    alert('Os convites foram enviados com sucesso!');
+                    showToast('Os convites foram enviados com sucesso!', 'success');
                   }, 1500);
                 }}
                 disabled={isEnviandoConvites || !convidarEmails.trim()}
@@ -5226,6 +5222,30 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
       )}
 
       {renderActionModal()}
+
+      {/* Toast de notificação — substitui todos os alert() nativos */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className={`fixed bottom-6 right-6 z-[200] flex items-center gap-3 px-5 py-3.5 rounded-xl shadow-xl text-sm font-semibold max-w-sm ${
+              toast.type === 'success' ? 'bg-emerald-600 text-white' :
+              toast.type === 'error'   ? 'bg-red-600 text-white' :
+                                         'bg-slate-800 text-white'
+            }`}
+          >
+            {toast.type === 'success' && <CheckCircle className="w-5 h-5 flex-shrink-0" />}
+            {toast.type === 'error'   && <AlertCircle className="w-5 h-5 flex-shrink-0" />}
+            {toast.type === 'info'    && <Info className="w-5 h-5 flex-shrink-0" />}
+            <span>{toast.text}</span>
+            <button onClick={() => setToast(null)} className="ml-2 opacity-70 hover:opacity-100 transition-opacity">
+              <X className="w-4 h-4" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
           </div>
         </div>
       </div>

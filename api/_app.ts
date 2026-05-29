@@ -727,13 +727,16 @@ app.post("/api/pagarme/create-order", async (req, res) => {
         type: "individual",
         document: String(customer.cpf || "").replace(/\D/g, '') || "00000000000",
         document_type: "CPF",
-        phones: {
-          mobile_phone: {
-            country_code: "55",
-            area_code: "11",
-            number: "999999999"
+        // Telefone é opcional no PIX/Checkout — só inclui se informado
+        ...(customer.phone && String(customer.phone).replace(/\D/g, '').length >= 10 && {
+          phones: {
+            mobile_phone: {
+              country_code: "55",
+              area_code: String(customer.phone).replace(/\D/g, '').substring(0, 2),
+              number: String(customer.phone).replace(/\D/g, '').substring(2)
+            }
           }
-        }
+        })
       },
       payments: [
         {
@@ -959,13 +962,16 @@ app.post("/api/pagarme/create-onboarding-order", async (req, res) => {
         type: "individual",
         document: String(customer?.cpf || "").replace(/\D/g, '') || "00000000000",
         document_type: "CPF",
-        phones: {
-          mobile_phone: {
-            country_code: "55",
-            area_code: "11",
-            number: "999999999"
+        // Telefone é opcional — só inclui se o cliente informou um número válido
+        ...(customer?.phone && String(customer.phone).replace(/\D/g, '').length >= 10 && {
+          phones: {
+            mobile_phone: {
+              country_code: "55",
+              area_code: String(customer.phone).replace(/\D/g, '').substring(0, 2),
+              number: String(customer.phone).replace(/\D/g, '').substring(2)
+            }
           }
-        }
+        })
       },
       payments: [
         {
@@ -1201,7 +1207,38 @@ app.post("/api/pagarme/webhook", async (req, res) => {
             console.error(`Profile creation failed for: ${customerEmail}`, profileErr);
             return res.status(500).send("User profile creation failed");
           }
-        }
+
+          // Notificar o novo usuário com suas credenciais de acesso
+          // A senha temporária não é enviada diretamente por segurança;
+          // enviamos um link de redefinição de senha pelo Supabase Auth.
+          try {
+            const appUrl = process.env.APP_URL || 'https://segunda-gaveta-academy.vercel.app';
+            const resetLink = `${appUrl}/login?reset=true`;
+            const { sendEmail } = await import('./lib/notification.js');
+            await sendEmail({
+              to: customerEmail,
+              toName: customerName,
+              subject: 'Sua conta foi criada — Bem-vindo(a)!',
+              htmlContent: `
+                <div style="font-family: sans-serif; max-width: 520px; margin: auto; padding: 32px; background: #f8fafc; border-radius: 12px;">
+                  <h2 style="color: #1e293b; margin-bottom: 8px;">Olá, ${customerName}! 🎉</h2>
+                  <p style="color: #475569;">Seu pagamento foi confirmado e sua conta foi criada automaticamente.</p>
+                  <p style="color: #475569;">Para acessar a plataforma, clique no botão abaixo para definir sua senha:</p>
+                  <div style="text-align: center; margin: 32px 0;">
+                    <a href="${resetLink}" style="background: #4f46e5; color: #fff; padding: 14px 28px; border-radius: 8px; font-weight: bold; text-decoration: none; display: inline-block;">
+                      Definir Minha Senha de Acesso
+                    </a>
+                  </div>
+                  <p style="color: #94a3b8; font-size: 12px;">Seu e-mail de acesso é: <strong>${customerEmail}</strong></p>
+                  <p style="color: #94a3b8; font-size: 12px;">Se não realizou esta compra, ignore este e-mail.</p>
+                </div>
+              `
+            });
+            console.log(`[Notification] Welcome email sent to new user: ${customerEmail}`);
+          } catch (emailErr) {
+            // Não bloquear o webhook se o e-mail falhar
+            console.error(`[Notification Error] Failed to send welcome email to ${customerEmail}:`, emailErr);
+          }
 
         // Update/Insert enrollment
         const { data: existingEnrollment } = await supabase

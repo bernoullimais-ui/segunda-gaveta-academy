@@ -2,24 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { PlayCircle, Clock, Award, ChevronRight, FileText, CheckCircle, ChevronLeft, Calendar, Maximize2, RefreshCcw, Info, ChevronDown, ChevronUp, Video, Check, X, MessageSquare, Download, List, Users, Sparkles, Bot, Loader2, BookOpen, Trophy, Star, PartyPopper } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { generateCertificatePDF } from '../lib/certificateUtils';
+import { getFormattedVideoUrl } from '../lib/videoUtils';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import ReactPlayer from 'react-player/youtube';
 import { motion, AnimatePresence } from 'motion/react';
 
-const getFormattedVideoUrl = (url: string) => {
-  if (!url) return '';
-  let formattedUrl = url;
-  if (formattedUrl.includes('youtube.com/watch?v=')) {
-    formattedUrl = formattedUrl.replace('watch?v=', 'embed/');
-  } else if (formattedUrl.includes('youtube.com/live/')) {
-    formattedUrl = formattedUrl.replace('youtube.com/live/', 'youtube.com/embed/');
-  } else if (formattedUrl.includes('youtu.be/')) {
-    formattedUrl = formattedUrl.replace('youtu.be/', 'youtube.com/embed/');
-  }
-  
-  if (formattedUrl.includes('youtube.com/embed/')) {
-    const separator = formattedUrl.includes('?') ? '&' : '?';
     // rel=0 restricts related videos to the same channel
     // modestbranding=1 removes the YouTube logo from the control bar
     // controls=0 hides the player controls
