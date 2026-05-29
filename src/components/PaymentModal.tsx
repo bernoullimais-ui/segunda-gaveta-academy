@@ -120,6 +120,12 @@ export function PaymentModal({ isOpen, onClose, item, customer, participantId, o
       return;
     }
 
+    // Cartao de crédito requer telefone para antifraude
+    if (paymentMethod === 'credit_card' && phone.replace(/\D/g, '').length < 10) {
+      setError('Por favor, informe um telefone válido para pagamento com cartão.');
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
@@ -150,7 +156,7 @@ export function PaymentModal({ isOpen, onClose, item, customer, participantId, o
               name: customer.name, 
               email: customer.email, 
               cpf: cpf.replace(/\D/g, ''),
-              phone: phone || "11999999999"
+              phone: phone.replace(/\D/g, '')
             },
             items: [{ amount: Math.round(item.amount * 100), description: item.description, code: item.id }],
             metadata: {
@@ -178,7 +184,8 @@ export function PaymentModal({ isOpen, onClose, item, customer, participantId, o
             customer: { 
               name: customer.name, 
               email: customer.email, 
-              phone: (phone || "11999999999").replace(/\D/g, ''), 
+              // Telefone é opcional no PIX; se não informado, omite o campo
+              ...(phone.replace(/\D/g, '').length >= 10 && { phone: phone.replace(/\D/g, '') }),
               cpf: cpf.replace(/\D/g, '') 
             },
             items: [{ amount: Math.round(item.amount * 100), description: item.description, code: item.id }],

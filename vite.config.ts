@@ -86,7 +86,8 @@ export default defineConfig(({mode}) => {
       }
     },
     define: {
-      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY || ''),
+      // NOTA DE SEGURANÇA: Nunca exponha GEMINI_API_KEY aqui.
+      // Chaves de servidor devem existir APENAS em process.env no backend (api/_app.ts).
       'process.env.APP_URL': JSON.stringify(env.APP_URL || ''),
       'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(env.VITE_SUPABASE_URL || ''),
       'import.meta.env.VITE_SUPABASE_ANON_KEY': JSON.stringify(env.VITE_SUPABASE_ANON_KEY || ''),

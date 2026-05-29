@@ -90,6 +90,19 @@ export const Community: React.FC<CommunityProps> = ({
   const [activeOrgId, setActiveOrgId] = useState(loggedUser?.organizacao_id);
   const [orgs, setOrgs] = useState<{ id: string; nome: string }[]>([]);
 
+  // Toast system (substitui alert() nativo)
+  const [toast, setToast] = useState<{ text: string; type: 'success' | 'error' | 'info' } | null>(null);
+  const showToast = (text: string, type: 'success' | 'error' | 'info' = 'info') => {
+    setToast({ text, type });
+    setTimeout(() => setToast(null), 4000);
+  };
+
+  // Estado de confirmação (substitui confirm() nativo)
+  const [confirmState, setConfirmState] = useState<{ message: string; onConfirm: () => void } | null>(null);
+  const showConfirm = (message: string, onConfirm: () => void) => {
+    setConfirmState({ message, onConfirm });
+  };
+
   useEffect(() => {
     if (loggedUser?.role === 'super_admin') {
       supabase.from('organizacoes').select('id, nome').order('nome').then(({ data }) => {
@@ -501,7 +514,7 @@ export const Community: React.FC<CommunityProps> = ({
       setIsCreating(false);
       setEditingPostId(null);
     } catch (error: any) {
-      alert('Erro ao publicar: ' + error.message);
+      showToast('Erro ao publicar: ' + error.message, 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -552,7 +565,7 @@ export const Community: React.FC<CommunityProps> = ({
       }
       setNewComment('');
     } catch (error: any) {
-      alert('Erro ao comentar: ' + error.message);
+      showToast('Erro ao comentar: ' + error.message, 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -608,102 +621,102 @@ export const Community: React.FC<CommunityProps> = ({
       });
     } catch (error: any) {
       console.error('Error pinning post:', error);
-      alert('Erro ao fixar postagem: ' + error.message);
+      showToast('Erro ao fixar postagem: ' + error.message, 'error');
     }
   };
 
   const handleDeletePost = async (postId: string) => {
-    if (!confirm('Deseja realmente excluir esta postagem?')) return;
-    setIsSubmitting(true);
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Sessão expirada. Faça login novamente.');
+    showConfirm('Deseja realmente excluir esta postagem?', async () => {
+      setIsSubmitting(true);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('Sessão expirada. Faça login novamente.');
 
-      const { error, count } = await supabase
-        .from('community_posts')
-        .delete({ count: 'exact' })
-        .eq('id', postId);
-      
-      if (error) throw error;
+        const { error, count } = await supabase
+          .from('community_posts')
+          .delete({ count: 'exact' })
+          .eq('id', postId);
+        
+        if (error) throw error;
 
-      if (count === 0) {
-        throw new Error('Você não tem permissão para excluir esta postagem ou ela já foi removida.');
+        if (count === 0) {
+          throw new Error('Você não tem permissão para excluir esta postagem ou ela já foi removida.');
+        }
+        
+        setPosts(prev => prev.filter(p => p.id !== postId));
+        showToast('Postagem excluída com sucesso!', 'success');
+      } catch (error: any) {
+        console.error('Delete error details:', error);
+        showToast('Erro ao excluir: ' + (error.message || 'Erro desconhecido'), 'error');
+      } finally {
+        setIsSubmitting(false);
       }
-      
-      // Update local state
-      setPosts(prev => prev.filter(p => p.id !== postId));
-      alert('Postagem excluída com sucesso!');
-    } catch (error: any) {
-      console.error('Delete error details:', error);
-      alert('Erro ao excluir: ' + (error.message || 'Erro desconhecido'));
-    } finally {
-      setIsSubmitting(false);
-    }
+    });
   };
 
   const handleDeleteComment = async (postId: string, commentId: string) => {
-    if (!confirm('Deseja realmente excluir este comentário?')) return;
-    setIsSubmitting(true);
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Sessão expirada. Faça login novamente.');
+    showConfirm('Deseja realmente excluir este comentário?', async () => {
+      setIsSubmitting(true);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('Sessão expirada. Faça login novamente.');
 
-      const { error, count } = await supabase
-        .from('community_comments')
-        .delete({ count: 'exact' })
-        .eq('id', commentId);
-      
-      if (error) throw error;
-
-      if (count === 0) {
-        throw new Error('Você não tem permissão para excluir este comentário ou ele já foi removido.');
-      }
-      
-      // Update local state and decrement comment count locally only if it existed
-      setComments(prev => {
-        const postComments = prev[postId] || [];
-        if (!postComments.some(c => c.id === commentId)) return prev;
+        const { error, count } = await supabase
+          .from('community_comments')
+          .delete({ count: 'exact' })
+          .eq('id', commentId);
         
-        setPosts(prevPosts => prevPosts.map(p => p.id === postId ? { ...p, comments_count: Math.max(0, p.comments_count - 1) } : p));
-        return {
-          ...prev,
-          [postId]: postComments.filter(c => c.id !== commentId)
-        };
-      });
-      
-    } catch (error: any) {
-      console.error('Delete comment error details:', error);
-      alert('Erro ao excluir comentário: ' + (error.message || 'Erro desconhecido'));
-    } finally {
-      setIsSubmitting(false);
-    }
+        if (error) throw error;
+
+        if (count === 0) {
+          throw new Error('Você não tem permissão para excluir este comentário ou ele já foi removido.');
+        }
+        
+        setComments(prev => {
+          const postComments = prev[postId] || [];
+          if (!postComments.some(c => c.id === commentId)) return prev;
+          
+          setPosts(prevPosts => prevPosts.map(p => p.id === postId ? { ...p, comments_count: Math.max(0, p.comments_count - 1) } : p));
+          return {
+            ...prev,
+            [postId]: postComments.filter(c => c.id !== commentId)
+          };
+        });
+      } catch (error: any) {
+        console.error('Delete comment error details:', error);
+        showToast('Erro ao excluir comentário: ' + (error.message || 'Erro desconhecido'), 'error');
+      } finally {
+        setIsSubmitting(false);
+      }
+    });
   };
 
   const handleDeleteMessage = async (messageId: string) => {
-    if (!confirm('Deseja excluir esta mensagem?')) return;
-    setIsSubmitting(true);
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Sessão expirada.');
+    showConfirm('Deseja excluir esta mensagem?', async () => {
+      setIsSubmitting(true);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('Sessão expirada.');
 
-      const { error, count } = await supabase
-        .from('community_messages')
-        .delete({ count: 'exact' })
-        .eq('id', messageId);
+        const { error, count } = await supabase
+          .from('community_messages')
+          .delete({ count: 'exact' })
+          .eq('id', messageId);
 
-      if (error) throw error;
-      
-      if (count === 0) {
-        throw new Error('Sem permissão para excluir esta mensagem.');
+        if (error) throw error;
+        
+        if (count === 0) {
+          throw new Error('Sem permissão para excluir esta mensagem.');
+        }
+        
+        setMessages(prev => prev.filter(m => m.id !== messageId));
+      } catch (error: any) {
+        console.error('Delete message error details:', error);
+        showToast('Erro ao excluir mensagem: ' + error.message, 'error');
+      } finally {
+        setIsSubmitting(false);
       }
-      
-      setMessages(prev => prev.filter(m => m.id !== messageId));
-    } catch (error: any) {
-      console.error('Delete message error details:', error);
-      alert('Erro ao excluir mensagem: ' + error.message);
-    } finally {
-      setIsSubmitting(false);
-    }
+    });
   };
 
   const markAsRead = async (recipientId: string) => {
@@ -766,7 +779,7 @@ export const Community: React.FC<CommunityProps> = ({
       }
       setDmContent('');
     } catch (error: any) {
-      alert('Erro ao enviar mensagem: ' + error.message);
+      showToast('Erro ao enviar mensagem: ' + error.message, 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -1353,6 +1366,78 @@ export const Community: React.FC<CommunityProps> = ({
                   </button>
                 </div>
               </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Toast de notificação (substitui alert nativo) */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className={`fixed bottom-6 right-6 z-[100] flex items-center gap-3 px-5 py-3.5 rounded-xl shadow-xl text-sm font-semibold max-w-sm ${
+              toast.type === 'success' ? 'bg-emerald-600 text-white' :
+              toast.type === 'error'   ? 'bg-red-600 text-white' :
+                                         'bg-slate-800 text-white'
+            }`}
+          >
+            {toast.type === 'success' && <CheckCircle className="w-5 h-5 flex-shrink-0" />}
+            {toast.type === 'error'   && <AlertCircle className="w-5 h-5 flex-shrink-0" />}
+            {toast.type === 'info'    && <MessageCircle className="w-5 h-5 flex-shrink-0" />}
+            <span>{toast.text}</span>
+            <button onClick={() => setToast(null)} className="ml-2 opacity-70 hover:opacity-100 transition-opacity">
+              <X className="w-4 h-4" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Modal de confirmação (substitui confirm nativo) */}
+      <AnimatePresence>
+        {confirmState && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+            onClick={() => setConfirmState(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.92, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.92, opacity: 0 }}
+              className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-start gap-3 mb-5">
+                <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                  <AlertCircle className="w-5 h-5 text-red-600" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-900 text-base">Confirmar ação</h3>
+                  <p className="text-slate-600 text-sm mt-1">{confirmState.message}</p>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setConfirmState(null)}
+                  className="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-semibold text-sm hover:bg-slate-50 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={() => {
+                    confirmState.onConfirm();
+                    setConfirmState(null);
+                  }}
+                  className="flex-1 py-2.5 rounded-xl bg-red-600 text-white font-semibold text-sm hover:bg-red-700 transition-colors"
+                >
+                  Confirmar
+                </button>
+              </div>
             </motion.div>
           </motion.div>
         )}

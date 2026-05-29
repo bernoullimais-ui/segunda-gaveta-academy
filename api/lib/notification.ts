@@ -28,8 +28,8 @@ export async function sendEmail({
   htmlContent: string;
 }): Promise<boolean> {
   const apiKey = process.env.BREVO_API_KEY;
-  const senderEmail = process.env.BREVO_SENDER_EMAIL || 'adm@sportforkids.com.br';
-  const senderName = process.env.BREVO_SENDER_NAME || 'Sport for Kids';
+  const senderEmail = process.env.BREVO_SENDER_EMAIL || 'noreply@segundagaveta.com.br';
+  const senderName = process.env.BREVO_SENDER_NAME || 'Segunda Gaveta Academy';
 
   if (!apiKey) {
     console.warn('[Notification Warning] BREVO_API_KEY não configurado no ambiente. E-mail não enviado.');

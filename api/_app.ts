@@ -170,13 +170,22 @@ app.get("/api/health", (req, res) => {
 });
 
 app.get("/api/diag", (req, res) => {
+  // Proteção: requer token de admin para acessar diagnóstico.
+  // Configure DIAG_SECRET_TOKEN nas variáveis de ambiente do servidor.
+  const secretToken = process.env.DIAG_SECRET_TOKEN;
+  const providedToken = req.headers['x-admin-token'];
+
+  if (!secretToken || providedToken !== secretToken) {
+    return res.status(403).json({ error: "Acesso não autorizado." });
+  }
+
   res.json({
     url_set: !!process.env.VITE_SUPABASE_URL,
     key_set: !!process.env.VITE_SUPABASE_ANON_KEY,
     pagarme_secret_set: !!(process.env.PAGAR_ME_SECRET_KEY || process.env.PAGARME_SECRET_KEY),
     pagarme_public_set: !!(process.env.VITE_PAGAR_ME_PUBLIC_KEY || process.env.VITE_PAGARME_PUBLIC_KEY),
     node_version: process.version,
-    vite_vars: Object.keys(process.env).filter(k => k.startsWith('VITE_'))
+    vars_configured: Object.keys(process.env).filter(k => k.startsWith('VITE_')).length
   });
 });
 

@@ -288,6 +288,10 @@ export function CursosCandidato({
   }, [selectedCurso]);
 
   useEffect(() => {
+    // currentChannel declarado fora do if para que o cleanup sempre possa removê-lo,
+    // independente do tipo da aula selecionada. Isso previne vazamentos de memória.
+    let currentChannel: any = null;
+
     if (selectedLesson) {
       setAiExplanations({});
       setLoadingExplanations({});
@@ -305,33 +309,36 @@ export function CursosCandidato({
       
       // Setup chat and presence for live lesson
       if (selectedLesson.tipo === 'ao_vivo') {
-      const channel = supabase.channel(`live_chat_${selectedLesson._calculatedId}`)
-        .on('broadcast', { event: 'new_message' }, payload => {
-          setChatMessages(prev => [...prev, payload.payload]);
-        })
-        .on('broadcast', { event: 'release_attendance' }, payload => {
-          setAttendanceWindow({ active: true, expiresAt: payload.payload.expiresAt });
-        })
-        .on('presence', { event: 'sync' }, () => {
-          const newState = channel.presenceState();
-          // Count unique users across all connections
-          const count = Object.keys(newState).length;
-          setParticipantCount(count);
-        })
-        .subscribe(async (status) => {
-          if (status === 'SUBSCRIBED') {
-            await channel.track({
-              user_id: currentUserId || 'anonymous',
-              online_at: new Date().toISOString(),
-            });
-          }
-        });
-        
-      return () => {
-        supabase.removeChannel(channel);
-      }
+        currentChannel = supabase.channel(`live_chat_${selectedLesson._calculatedId}`)
+          .on('broadcast', { event: 'new_message' }, payload => {
+            setChatMessages(prev => [...prev, payload.payload]);
+          })
+          .on('broadcast', { event: 'release_attendance' }, payload => {
+            setAttendanceWindow({ active: true, expiresAt: payload.payload.expiresAt });
+          })
+          .on('presence', { event: 'sync' }, () => {
+            const newState = currentChannel.presenceState();
+            // Count unique users across all connections
+            const count = Object.keys(newState).length;
+            setParticipantCount(count);
+          })
+          .subscribe(async (status: string) => {
+            if (status === 'SUBSCRIBED') {
+              await currentChannel.track({
+                user_id: currentUserId || 'anonymous',
+                online_at: new Date().toISOString(),
+              });
+            }
+          });
       }
     }
+
+    // Cleanup sempre executado — remove o canal se existir
+    return () => {
+      if (currentChannel) {
+        supabase.removeChannel(currentChannel);
+      }
+    };
   }, [selectedLesson]);
 
   // Rastreador de tempo de estudo ativo (a cada 1 minuto de aula aberta)
