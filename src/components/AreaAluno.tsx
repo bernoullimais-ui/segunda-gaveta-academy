@@ -122,7 +122,7 @@ export function AreaAluno({ loggedUser, userRole, onLogout }: AreaAlunoProps) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 flex flex-col">
       {/* Top Navigation / Tabs */}
       <div className="bg-white border-b border-slate-100 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
@@ -206,7 +206,7 @@ export function AreaAluno({ loggedUser, userRole, onLogout }: AreaAlunoProps) {
       </div>
 
       {/* Main Content Area */}
-      <main className="max-w-7xl mx-auto px-4 md:px-8 py-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 md:px-8 py-8">
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}
@@ -219,6 +219,13 @@ export function AreaAluno({ loggedUser, userRole, onLogout }: AreaAlunoProps) {
           </motion.div>
         </AnimatePresence>
       </main>
+
+      {/* Minimalist Footer */}
+      <footer className="mt-auto py-6 border-t border-slate-200 text-center flex-shrink-0">
+        <p className="text-xs text-slate-400 font-medium tracking-wide">
+          By <span className="text-slate-500 font-bold">Segunda Gaveta Academy</span>
+        </p>
+      </footer>
     </div>
   );
 }
