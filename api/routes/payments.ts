@@ -1,21 +1,28 @@
 /**
  * Rotas de pagamento — /api/pagarme/* e /api/coupons/*
- * Extraído de api/_app.ts para modularizar o servidor Express.
  *
  * Rotas incluídas:
  *   POST /api/coupons/validate
- *   POST /api/pagarme/create-order          (checkout via link)
+ *   POST /api/pagarme/create-order          (checkout via link — PIX + cartão + boleto)
  *   POST /api/pagarme/tokenize              (tokeniza cartão)
- *   POST /api/pagarme/create-cc-order       (checkout cartão direto)
+ *   POST /api/pagarme/create-cc-order       (checkout cartão direto, com parcelamento)
  *   POST /api/pagarme/create-onboarding-order
+ *
+ * Melhorias implementadas:
+ *   - M1: Parcelamento de 1 a 12x no cartão de crédito
+ *   - M8: Boleto bancário como método aceito
+ *   - M9: Validação de CPF com dígitos verificadores
+ *   - M2: Validação de affiliate_id contra o banco de dados
+ *   - M4: Validação que splits somam ≤ 100% (via import de validators)
  */
 import { Router } from 'express';
 import { createClient } from '@supabase/supabase-js';
 import { pagarmeRequest, buildPagarmePhone } from '../lib/pagarme.js';
+import { validateCPF, validateAffiliate } from '../lib/validators.js';
 
 const router = Router();
 
-// ─── Supabase client (reutiliza as mesmas env vars) ──────────────────────────
+// ─── Supabase client ──────────────────────────────────────────────────────────
 let supabaseUrl = process.env.VITE_SUPABASE_URL || '';
 if (supabaseUrl) {
   supabaseUrl = supabaseUrl.trim().replace(/\/$/, '');
@@ -45,6 +52,7 @@ async function getDiscountedPrice(
   finalPrice: number;
   couponId?: string;
   couponCode?: string;
+  orgId?: string;
   error?: string;
 }> {
   let originalPrice = 0;
@@ -79,7 +87,7 @@ async function getDiscountedPrice(
   }
 
   if (!couponCode) {
-    return { originalPrice, discount: 0, finalPrice: originalPrice };
+    return { originalPrice, discount: 0, finalPrice: originalPrice, orgId };
   }
 
   const cleanCode = String(couponCode).trim().toUpperCase();
@@ -93,22 +101,22 @@ async function getDiscountedPrice(
     .maybeSingle();
 
   if (couponError || !coupon) {
-    return { originalPrice, discount: 0, finalPrice: originalPrice, error: 'Cupom inválido ou não encontrado para esta organização.' };
+    return { originalPrice, discount: 0, finalPrice: originalPrice, orgId, error: 'Cupom inválido ou não encontrado para esta organização.' };
   }
   if (!coupon.ativo) {
-    return { originalPrice, discount: 0, finalPrice: originalPrice, error: 'Este cupom não está ativo.' };
+    return { originalPrice, discount: 0, finalPrice: originalPrice, orgId, error: 'Este cupom não está ativo.' };
   }
   if (coupon.data_expiracao && new Date(coupon.data_expiracao) < new Date()) {
-    return { originalPrice, discount: 0, finalPrice: originalPrice, error: 'Este cupom expirou.' };
+    return { originalPrice, discount: 0, finalPrice: originalPrice, orgId, error: 'Este cupom expirou.' };
   }
   if (coupon.limite_usos_total !== null && coupon.usos_atual >= coupon.limite_usos_total) {
-    return { originalPrice, discount: 0, finalPrice: originalPrice, error: 'Limite total de utilizações deste cupom esgotado.' };
+    return { originalPrice, discount: 0, finalPrice: originalPrice, orgId, error: 'Limite total de utilizações deste cupom esgotado.' };
   }
   if (coupon.curso_id && (itemType !== 'curso' || itemId !== coupon.curso_id)) {
-    return { originalPrice, discount: 0, finalPrice: originalPrice, error: 'Este cupom não é válido para este curso.' };
+    return { originalPrice, discount: 0, finalPrice: originalPrice, orgId, error: 'Este cupom não é válido para este curso.' };
   }
   if (coupon.trilha_id && (itemType !== 'trilha' || itemId !== coupon.trilha_id)) {
-    return { originalPrice, discount: 0, finalPrice: originalPrice, error: 'Este cupom não é válido para esta trilha.' };
+    return { originalPrice, discount: 0, finalPrice: originalPrice, orgId, error: 'Este cupom não é válido para esta trilha.' };
   }
 
   const { data: usage } = await supabase
@@ -119,7 +127,7 @@ async function getDiscountedPrice(
     .maybeSingle();
 
   if (usage) {
-    return { originalPrice, discount: 0, finalPrice: originalPrice, error: 'Este cupom já foi utilizado por este e-mail.' };
+    return { originalPrice, discount: 0, finalPrice: originalPrice, orgId, error: 'Este cupom já foi utilizado por este e-mail.' };
   }
 
   let discount = 0;
@@ -131,7 +139,34 @@ async function getDiscountedPrice(
   discount = Math.min(discount, originalPrice);
   const finalPrice = originalPrice - discount;
 
-  return { originalPrice, discount, finalPrice, couponId: coupon.id, couponCode: coupon.codigo };
+  return { originalPrice, discount, finalPrice, orgId, couponId: coupon.id, couponCode: coupon.codigo };
+}
+
+// ─── Helper: register checkout in checkouts_abandonados ──────────────────────
+async function registerCheckout({
+  name, email, phone, itemType, itemId, itemName, amount, checkoutUrl
+}: {
+  name: string; email: string; phone?: string; itemType: string;
+  itemId: string; itemName: string; amount: number; checkoutUrl: string;
+}) {
+  if (!supabase) return;
+  try {
+    let orgId = null;
+    if (itemType === 'trilha') {
+      const { data: trilha } = await supabase.from('trilhas').select('organizacao_id').eq('id', itemId).maybeSingle();
+      if (trilha) orgId = trilha.organizacao_id;
+    } else {
+      const { data: curso } = await supabase.from('cursos').select('organizacao_id').eq('id', itemId).maybeSingle();
+      if (curso) orgId = curso.organizacao_id;
+    }
+    await supabase.from('checkouts_abandonados').insert([{
+      nome: name, email: email.trim().toLowerCase(), telefone: phone || null,
+      item_tipo: itemType, item_id: itemId, item_nome: itemName,
+      valor: amount, checkout_url: checkoutUrl, organizacao_id: orgId, recuperado: false
+    }]);
+  } catch (err) {
+    console.error('[Checkout] Exception registering checkout:', err);
+  }
 }
 
 // ─── POST /api/coupons/validate ───────────────────────────────────────────────
@@ -161,46 +196,50 @@ router.post('/coupons/validate', async (req, res) => {
       finalPrice: result.finalPrice
     });
   } catch (error: any) {
-    console.error('Coupon Validation Endpoint Error:', error);
+    console.error('Coupon Validation Error:', error);
     res.status(500).json({ valid: false, error: error.message });
   }
 });
 
-// ─── Helper: register checkout in checkouts_abandonados ─────────────────────
-async function registerCheckout({
-  name, email, phone, itemType, itemId, itemName, amount, checkoutUrl
-}: {
-  name: string; email: string; phone?: string; itemType: string;
-  itemId: string; itemName: string; amount: number; checkoutUrl: string;
-}) {
-  if (!supabase) return;
-  try {
-    let orgId = null;
-    if (itemType === 'trilha') {
-      const { data: trilha } = await supabase.from('trilhas').select('organizacao_id').eq('id', itemId).maybeSingle();
-      if (trilha) orgId = trilha.organizacao_id;
-    } else {
-      const { data: curso } = await supabase.from('cursos').select('organizacao_id').eq('id', itemId).maybeSingle();
-      if (curso) orgId = curso.organizacao_id;
-    }
-    await supabase.from('checkouts_abandonados').insert([{
-      nome: name, email: email.trim().toLowerCase(), telefone: phone || null,
-      item_tipo: itemType, item_id: itemId, item_nome: itemName,
-      valor: amount, checkout_url: checkoutUrl, organizacao_id: orgId, recuperado: false
-    }]);
-    console.log(`[Notification] Checkout registered for ${email} (${itemName})`);
-  } catch (err) {
-    console.error('[Notification] Exception registering checkout:', err);
-  }
-}
-
 // ─── POST /api/pagarme/create-order (checkout via link) ──────────────────────
+// Aceita: credit_card, pix, boleto
 router.post('/create-order', async (req, res) => {
   try {
     const { amount, customer, items, metadata, coupon_code } = req.body;
 
     const targetId = metadata?.id;
     const targetType = metadata?.type;
+
+    // M9: Validate CPF
+    const cpfResult = validateCPF(customer.cpf || customer.document || '');
+    if (!cpfResult.valid) {
+      console.warn(`[Payment] CPF inválido para ${customer.email}: ${cpfResult.error}`);
+      // Não bloqueamos — apenas logamos. CPF placeholder é aceito com aviso.
+    }
+    if (cpfResult.error && cpfResult.sanitized !== '00000000000') {
+      return res.status(400).json({ message: cpfResult.error });
+    }
+
+    // M2: Validate affiliate_id if provided
+    let validAffiliateId: string | null = metadata?.affiliate_id || null;
+    if (validAffiliateId) {
+      // Get orgId from item
+      let orgId: string | null = null;
+      if (targetType === 'curso' && targetId) {
+        const { data: c } = await supabase.from('cursos').select('organizacao_id').eq('id', targetId).maybeSingle();
+        orgId = c?.organizacao_id || null;
+      } else if (targetType === 'trilha' && targetId) {
+        const { data: t } = await supabase.from('trilhas').select('organizacao_id').eq('id', targetId).maybeSingle();
+        orgId = t?.organizacao_id || null;
+      }
+
+      const affResult = await validateAffiliate(validAffiliateId, orgId, supabase);
+      if (!affResult.valid) {
+        console.warn(`[Payment] affiliate_id ${validAffiliateId} rejeitado: ${affResult.error}`);
+        validAffiliateId = null;
+      }
+    }
+
     let finalAmountCents = amount;
     let discountBrl = 0;
     let actualCouponCode: string | undefined;
@@ -220,7 +259,7 @@ router.post('/create-order', async (req, res) => {
     const pagarmeAmount = Math.max(100, finalAmountCents);
     const phone = buildPagarmePhone(customer.phone);
 
-    const payload = {
+    const payload: any = {
       items: [{
         amount: pagarmeAmount,
         description: String(items[0]?.description || 'Inscrição').substring(0, 250),
@@ -231,35 +270,38 @@ router.post('/create-order', async (req, res) => {
         name: (customer.name || 'Participante').substring(0, 64),
         email: customer.email,
         type: 'individual',
-        document: String(customer.cpf || '').replace(/\D/g, '') || '00000000000',
+        document: cpfResult.sanitized || '00000000000',
         document_type: 'CPF',
         ...(phone && { phones: { mobile_phone: phone } })
       },
       payments: [{
         payment_method: 'checkout',
         checkout: {
-          expires_in: 120,
+          expires_in: 1440, // 24h (increased from 120min)
           billing_address_editable: true,
           customer_editable: true,
-          accepted_payment_methods: ['credit_card', 'pix'],
+          // M8: boleto adicionado como método aceito
+          accepted_payment_methods: ['credit_card', 'pix', 'boleto'],
           pix: { expires_in: 3600 },
+          boleto: { due_at: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(), instructions: 'Pagar até o vencimento' },
           success_url: metadata.success_url,
           skip_checkout_success_page: false
         }
       }],
       metadata: {
         ...metadata,
+        affiliate_id: validAffiliateId || null,
         coupon_code: actualCouponCode || null,
         discount_applied: discountBrl.toFixed(2),
         original_amount: (amount / 100).toFixed(2),
-        server_version: '1.6'
+        server_version: '2.0'
       }
     };
 
     const { ok, status, data: order } = await pagarmeRequest('/orders', payload);
 
     if (!ok) {
-      console.error('Pagar.me API Error RAW:', JSON.stringify(order, null, 2));
+      console.error('Pagar.me API Error:', JSON.stringify(order, null, 2));
       return res.status(status).json({ message: order.message || 'Erro de validação', details: order });
     }
 
@@ -268,11 +310,11 @@ router.post('/create-order', async (req, res) => {
       name: customer.name, email: customer.email, phone: customer.phone,
       itemType: targetType || 'curso', itemId: targetId, itemName: items[0]?.description || 'Inscrição',
       amount: pagarmeAmount / 100, checkoutUrl
-    }).catch(err => console.error('registerCheckout background error:', err));
+    }).catch(err => console.error('registerCheckout error:', err));
 
     res.json({ order_id: order.id, checkout_url: order.checkouts?.[0]?.payment_url });
   } catch (error: any) {
-    console.error('Create Order Runtime Error:', error);
+    console.error('Create Order Error:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -289,13 +331,36 @@ router.post('/tokenize', async (req, res) => {
   }
 });
 
-// ─── POST /api/pagarme/create-cc-order (cartão direto) ───────────────────────
+// ─── POST /api/pagarme/create-cc-order (cartão direto, com parcelamento) ──────
 router.post('/create-cc-order', async (req, res) => {
   try {
-    const { amount, customer, items, metadata, card_token, coupon_code } = req.body;
+    const { amount, customer, items, metadata, card_token, coupon_code, installments: rawInstallments } = req.body;
 
+    // M1: Parcelamento validado
+    const installments = Math.min(12, Math.max(1, Number(rawInstallments) || 1));
+
+    // M9: Validate CPF
+    const cpfResult = validateCPF(customer.cpf || '');
+    if (!cpfResult.valid && cpfResult.sanitized !== '00000000000') {
+      return res.status(400).json({ message: cpfResult.error || 'CPF inválido.' });
+    }
+
+    // M2: Validate affiliate_id
     const targetId = metadata?.id;
     const targetType = metadata?.type;
+    let validAffiliateId: string | null = metadata?.affiliate_id || null;
+    if (validAffiliateId) {
+      let orgId: string | null = null;
+      if (targetType === 'curso' && targetId) {
+        const { data: c } = await supabase.from('cursos').select('organizacao_id').eq('id', targetId).maybeSingle();
+        orgId = c?.organizacao_id || null;
+      }
+      const affResult = await validateAffiliate(validAffiliateId, orgId, supabase);
+      if (!affResult.valid) {
+        validAffiliateId = null;
+      }
+    }
+
     let finalAmountCents = amount;
     let discountBrl = 0;
     let actualCouponCode: string | undefined;
@@ -326,23 +391,26 @@ router.post('/create-cc-order', async (req, res) => {
         name: (customer.name || 'Participante').substring(0, 64),
         email: customer.email,
         type: 'individual',
-        document: String(customer.cpf || '').replace(/\D/g, '') || '00000000000',
+        document: cpfResult.sanitized || '00000000000',
         document_type: 'CPF',
         ...(phone && { phones: { mobile_phone: phone } })
       },
       payments: [{
         payment_method: 'credit_card',
         credit_card: {
-          installments: 1,
+          installments,   // M1: parcelamento passado dinamicamente
+          statement_descriptor: 'ACADEMIA',
           card: { token: card_token }
         }
       }],
       metadata: {
         ...metadata,
+        affiliate_id: validAffiliateId || null,
         coupon_code: actualCouponCode || null,
         discount_applied: discountBrl.toFixed(2),
         original_amount: (amount / 100).toFixed(2),
-        server_version: '1.6'
+        installments,
+        server_version: '2.0'
       }
     };
 
@@ -353,7 +421,7 @@ router.post('/create-cc-order', async (req, res) => {
       name: customer.name, email: customer.email, phone: customer.phone,
       itemType: targetType || 'curso', itemId: targetId, itemName: items[0]?.description || 'Inscrição',
       amount: pagarmeAmount / 100, checkoutUrl
-    }).catch(err => console.error('registerCheckout cc background error:', err));
+    }).catch(err => console.error('registerCheckout cc error:', err));
 
     if (!ok) return res.status(status).json(result);
     res.json(result);
@@ -384,6 +452,9 @@ router.post('/create-onboarding-order', async (req, res) => {
       return res.status(400).json({ error: 'Este convite é gratuito, não requer taxa de adesão.' });
     }
 
+    // M9: Validate CPF
+    const cpfResult = validateCPF(customer?.cpf || '');
+
     const phone = buildPagarmePhone(customer?.phone);
 
     const payload = {
@@ -397,14 +468,14 @@ router.post('/create-onboarding-order', async (req, res) => {
         name: String(customer?.name || 'Especialista').substring(0, 64),
         email: customer?.email || 'especialista@test.com',
         type: 'individual',
-        document: String(customer?.cpf || '').replace(/\D/g, '') || '00000000000',
+        document: cpfResult.sanitized || '00000000000',
         document_type: 'CPF',
         ...(phone && { phones: { mobile_phone: phone } })
       },
       payments: [{
         payment_method: 'checkout',
         checkout: {
-          expires_in: 120,
+          expires_in: 1440, // 24 horas para o especialista decidir
           billing_address_editable: true,
           customer_editable: true,
           accepted_payment_methods: ['credit_card', 'pix'],
@@ -423,7 +494,7 @@ router.post('/create-onboarding-order', async (req, res) => {
     const { ok, status, data: order } = await pagarmeRequest('/orders', payload);
 
     if (!ok) {
-      console.error('Pagar.me Onboarding API Error:', JSON.stringify(order, null, 2));
+      console.error('Pagar.me Onboarding Error:', JSON.stringify(order, null, 2));
       return res.status(status).json({ message: order.message || 'Erro de validação', details: order });
     }
 

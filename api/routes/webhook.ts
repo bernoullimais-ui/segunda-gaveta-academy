@@ -1,10 +1,17 @@
 /**
  * Webhook do Pagar.me — POST /api/pagarme/webhook
- * Extraído de api/_app.ts. Processa order.paid e order.payment_failed.
+ * Processa order.paid e order.payment_failed.
+ *
+ * Melhorias implementadas:
+ *   - M2: Valida affiliate_id contra o banco de dados
+ *   - M4: Valida que splits somam ≤ 100%
+ *   - M5: Desconta taxa do Pagar.me antes de calcular splits
+ *   - M11: Armazena pagarme_order_id para lookup de estorno
  */
 import { Router } from 'express';
 import { createClient } from '@supabase/supabase-js';
-import { extractPhoneFromOrder } from '../lib/pagarme.js';
+import { extractPhoneFromOrder, calculatePagarmeNet } from '../lib/pagarme.js';
+import { validateAffiliate, validateSplits } from '../lib/validators.js';
 import {
   notifyWelcome,
   notifyOnboarding,
@@ -332,6 +339,8 @@ router.post('/', async (req, res) => {
       if (finalUserId) {
         let affiliateCommissionPct = 0;
         let splitsConfig: { usuario_id: string; porcentagem: number }[] = [];
+        let pagarmeOrderId: string | null = order.id || null;
+        let pagarmeChargeId: string | null = order.charges?.[0]?.id || null;
 
         if (targetType === 'curso' && targetItemId) {
           const { data: curso } = await supabase
@@ -346,10 +355,33 @@ router.post('/', async (req, res) => {
           }
         }
 
-        const affiliateShare = affiliate_id ? (totalPaidBrl * affiliateCommissionPct) / 100 : 0.00;
-        const afterAffiliateBrl = totalPaidBrl - affiliateShare;
+        // M2: Validate affiliate_id against the database
+        let validatedAffiliateId: string | null = affiliate_id || null;
+        if (validatedAffiliateId && finalOrgId) {
+          const affResult = await validateAffiliate(validatedAffiliateId, finalOrgId, supabase);
+          if (!affResult.valid) {
+            console.warn(`[Webhook] Rejecting unvalidated affiliate_id ${validatedAffiliateId}:`, affResult.error);
+            validatedAffiliateId = null;
+          }
+        }
+
+        // M4: Validate split sum
+        const splitValidation = validateSplits(splitsConfig);
+        if (!splitValidation.valid) {
+          console.error(`[Webhook] Invalid split config for ${targetItemId}: ${splitValidation.error}`);
+          // Continue but zero out splits to avoid corrupted data
+          splitsConfig = [];
+        }
+
+        // M5: Deduct Pagar.me fee before calculating splits
+        const { netAmount: netRevenueBrl } = calculatePagarmeNet(totalPaidBrl, paymentMethod);
+
+        const affiliateShare = validatedAffiliateId ? (totalPaidBrl * affiliateCommissionPct) / 100 : 0.00;
+        // Splits calculated on NET revenue (after Pagar.me fee) minus affiliate commission
+        const afterAffiliateBrl = netRevenueBrl - affiliateShare;
         const calculatedCoproducersList = splitsConfig.map(split => ({
           usuario_id: split.usuario_id,
+          porcentagem: split.porcentagem,
           valor: Number(((afterAffiliateBrl * split.porcentagem) / 100).toFixed(2))
         }));
 
@@ -360,6 +392,7 @@ router.post('/', async (req, res) => {
           curso_id: targetType === 'curso' ? targetItemId : null,
           trilha_id: targetType === 'trilha' ? targetItemId : null,
           valor_pago: totalPaidBrl,
+          valor_liquido: Number(netRevenueBrl.toFixed(2)),     // M5: valor líquido armazenado
           metodo_pagamento: paymentMethod,
           status: 'pago',
           cupom_codigo: coupon_code || null,
@@ -367,9 +400,11 @@ router.post('/', async (req, res) => {
           utm_source: utm_source || null,
           utm_medium: utm_medium || null,
           utm_campaign: utm_campaign || null,
-          affiliate_id: affiliate_id || null,
+          affiliate_id: validatedAffiliateId || null,           // M2: apenas afiliado validado
           comissao_afiliado: Number(affiliateShare.toFixed(2)),
-          comissao_coprodutores: calculatedCoproducersList
+          comissao_coprodutores: calculatedCoproducersList,
+          pagarme_order_id: pagarmeOrderId,                     // M11: para estorno
+          pagarme_charge_id: pagarmeChargeId                    // M11: para estorno
         }]);
 
         if (purchaseErr) console.error('Failed to insert into compras table:', purchaseErr);

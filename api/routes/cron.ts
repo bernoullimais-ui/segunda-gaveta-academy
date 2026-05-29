@@ -126,4 +126,106 @@ async function handleCartRecovery(req: any, res: any) {
 router.post('/recover-carts', handleCartRecovery);
 router.get('/recover-carts', handleCartRecovery);
 
+// ─── M10: Expire course access ───────────────────────────────────────────────
+/**
+ * GET/POST /api/cron/expire-access
+ *
+ * Revokes access for participants whose enrollment period has expired.
+ * Should be called daily (e.g., via Vercel cron or external scheduler).
+ *
+ * Logic:
+ *   1. Fetch all cursos where duracao_tipo = 'com_limite' or 'days' (has expiration)
+ *   2. For each course, find participants where (inscrito_em + duracao) < now
+ *   3. Update status to 'expirado' in curso_participantes
+ */
+async function handleExpireAccess(_req: any, res: any) {
+  if (!supabase) {
+    return res.status(500).json({ error: 'Supabase client not initialized' });
+  }
+
+  try {
+    console.log('[Cron] Running expire-access job...');
+
+    // 1. Find courses with limited access duration
+    const { data: cursosComLimite, error: cursosErr } = await supabase
+      .from('cursos')
+      .select('id, nome, duracao_tipo, duracao, duracao_dias')
+      .in('duracao_tipo', ['com_limite', 'days', 'meses', 'semanas'])
+      .not('duracao', 'is', null);
+
+    if (cursosErr) {
+      console.error('[ExpireAccess] Error fetching cursos:', cursosErr);
+      return res.status(500).json({ error: cursosErr.message });
+    }
+
+    if (!cursosComLimite || cursosComLimite.length === 0) {
+      return res.json({ success: true, expired: 0, message: 'No courses with expiration configured.' });
+    }
+
+    let totalExpired = 0;
+    const now = new Date();
+
+    for (const curso of cursosComLimite) {
+      // Determine duration in days
+      let durationDays: number | null = null;
+      if (curso.duracao_dias) {
+        durationDays = Number(curso.duracao_dias);
+      } else if (curso.duracao_tipo === 'meses' && curso.duracao) {
+        durationDays = Number(curso.duracao) * 30;
+      } else if (curso.duracao_tipo === 'semanas' && curso.duracao) {
+        durationDays = Number(curso.duracao) * 7;
+      } else if (curso.duracao) {
+        durationDays = Number(curso.duracao);
+      }
+
+      if (!durationDays || durationDays <= 0) continue;
+
+      // 2. Find active participants enrolled longer than durationDays
+      const { data: participants, error: partErr } = await supabase
+        .from('curso_participantes')
+        .select('id, usuario_id, inscrito_em')
+        .eq('curso_id', curso.id)
+        .in('status', ['inscrito', 'pago', 'ativo'])
+        .not('inscrito_em', 'is', null);
+
+      if (partErr) {
+        console.error(`[ExpireAccess] Error fetching participants for ${curso.nome}:`, partErr);
+        continue;
+      }
+
+      for (const participant of (participants || [])) {
+        const enrolledAt = new Date(participant.inscrito_em);
+        const expiresAt = new Date(enrolledAt.getTime() + durationDays * 24 * 60 * 60 * 1000);
+
+        if (now > expiresAt) {
+          const { error: updateErr } = await supabase
+            .from('curso_participantes')
+            .update({
+              status: 'expirado',
+              expirado_em: expiresAt.toISOString()
+            })
+            .eq('id', participant.id);
+
+          if (!updateErr) {
+            totalExpired++;
+            console.log(`[ExpireAccess] Expired access for user ${participant.usuario_id} in course ${curso.nome}`);
+          } else {
+            console.error(`[ExpireAccess] Failed to expire ${participant.id}:`, updateErr);
+          }
+        }
+      }
+    }
+
+    console.log(`[ExpireAccess] Job complete. Total expired: ${totalExpired}`);
+    res.json({ success: true, expired: totalExpired, courses_checked: cursosComLimite.length });
+  } catch (error: any) {
+    console.error('[ExpireAccess] Exception:', error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
+router.post('/expire-access', handleExpireAccess);
+router.get('/expire-access', handleExpireAccess);
+
 export default router;
+

@@ -56,21 +56,87 @@ export function extractPhoneFromOrder(
 }
 
 /**
- * Makes a POST request to the Pagar.me Core v5 API.
+ * Makes a request to the Pagar.me Core v5 API.
+ *
+ * @param path    - API path, e.g. '/orders' or '/charges/ch_xxx/cancel'
+ * @param payload - Request body (null for GET/DELETE with no body)
+ * @param method  - HTTP method (default: 'POST')
  */
 export async function pagarmeRequest(
   path: string,
-  payload: any
+  payload: any,
+  method: 'GET' | 'POST' | 'DELETE' | 'PATCH' = 'POST'
 ): Promise<{ ok: boolean; status: number; data: any }> {
   const authHeader = getPagarmeAuthHeader();
   const response = await fetch(`https://api.pagar.me/core/v5${path}`, {
-    method: 'POST',
+    method,
     headers: {
       'Content-Type': 'application/json',
       Authorization: authHeader
     },
-    body: JSON.stringify(payload)
+    ...(payload !== null ? { body: JSON.stringify(payload) } : {})
   });
   const data = await response.json();
   return { ok: response.ok, status: response.status, data };
 }
+
+// ─── Fee calculation helpers ──────────────────────────────────────────────────
+
+export interface PagarmeFee {
+  feePct: number;
+  feeFlat: number;
+  netAmount: number;
+}
+
+/**
+ * Calculates the net amount after Pagar.me fees.
+ * These are approximate rates — actual rates depend on your contract.
+ *
+ * CC:  ~4.99% + R$ 1.00
+ * PIX: ~1.99% + R$ 0.00
+ */
+export function calculatePagarmeNet(grossAmountBrl: number, paymentMethod: string): PagarmeFee {
+  const isCC = paymentMethod.toLowerCase().includes('credit') || paymentMethod.toLowerCase().includes('cartao');
+  const feePct = isCC ? 0.0499 : 0.0199;
+  const feeFlat = isCC ? 1.00 : 0.00;
+  const netAmount = Math.max(0, grossAmountBrl * (1 - feePct) - feeFlat);
+  return { feePct, feeFlat, netAmount };
+}
+
+// ─── Split rules builder ──────────────────────────────────────────────────────
+
+export interface PagarmeSplitRule {
+  recipient_id: string;
+  percentage?: number;
+  amount?: number;
+  liable: boolean;
+  charge_processing_fee: boolean;
+}
+
+/**
+ * Builds Pagar.me native split_rules from our internal split config.
+ * NOTE: recipient_id in Pagar.me Marketplace must be a registered recipient
+ * (conta bancária vinculada). Only use this if your organization is a Marketplace.
+ *
+ * For now this is a utility — actual marketplace split activation requires
+ * onboarding each specialist as a Pagar.me recipient.
+ */
+export function buildSplitRules(
+  splits: { usuario_id: string; porcentagem: number; pagarme_recipient_id?: string }[],
+  mainRecipientId?: string
+): PagarmeSplitRule[] {
+  const rules: PagarmeSplitRule[] = [];
+
+  for (const split of splits) {
+    if (!split.pagarme_recipient_id) continue; // Skip if not yet a Pagar.me recipient
+    rules.push({
+      recipient_id: split.pagarme_recipient_id,
+      percentage: split.porcentagem,
+      liable: false,
+      charge_processing_fee: false
+    });
+  }
+
+  return rules;
+}
+

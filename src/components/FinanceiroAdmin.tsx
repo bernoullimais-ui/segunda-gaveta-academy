@@ -51,7 +51,9 @@ export function FinanceiroAdmin({ orgId }: { orgId?: string }) {
     async function fetchCompras() {
       setIsLoading(true);
       try {
-        const { data, error } = await supabase
+        // M3: Filter by organization in the DB query (not in JS)
+        // We use a two-step query: get curso/trilha IDs for this org first, then filter compras
+        let query = supabase
           .from('compras')
           .select(`
             *,
@@ -61,21 +63,30 @@ export function FinanceiroAdmin({ orgId }: { orgId?: string }) {
           `)
           .order('criado_em', { ascending: false });
 
-        if (error) throw error;
-        
-        // Filter by organization in JS to ensure clean isolation
-        const filteredData = (data || []).filter(compra => {
-          if (!orgId) return true;
-          if (compra.tipo === 'curso') {
-            return compra.cursos?.organizacao_id === orgId;
-          }
-          if (compra.tipo === 'trilha') {
-            return compra.trilhas?.organizacao_id === orgId;
-          }
-          return false;
-        });
+        // Apply server-side org filter when orgId is available
+        if (orgId) {
+          // Fetch org's curso IDs and trilha IDs to filter compras
+          const [cursosRes, trilhasRes] = await Promise.all([
+            supabase.from('cursos').select('id').eq('organizacao_id', orgId),
+            supabase.from('trilhas').select('id').eq('organizacao_id', orgId)
+          ]);
 
-        setCompras(filteredData);
+          const cursoIds = (cursosRes.data || []).map((c: any) => c.id);
+          const trilhaIds = (trilhasRes.data || []).map((t: any) => t.id);
+          const allItemIds = [...cursoIds, ...trilhaIds];
+
+          if (allItemIds.length === 0) {
+            setCompras([]);
+            setIsLoading(false);
+            return;
+          }
+
+          query = query.in('item_id', allItemIds);
+        }
+
+        const { data, error } = await query;
+        if (error) throw error;
+        setCompras(data || []);
       } catch (err) {
         console.error('Erro ao carregar compras:', err);
       } finally {
@@ -102,6 +113,7 @@ export function FinanceiroAdmin({ orgId }: { orgId?: string }) {
   // Calculate KPIs based on ALL purchases (not filtered by search/status for accuracy)
   const approvedPurchases = compras.filter(c => c.status === 'pago');
   const totalRevenue = approvedPurchases.reduce((acc, c) => acc + Number(c.valor_pago || 0), 0);
+  const totalNetRevenue = approvedPurchases.reduce((acc, c) => acc + Number(c.valor_liquido || c.valor_pago || 0), 0);
   const totalDiscounts = approvedPurchases.reduce((acc, c) => acc + Number(c.desconto_aplicado || 0), 0);
   const averageTicket = approvedPurchases.length > 0 ? totalRevenue / approvedPurchases.length : 0;
   
@@ -109,6 +121,9 @@ export function FinanceiroAdmin({ orgId }: { orgId?: string }) {
   const couponConversionRate = approvedPurchases.length > 0 
     ? (purchasesWithCoupon.length / approvedPurchases.length) * 100 
     : 0;
+  
+  const totalAffiliateCommissions = approvedPurchases.reduce((acc, c) => acc + Number(c.comissao_afiliado || 0), 0);
+  const estornos = compras.filter(c => c.status === 'estornado').length;
 
   // Coupon Performance aggregation
   const couponStats: { [code: string]: { code: string; count: number; totalRevenue: number; totalDiscounts: number } } = {};
@@ -241,17 +256,20 @@ export function FinanceiroAdmin({ orgId }: { orgId?: string }) {
   };
 
   const handleExportCSV = () => {
-    const headers = ['Data', 'Aluno', 'E-mail', 'Produto', 'Tipo', 'Cupom', 'Desconto', 'Valor Pago', 'Método', 'Status'];
+    const headers = ['Data', 'Aluno', 'E-mail', 'Produto', 'Tipo', 'Método', 'Parcelas', 'Cupom', 'Desconto', 'Valor Bruto', 'Valor Líquido', 'Comissão Afiliado', 'Status'];
     const rows = compras.map(c => [
-      new Date(c.criado_em).toLocaleDateString(),
+      new Date(c.criado_em).toLocaleDateString('pt-BR'),
       c.usuarios?.nome || 'N/A',
       c.usuarios?.email || 'N/A',
       c.tipo === 'curso' ? c.cursos?.nome : c.tipo === 'trilha' ? c.trilhas?.nome : 'Acesso Total',
       c.tipo,
+      c.metodo_pagamento || '',
+      c.installments || '1',
       c.cupom_codigo || '',
       c.desconto_aplicado || '0',
       c.valor_pago,
-      c.metodo_pagamento,
+      c.valor_liquido || c.valor_pago,
+      c.comissao_afiliado || '0',
       c.status
     ]);
 
@@ -294,70 +312,95 @@ export function FinanceiroAdmin({ orgId }: { orgId?: string }) {
       </div>
 
       {/* KPI Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-        {/* KPI 1 */}
-        <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow">
-          <div className="space-y-2">
-            <span className="text-sm font-medium text-slate-500">Faturamento Total</span>
-            <div className="text-2xl font-bold text-slate-900">{formatCurrency(totalRevenue)}</div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4">
+        {/* KPI 1 — Faturamento Bruto */}
+        <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow">
+          <div className="space-y-1">
+            <span className="text-xs font-medium text-slate-500">Faturamento Bruto</span>
+            <div className="text-xl font-bold text-slate-900">{formatCurrency(totalRevenue)}</div>
             <div className="flex items-center gap-1 text-emerald-600 text-xs font-semibold">
-              <TrendingUp className="w-3.5 h-3.5" />
-              <span>Dados reais atualizados</span>
+              <TrendingUp className="w-3 h-3" />
+              <span>Total pago</span>
             </div>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600">
-            <DollarSign className="w-6 h-6" />
+          <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600">
+            <DollarSign className="w-5 h-5" />
           </div>
         </div>
 
-        {/* KPI 2 - Saldo a Liberar */}
-        <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow">
-          <div className="space-y-2">
-            <span className="text-sm font-medium text-slate-500">Saldo a Liberar (D+30)</span>
-            <div className="text-2xl font-bold text-slate-900">{formatCurrency(pendingReleaseTotal)}</div>
-            <div className="text-slate-400 text-xs font-medium">Liberações futuras líquidas</div>
+        {/* KPI 2 — Receita Líquida */}
+        <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow">
+          <div className="space-y-1">
+            <span className="text-xs font-medium text-slate-500">Receita Líquida</span>
+            <div className="text-xl font-bold text-slate-900">{formatCurrency(totalNetRevenue)}</div>
+            <div className="text-slate-400 text-xs font-medium">Após taxas Pagar.me</div>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-purple-50 flex items-center justify-center text-purple-600">
-            <TrendingUp className="w-6 h-6" />
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+            <TrendingUp className="w-5 h-5" />
           </div>
         </div>
 
-        {/* KPI 3 */}
-        <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow">
-          <div className="space-y-2">
-            <span className="text-sm font-medium text-slate-500">Ticket Médio</span>
-            <div className="text-2xl font-bold text-slate-900">{formatCurrency(averageTicket)}</div>
+        {/* KPI 3 — Saldo a Liberar */}
+        <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow">
+          <div className="space-y-1">
+            <span className="text-xs font-medium text-slate-500">A Liberar (D+30)</span>
+            <div className="text-xl font-bold text-slate-900">{formatCurrency(pendingReleaseTotal)}</div>
+            <div className="text-slate-400 text-xs font-medium">Liberações futuras</div>
+          </div>
+          <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center text-purple-600">
+            <Calendar className="w-5 h-5" />
+          </div>
+        </div>
+
+        {/* KPI 4 — Ticket Médio */}
+        <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow">
+          <div className="space-y-1">
+            <span className="text-xs font-medium text-slate-500">Ticket Médio</span>
+            <div className="text-xl font-bold text-slate-900">{formatCurrency(averageTicket)}</div>
             <div className="text-slate-400 text-xs font-medium">Por venda aprovada</div>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
-            <ArrowUpRight className="w-6 h-6" />
+          <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+            <ArrowUpRight className="w-5 h-5" />
           </div>
         </div>
 
-        {/* KPI 4 */}
-        <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow">
-          <div className="space-y-2">
-            <span className="text-sm font-medium text-slate-500">Descontos Concedidos</span>
-            <div className="text-2xl font-bold text-slate-950">{formatCurrency(totalDiscounts)}</div>
-            <div className="text-slate-400 text-xs font-medium">Soma de cupons aplicados</div>
+        {/* KPI 5 — Descontos */}
+        <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow">
+          <div className="space-y-1">
+            <span className="text-xs font-medium text-slate-500">Descontos</span>
+            <div className="text-xl font-bold text-slate-950">{formatCurrency(totalDiscounts)}</div>
+            <div className="text-slate-400 text-xs font-medium">Cupons aplicados</div>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-rose-50 flex items-center justify-center text-rose-600">
-            <Percent className="w-6 h-6" />
+          <div className="w-10 h-10 rounded-xl bg-rose-50 flex items-center justify-center text-rose-600">
+            <Percent className="w-5 h-5" />
           </div>
         </div>
 
-        {/* KPI 5 */}
-        <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow">
-          <div className="space-y-2">
-            <span className="text-sm font-medium text-slate-500">Conversão de Cupons</span>
-            <div className="text-2xl font-bold text-slate-900">{couponConversionRate.toFixed(1)}%</div>
-            <div className="text-slate-400 text-xs font-medium">Vendas com cupom aplicado</div>
+        {/* KPI 6 — Conversão de Cupons */}
+        <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow">
+          <div className="space-y-1">
+            <span className="text-xs font-medium text-slate-500">Uso de Cupons</span>
+            <div className="text-xl font-bold text-slate-900">{couponConversionRate.toFixed(1)}%</div>
+            <div className="text-slate-400 text-xs font-medium">Vendas com cupom</div>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
-            <Tag className="w-6 h-6" />
+          <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
+            <Tag className="w-5 h-5" />
+          </div>
+        </div>
+
+        {/* KPI 7 — Comissões Afiliados */}
+        <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow">
+          <div className="space-y-1">
+            <span className="text-xs font-medium text-slate-500">Comissões Afil.</span>
+            <div className="text-xl font-bold text-slate-900">{formatCurrency(totalAffiliateCommissions)}</div>
+            <div className="text-slate-400 text-xs font-medium">{estornos > 0 ? `${estornos} estorno(s)` : 'Total pago'}</div>
+          </div>
+          <div className="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center text-teal-600">
+            <Users className="w-5 h-5" />
           </div>
         </div>
       </div>
+
 
       {/* Charts and Coupon Performance Split */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

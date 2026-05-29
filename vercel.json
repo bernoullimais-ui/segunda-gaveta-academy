@@ -7,6 +7,10 @@
     {
       "path": "/api/cron/recover-carts",
       "schedule": "*/15 * * * *"
+    },
+    {
+      "path": "/api/cron/expire-access",
+      "schedule": "0 3 * * *"
     }
   ]
 }
