@@ -578,6 +578,8 @@ const WhatsAppFloatingButton = ({ item }: { item: any }) => {
 export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, isTrilha }) => {
   const [item, setItem] = useState<any>(null);
   const [cursosTrilha, setCursosTrilha] = useState<any[]>([]);
+  const [planosAssinatura, setPlanosAssinatura] = useState<any[]>([]);
+  const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   // #4 Real participant count
@@ -702,7 +704,8 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
   }, [item]);
 
   const isFree = isTrilha ? (item?.preco === 0) : (item?.preco === 'gratuito');
-  const itemPrice = isTrilha ? (item?.preco || 0) : (parseFloat(item?.valor) || 0);
+  const selectedPlan = planosAssinatura?.find(p => p.pagarme_plan_id === selectedPlanId);
+  const itemPrice = selectedPlan ? (selectedPlan.valor_cents / 100) : (isTrilha ? (item?.preco || 0) : (parseFloat(item?.valor) || 0));
 
   const handleEnrollClick = () => {
     if (isFree) {
@@ -858,6 +861,19 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             .eq('status', 'inscrito');
           if (count !== null) setParticipantCount(count);
         }
+        
+        // M6: Fetch planos_assinatura
+        const { data: plansData } = await supabase
+          .from('planos_assinatura')
+          .select('*')
+          .eq(isTrilha ? 'trilha_id' : 'curso_id', courseId)
+          .eq('ativo', true)
+          .order('valor_cents', { ascending: true });
+        
+        if (plansData && plansData.length > 0) {
+          setPlanosAssinatura(plansData);
+          setSelectedPlanId(plansData[0].pagarme_plan_id); // default to first active plan
+        }
       } catch (err: any) {
         console.error('Error fetching public content:', err);
         setError(err.message);
@@ -906,7 +922,8 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             utm_source: utm_source || sessionStorage.getItem('utm_source') || null,
             utm_medium: utm_medium || sessionStorage.getItem('utm_medium') || null,
             utm_campaign: utm_campaign || sessionStorage.getItem('utm_campaign') || null,
-            visitor_id: visitorId
+            visitor_id: visitorId,
+            affiliate_id: ref || sessionStorage.getItem('affiliate_ref_id') || null
           })
         });
       } catch (err) {
@@ -1117,12 +1134,41 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                          <span className="text-4xl font-black text-emerald-500">GRÁTIS</span>
                        </div>
                      ) : (
-                       <div className="flex flex-col text-left">
-                         <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Valor do Investimento</span>
-                         <div className="flex items-baseline gap-2">
-                           <span className="text-xl font-bold text-white">R$</span>
-                           <span className="text-6xl font-black text-white">{itemPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                         </div>
+                       <div className="flex flex-col text-left space-y-4">
+                         {planosAssinatura && planosAssinatura.length > 0 ? (
+                           <div className="space-y-2">
+                             <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Escolha seu Plano</span>
+                             <div className="flex flex-col gap-2">
+                               {planosAssinatura.map(plano => (
+                                 <button
+                                   key={plano.id}
+                                   onClick={() => setSelectedPlanId(plano.pagarme_plan_id)}
+                                   className={`flex items-center justify-between p-3 rounded-xl border-2 transition-all w-full sm:w-64 ${
+                                     selectedPlanId === plano.pagarme_plan_id 
+                                       ? 'border-primary bg-primary/10' 
+                                       : 'border-slate-700 hover:border-slate-600'
+                                   }`}
+                                 >
+                                   <div className="text-left">
+                                     <div className={`font-bold ${selectedPlanId === plano.pagarme_plan_id ? 'text-primary' : 'text-slate-300'}`}>{plano.nome}</div>
+                                     <div className="text-xs text-slate-500">{plano.intervalo === 'month' ? 'Mensal' : 'Anual'}</div>
+                                   </div>
+                                   <div className={`font-black ${selectedPlanId === plano.pagarme_plan_id ? 'text-white' : 'text-slate-400'}`}>
+                                     R$ {(plano.valor_cents / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                                   </div>
+                                 </button>
+                               ))}
+                             </div>
+                           </div>
+                         ) : (
+                           <div>
+                             <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Valor do Investimento</span>
+                             <div className="flex items-baseline gap-2">
+                               <span className="text-xl font-bold text-white">R$</span>
+                               <span className="text-6xl font-black text-white">{itemPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                             </div>
+                           </div>
+                         )}
                        </div>
                      )}
                    </div>
@@ -1415,6 +1461,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             cpf: enrollData.cpf
           }}
           organizacaoId={item.organizacao_id}
+          planId={selectedPlanId || undefined}
         />
         <WhatsAppFloatingButton item={item} />
       </div>
@@ -1507,12 +1554,41 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                     <span className="text-slate-400 line-through text-sm">R$ {isTrilha ? '497,00' : '197,00'}</span>
                   </div>
                 ) : (
-                  <div className="flex flex-col">
-                    <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">Invista em você por apenas</span>
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-sm font-bold text-slate-900">R$</span>
-                      <span className="text-5xl font-black text-slate-900">{itemPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                    </div>
+                  <div className="flex flex-col space-y-4">
+                    {planosAssinatura && planosAssinatura.length > 0 ? (
+                      <div className="space-y-2">
+                        <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">Escolha seu Plano</span>
+                        <div className="flex flex-col gap-2">
+                          {planosAssinatura.map(plano => (
+                            <button
+                              key={plano.id}
+                              onClick={() => setSelectedPlanId(plano.pagarme_plan_id)}
+                              className={`flex items-center justify-between p-3 rounded-xl border-2 transition-all w-full sm:w-64 ${
+                                selectedPlanId === plano.pagarme_plan_id 
+                                  ? 'border-primary bg-primary/5' 
+                                  : 'border-slate-200 hover:border-slate-300'
+                              }`}
+                            >
+                              <div className="text-left">
+                                <div className={`font-bold ${selectedPlanId === plano.pagarme_plan_id ? 'text-primary' : 'text-slate-700'}`}>{plano.nome}</div>
+                                <div className="text-xs text-slate-500">{plano.intervalo === 'month' ? 'Mensal' : 'Anual'}</div>
+                              </div>
+                              <div className={`font-black ${selectedPlanId === plano.pagarme_plan_id ? 'text-slate-900' : 'text-slate-600'}`}>
+                                R$ {(plano.valor_cents / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <div>
+                        <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">Invista em você por apenas</span>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-sm font-bold text-slate-900">R$</span>
+                          <span className="text-5xl font-black text-slate-900">{itemPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -1982,6 +2058,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
           cpf: enrollData.cpf
         }}
         organizacaoId={item.organizacao_id}
+        planId={selectedPlanId || undefined}
       />
       <WhatsAppFloatingButton item={item} />
     </div>

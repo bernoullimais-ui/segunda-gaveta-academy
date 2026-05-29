@@ -17,7 +17,8 @@ export function DadosRecebimento({ loggedUser, onSave }: DadosRecebimentoProps) 
     agencia: '',
     conta: '',
     tipo_chave_pix: 'cpf',
-    chave_pix: ''
+    chave_pix: '',
+    pagarme_recipient_id: ''
   });
 
   useEffect(() => {
@@ -192,6 +193,24 @@ export function DadosRecebimento({ loggedUser, onSave }: DadosRecebimentoProps) 
                 placeholder="Digite a chave pix"
                 className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:bg-white focus:border-indigo-500 transition-all text-slate-800"
               />
+            </div>
+          </div>
+
+          {/* M14: Recipient ID Pagar.me */}
+          <div className="pt-4 border-t border-slate-100">
+            <div className="space-y-2">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
+                Recipient ID Pagar.me 
+                <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-[10px]">Marketplace</span>
+              </label>
+              <input 
+                type="text"
+                value={formData.pagarme_recipient_id}
+                onChange={e => setFormData({...formData, pagarme_recipient_id: e.target.value})}
+                placeholder="Ex: re_xxxxxxxxxxxxxxxxx"
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:bg-white focus:border-indigo-500 transition-all text-slate-800"
+              />
+              <p className="text-[10px] text-slate-400">Preencha apenas se a organização for um Marketplace credenciado no Pagar.me.</p>
             </div>
           </div>
         </div>

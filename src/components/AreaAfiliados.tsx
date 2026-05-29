@@ -26,6 +26,7 @@ type SubTabType = 'links' | 'extrato' | 'dados';
 export function AreaAfiliados({ loggedUser, orgSlug, organizacaoId }: AreaAfiliadosProps) {
   const [courses, setCourses] = useState<any[]>([]);
   const [sales, setSales] = useState<any[]>([]);
+  const [totalClicks, setTotalClicks] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [activeSubTab, setActiveSubTab] = useState<SubTabType>('links');
@@ -56,6 +57,14 @@ export function AreaAfiliados({ loggedUser, orgSlug, organizacaoId }: AreaAfilia
         .order('criado_em', { ascending: false });
 
       if (salesData) setSales(salesData);
+
+      // 2.5 Fetch clicks for funnel metrics (M7/M15)
+      const { count: clicksCount } = await supabase
+        .from('clicks_afiliados')
+        .select('id', { count: 'exact', head: true })
+        .eq('affiliate_id', loggedUser.id);
+      
+      setTotalClicks(clicksCount || 0);
 
       // 3. Fetch user financial details to verify configuration
       const { data: userData } = await supabase
@@ -132,7 +141,7 @@ export function AreaAfiliados({ loggedUser, orgSlug, organizacaoId }: AreaAfilia
       )}
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="bg-gradient-to-br from-indigo-500 to-blue-600 p-6 rounded-[24px] text-white shadow-md flex items-center gap-4 hover:shadow-lg transition-shadow">
           <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
             <DollarSign className="w-6 h-6" />
@@ -150,8 +159,24 @@ export function AreaAfiliados({ loggedUser, orgSlug, organizacaoId }: AreaAfilia
             <TrendingUp className="w-6 h-6" />
           </div>
           <div>
-            <div className="text-sm font-semibold text-slate-500 uppercase tracking-wider text-[10px]">Conversões</div>
-            <div className="text-2xl font-black text-slate-800 mt-0.5">{sales.length} vendas</div>
+            <div className="text-sm font-semibold text-slate-500 uppercase tracking-wider text-[10px]">Vendas</div>
+            <div className="text-2xl font-black text-slate-800 mt-0.5">{sales.length}</div>
+          </div>
+        </div>
+
+        {/* M7/M15: Funnel Metrics */}
+        <div className="bg-white p-6 rounded-[24px] border border-slate-200 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow relative overflow-hidden">
+          <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center relative z-10">
+            <ExternalLink className="w-6 h-6" />
+          </div>
+          <div className="relative z-10">
+            <div className="text-sm font-semibold text-slate-500 uppercase tracking-wider text-[10px]">Cliques Totais</div>
+            <div className="flex items-end gap-2 mt-0.5">
+              <span className="text-2xl font-black text-slate-800">{totalClicks}</span>
+              <span className="text-xs font-bold text-slate-400 mb-1.5">
+                {totalClicks > 0 ? `${((sales.length / totalClicks) * 100).toFixed(1)}% conv.` : '0% conv.'}
+              </span>
+            </div>
           </div>
         </div>
 
@@ -162,7 +187,7 @@ export function AreaAfiliados({ loggedUser, orgSlug, organizacaoId }: AreaAfilia
           <div>
             <div className="text-sm font-semibold text-slate-500 uppercase tracking-wider text-[10px]">Cursos Disponíveis</div>
             <div className="text-2xl font-black text-slate-800 mt-0.5">
-              {courses.filter(c => c.configuracao_json?.comissao_afiliado > 0).length} programas
+              {courses.filter(c => c.configuracao_json?.comissao_afiliado > 0).length}
             </div>
           </div>
         </div>

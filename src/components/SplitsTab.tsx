@@ -17,7 +17,7 @@ interface SplitsTabProps {
   splits: SplitEntry[];
   affiliateCommission: number;
   isSaving: boolean;
-  onSave: (splits: SplitEntry[], affiliateComm: number) => Promise<void>;
+  onSave: (splits: SplitEntry[], affiliateComm: number, marketplaceEnabled?: boolean) => Promise<void>;
   onShowToast: (text: string, type: 'success' | 'error' | 'info') => void;
 }
 
@@ -25,12 +25,14 @@ export function SplitsTab({
   orgUsers,
   splits,
   affiliateCommission,
+  pagarmeMarketplaceEnabled = false,
   isSaving,
   onSave,
   onShowToast
-}: SplitsTabProps) {
+}: SplitsTabProps & { pagarmeMarketplaceEnabled?: boolean }) {
   const [localSplits, setLocalSplits] = useState<SplitEntry[]>(splits);
   const [localAffiliate, setLocalAffiliate] = useState(affiliateCommission);
+  const [localMarketplace, setLocalMarketplace] = useState(pagarmeMarketplaceEnabled);
   const [selectedUser, setSelectedUser] = useState('');
   const [newPct, setNewPct] = useState('');
 
@@ -62,7 +64,7 @@ export function SplitsTab({
   };
 
   const handleSave = async () => {
-    await onSave(localSplits, localAffiliate);
+    await onSave(localSplits, localAffiliate, localMarketplace);
   };
 
   const getUserName = (userId: string) => {
@@ -103,6 +105,20 @@ export function SplitsTab({
         <p className="text-sm text-slate-500">
           Configure como a receita líquida (após comissão de afiliados) é dividida entre os membros da organização.
         </p>
+
+        {/* M14: Native Marketplace Toggle */}
+        <div className="flex items-center gap-3 p-4 bg-slate-50 border border-slate-200 rounded-lg mt-4">
+          <input
+            type="checkbox"
+            id="pagarmeMarketplaceEnabled"
+            checked={localMarketplace}
+            onChange={(e) => setLocalMarketplace(e.target.checked)}
+            className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+          />
+          <label htmlFor="pagarmeMarketplaceEnabled" className="text-sm font-medium text-slate-700 select-none">
+            Ativar Split Nativo Pagar.me (Marketplace)
+          </label>
+        </div>
 
         {/* Current splits */}
         {localSplits.length > 0 && (

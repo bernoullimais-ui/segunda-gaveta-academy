@@ -154,10 +154,12 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
     em_breve: false
   });
 
-  const [activeTab, setActiveTab] = useState<'visao_geral' | 'conteudo' | 'participantes' | 'configuracoes' | 'engajamento' | 'acessar_curso' | 'landing_page' | 'split' | 'financeiro'>('visao_geral');
+  const [activeTab, setActiveTab] = useState<'visao_geral' | 'conteudo' | 'participantes' | 'configuracoes' | 'engajamento' | 'acessar_curso' | 'landing_page' | 'split' | 'financeiro' | 'planos'>('visao_geral');
   const [orgUsers, setOrgUsers] = useState<any[]>([]);
   const [courseSplits, setCourseSplits] = useState<{ usuario_id: string, porcentagem: number }[]>([]);
-  const [affiliateCommission, setAffiliateCommission] = useState(0);
+  const [pagarmeMarketplaceEnabled, setPagarmeMarketplaceEnabled] = useState(false);
+  const [affiliateCommission, setAffiliateCommission] = useState<number>(0);
+  const [planosAssinatura, setPlanosAssinatura] = useState<any[]>([]);
 
   // AI Copywriting States
   const [copyFramework, setCopyFramework] = useState<'AIDA' | 'PAS'>('AIDA');
@@ -424,6 +426,14 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
           return;
         }
 
+        // M6: Fetch plan_assinatura
+        const { data: plansData } = await supabase
+          .from('planos_assinatura')
+          .select('*')
+          .eq('curso_id', createdCourseId)
+          .order('criado_em', { ascending: false });
+        setPlanosAssinatura(plansData || []);
+
         // Update the cursos array with fresh data
         setCursos(prev => prev.map(c => c.id === createdCourseId ? { ...c, ...freshCurso } : c));
 
@@ -454,6 +464,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
         // Fixed: use nullish check instead of falsy (so 0 is also loaded correctly)
         const commValue = freshCurso?.configuracao_json?.comissao_afiliado;
         setAffiliateCommission(commValue != null ? Number(commValue) : 0);
+        setPagarmeMarketplaceEnabled(!!freshCurso?.configuracao_json?.pagarme_marketplace_enabled);
 
         if (freshCurso?.configuracao_json?.lp) {
           setLpData(prev => ({
@@ -517,7 +528,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
     }
   };
 
-  const saveCourseSplits = async (newSplits: { usuario_id: string, porcentagem: number }[], affiliateComm: number) => {
+  const saveCourseSplits = async (newSplits: { usuario_id: string, porcentagem: number }[], affiliateComm: number, marketplaceEnabled: boolean = false) => {
     if (!createdCourseId) return;
     setIsSaving(true);
     try {
@@ -525,7 +536,8 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
       const newConfig = {
         ...(activeCurso?.configuracao_json || {}),
         splits: newSplits,
-        comissao_afiliado: affiliateComm
+        comissao_afiliado: affiliateComm,
+        pagarme_marketplace_enabled: marketplaceEnabled
       };
       
       const { error } = await supabase
@@ -1442,7 +1454,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
         </div>
 
         <div className="bg-white border-b border-slate-100 px-8 flex gap-8 shrink-0 overflow-x-auto scrollbar-hide">
-          {(['visao_geral', 'conteudo', 'participantes', 'engajamento', 'landing_page', 'split', 'financeiro'] as const).map(tab => (
+          {(['visao_geral', 'conteudo', 'participantes', 'engajamento', 'landing_page', 'planos', 'split', 'financeiro'] as const).map(tab => (
             <button 
               key={tab} 
               onClick={() => setActiveTab(tab)}
@@ -1457,6 +1469,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                tab === 'participantes' ? (editingTrilha ? 'Alunos' : 'Participantes') : 
                tab === 'engajamento' ? 'Certificado' : 
                tab === 'landing_page' ? 'Página de Vendas' : 
+               tab === 'planos' ? 'Assinaturas' :
                tab === 'split' ? 'Coprodução / Split' :
                tab === 'financeiro' ? 'Financeiro' : 'Configurações'}
               {activeTab === tab && (
@@ -1473,6 +1486,47 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
           <div className="max-w-5xl mx-auto">
         {activeTab === 'financeiro' && (
           <FinanceiroAdmin orgId={orgId} />
+        )}
+        {activeTab === 'planos' && (
+          <div className="space-y-6">
+            <div className="bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm space-y-6">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <h3 className="font-black text-2xl text-slate-900 mb-2">Planos de Assinatura</h3>
+                  <p className="text-slate-500 text-sm">Crie e gerencie os planos de pagamento recorrente (mensal/anual) para este conteúdo.</p>
+                </div>
+                <button
+                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-md flex items-center gap-2"
+                  onClick={() => alert('Criação de planos pelo Painel Administrativo do Pagar.me (em breve API de criação)')}
+                >
+                  + Novo Plano
+                </button>
+              </div>
+
+              {planosAssinatura.length === 0 ? (
+                <div className="p-8 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-300">
+                  <p className="text-slate-500 text-sm">Nenhum plano de assinatura configurado para este conteúdo.</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {planosAssinatura.map((plano) => (
+                    <div key={plano.id} className="p-4 border border-slate-200 rounded-xl flex items-center justify-between">
+                      <div>
+                        <h4 className="font-bold text-slate-800 text-lg">{plano.nome}</h4>
+                        <p className="text-slate-500 text-sm">{plano.descricao}</p>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-black text-xl text-blue-600">R$ {(plano.valor_cents / 100).toFixed(2)}</div>
+                        <div className="text-xs uppercase font-bold text-slate-400 tracking-wider">
+                          /{plano.intervalo === 'month' ? 'mês' : 'ano'}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
         )}
         {activeTab === 'split' && (
           <div className="space-y-6">
@@ -1605,6 +1659,24 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                 </div>
               </div>
 
+              {/* M14: Pagar.me Marketplace Toggle */}
+              <div className="border-t border-slate-100 pt-6 space-y-4">
+                <h4 className="font-bold text-slate-800 text-sm uppercase tracking-wider">Pagar.me Marketplace</h4>
+                <div className="flex items-center gap-3 p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                  <input
+                    type="checkbox"
+                    id="pagarmeMarketplaceEnabled"
+                    disabled={loggedUser?.role !== 'super_admin'}
+                    checked={pagarmeMarketplaceEnabled}
+                    onChange={(e) => setPagarmeMarketplaceEnabled(e.target.checked)}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <label htmlFor="pagarmeMarketplaceEnabled" className="text-sm font-medium text-slate-700 select-none">
+                    Ativar Split Nativo Pagar.me (Requer aprovação como Marketplace no Pagar.me)
+                  </label>
+                </div>
+              </div>
+
               {/* Affiliate Commission Configuration */}
               <div className="border-t border-slate-100 pt-6 space-y-4">
                 <h4 className="font-bold text-slate-800 text-sm uppercase tracking-wider">Configuração de Afiliados</h4>
@@ -1632,7 +1704,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                 <div className="flex justify-end pt-4 border-t border-slate-100">
                   <button
                     disabled={isSaving}
-                    onClick={() => saveCourseSplits(courseSplits, affiliateCommission)}
+                    onClick={() => saveCourseSplits(courseSplits, affiliateCommission, pagarmeMarketplaceEnabled)}
                     className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-md flex items-center gap-2 disabled:opacity-50"
                   >
                     {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}

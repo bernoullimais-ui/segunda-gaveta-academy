@@ -21,6 +21,7 @@ import { ConfiguracaoAdmin } from './components/ConfiguracaoAdmin';
 import { NotificationCenter } from './components/NotificationCenter';
 import { SpecialistOnboarding } from './components/SpecialistOnboarding';
 import { ParticiparInvite } from './components/ParticiparInvite';
+import { ResetPasswordScreen } from './components/ResetPasswordScreen';
 import { 
   User, 
   BookOpen, 
@@ -104,6 +105,7 @@ export default function App() {
   const [activeOrg, setActiveOrg] = useState<any>(null);
   const [isValidInvite, setIsValidInvite] = useState<boolean | null>(null);
   const [isParticiparRoute, setIsParticiparRoute] = useState(false);
+  const [isResetPasswordRoute, setIsResetPasswordRoute] = useState(false);
   const [inviteConfig, setInviteConfig] = useState<any>(null);
   const [resumeOnboarding, setResumeOnboarding] = useState<any>(null);
 
@@ -178,6 +180,12 @@ export default function App() {
     const participarMatch = path.match(/^\/participar/);
     if (participarMatch) {
       setIsParticiparRoute(true);
+    }
+
+    const resetMatch = path.match(/^\/reset-password/);
+    const hash = window.location.hash;
+    if (resetMatch || hash.includes('type=recovery')) {
+      setIsResetPasswordRoute(true);
     }
   }, []);
 
@@ -598,6 +606,10 @@ export default function App() {
 
   if (publicTrilhaId) {
     return <PublicCoursePage courseId={publicTrilhaId} isTrilha />;
+  }
+
+  if (isResetPasswordRoute) {
+    return <ResetPasswordScreen activeOrg={activeOrg} />;
   }
 
   if (!authInitialized) {

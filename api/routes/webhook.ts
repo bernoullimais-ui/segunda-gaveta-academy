@@ -404,10 +404,35 @@ router.post('/', async (req, res) => {
           comissao_afiliado: Number(affiliateShare.toFixed(2)),
           comissao_coprodutores: calculatedCoproducersList,
           pagarme_order_id: pagarmeOrderId,                     // M11: para estorno
-          pagarme_charge_id: pagarmeChargeId                    // M11: para estorno
+          pagarme_charge_id: pagarmeChargeId,                   // M11: para estorno
+          pagarme_subscription_id: order.subscription?.id || order.charges?.[0]?.subscription_id || null // M6: Assinatura
         }]);
 
-        if (purchaseErr) console.error('Failed to insert into compras table:', purchaseErr);
+        if (purchaseErr) {
+          console.error('Failed to insert into compras table:', purchaseErr);
+        } else if (validatedAffiliateId) {
+          // M7: Marcar conversão no rastreamento de cliques
+          try {
+            // Find the most recent click for this affiliate + course
+            const { data: latestClick } = await supabase
+              .from('clicks_afiliados')
+              .select('id')
+              .eq('affiliate_id', validatedAffiliateId)
+              .eq(targetType === 'curso' ? 'curso_id' : 'trilha_id', targetItemId)
+              .order('criado_em', { ascending: false })
+              .limit(1)
+              .maybeSingle();
+
+            if (latestClick) {
+              await supabase
+                .from('clicks_afiliados')
+                .update({ converteu: true })
+                .eq('id', latestClick.id);
+            }
+          } catch (errClick) {
+            console.error('Failed to update click conversion:', errClick);
+          }
+        }
       }
 
       // 4. Update checkouts_abandonados & trigger welcome notification
@@ -469,6 +494,46 @@ router.post('/', async (req, res) => {
           });
         } catch (errFail) {
           console.error('[Notification Error] Failed to send payment failed notification:', errFail);
+        }
+      }
+
+    // ── subscription.created / subscription.canceled ───────────────────────
+    } else if (event.type === 'subscription.created' || event.type === 'subscription.canceled') {
+      const sub = event.data;
+      const customerEmail = sub.customer?.email?.toLowerCase()?.trim();
+      const planId = sub.plan?.id; // pagarme_plan_id
+      
+      if (customerEmail && planId) {
+        try {
+          const { data: user } = await supabase.from('usuarios').select('id').eq('email', customerEmail).maybeSingle();
+          const { data: plano } = await supabase.from('planos_assinatura').select('id').eq('pagarme_plan_id', planId).maybeSingle();
+          
+          if (user && plano) {
+            if (event.type === 'subscription.created') {
+              // Check if exists
+              const { data: existingSub } = await supabase.from('assinaturas').select('id').eq('pagarme_subscription_id', sub.id).maybeSingle();
+              if (existingSub) {
+                await supabase.from('assinaturas').update({
+                  status: sub.status,
+                  proxima_cobranca: sub.current_cycle?.end_at || sub.next_billing_at || null
+                }).eq('id', existingSub.id);
+              } else {
+                await supabase.from('assinaturas').insert([{
+                  usuario_id: user.id,
+                  plano_id: plano.id,
+                  pagarme_subscription_id: sub.id,
+                  status: sub.status,
+                  proxima_cobranca: sub.current_cycle?.end_at || sub.next_billing_at || null
+                }]);
+              }
+            } else if (event.type === 'subscription.canceled') {
+              await supabase.from('assinaturas')
+                .update({ status: 'canceled' })
+                .eq('pagarme_subscription_id', sub.id);
+            }
+          }
+        } catch (errSub) {
+          console.error('[Webhook] Error processing subscription event:', errSub);
         }
       }
     }

@@ -183,10 +183,10 @@ async function handleExpireAccess(_req: any, res: any) {
       // 2. Find active participants enrolled longer than durationDays
       const { data: participants, error: partErr } = await supabase
         .from('curso_participantes')
-        .select('id, usuario_id, inscrito_em')
+        .select('id, usuario_id, created_at')
         .eq('curso_id', curso.id)
         .in('status', ['inscrito', 'pago', 'ativo'])
-        .not('inscrito_em', 'is', null);
+        .not('created_at', 'is', null);
 
       if (partErr) {
         console.error(`[ExpireAccess] Error fetching participants for ${curso.nome}:`, partErr);
@@ -194,7 +194,7 @@ async function handleExpireAccess(_req: any, res: any) {
       }
 
       for (const participant of (participants || [])) {
-        const enrolledAt = new Date(participant.inscrito_em);
+        const enrolledAt = new Date(participant.created_at);
         const expiresAt = new Date(enrolledAt.getTime() + durationDays * 24 * 60 * 60 * 1000);
 
         if (now > expiresAt) {

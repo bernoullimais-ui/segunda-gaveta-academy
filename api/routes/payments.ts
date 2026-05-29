@@ -17,7 +17,7 @@
  */
 import { Router } from 'express';
 import { createClient } from '@supabase/supabase-js';
-import { pagarmeRequest, buildPagarmePhone } from '../lib/pagarme.js';
+import { pagarmeRequest, buildPagarmePhone, buildSplitRules } from '../lib/pagarme.js';
 import { validateCPF, validateAffiliate } from '../lib/validators.js';
 
 const router = Router();
@@ -220,19 +220,23 @@ router.post('/create-order', async (req, res) => {
       return res.status(400).json({ message: cpfResult.error });
     }
 
+    // Get orgId and split configuration from item
+    let orgId: string | null = null;
+    let itemConfig: any = null;
+    
+    if (targetType === 'curso' && targetId) {
+      const { data: c } = await supabase.from('cursos').select('organizacao_id, configuracao_json').eq('id', targetId).maybeSingle();
+      orgId = c?.organizacao_id || null;
+      itemConfig = c?.configuracao_json;
+    } else if (targetType === 'trilha' && targetId) {
+      const { data: t } = await supabase.from('trilhas').select('organizacao_id, configuracao_json').eq('id', targetId).maybeSingle();
+      orgId = t?.organizacao_id || null;
+      itemConfig = t?.configuracao_json;
+    }
+
     // M2: Validate affiliate_id if provided
     let validAffiliateId: string | null = metadata?.affiliate_id || null;
     if (validAffiliateId) {
-      // Get orgId from item
-      let orgId: string | null = null;
-      if (targetType === 'curso' && targetId) {
-        const { data: c } = await supabase.from('cursos').select('organizacao_id').eq('id', targetId).maybeSingle();
-        orgId = c?.organizacao_id || null;
-      } else if (targetType === 'trilha' && targetId) {
-        const { data: t } = await supabase.from('trilhas').select('organizacao_id').eq('id', targetId).maybeSingle();
-        orgId = t?.organizacao_id || null;
-      }
-
       const affResult = await validateAffiliate(validAffiliateId, orgId, supabase);
       if (!affResult.valid) {
         console.warn(`[Payment] affiliate_id ${validAffiliateId} rejeitado: ${affResult.error}`);
@@ -298,6 +302,28 @@ router.post('/create-order', async (req, res) => {
       }
     };
 
+    // M14: Native split rules injection
+    if (itemConfig && itemConfig.pagarme_marketplace_enabled && itemConfig.splits?.length > 0) {
+      // Fetch recipient IDs for each user in the split
+      const userIds = itemConfig.splits.map((s: any) => s.usuario_id);
+      const { data: usersInfo } = await supabase
+        .from('usuarios')
+        .select('id, curriculo_json')
+        .in('id', userIds);
+      
+      if (usersInfo) {
+        const enrichedSplits = itemConfig.splits.map((s: any) => {
+          const u = usersInfo.find((usr: any) => usr.id === s.usuario_id);
+          const recId = u?.curriculo_json?.dados_recebimento?.pagarme_recipient_id;
+          return { ...s, pagarme_recipient_id: recId };
+        });
+        const splitRules = buildSplitRules(enrichedSplits);
+        if (splitRules.length > 0) {
+          payload.payments[0].split = splitRules;
+        }
+      }
+    }
+
     const { ok, status, data: order } = await pagarmeRequest('/orders', payload);
 
     if (!ok) {
@@ -349,12 +375,20 @@ router.post('/create-cc-order', async (req, res) => {
     const targetId = metadata?.id;
     const targetType = metadata?.type;
     let validAffiliateId: string | null = metadata?.affiliate_id || null;
+    let orgId: string | null = null;
+    let itemConfig: any = null;
+    
+    if (targetType === 'curso' && targetId) {
+      const { data: c } = await supabase.from('cursos').select('organizacao_id, configuracao_json').eq('id', targetId).maybeSingle();
+      orgId = c?.organizacao_id || null;
+      itemConfig = c?.configuracao_json;
+    } else if (targetType === 'trilha' && targetId) {
+      const { data: t } = await supabase.from('trilhas').select('organizacao_id, configuracao_json').eq('id', targetId).maybeSingle();
+      orgId = t?.organizacao_id || null;
+      itemConfig = t?.configuracao_json;
+    }
+
     if (validAffiliateId) {
-      let orgId: string | null = null;
-      if (targetType === 'curso' && targetId) {
-        const { data: c } = await supabase.from('cursos').select('organizacao_id').eq('id', targetId).maybeSingle();
-        orgId = c?.organizacao_id || null;
-      }
       const affResult = await validateAffiliate(validAffiliateId, orgId, supabase);
       if (!affResult.valid) {
         validAffiliateId = null;
@@ -380,7 +414,7 @@ router.post('/create-cc-order', async (req, res) => {
     const pagarmeAmount = Math.max(100, finalAmountCents);
     const phone = buildPagarmePhone(customer.phone);
 
-    const payload = {
+    const payload: any = {
       items: [{
         amount: pagarmeAmount,
         description: String(items[0]?.description || 'Inscrição').substring(0, 250),
@@ -413,6 +447,28 @@ router.post('/create-cc-order', async (req, res) => {
         server_version: '2.0'
       }
     };
+
+    // M14: Native split rules injection
+    if (itemConfig && itemConfig.pagarme_marketplace_enabled && itemConfig.splits?.length > 0) {
+      // Fetch recipient IDs for each user in the split
+      const userIds = itemConfig.splits.map((s: any) => s.usuario_id);
+      const { data: usersInfo } = await supabase
+        .from('usuarios')
+        .select('id, curriculo_json')
+        .in('id', userIds);
+      
+      if (usersInfo) {
+        const enrichedSplits = itemConfig.splits.map((s: any) => {
+          const u = usersInfo.find((usr: any) => usr.id === s.usuario_id);
+          const recId = u?.curriculo_json?.dados_recebimento?.pagarme_recipient_id;
+          return { ...s, pagarme_recipient_id: recId };
+        });
+        const splitRules = buildSplitRules(enrichedSplits);
+        if (splitRules.length > 0) {
+          payload.payments[0].split = splitRules;
+        }
+      }
+    }
 
     const { ok, status, data: result } = await pagarmeRequest('/orders', payload);
 
@@ -506,6 +562,76 @@ router.post('/create-onboarding-order', async (req, res) => {
     res.json({ order_id: order.id, checkout_url: order.checkouts?.[0]?.payment_url });
   } catch (error: any) {
     console.error('Create Onboarding Order Error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ─── POST /api/pagarme/create-subscription ──────────────────────────────────
+router.post('/create-subscription', async (req, res) => {
+  try {
+    const { plan_id, customer, payment_method, card_token, metadata } = req.body;
+    
+    const cpfResult = validateCPF(customer?.cpf || '');
+    const phone = buildPagarmePhone(customer?.phone);
+    
+    const payload: any = {
+      plan_id,
+      payment_method: payment_method || 'credit_card',
+      customer: {
+        name: String(customer?.name || 'Assinante').substring(0, 64),
+        email: customer?.email,
+        type: 'individual',
+        document: cpfResult.sanitized || '00000000000',
+        document_type: 'CPF',
+        ...(phone && { phones: { mobile_phone: phone } })
+      },
+      metadata: {
+        ...metadata,
+        type: 'assinatura',
+        server_version: '2.0'
+      }
+    };
+    
+    if (payment_method === 'credit_card') {
+      payload.card_token = card_token;
+    } else if (payment_method === 'pix') {
+      // For PIX, Pagar.me subscriptions automatically generate a PIX charge for the first cycle
+    } else if (payment_method === 'boleto') {
+      payload.boleto = {
+        due_at: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
+        instructions: 'Pagar até o vencimento'
+      };
+    }
+    
+    // M14: Native split rules for subscriptions (if applicable)
+    if (metadata?.pagarme_marketplace_enabled && metadata?.splits?.length > 0) {
+      const userIds = metadata.splits.map((s: any) => s.usuario_id);
+      const { data: usersInfo } = await supabase.from('usuarios').select('id, curriculo_json').in('id', userIds);
+      if (usersInfo) {
+        const enrichedSplits = metadata.splits.map((s: any) => {
+          const u = usersInfo.find((usr: any) => usr.id === s.usuario_id);
+          return { ...s, pagarme_recipient_id: u?.curriculo_json?.dados_recebimento?.pagarme_recipient_id };
+        });
+        const splitRules = buildSplitRules(enrichedSplits);
+        if (splitRules.length > 0) {
+          payload.split = {
+            enabled: true,
+            rules: splitRules
+          }; // Pagar.me Subscriptions split syntax can vary, usually injected in the plan, but we'll try at subscription level.
+        }
+      }
+    }
+
+    const { ok, status, data: sub } = await pagarmeRequest('/subscriptions', payload);
+
+    if (!ok) {
+      console.error('Pagar.me Subscription Error:', JSON.stringify(sub, null, 2));
+      return res.status(status).json({ message: sub.message || 'Erro de validação', details: sub });
+    }
+
+    res.json({ subscription_id: sub.id, status: sub.status, data: sub });
+  } catch (error: any) {
+    console.error('Create Subscription Error:', error);
     res.status(500).json({ error: error.message });
   }
 });

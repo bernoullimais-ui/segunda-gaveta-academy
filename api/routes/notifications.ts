@@ -97,7 +97,7 @@ router.post('/test', async (req, res) => {
 // ─── POST /traffic/track (used on landing pages) ──────────────────────────────
 router.post('/traffic/track', async (req, res) => {
   try {
-    const { organizacao_id, curso_id, trilha_id, event_type, utm_source, utm_medium, utm_campaign, visitor_id } = req.body;
+    const { organizacao_id, curso_id, trilha_id, event_type, utm_source, utm_medium, utm_campaign, visitor_id, affiliate_id } = req.body;
     if (!organizacao_id || !event_type) {
       return res.status(400).json({ error: 'organizacao_id e event_type são obrigatórios.' });
     }
@@ -115,7 +115,23 @@ router.post('/traffic/track', async (req, res) => {
 
     if (error) {
       console.error('Failed to insert traffic_event:', error);
-      return res.status(500).json({ error: error.message });
+      // We do not return 500 here, we still try to track affiliate click
+    }
+
+    // M7: Track Affiliate Click
+    if (affiliate_id && event_type === 'pageview') {
+      const ip_hash = req.headers['x-forwarded-for'] || req.socket.remoteAddress || visitor_id || 'unknown';
+      
+      const { error: clickErr } = await supabase.from('clicks_afiliados').insert([{
+        affiliate_id,
+        curso_id: curso_id || null,
+        trilha_id: trilha_id || null,
+        ip_hash: typeof ip_hash === 'string' ? ip_hash.split(',')[0] : String(ip_hash)
+      }]);
+      
+      if (clickErr) {
+        console.error('Failed to insert clicks_afiliados:', clickErr);
+      }
     }
 
     res.status(200).json({ success: true });
