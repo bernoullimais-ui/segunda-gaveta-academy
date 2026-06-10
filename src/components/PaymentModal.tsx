@@ -9,6 +9,9 @@ interface PaymentModalProps {
     description: string;
     amount: number; // Em reais (ex: 99.90)
     type: 'curso' | 'modulo' | 'trilha';
+    paymentModel?: string;
+    paymentCycle?: string;
+    paymentInstallmentsLimit?: string;
   };
   customer: {
     name: string;
@@ -190,13 +193,21 @@ export function PaymentModal({ isOpen, onClose, item, customer, participantId, o
         const tokenData = await tokenRes.json();
         if (!tokenRes.ok) throw new Error(tokenData.message || 'Erro ao tokenizar cartão');
 
+        const isSubscriptionMode = planId || item.paymentModel === 'recorrente' || item.paymentModel === 'parcelado';
+
         // M6: Subscription logic
-        if (planId) {
+        if (isSubscriptionMode) {
           const orderRes = await fetch('/api/pagarme/create-subscription', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               plan_id: planId,
+              custom_subscription: !planId ? {
+                 amount: Math.round(item.amount * 100),
+                 description: item.description,
+                 cycle: item.paymentCycle,
+                 installments: item.paymentModel === 'parcelado' ? item.paymentInstallmentsLimit : undefined
+              } : undefined,
               payment_method: 'credit_card',
               card_token: tokenData.id,
               customer: {
@@ -237,12 +248,20 @@ export function PaymentModal({ isOpen, onClose, item, customer, participantId, o
         }
       } else {
         // PIX ou Boleto
-        if (planId) {
+        const isSubscriptionMode = planId || item.paymentModel === 'recorrente' || item.paymentModel === 'parcelado';
+        
+        if (isSubscriptionMode) {
           const response = await fetch('/api/pagarme/create-subscription', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               plan_id: planId,
+              custom_subscription: !planId ? {
+                 amount: Math.round(item.amount * 100),
+                 description: item.description,
+                 cycle: item.paymentCycle,
+                 installments: item.paymentModel === 'parcelado' ? item.paymentInstallmentsLimit : undefined
+              } : undefined,
               payment_method: paymentMethod,
               customer: {
                 name: customer.name,
@@ -255,9 +274,6 @@ export function PaymentModal({ isOpen, onClose, item, customer, participantId, o
           });
           const data = await response.json();
           if (!response.ok) throw new Error(data.message || 'Erro ao processar assinatura');
-          // For subscriptions paid via boleto/pix, Pagar.me usually creates the charge and returns the url.
-          // Wait, data doesn't return checkout_url for subscriptions, it returns `data.current_cycle.id`?
-          // I will redirect to success for now and maybe the user gets the boleto via email, but Pagar.me typically doesn't give a hosted checkout URL for subscription boleto directly on /subscriptions. We would need to extract the boleto_url from `data.charges[0].last_transaction.url`.
           window.location.href = `${window.location.origin}/pagamento-sucesso?id=${participantId}&type=${item.type}&sub_status=pending`;
         } else {
           const response = await fetch('/api/pagarme/create-order', {
@@ -484,7 +500,7 @@ export function PaymentModal({ isOpen, onClose, item, customer, participantId, o
               </div>
 
               {/* M1: Installment selector */}
-              {finalAmount >= 10 && (
+              {finalAmount >= 10 && item.paymentModel !== 'recorrente' && item.paymentModel !== 'parcelado' && !planId && (
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Parcelamento</label>
                   <select

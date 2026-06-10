@@ -376,7 +376,10 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
     professor_titulo: '',
     professor_foto_url: '',
     carga_horaria: '',
-    em_breve: false
+    em_breve: false,
+    pagamento_modelo: 'fixo',
+    pagamento_ciclo: '30',
+    pagamento_parcelas_limite: '12'
   });
 
   useEffect(() => {
@@ -1773,6 +1776,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                       showToast('Abrir edição de trilha no modal', 'info');
                   } else {
                     setCreatedCourseId(activeCurso?.id || '');
+                    const config = activeCurso?.configuracao_json || {};
                     setEditingSettingsData({
                       nome: activeCurso?.nome || '',
                       thumbnail_url: activeCurso?.thumbnail_url || '',
@@ -1787,7 +1791,10 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                       professor_foto_url: activeCurso?.professor_foto_url || '',
                       descricao: activeCurso?.descricao || '',
                       carga_horaria: activeCurso?.carga_horaria || '',
-                      em_breve: activeCurso?.em_breve || false
+                      em_breve: activeCurso?.em_breve || false,
+                      pagamento_modelo: config.pagamento_modelo || 'fixo',
+                      pagamento_ciclo: config.pagamento_ciclo?.toString() || '30',
+                      pagamento_parcelas_limite: config.pagamento_parcelas_limite?.toString() || '12'
                     });
                     setIsEditingSettingsModalOpen(true);
                   }
@@ -4370,18 +4377,78 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                 </div>
               </div>
 
-              {/* Valor */}
+              {/* Configurações de Pagamento */}
               {editingSettingsData.preco === 'pago' && (
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Valor do Curso (R$)</label>
-                  <input 
-                    type="number" 
-                    step="0.01"
-                    value={editingSettingsData.valor}
-                    onChange={(e) => setEditingSettingsData({...editingSettingsData, valor: e.target.value})}
-                    className="w-full px-4 py-2 border border-slate-300 rounded outline-none focus:border-blue-500"
-                    placeholder="0.00"
-                  />
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Modelo de Pagamento</label>
+                      <select 
+                        value={editingSettingsData.pagamento_modelo}
+                        onChange={(e) => setEditingSettingsData({...editingSettingsData, pagamento_modelo: e.target.value})}
+                        className="w-full px-3 py-2 border border-slate-300 rounded outline-none focus:border-blue-500 bg-white"
+                      >
+                        <option value="fixo">Pagamento Único (Fixo)</option>
+                        <option value="recorrente">Assinatura Recorrente</option>
+                        <option value="parcelado">Parcelamento Inteligente (Carnê)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Valor {editingSettingsData.pagamento_modelo === 'fixo' ? 'Total' : 'da Parcela'} (R$)</label>
+                      <input 
+                        type="number" 
+                        step="0.01"
+                        value={editingSettingsData.valor}
+                        onChange={(e) => setEditingSettingsData({...editingSettingsData, valor: e.target.value})}
+                        className="w-full px-3 py-2 border border-slate-300 rounded outline-none focus:border-blue-500 bg-white"
+                        placeholder="0.00"
+                      />
+                    </div>
+                  </div>
+                  
+                  {editingSettingsData.pagamento_modelo === 'recorrente' && (
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Ciclo da Assinatura (em dias)</label>
+                      <select
+                        value={editingSettingsData.pagamento_ciclo}
+                        onChange={(e) => setEditingSettingsData({...editingSettingsData, pagamento_ciclo: e.target.value})}
+                        className="w-full px-3 py-2 border border-slate-300 rounded outline-none focus:border-blue-500 bg-white"
+                      >
+                        <option value="30">Mensal (30 dias)</option>
+                        <option value="90">Trimestral (90 dias)</option>
+                        <option value="180">Semestral (180 dias)</option>
+                        <option value="365">Anual (365 dias)</option>
+                      </select>
+                      <p className="text-xs text-slate-500 mt-1">Acesso é renovado a cada pagamento aprovado.</p>
+                    </div>
+                  )}
+
+                  {editingSettingsData.pagamento_modelo === 'parcelado' && (
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">Ciclo da Parcela</label>
+                        <select
+                          value={editingSettingsData.pagamento_ciclo}
+                          onChange={(e) => setEditingSettingsData({...editingSettingsData, pagamento_ciclo: e.target.value})}
+                          className="w-full px-3 py-2 border border-slate-300 rounded outline-none focus:border-blue-500 bg-white"
+                        >
+                          <option value="30">Mensal (30 dias)</option>
+                          <option value="15">Quinzenal (15 dias)</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">Qtd. de Parcelas</label>
+                        <input 
+                          type="number" 
+                          min="2"
+                          max="36"
+                          value={editingSettingsData.pagamento_parcelas_limite}
+                          onChange={(e) => setEditingSettingsData({...editingSettingsData, pagamento_parcelas_limite: e.target.value})}
+                          className="w-full px-3 py-2 border border-slate-300 rounded outline-none focus:border-blue-500 bg-white"
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -4481,7 +4548,19 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                       em_breve: editingSettingsData.em_breve
                     };
 
-                    const completeData = { ...updateData, thumbnail_url: editingSettingsData.thumbnail_url };
+                    const currentCurso = cursos.find(c => c.id === createdCourseId);
+                    const baseConfig = currentCurso?.configuracao_json || {};
+
+                    const completeData = { 
+                      ...updateData, 
+                      thumbnail_url: editingSettingsData.thumbnail_url,
+                      configuracao_json: {
+                        ...baseConfig,
+                        pagamento_modelo: editingSettingsData.pagamento_modelo,
+                        pagamento_ciclo: editingSettingsData.pagamento_ciclo,
+                        pagamento_parcelas_limite: editingSettingsData.pagamento_parcelas_limite
+                      }
+                    };
                     console.log('Salvando configurações do curso:', completeData);
 
                     // Try updating everything including thumbnail_url

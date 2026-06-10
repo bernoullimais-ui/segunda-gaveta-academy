@@ -707,6 +707,11 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
   const selectedPlan = planosAssinatura?.find(p => p.pagarme_plan_id === selectedPlanId);
   const itemPrice = selectedPlan ? (selectedPlan.valor_cents / 100) : (isTrilha ? (item?.preco || 0) : (parseFloat(item?.valor) || 0));
 
+  const config = item?.configuracao_json || {};
+  const paymentModel = config.pagamento_modelo || 'fixo';
+  const paymentCycle = config.pagamento_ciclo || '30';
+  const paymentInstallmentsLimit = config.pagamento_parcelas_limite || '12';
+
   const handleEnrollClick = () => {
     if (isFree) {
       setEnrollMode('free');
@@ -1161,13 +1166,15 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                              </div>
                            </div>
                          ) : (
-                           <div>
-                             <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Valor do Investimento</span>
-                             <div className="flex items-baseline gap-2">
-                               <span className="text-xl font-bold text-white">R$</span>
-                               <span className="text-6xl font-black text-white">{itemPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                             </div>
-                           </div>
+                            <div>
+                              <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Valor do Investimento</span>
+                              <div className="flex items-baseline gap-2">
+                                <span className="text-xl font-bold text-white">R$</span>
+                                <span className="text-6xl font-black text-white">{itemPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                {paymentModel === 'recorrente' && <span className="text-lg text-slate-300 font-medium">/ {paymentCycle === '30' ? 'mês' : paymentCycle === '365' ? 'ano' : paymentCycle + ' dias'}</span>}
+                                {paymentModel === 'parcelado' && <span className="text-lg text-slate-300 font-medium">/ mês (x{paymentInstallmentsLimit})</span>}
+                              </div>
+                            </div>
                          )}
                        </div>
                      )}
@@ -1453,7 +1460,10 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             id: courseId,
             description: item.nome,
             amount: itemPrice,
-            type: isTrilha ? 'trilha' : 'curso'
+            type: isTrilha ? 'trilha' : 'curso',
+            paymentModel,
+            paymentCycle,
+            paymentInstallmentsLimit
           }}
           customer={{
             name: enrollData.nome,
@@ -2050,7 +2060,10 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
           id: courseId,
           description: item.nome,
           amount: itemPrice,
-          type: isTrilha ? 'trilha' : 'curso'
+          type: isTrilha ? 'trilha' : 'curso',
+          paymentModel,
+          paymentCycle,
+          paymentInstallmentsLimit
         }}
         customer={{
           name: enrollData.nome,

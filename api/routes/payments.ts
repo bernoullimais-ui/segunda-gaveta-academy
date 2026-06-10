@@ -569,7 +569,7 @@ router.post('/pagarme/create-onboarding-order', async (req, res) => {
 // ─── POST /api/pagarme/create-subscription ──────────────────────────────────
 router.post('/pagarme/create-subscription', async (req, res) => {
   try {
-    const { plan_id, customer, payment_method, card_token, metadata } = req.body;
+    const { plan_id, custom_subscription, customer, payment_method, card_token, metadata } = req.body;
     
     const cpfResult = validateCPF(customer?.cpf || '');
     const phone = buildPagarmePhone(customer?.phone);
@@ -591,6 +591,33 @@ router.post('/pagarme/create-subscription', async (req, res) => {
         server_version: '2.0'
       }
     };
+
+    if (custom_subscription && !plan_id) {
+      let interval = 'month';
+      let interval_count = 1;
+
+      switch (custom_subscription.cycle) {
+        case '15': interval = 'day'; interval_count = 15; break;
+        case '30': interval = 'month'; interval_count = 1; break;
+        case '90': interval = 'month'; interval_count = 3; break;
+        case '180': interval = 'month'; interval_count = 6; break;
+        case '365': interval = 'year'; interval_count = 1; break;
+        default: interval = 'month'; interval_count = 1; break;
+      }
+
+      payload.interval = interval;
+      payload.interval_count = interval_count;
+      payload.pricing_scheme = {
+        scheme_type: 'unit',
+        price: custom_subscription.amount
+      };
+      payload.quantity = 1;
+      payload.description = custom_subscription.description;
+
+      if (custom_subscription.installments && custom_subscription.installments > 0) {
+         payload.installments = Number(custom_subscription.installments);
+      }
+    }
     
     if (payment_method === 'credit_card') {
       payload.card_token = card_token;
