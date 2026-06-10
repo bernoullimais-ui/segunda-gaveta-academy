@@ -802,12 +802,6 @@ export default function App() {
             onClick={() => setCurrentView('comunidade')} 
           />
           <NavItem 
-            icon={<User size={20} />} 
-            label="Meu Perfil" 
-            active={currentView === 'perfil'} 
-            onClick={() => setCurrentView('perfil')} 
-          />
-          <NavItem 
             icon={<Share2 size={20} />} 
             label="Área de Afiliados" 
             active={currentView === 'afiliados'} 
