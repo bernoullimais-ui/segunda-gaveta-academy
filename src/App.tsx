@@ -339,6 +339,8 @@ export default function App() {
             if (profile) {
               setLoggedUser(profile);
               setLoggedRole(profile.role);
+              setCurrentView('dashboard');
+              await checkOnboardingStatus(profile.id, profile.role);
               finalProfile = profile;
             }
           }
@@ -441,6 +443,7 @@ export default function App() {
 
       setLoggedUser(finalUserData);
       setLoggedRole(finalUserData.role);
+      setCurrentView('dashboard');
       await checkOnboardingStatus(finalUserData.id, finalUserData.role);
       showToast('Login realizado com sucesso!', 'success');
     } catch (err: any) {
@@ -723,10 +726,16 @@ export default function App() {
 
   const isAdmin = loggedRole === 'gestor' || loggedRole === 'super_admin' || loggedRole === 'curador' || loggedRole === 'design' || loggedRole === 'especialista';
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setLoggedUser(null);
     setLoggedRole(null);
     localStorage.removeItem('segunda_gaveta_session');
+    setCurrentView('dashboard');
+    try {
+      await supabase.auth.signOut();
+    } catch (e) {
+      console.error('Logout error', e);
+    }
   };
 
   const handleOrgUpdate = (updatedOrg: any) => {
