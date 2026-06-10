@@ -1027,11 +1027,13 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
               {isFree ? (
                 <span className="text-emerald-400 font-black text-lg">GRATUITO</span>
               ) : (
-                <div className="flex items-baseline gap-1">
-                  <span className="text-white text-xs font-bold">R$</span>
-                  <span className="text-white font-black text-xl">{itemPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                </div>
-              )}
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-white text-xs font-bold">R$</span>
+                    <span className="text-white font-black text-xl">{itemPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                    {paymentModel === 'recorrente' && <span className="text-sm text-slate-300 font-medium">/ {paymentCycle === '30' ? 'mês' : paymentCycle === '365' ? 'ano' : paymentCycle + ' dias'}</span>}
+                    {paymentModel === 'parcelado' && <span className="text-sm text-slate-300 font-medium">/ mês (x{paymentInstallmentsLimit})</span>}
+                  </div>
+                )}
               <div className="text-slate-500 text-[10px] font-medium">{lp.guarantee_days || 7} dias de garantia</div>
             </div>
             <button
@@ -1524,6 +1526,8 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                     <div className="flex items-baseline gap-1">
                       <span className="text-slate-900 text-xs font-bold">R$</span>
                       <span className="text-slate-900 font-black text-xl">{itemPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                      {paymentModel === 'recorrente' && <span className="text-sm text-slate-500 font-medium">/ {paymentCycle === '30' ? 'mês' : paymentCycle === '365' ? 'ano' : paymentCycle + ' dias'}</span>}
+                      {paymentModel === 'parcelado' && <span className="text-sm text-slate-500 font-medium">/ mês (x{paymentInstallmentsLimit})</span>}
                     </div>
                   )}
                   <div className="text-slate-400 text-[10px] font-medium">{lp.guarantee_days || 7} dias de garantia</div>
@@ -1596,6 +1600,8 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                         <div className="flex items-baseline gap-2">
                           <span className="text-sm font-bold text-slate-900">R$</span>
                           <span className="text-5xl font-black text-slate-900">{itemPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                          {paymentModel === 'recorrente' && <span className="text-lg text-slate-500 font-medium">/ {paymentCycle === '30' ? 'mês' : paymentCycle === '365' ? 'ano' : paymentCycle + ' dias'}</span>}
+                          {paymentModel === 'parcelado' && <span className="text-lg text-slate-500 font-medium">/ mês (x{paymentInstallmentsLimit})</span>}
                         </div>
                       </div>
                     )}
