@@ -203,7 +203,7 @@ router.post('/coupons/validate', async (req, res) => {
 
 // ─── POST /api/pagarme/create-order (checkout via link) ──────────────────────
 // Aceita: credit_card, pix, boleto
-router.post('/create-order', async (req, res) => {
+router.post('/pagarme/create-order', async (req, res) => {
   try {
     const { amount, customer, items, metadata, coupon_code } = req.body;
 
@@ -346,7 +346,7 @@ router.post('/create-order', async (req, res) => {
 });
 
 // ─── POST /api/pagarme/tokenize ───────────────────────────────────────────────
-router.post('/tokenize', async (req, res) => {
+router.post('/pagarme/tokenize', async (req, res) => {
   try {
     const { card } = req.body;
     const { ok, status, data } = await pagarmeRequest('/tokens?appId=v5', { type: 'card', card });
@@ -358,7 +358,7 @@ router.post('/tokenize', async (req, res) => {
 });
 
 // ─── POST /api/pagarme/create-cc-order (cartão direto, com parcelamento) ──────
-router.post('/create-cc-order', async (req, res) => {
+router.post('/pagarme/create-cc-order', async (req, res) => {
   try {
     const { amount, customer, items, metadata, card_token, coupon_code, installments: rawInstallments } = req.body;
 
@@ -487,7 +487,7 @@ router.post('/create-cc-order', async (req, res) => {
 });
 
 // ─── POST /api/pagarme/create-onboarding-order ───────────────────────────────
-router.post('/create-onboarding-order', async (req, res) => {
+router.post('/pagarme/create-onboarding-order', async (req, res) => {
   try {
     const { onboarding_id, customer } = req.body;
 
@@ -567,7 +567,7 @@ router.post('/create-onboarding-order', async (req, res) => {
 });
 
 // ─── POST /api/pagarme/create-subscription ──────────────────────────────────
-router.post('/create-subscription', async (req, res) => {
+router.post('/pagarme/create-subscription', async (req, res) => {
   try {
     const { plan_id, customer, payment_method, card_token, metadata } = req.body;
     
