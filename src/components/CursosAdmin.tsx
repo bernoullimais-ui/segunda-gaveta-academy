@@ -31,7 +31,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
 
   const [view, setView] = useState<'list' | 'create_wizard' | 'course_dashboard'>('list');
   const [wizardStep, setWizardStep] = useState(1);
-  const [createdCourseName, setCreatedCourseName] = useState('Tutorial DOJO TV');
+  const [createdCourseName, setCreatedCourseName] = useState('Novo Curso');
   const [createdCourseId, setCreatedCourseId] = useState<string | null>(null);
   const [cursos, setCursos] = useState<any[]>([]);
   const [trilhas, setTrilhas] = useState<any[]>([]);
@@ -1726,7 +1726,13 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                   className="w-24 h-16 bg-slate-100 border border-slate-200 rounded flex items-center justify-center font-bold text-lg text-slate-800 bg-cover bg-center"
                   style={{ backgroundImage: (activeCurso?.thumbnail_url || activeTrilha?.capa_url) ? `url("${activeCurso?.thumbnail_url || activeTrilha?.capa_url}")` : undefined }}
                 >
-                  {!(activeCurso?.thumbnail_url || activeTrilha?.capa_url) && 'DOJO TV'}
+                  {!(activeCurso?.thumbnail_url || activeTrilha?.capa_url) && (
+                    loggedUser?.organizacoes?.logo_url ? (
+                      <img src={loggedUser.organizacoes.logo_url} alt="Logo" className="max-h-full max-w-full object-contain p-2" />
+                    ) : (
+                      <span className="text-sm px-2 text-center truncate">{loggedUser?.organizacoes?.nome || 'Novo Curso'}</span>
+                    )
+                  )}
                 </div>
                 <div>
                   <h2 className="text-xl font-bold text-slate-900 mb-2">{nomeExibido}</h2>
@@ -4065,13 +4071,13 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                 <div className="flex items-center gap-4 text-slate-600">
                   <span>{createdCourseName}</span>
                   <span className="w-px h-4 bg-slate-300"></span>
-                  <span className="truncate">Domine o DOJO TV e transforme a dinâmica das suas aulas. Neste tutorial passo a passo, você aprenderá...</span>
+                  <span className="truncate">{activeCurso?.descricao || 'Nenhuma descrição informada'}</span>
                 </div>
               </div>
               <div className="grid grid-cols-[200px_1fr] gap-4 text-sm mt-4">
                 <div className="font-semibold text-slate-700">Categorias</div>
                 <div>
-                  <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">Tutorial de Aplicativos</span>
+                  <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">Curso</span>
                 </div>
               </div>
             </div>
