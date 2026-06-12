@@ -672,7 +672,7 @@ export function CursosCandidato({
     }
   };
 
-  const fetchTrilhas = async () => {
+  const fetchTrilhas = async (allowedOrgs: Set<string> | null = null) => {
     try {
       const { data: trilhasData, error: trilhasError } = await supabase
         .from('trilhas')
@@ -689,7 +689,12 @@ export function CursosCandidato({
 
       if (trilhaCursosError) throw trilhaCursosError;
 
-      const trilhasWithCursos = (trilhasData || []).map(trilha => ({
+      let validTrilhasData = trilhasData || [];
+      if (allowedOrgs) {
+         validTrilhasData = validTrilhasData.filter(t => allowedOrgs.has(t.organizacao_id));
+      }
+
+      const trilhasWithCursos = validTrilhasData.map(trilha => ({
         ...trilha,
         trilha_cursos: (trilhaCursosData || []).filter(tc => tc.trilha_id === trilha.id)
       }));
@@ -704,8 +709,33 @@ export function CursosCandidato({
   const fetchCursos = async (uId?: string | null) => {
     setIsLoading(true);
     try {
-      const { trilhas: fetchedTrilhas, trilhaCursos } = await fetchTrilhas();
-      let fetchedCursos = [];
+      const targetUserId = uId || currentUserId;
+      let allowedOrgIds: Set<string> | null = null;
+
+      if (targetUserId && !isGestor && !previewCourseId) {
+        allowedOrgIds = new Set<string>();
+        // 1. Organização direta do usuário
+        const { data: userProfile } = await supabase.from('usuarios').select('organizacao_id').eq('id', targetUserId).maybeSingle();
+        if (userProfile?.organizacao_id) {
+           allowedOrgIds.add(userProfile.organizacao_id);
+        }
+
+        // 2. Organizações de cursos adquiridos
+        const { data: participacoes } = await supabase
+          .from('curso_participantes')
+          .select('cursos(organizacao_id)')
+          .eq('usuario_id', targetUserId);
+          
+        if (participacoes) {
+           participacoes.forEach((p: any) => {
+             const orgId = Array.isArray(p.cursos) ? p.cursos[0]?.organizacao_id : p.cursos?.organizacao_id;
+             if (orgId) allowedOrgIds.add(orgId);
+           });
+        }
+      }
+
+      const { trilhas: fetchedTrilhas, trilhaCursos } = await fetchTrilhas(allowedOrgIds);
+      let fetchedCursos: any[] = [];
 
       if (previewCourseId) {
         const { data, error } = await supabase
@@ -721,16 +751,18 @@ export function CursosCandidato({
       } else {
         const { data, error } = await supabase
           .from('cursos')
-          .select('id, nome, descricao, thumbnail_url, curriculo_json, configuracao_json, carga_horaria, ritmo, tempo, duracao, duracao_tipo, preco, valor, em_breve, professor_nome, professor_titulo, professor_foto_url, tem_certificado, ordem, created_at')
+          .select('id, nome, descricao, thumbnail_url, curriculo_json, configuracao_json, carga_horaria, ritmo, tempo, duracao, duracao_tipo, preco, valor, em_breve, professor_nome, professor_titulo, professor_foto_url, tem_certificado, ordem, created_at, organizacao_id')
           .order('ordem', { ascending: true, nullsFirst: false })
           .order('created_at', { ascending: false });
 
         if (error) throw error;
         fetchedCursos = data || [];
+        if (allowedOrgIds) {
+           fetchedCursos = fetchedCursos.filter(c => allowedOrgIds!.has(c.organizacao_id));
+        }
         setCursos(fetchedCursos);
       }
       
-      const targetUserId = uId || currentUserId;
       if (targetUserId) {
         const { data: participacoes, error: pErr } = await supabase
           .from('curso_participantes')
