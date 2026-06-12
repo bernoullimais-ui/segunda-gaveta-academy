@@ -17,6 +17,7 @@ const SuperAdminPanel = React.lazy(() =>
 );
 import { PublicCoursePage } from './components/PublicCoursePage';
 import { AreaAluno } from './components/AreaAluno';
+import { ConfiguracaoAdmin } from './components/ConfiguracaoAdmin';
 import { NotificationCenter } from './components/NotificationCenter';
 import { SpecialistOnboarding } from './components/SpecialistOnboarding';
 import { ParticiparInvite } from './components/ParticiparInvite';
