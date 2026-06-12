@@ -876,14 +876,32 @@ export function CursosCandidato({
     try {
       const targetUserId = currentUserId;
       if (!targetUserId) throw new Error("Usuário não identificado.");
+      
+      // Tenta buscar pelo auth_id primeiro, que é o correto, ou pelo email da sessão
+      let userData = null;
+      const { data: authSessionData } = await supabase.auth.getUser();
+      const sessionEmail = authSessionData?.user?.email || '';
+      
+      if (sessionEmail) {
+        const { data: userByEmail } = await supabase
+          .from('usuarios')
+          .select('id, nome, email, auth_id')
+          .eq('email', sessionEmail)
+          .maybeSingle();
+        userData = userByEmail;
+      }
+      
+      if (!userData) {
+        const { data: userById } = await supabase
+          .from('usuarios')
+          .select('id, nome, email, auth_id')
+          .eq('auth_id', targetUserId)
+          .maybeSingle();
+        userData = userById;
+      }
 
-      const { data: userData, error: userErr } = await supabase
-        .from('usuarios')
-        .select('nome, email')
-        .eq('id', targetUserId)
-        .maybeSingle();
-        
-      if (userErr) throw userErr;
+      // O target id real da tabela de participantes e usuarios será o id interno retornado
+      const realUsuarioId = userData?.id || targetUserId;
 
       let finalUserData = userData;
       if (!finalUserData) {
@@ -915,7 +933,7 @@ export function CursosCandidato({
         .from('curso_participantes')
         .select('id, status')
         .eq('curso_id', curso.id)
-        .eq('usuario_id', targetUserId)
+        .eq('usuario_id', realUsuarioId)
         .maybeSingle();
 
       if (existingParticipation) {
@@ -931,7 +949,7 @@ export function CursosCandidato({
           .from('curso_participantes')
           .insert({
             curso_id: curso.id,
-            usuario_id: targetUserId,
+            usuario_id: realUsuarioId,
             status: isFree ? 'inscrito' : 'pendente',
             progresso: 0
           })
