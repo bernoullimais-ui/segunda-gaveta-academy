@@ -169,7 +169,23 @@ export default function App() {
 
     const projectMatch = path.match(/^\/projeto\/([a-zA-Z0-9-]+)/);
     if (projectMatch && projectMatch[1]) {
+      // Prioritize explicit route for local testing
       setProjectSlug(projectMatch[1]);
+    } else {
+      // Wildcard Subdomain resolution
+      const hostname = window.location.hostname;
+      const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
+      const isMainDomain = 
+        hostname === 'segundagavetaacademy.com.br' || 
+        hostname === 'www.segundagavetaacademy.com.br' || 
+        hostname.endsWith('.vercel.app');
+
+      if (!isLocalhost && !isMainDomain) {
+        const subdomain = hostname.split('.')[0];
+        if (subdomain && subdomain !== 'www') {
+          setProjectSlug(subdomain);
+        }
+      }
     }
 
     const inviteMatch = path.match(/^\/convite\/([a-zA-Z0-9-]+)/);
