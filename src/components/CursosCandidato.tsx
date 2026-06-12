@@ -1057,8 +1057,11 @@ export function CursosCandidato({
             item={{
               id: courseToBuy.id,
               description: courseToBuy.nome,
-              amount: parseFloat(courseToBuy.preco) || 0,
-              type: 'curso'
+              amount: courseToBuy.valor ? Number(courseToBuy.valor) : 0,
+              type: 'curso',
+              paymentModel: courseToBuy.configuracao_json?.pagamento_modelo,
+              paymentCycle: courseToBuy.configuracao_json?.pagamento_ciclo,
+              paymentInstallmentsLimit: courseToBuy.configuracao_json?.pagamento_parcelas_limite
             }}
             customer={{ name: buyerData.nome, email: buyerData.email, cpf: buyerData.cpf || '' }}
             participantId={purchaseParticipantId}
