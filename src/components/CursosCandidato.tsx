@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { PlayCircle, Clock, Award, ChevronRight, FileText, CheckCircle, ChevronLeft, Calendar, Maximize2, RefreshCcw, Info, ChevronDown, ChevronUp, Video, Check, X, MessageSquare, Download, List, Users, Sparkles, Bot, Loader2, BookOpen, Trophy, Star, PartyPopper } from 'lucide-react';
+import { PaymentModal } from './PaymentModal';
 import { supabase } from '../lib/supabase';
 import { generateCertificatePDF } from '../lib/certificateUtils';
 import { getFormattedVideoUrl } from '../lib/videoUtils';
@@ -31,6 +32,11 @@ export function CursosCandidato({
   const [cursosProgress, setCursosProgress] = useState<{[key: string]: {progresso: number, nome: string}}>({});
   const [isLoading, setIsLoading] = useState(true);
   const [view, setView] = useState<'list' | 'course' | 'lesson'>('list');
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [courseToBuy, setCourseToBuy] = useState<any>(null);
+  const [purchaseParticipantId, setPurchaseParticipantId] = useState<string | null>(null);
+  const [buyerData, setBuyerData] = useState<{nome: string, email: string, cpf: string} | null>(null);
+  const [isProcessingPurchase, setIsProcessingPurchase] = useState<string | null>(null);
   const [selectedCurso, setSelectedCurso] = useState<any>(null);
   const [selectedLesson, setSelectedLesson] = useState<any>(null);
   const [filterTrailId, setFilterTrailId] = useState<string | null>(null);
@@ -859,6 +865,59 @@ export function CursosCandidato({
     return <div className="text-center p-8 text-slate-500">Carregando cursos...</div>;
   }
 
+  const handleAccessCourse = async (curso: any) => {
+    if (cursosProgress[curso.id] !== undefined || isGestor || userRole === 'avaliador') {
+      setSelectedCurso(curso);
+      setView('course');
+      return;
+    }
+
+    setIsProcessingPurchase(curso.id);
+    try {
+      const targetUserId = currentUserId;
+      if (!targetUserId) throw new Error("Usuário não identificado.");
+
+      const { data: userData, error: userErr } = await supabase
+        .from('usuarios')
+        .select('nome, email, cpf')
+        .eq('id', targetUserId)
+        .single();
+        
+      if (userErr) throw userErr;
+
+      const isFree = parseFloat(curso.preco) === 0;
+
+      const { data: participant, error: partErr } = await supabase
+        .from('curso_participantes')
+        .upsert({
+          curso_id: curso.id,
+          usuario_id: targetUserId,
+          status: isFree ? 'inscrito' : 'pendente',
+          progresso: 0
+        })
+        .select()
+        .single();
+
+      if (partErr) throw partErr;
+
+      if (isFree) {
+        await fetchCursos();
+        setSelectedCurso(curso);
+        setView('course');
+      } else {
+        setBuyerData(userData as any);
+        setPurchaseParticipantId(participant.id);
+        setCourseToBuy(curso);
+        setShowPaymentModal(true);
+      }
+    } catch (err: any) {
+      console.error("Erro ao iniciar acesso ao curso:", err);
+      alert("Não foi possível acessar o curso no momento.");
+    } finally {
+      setIsProcessingPurchase(null);
+    }
+  };
+
   const handleDownloadCertificate = async (curso: any, overrideName?: string, overridePartId?: string) => {
     setIsGeneratingCert(true);
     try {
@@ -921,6 +980,20 @@ export function CursosCandidato({
           <button onClick={() => setActiveTab('cursos')} className={`pb-4 px-2 font-bold ${activeTab === 'cursos' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-500'}`}>Cursos</button>
           <button onClick={() => setActiveTab('trilhas')} className={`pb-4 px-2 font-bold ${activeTab === 'trilhas' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-500'}`}>Trilhas</button>
         </div>
+
+        {courseToBuy && buyerData && purchaseParticipantId && (
+          <PaymentModal 
+            isOpen={showPaymentModal}
+            onClose={() => {
+              setShowPaymentModal(false);
+              fetchCursos();
+            }}
+            item={courseToBuy}
+            customer={{ nome: buyerData.nome, email: buyerData.email, cpf: buyerData.cpf || '' }}
+            participantId={purchaseParticipantId}
+            organizacaoId={courseToBuy.organizacao_id}
+          />
+        )}
 
         {filterTrailId && activeTab === 'cursos' && (
           <div className="mb-6 bg-blue-50 border border-blue-200 p-4 rounded-xl flex items-center justify-between">
@@ -1053,14 +1126,14 @@ export function CursosCandidato({
                          )}
                       </div>
                       <button 
-                        disabled={!!curso.em_breve}
+                        disabled={!!curso.em_breve || isProcessingPurchase === curso.id}
                         onClick={() => {
-                          setSelectedCurso(curso);
-                          setView('course');
+                          handleAccessCourse(curso);
                         }}
                         className={`px-6 py-2 ${curso.em_breve ? 'bg-slate-300 cursor-not-allowed text-slate-500' : (cursosProgress[curso.id] !== undefined || userRole === 'avaliador' ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700')} text-white rounded-full font-medium flex items-center gap-2 transition-colors`}
                       >
-                        {curso.em_breve ? 'Indisponível' : (cursosProgress[curso.id] !== undefined || userRole === 'avaliador' ? 'Continuar Curso' : 'Acessar Curso')} <ChevronRight className="w-4 h-4"/>
+                        {isProcessingPurchase === curso.id ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                        {curso.em_breve ? 'Indisponível' : (cursosProgress[curso.id] !== undefined || userRole === 'avaliador' ? 'Continuar Curso' : 'Acessar Curso')} {isProcessingPurchase !== curso.id ? <ChevronRight className="w-4 h-4"/> : null}
                       </button>
                     </div>
                   </div>
@@ -1206,8 +1279,7 @@ export function CursosCandidato({
                                     <li key={curso.id} 
                                        className="cursor-pointer hover:text-blue-600 hover:underline transition-colors py-0.5"
                                        onClick={() => {
-                                         setSelectedCurso(curso);
-                                         setView('course');
+                                         handleAccessCourse(curso);
                                        }}
                                      >
                                        {curso.nome}
