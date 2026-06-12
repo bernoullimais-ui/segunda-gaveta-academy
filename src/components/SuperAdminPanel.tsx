@@ -19,7 +19,8 @@ import {
   Globe,
   Percent,
   ShoppingCart,
-  DollarSign
+  DollarSign,
+  Eye
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { ActionModal } from './ActionModal';
@@ -532,13 +533,26 @@ export function SuperAdminPanel({ loggedUser }: { loggedUser: any }) {
                       </td>
                       <td className="p-4 text-right">
                         <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => {
+                              if (org.slug) {
+                                window.location.href = `/projeto/${org.slug}`;
+                              } else {
+                                alert('Esta organização não possui um slug configurado.');
+                              }
+                            }}
+                            className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                            title="Acessar Portal da Organização"
+                          >
+                            <Eye className="w-5 h-5" />
+                          </button>
                           <button 
                             onClick={() => {
                               setSelectedOrg(org);
                               setEditingName(org.nome);
                             }}
-                            className="p-2 text-slate-400 hover:text-red-600 transition-colors rounded-lg hover:bg-red-50"
-                            title="Gerenciar Organização"
+                            className="p-2 text-slate-400 hover:text-blue-600 transition-colors rounded-lg hover:bg-blue-50"
+                            title="Gerenciar Organização (Avançado)"
                           >
                             <Settings className="w-5 h-5" />
                           </button>
