@@ -17,11 +17,11 @@ const SuperAdminPanel = React.lazy(() =>
 );
 import { PublicCoursePage } from './components/PublicCoursePage';
 import { AreaAluno } from './components/AreaAluno';
-import { ConfiguracaoAdmin } from './components/ConfiguracaoAdmin';
 import { NotificationCenter } from './components/NotificationCenter';
 import { SpecialistOnboarding } from './components/SpecialistOnboarding';
 import { ParticiparInvite } from './components/ParticiparInvite';
 import { ResetPasswordScreen } from './components/ResetPasswordScreen';
+import { InstitutionalPage } from './components/InstitutionalPage';
 import { 
   User, 
   BookOpen, 
@@ -106,6 +106,8 @@ export default function App() {
   const [isValidInvite, setIsValidInvite] = useState<boolean | null>(null);
   const [isParticiparRoute, setIsParticiparRoute] = useState(false);
   const [isResetPasswordRoute, setIsResetPasswordRoute] = useState(false);
+  const [isRootRoute, setIsRootRoute] = useState(false);
+  const [isGestaoRoute, setIsGestaoRoute] = useState(false);
   const [inviteConfig, setInviteConfig] = useState<any>(null);
   const [resumeOnboarding, setResumeOnboarding] = useState<any>(null);
 
@@ -157,6 +159,9 @@ export default function App() {
     // Detect public landing page route
     const path = window.location.pathname;
     
+    if (path === '/') setIsRootRoute(true);
+    if (path.startsWith('/gestao')) setIsGestaoRoute(true);
+
     const courseMatch = path.match(/^\/public\/curso\/([a-zA-Z0-9-]+)/);
     if (courseMatch && courseMatch[1]) {
       setPublicCourseId(courseMatch[1]);
@@ -648,6 +653,15 @@ export default function App() {
   }
 
   if (!loggedUser) {
+    if (!projectSlug && isRootRoute) {
+      return (
+        <>
+          <InstitutionalPage />
+          <Toast message={toastMessage} onClose={() => setToastMessage(null)} />
+        </>
+      );
+    }
+
     if (isParticiparRoute) {
       return (
         <>
@@ -737,6 +751,16 @@ export default function App() {
           onOnboarding={handleOnboarding}
           isLoading={isLoading}
         />
+        <Toast message={toastMessage} onClose={() => setToastMessage(null)} />
+      </>
+    );
+  }
+
+  // Se o usuário está logado mas acessou a raiz do domínio principal, exibe o site institucional
+  if (!projectSlug && isRootRoute) {
+    return (
+      <>
+        <InstitutionalPage />
         <Toast message={toastMessage} onClose={() => setToastMessage(null)} />
       </>
     );

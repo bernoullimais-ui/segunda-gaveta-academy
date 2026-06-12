@@ -20,20 +20,22 @@ import {
   Percent,
   ShoppingCart,
   DollarSign,
-  Eye
+  Eye,
+  MonitorPlay
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { ActionModal } from './ActionModal';
 import { CursosAdmin } from './CursosAdmin';
 import { Community } from './Community';
 import { CuponsAdmin } from './CuponsAdmin';
+import { WebsiteEditor } from './WebsiteEditor';
 
 export function SuperAdminPanel({ loggedUser }: { loggedUser: any }) {
   const [organizacoes, setOrganizacoes] = useState<any[]>([]);
   const [usuarios, setUsuarios] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState<'organizacoes' | 'cursos' | 'comunidade' | 'atividades' | 'super_admins' | 'cupons' | 'trafego'>('organizacoes');
+  const [activeTab, setActiveTab] = useState<'organizacoes' | 'cursos' | 'comunidade' | 'atividades' | 'super_admins' | 'cupons' | 'trafego' | 'website'>('organizacoes');
   
   // Traffic Analytics States
   const [trafficData, setTrafficData] = useState<any[]>([]);
@@ -473,6 +475,18 @@ export function SuperAdminPanel({ loggedUser }: { loggedUser: any }) {
         >
           <BarChart3 className="w-4 h-4" />
           Tráfego & Funis
+        </button>
+        <button
+          onClick={() => {
+            setActiveTab('website');
+            setSearchTerm('');
+          }}
+          className={`flex items-center gap-2 px-4 py-2 font-bold text-sm rounded-lg transition-all ${
+            activeTab === 'website' ? 'bg-white text-slate-900 shadow-sm border border-slate-200/50' : 'text-slate-600 hover:bg-white/50 hover:text-slate-900'
+          }`}
+        >
+          <MonitorPlay className="w-4 h-4" />
+          Site Institucional
         </button>
       </div>
 
@@ -1016,6 +1030,11 @@ export function SuperAdminPanel({ loggedUser }: { loggedUser: any }) {
             </div>
           )}
         </div>
+      )}
+
+      {/* 8. Website Institucional */}
+      {activeTab === 'website' && (
+        <WebsiteEditor />
       )}
 
       {/* Modal de Edição de Organização */}
