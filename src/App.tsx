@@ -178,6 +178,8 @@ export default function App() {
       const isMainDomain = 
         hostname === 'segundagavetaacademy.com.br' || 
         hostname === 'www.segundagavetaacademy.com.br' || 
+        hostname === 'segundagaveta.com.br' ||
+        hostname === 'www.segundagaveta.com.br' ||
         hostname.endsWith('.vercel.app');
 
       if (!isLocalhost && !isMainDomain) {
