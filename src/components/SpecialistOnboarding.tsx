@@ -631,6 +631,7 @@ export function SpecialistOnboarding({ onOnboarding, isLoading: parentLoading, i
                 </div>
               </div>
 
+              {!checkoutUrl ? (
                 <div className="space-y-4 w-full">
                   <button
                     onClick={handleGenerateCheckout}
