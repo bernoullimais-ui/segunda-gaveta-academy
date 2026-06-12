@@ -27,7 +27,7 @@ export function CursosCandidato({
   const [cursos, setCursos] = useState<any[]>([]);
   const [trilhas, setTrilhas] = useState<any[]>([]);
   const [userRole, setUserRole] = useState<string | null>(initialUserRole || null);
-  const [activeTab, setActiveTab] = useState<'cursos' | 'trilhas'>('trilhas');
+  const [activeTab, setActiveTab] = useState<'cursos' | 'trilhas'>('cursos');
   const [cursosProgress, setCursosProgress] = useState<{[key: string]: {progresso: number, nome: string}}>({});
   const [isLoading, setIsLoading] = useState(true);
   const [view, setView] = useState<'list' | 'course' | 'lesson'>('list');
@@ -918,8 +918,8 @@ export function CursosCandidato({
     return (
       <div className="space-y-6">
         <div className="flex gap-4 border-b border-slate-200 mb-6">
-          <button onClick={() => setActiveTab('trilhas')} className={`pb-4 px-2 font-bold ${activeTab === 'trilhas' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-500'}`}>Trilhas</button>
           <button onClick={() => setActiveTab('cursos')} className={`pb-4 px-2 font-bold ${activeTab === 'cursos' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-500'}`}>Cursos</button>
+          <button onClick={() => setActiveTab('trilhas')} className={`pb-4 px-2 font-bold ${activeTab === 'trilhas' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-500'}`}>Trilhas</button>
         </div>
 
         {filterTrailId && activeTab === 'cursos' && (
