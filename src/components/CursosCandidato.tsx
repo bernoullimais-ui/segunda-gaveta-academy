@@ -879,7 +879,7 @@ export function CursosCandidato({
 
       const { data: userData, error: userErr } = await supabase
         .from('usuarios')
-        .select('nome, email, cpf')
+        .select('nome, email')
         .eq('id', targetUserId)
         .maybeSingle();
         
@@ -928,7 +928,7 @@ export function CursosCandidato({
         const buyer = {
           nome: userData?.nome || authData.user?.user_metadata?.nome || 'Aluno',
           email: userData?.email || authData.user?.email || '',
-          cpf: userData?.cpf || ''
+          cpf: ''
         };
         setBuyerData(buyer);
         setPurchaseParticipantId(participantId);
