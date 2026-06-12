@@ -1241,6 +1241,41 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
 
         <TargetAudienceSection targetAudience={lp.target_audience} layout={layout} />
 
+        {/* Bonus Section - Dark */}
+        {lp.bonuses?.length > 0 && (
+          <section className="py-32 bg-emerald-950/40 text-white overflow-hidden relative border-t border-slate-800">
+            <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2"></div>
+            <div className="max-w-7xl mx-auto px-6 relative z-10">
+              <div className="text-center mb-16 space-y-4">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 rounded-full text-xs font-black uppercase tracking-widest text-emerald-400 border border-emerald-500/20">
+                  Oportunidade Única
+                </div>
+                <h2 className="text-4xl md:text-5xl font-bold">Bônus Exclusivos Para Você</h2>
+                <p className="text-slate-400 text-lg">Inscreva-se hoje e leve gratuitamente estes materiais complementares.</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {lp.bonuses.map((bonus: any, idx: number) => (
+                  <div key={idx} className="bg-slate-900/50 backdrop-blur-sm p-8 rounded-3xl border border-slate-800 hover:border-emerald-500/50 transition-all group">
+                     <div className="w-14 h-14 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                       <Gift className="w-7 h-7 text-emerald-400" />
+                     </div>
+                     <h4 className="text-xl font-bold mb-3">{bonus.title}</h4>
+                     {bonus.value && (
+                       <div className="mb-3 flex items-center gap-2">
+                         <span className="text-emerald-400 text-xs font-bold uppercase tracking-wider">Valor:</span>
+                         <span className="text-slate-500 line-through text-sm">R$ {bonus.value}</span>
+                         <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 text-[10px] font-black px-2 py-0.5 rounded-full uppercase">Grátis</span>
+                       </div>
+                     )}
+                     <p className="text-slate-400 leading-relaxed">{bonus.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* Instructor - Dark */}
         <section id="instrutor" className="py-32 bg-slate-950">
            <div className="max-w-7xl mx-auto px-6">
