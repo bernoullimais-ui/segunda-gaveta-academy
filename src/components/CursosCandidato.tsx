@@ -14,13 +14,15 @@ export function CursosCandidato({
   isGestor, 
   userRole: initialUserRole,
   initialCourseId,
-  onClearInitialCourse
+  onClearInitialCourse,
+  globalOrgId
 }: { 
   previewCourseId?: string; 
   isGestor?: boolean; 
   userRole?: string;
   initialCourseId?: string | null;
   onClearInitialCourse?: () => void;
+  globalOrgId?: string | null;
 } = {}) {
   const [cursos, setCursos] = useState<any[]>([]);
   const [trilhas, setTrilhas] = useState<any[]>([]);
@@ -714,6 +716,11 @@ export function CursosCandidato({
 
       if (targetUserId && !isGestor && !previewCourseId) {
         allowedOrgIds = new Set<string>();
+        
+        if (globalOrgId) {
+          allowedOrgIds.add(globalOrgId);
+        }
+
         // 1. Organização direta do usuário
         const { data: userProfile } = await supabase.from('usuarios').select('organizacao_id').eq('id', targetUserId).maybeSingle();
         if (userProfile?.organizacao_id) {

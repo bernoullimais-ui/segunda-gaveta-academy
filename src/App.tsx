@@ -794,7 +794,7 @@ export default function App() {
   if (!isAdmin) {
     return (
       <>
-        <AreaAluno loggedUser={loggedUser} userRole={loggedRole!} onLogout={handleLogout} />
+        <AreaAluno loggedUser={loggedUser} userRole={loggedRole!} globalOrgId={globalOrgId} onLogout={handleLogout} />
         <Toast message={toastMessage} onClose={() => setToastMessage(null)} />
       </>
     );
@@ -929,7 +929,8 @@ export default function App() {
                   <RenderContent 
                     view={currentView} 
                     user={loggedUser} 
-                    role={loggedRole} 
+                    role={loggedRole}
+                    globalOrgId={globalOrgId}
                     showToast={showToast}
                     onOrgUpdate={handleOrgUpdate}
                     communityInitialTab={communityInitialTab}
@@ -988,6 +989,7 @@ function RenderContent({
   view, 
   user, 
   role, 
+  globalOrgId,
   showToast, 
   onOrgUpdate,
   communityInitialTab,
@@ -1000,7 +1002,7 @@ function RenderContent({
     case 'dashboard':
       return <DashboardCenso loggedUser={user} orgId={user?.organizacao_id} />;
     case 'cursos':
-      return isAdmin ? <CursosAdmin loggedUser={user} orgId={user.organizacao_id} /> : <CursosCandidato userRole={role} />;
+      return isAdmin ? <CursosAdmin loggedUser={user} orgId={user.organizacao_id} /> : <CursosCandidato userRole={role} globalOrgId={globalOrgId} />;
     case 'comunidade':
       return (
         <Community 

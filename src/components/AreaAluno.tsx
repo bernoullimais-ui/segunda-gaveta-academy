@@ -23,12 +23,13 @@ import { NotificationCenter } from './NotificationCenter';
 interface AreaAlunoProps {
   loggedUser: any;
   userRole: string;
+  globalOrgId?: string | null;
   onLogout: () => void;
 }
 
 type TabType = 'dashboard' | 'comunidade' | 'cursos' | 'afiliados' | 'dados_recebimento';
 
-export function AreaAluno({ loggedUser, userRole, onLogout }: AreaAlunoProps) {
+export function AreaAluno({ loggedUser, userRole, globalOrgId, onLogout }: AreaAlunoProps) {
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
   const [pendingMessages, setPendingMessages] = useState(0);
   const [initialCourseId, setInitialCourseId] = useState<string | null>(null);
@@ -98,6 +99,7 @@ export function AreaAluno({ loggedUser, userRole, onLogout }: AreaAlunoProps) {
         return (
           <CursosCandidato 
             userRole={userRole} 
+            globalOrgId={globalOrgId}
             initialCourseId={initialCourseId}
             onClearInitialCourse={() => setInitialCourseId(null)}
           />
