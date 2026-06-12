@@ -80,6 +80,7 @@ export function SuperAdminPanel({ loggedUser }: { loggedUser: any }) {
   // Modal state
   const [selectedOrg, setSelectedOrg] = useState<any>(null);
   const [editingName, setEditingName] = useState('');
+  const [editingSlug, setEditingSlug] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [modalConfig, setModalConfig] = useState<{isOpen: boolean, type?: 'confirm', title?: string, message?: string, onConfirm?: () => void}>({ isOpen: false });
 
@@ -257,19 +258,23 @@ export function SuperAdminPanel({ loggedUser }: { loggedUser: any }) {
   };
 
   const handleSaveOrg = async () => {
-    if (!selectedOrg || !editingName.trim()) return;
+    if (!selectedOrg || !editingName.trim() || !editingSlug.trim()) return;
     
     setIsSaving(true);
     try {
+      const formattedSlug = editingSlug.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-');
       const { error } = await supabase
         .from('organizacoes')
-        .update({ nome: editingName.trim() })
+        .update({ 
+          nome: editingName.trim(),
+          slug: formattedSlug 
+        })
         .eq('id', selectedOrg.id);
         
       if (error) throw error;
       
       setOrganizacoes(prev => prev.map(org => 
-        org.id === selectedOrg.id ? { ...org, nome: editingName.trim() } : org
+        org.id === selectedOrg.id ? { ...org, nome: editingName.trim(), slug: formattedSlug } : org
       ));
       
       setSelectedOrg(null);
@@ -564,6 +569,7 @@ export function SuperAdminPanel({ loggedUser }: { loggedUser: any }) {
                             onClick={() => {
                               setSelectedOrg(org);
                               setEditingName(org.nome);
+                              setEditingSlug(org.slug || '');
                             }}
                             className="p-2 text-slate-400 hover:text-blue-600 transition-colors rounded-lg hover:bg-blue-50"
                             title="Gerenciar Organização (Avançado)"
@@ -1067,6 +1073,22 @@ export function SuperAdminPanel({ loggedUser }: { loggedUser: any }) {
               </div>
 
               <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">URL Personalizada (Slug)</label>
+                <div className="flex">
+                  <span className="inline-flex items-center px-4 rounded-l-xl border border-r-0 border-slate-200 bg-slate-100 text-slate-500 text-sm font-semibold">
+                    segundagaveta.com.br/projeto/
+                  </span>
+                  <input
+                    type="text"
+                    value={editingSlug}
+                    onChange={(e) => setEditingSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-'))}
+                    className="flex-1 w-full p-3 bg-slate-50 border border-slate-200 rounded-r-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all font-mono text-slate-800"
+                    placeholder="nome-da-organizacao"
+                  />
+                </div>
+              </div>
+
+              <div>
                 <h4 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
                   <Users className="w-4 h-4 text-slate-500" />
                   Usuários Vinculados ({usuarios.filter(u => u.organizacao_id === selectedOrg.id).length})
@@ -1111,7 +1133,7 @@ export function SuperAdminPanel({ loggedUser }: { loggedUser: any }) {
               </button>
               <button
                 onClick={handleSaveOrg}
-                disabled={isSaving || !editingName.trim()}
+                disabled={isSaving || !editingName.trim() || !editingSlug.trim()}
                 className="px-5 py-2.5 bg-red-700 hover:bg-red-800 text-white text-sm font-bold rounded-xl transition-colors flex items-center gap-2 disabled:opacity-50"
               >
                 {isSaving ? (
