@@ -631,20 +631,37 @@ export function SpecialistOnboarding({ onOnboarding, isLoading: parentLoading, i
                 </div>
               </div>
 
-              {!checkoutUrl ? (
-                <button
-                  onClick={handleGenerateCheckout}
-                  disabled={isCreatingOrder}
-                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white p-3.5 rounded-xl font-bold text-md transition-all flex items-center justify-center gap-2 shadow-lg shadow-indigo-100"
-                >
-                  {isCreatingOrder ? (
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  ) : (
-                    <>Ir para o Pagamento (Pagar.me)</>
-                  )}
-                </button>
+                <div className="space-y-4 w-full">
+                  <button
+                    onClick={handleGenerateCheckout}
+                    disabled={isCreatingOrder}
+                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white p-3.5 rounded-xl font-bold text-md transition-all flex items-center justify-center gap-2 shadow-lg shadow-indigo-100"
+                  >
+                    {isCreatingOrder ? (
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                      <>Ir para o Pagamento (Pagar.me)</>
+                    )}
+                  </button>
+                  
+                  <div className="p-4 border border-indigo-100 bg-indigo-50/20 rounded-2xl flex flex-col items-center gap-2">
+                    <p className="text-xs text-indigo-800 font-medium text-center">Já realizou o pagamento em outra aba ou dispositivo?</p>
+                    <button
+                      onClick={() => checkPaymentStatus(false)}
+                      disabled={isCheckingPayment}
+                      className="flex items-center justify-center gap-1.5 text-xs text-indigo-600 hover:text-indigo-800 font-bold mt-1"
+                    >
+                      {isCheckingPayment ? (
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <RefreshCw className="w-3.5 h-3.5" />
+                      )}
+                      Atualizar Status
+                    </button>
+                  </div>
+                </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-4 w-full">
                   <a
                     href={checkoutUrl}
                     target="_blank"
@@ -657,7 +674,7 @@ export function SpecialistOnboarding({ onOnboarding, isLoading: parentLoading, i
                   <div className="p-4 border border-indigo-100 bg-indigo-50/20 rounded-2xl flex flex-col items-center gap-2">
                     <p className="text-xs text-indigo-800 font-medium">Aguardando a aprovação do PIX ou Cartão de Crédito...</p>
                     <button
-                      onClick={() => checkPaymentStatus()}
+                      onClick={() => checkPaymentStatus(false)}
                       disabled={isCheckingPayment}
                       className="flex items-center gap-1.5 text-xs text-indigo-600 hover:text-indigo-800 font-bold mt-2"
                     >
