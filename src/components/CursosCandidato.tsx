@@ -885,6 +885,29 @@ export function CursosCandidato({
         
       if (userErr) throw userErr;
 
+      let finalUserData = userData;
+      if (!finalUserData) {
+        const { data: authData } = await supabase.auth.getUser();
+        const authUser = authData?.user;
+        const nome = authUser?.user_metadata?.nome || 'Aluno';
+        const email = authUser?.email || '';
+        
+        const { data: newUser, error: upsertErr } = await supabase.from('usuarios').upsert({
+          id: targetUserId,
+          auth_id: targetUserId,
+          nome: nome,
+          email: email,
+          role: 'membro',
+          organizacao_id: curso.organizacao_id
+        }).select('nome, email').single();
+
+        if (upsertErr) {
+          console.error("Falha ao criar registro em usuarios:", upsertErr);
+        } else {
+          finalUserData = newUser;
+        }
+      }
+
       const isFree = parseFloat(curso.preco) === 0;
 
       let participantId;
@@ -926,8 +949,8 @@ export function CursosCandidato({
       } else {
         const { data: authData } = await supabase.auth.getUser();
         const buyer = {
-          nome: userData?.nome || authData.user?.user_metadata?.nome || 'Aluno',
-          email: userData?.email || authData.user?.email || '',
+          nome: finalUserData?.nome || authData.user?.user_metadata?.nome || 'Aluno',
+          email: finalUserData?.email || authData.user?.email || '',
           cpf: ''
         };
         setBuyerData(buyer);
