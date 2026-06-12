@@ -881,38 +881,63 @@ export function CursosCandidato({
         .from('usuarios')
         .select('nome, email, cpf')
         .eq('id', targetUserId)
-        .single();
+        .maybeSingle();
         
       if (userErr) throw userErr;
 
       const isFree = parseFloat(curso.preco) === 0;
 
-      const { data: participant, error: partErr } = await supabase
+      let participantId;
+      const { data: existingParticipation } = await supabase
         .from('curso_participantes')
-        .upsert({
-          curso_id: curso.id,
-          usuario_id: targetUserId,
-          status: isFree ? 'inscrito' : 'pendente',
-          progresso: 0
-        })
-        .select()
-        .single();
+        .select('id, status')
+        .eq('curso_id', curso.id)
+        .eq('usuario_id', targetUserId)
+        .maybeSingle();
 
-      if (partErr) throw partErr;
+      if (existingParticipation) {
+        participantId = existingParticipation.id;
+        if (existingParticipation.status === 'inscrito') {
+           setSelectedCurso(curso);
+           setView('course');
+           setIsProcessingPurchase(null);
+           return;
+        }
+      } else {
+        const { data: participant, error: partErr } = await supabase
+          .from('curso_participantes')
+          .insert({
+            curso_id: curso.id,
+            usuario_id: targetUserId,
+            status: isFree ? 'inscrito' : 'pendente',
+            progresso: 0
+          })
+          .select()
+          .single();
+
+        if (partErr) throw partErr;
+        participantId = participant.id;
+      }
 
       if (isFree) {
         await fetchCursos();
         setSelectedCurso(curso);
         setView('course');
       } else {
-        setBuyerData(userData as any);
-        setPurchaseParticipantId(participant.id);
+        const { data: authData } = await supabase.auth.getUser();
+        const buyer = {
+          nome: userData?.nome || authData.user?.user_metadata?.nome || 'Aluno',
+          email: userData?.email || authData.user?.email || '',
+          cpf: userData?.cpf || ''
+        };
+        setBuyerData(buyer);
+        setPurchaseParticipantId(participantId);
         setCourseToBuy(curso);
         setShowPaymentModal(true);
       }
     } catch (err: any) {
       console.error("Erro ao iniciar acesso ao curso:", err);
-      alert("Não foi possível acessar o curso no momento.");
+      alert("Não foi possível acessar o curso no momento. Erro: " + (err.message || JSON.stringify(err)));
     } finally {
       setIsProcessingPurchase(null);
     }
