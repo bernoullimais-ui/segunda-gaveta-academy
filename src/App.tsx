@@ -794,7 +794,7 @@ export default function App() {
   if (!isAdmin) {
     return (
       <>
-        <AreaAluno loggedUser={loggedUser} userRole={loggedRole!} globalOrgId={globalOrgId} onLogout={handleLogout} />
+        <AreaAluno loggedUser={loggedUser} userRole={loggedRole!} globalOrgId={activeOrg?.id} onLogout={handleLogout} />
         <Toast message={toastMessage} onClose={() => setToastMessage(null)} />
       </>
     );
@@ -930,7 +930,7 @@ export default function App() {
                     view={currentView} 
                     user={loggedUser} 
                     role={loggedRole}
-                    globalOrgId={globalOrgId}
+                    globalOrgId={activeOrg?.id}
                     showToast={showToast}
                     onOrgUpdate={handleOrgUpdate}
                     communityInitialTab={communityInitialTab}
