@@ -1064,8 +1064,17 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                           url={lp.hero_video_url} 
                           width="100%" 
                           height="100%" 
-                          playing={isHeroPlaying}
+                          playing={true}
                           controls={false}
+                          light={item.thumbnail_url || item.capa_url || true}
+                          playIcon={
+                            <div className="absolute inset-0 cursor-pointer flex items-center justify-center z-10 group">
+                              <div className="absolute inset-0 bg-slate-900/40 group-hover:bg-slate-900/20 transition-colors" />
+                              <div className="relative z-20 w-24 h-24 bg-primary rounded-full flex items-center justify-center text-white shadow-2xl scale-110 group-hover:scale-125 transition-transform duration-500">
+                                <Play className="w-10 h-10 fill-current" />
+                              </div>
+                            </div>
+                          }
                           config={{
                             youtube: {
                               playerVars: {
@@ -1080,22 +1089,6 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                             }
                           }}
                         />
-                        {!isHeroPlaying && (
-                          <div 
-                            className="absolute inset-0 cursor-pointer flex items-center justify-center z-10"
-                            onClick={() => setIsHeroPlaying(true)}
-                          >
-                            <img 
-                              src={item.thumbnail_url || item.capa_url || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070'} 
-                              alt="Video Preview"
-                              className="absolute inset-0 w-full h-full object-cover"
-                            />
-                            <div className="absolute inset-0 bg-slate-900/40 group-hover:bg-slate-900/20 transition-colors" />
-                            <div className="relative z-20 w-24 h-24 bg-primary rounded-full flex items-center justify-center text-white shadow-2xl scale-110 group-hover:scale-125 transition-transform duration-500">
-                              <Play className="w-10 h-10 fill-current" />
-                            </div>
-                          </div>
-                        )}
                       </div>
                     ) : (
                       <img 
@@ -1638,8 +1631,17 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                       url={lp.hero_video_url} 
                       width="100%" 
                       height="100%" 
-                      playing={isHeroPlaying}
+                      playing={true}
                       controls={false}
+                      light={item.thumbnail_url || item.capa_url || true}
+                      playIcon={
+                        <div className="absolute inset-0 cursor-pointer flex items-center justify-center z-10 group">
+                          <div className="absolute inset-0 bg-slate-900/40 group-hover:bg-slate-900/20 transition-colors" />
+                          <div className="relative z-20 w-24 h-24 bg-primary rounded-full flex items-center justify-center text-white shadow-2xl scale-110 group-hover:scale-125 transition-transform duration-500">
+                            <Play className="w-10 h-10 fill-current" />
+                          </div>
+                        </div>
+                      }
                       config={{
                         youtube: {
                           playerVars: {
@@ -1654,22 +1656,6 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                         }
                       }}
                     />
-                    {!isHeroPlaying && (
-                      <div 
-                        className="absolute inset-0 cursor-pointer flex items-center justify-center z-10"
-                        onClick={() => setIsHeroPlaying(true)}
-                      >
-                        <img 
-                          src={item.thumbnail_url || item.capa_url || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070'} 
-                          alt="Video Preview"
-                          className="absolute inset-0 w-full h-full object-cover"
-                        />
-                        <div className="absolute inset-0 bg-slate-900/40 group-hover:bg-slate-900/20 transition-colors" />
-                        <div className="relative z-20 w-24 h-24 bg-primary rounded-full flex items-center justify-center text-white shadow-2xl scale-110 group-hover:scale-125 transition-transform duration-500">
-                          <Play className="w-10 h-10 fill-current" />
-                        </div>
-                      </div>
-                    )}
                   </div>
                 ) : (
                   <img 
