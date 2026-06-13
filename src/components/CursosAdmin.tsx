@@ -1073,23 +1073,28 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                         configuracao_json: {
                           ritmo: 'proprio',
                           tempo: 'sem_limite',
-                          preco: 'gratuito'
+                          preco: 'gratuito',
+                          pagamento_modelo: 'fixo'
                         }
                       }])
-                      .select()
-                      .single();
+                      .select();
                     
                     if (error) throw error;
                     
-                    if (data) {
-                      setCreatedCourseId(data.id);
-                      setCreatedCourseName(data.nome);
+                    if (data && data.length > 0) {
+                      setCreatedCourseId(data[0].id);
+                      setCreatedCourseName(data[0].nome);
                       setView('course_dashboard');
                       fetchCursos();
+                    } else {
+                      // Se não retornou data, mas não deu erro, pode ser RLS impedindo o SELECT.
+                      // Mesmo assim, vamos atualizar a lista de cursos.
+                      fetchCursos();
+                      showToast('Curso criado, mas você não tem permissão para visualizá-lo imediatamente.', 'error');
                     }
                   } catch (err: any) {
                     console.error('Erro ao criar curso:', err);
-                    showToast('Erro ao criar curso: ' + (err.message || 'Erro desconhecido', 'error'));
+                    showToast('Erro ao criar curso: ' + (err.message || 'Erro desconhecido'), 'error');
                   }
                 }}
                 className="px-4 py-2 bg-blue-600 text-white rounded-full font-medium hover:bg-blue-700 flex items-center gap-2"
