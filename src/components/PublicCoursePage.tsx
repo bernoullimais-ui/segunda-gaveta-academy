@@ -1204,34 +1204,61 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
 
         {/* About Section - Dark */}
         <section id="sobre" className="py-32 bg-slate-900 border-b border-slate-800">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
-               <div className="space-y-8 text-left">
-                  <div className="w-16 h-1 bg-primary rounded-full"></div>
-                  {/* #7 Configurable about_title */}
-                  <h2 className="text-4xl md:text-5xl font-bold text-white leading-tight">{lp.about_title || 'Prepare-se para uma experiência de aprendizado sem precedentes.'}</h2>
-                  <div className="text-lg text-slate-400 leading-relaxed space-y-6">
-                    <div className="prose prose-invert max-w-none text-slate-400">
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                        {lp.about || item.descricao}
-                      </ReactMarkdown>
-                    </div>
-                  </div>
-               </div>
-
-               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  {(lp.benefits || []).filter(Boolean).slice(0, 4).map((benefit: string, idx: number) => (
-                    <div key={idx} className="bg-slate-800/40 p-8 rounded-[32px] border border-slate-700 hover:border-primary/50 transition-colors group text-left">
-                       <div className="w-10 h-10 bg-primary/10 text-primary rounded-2xl flex items-center justify-center mb-6">
-                         <CheckCircle className="w-5 h-5" />
-                       </div>
-                       <p className="font-bold text-white text-lg leading-tight group-hover:text-primary transition-colors">{benefit}</p>
-                    </div>
-                  ))}
-               </div>
+          <div className="max-w-4xl mx-auto px-6 text-center">
+            <div className="w-16 h-1 bg-primary rounded-full mx-auto mb-8"></div>
+            {/* #7 Configurable about_title */}
+            <h2 className="text-4xl md:text-5xl font-bold text-white leading-tight mb-8">{lp.about_title || 'Prepare-se para uma experiência de aprendizado sem precedentes.'}</h2>
+            <div className="text-lg text-slate-400 leading-relaxed text-left">
+              <div className="prose prose-invert max-w-none text-slate-400">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {lp.about || item.descricao}
+                </ReactMarkdown>
+              </div>
             </div>
           </div>
         </section>
+
+        {/* Benefits & Testimonials Section - Dark */}
+        {(lp.benefits?.length > 0 || lp.testimonials?.length > 0) && (
+          <section id="vantagens-depoimentos" className="py-32 bg-slate-900/50 border-b border-slate-800">
+            <div className="max-w-7xl mx-auto px-6">
+              <div className={`grid grid-cols-1 ${(lp.benefits?.length > 0 && lp.testimonials?.length > 0) ? 'lg:grid-cols-2 gap-16' : 'gap-16'}`}>
+                
+                {/* Vantagens */}
+                {lp.benefits?.length > 0 && (
+                  <div className={(lp.benefits?.length > 0 && lp.testimonials?.length > 0) ? '' : 'max-w-4xl mx-auto w-full'}>
+                    <h3 className={`font-bold text-white mb-10 ${(lp.benefits?.length > 0 && lp.testimonials?.length > 0) ? 'text-3xl text-center lg:text-left' : 'text-4xl text-center'}`}>O que você vai dominar</h3>
+                    <div className={`grid grid-cols-1 ${(!lp.testimonials || lp.testimonials.length === 0) ? 'sm:grid-cols-2' : 'sm:grid-cols-1 xl:grid-cols-2'} gap-6`}>
+                      {(lp.benefits || []).filter(Boolean).map((benefit: string, idx: number) => (
+                        <div key={idx} className="bg-slate-800/40 p-8 rounded-[32px] border border-slate-700 hover:border-primary/50 transition-colors group text-left">
+                           <div className="w-10 h-10 bg-primary/10 text-primary rounded-2xl flex items-center justify-center mb-6">
+                             <CheckCircle className="w-5 h-5" />
+                           </div>
+                           <p className="font-bold text-white text-lg leading-tight group-hover:text-primary transition-colors">{benefit}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Depoimentos */}
+                {lp.testimonials?.length > 0 && (
+                  <div className={(lp.benefits?.length > 0 && lp.testimonials?.length > 0) ? '' : 'max-w-4xl mx-auto w-full'}>
+                    <div className="text-center mb-10">
+                      <h3 className={`font-bold text-white mb-4 tracking-tight ${(lp.benefits?.length > 0 && lp.testimonials?.length > 0) ? 'text-3xl' : 'text-4xl md:text-5xl'}`}>O que dizem nossos alunos</h3>
+                      <div className="flex items-center justify-center gap-1 text-amber-500">
+                        {[1,2,3,4,5].map(i => <Star key={i} className="w-5 h-5 fill-current" />)}
+                        <span className="ml-2 text-slate-300 font-bold">4.9/5 de satisfação</span>
+                      </div>
+                    </div>
+                    <TestimonialsCarousel testimonials={lp.testimonials} layout={layout} primaryColor={lp.primary_color} />
+                  </div>
+                )}
+
+              </div>
+            </div>
+          </section>
+        )}
 
         <TargetAudienceSection targetAudience={lp.target_audience} layout={layout} />
 
@@ -1296,21 +1323,6 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
            </div>
         </section>
 
-        {/* Testimonials - Dark */}
-        {lp.testimonials?.length > 0 && (
-          <section className="py-32 bg-slate-900 overflow-hidden border-t border-slate-800">
-            <div className="max-w-7xl mx-auto px-6">
-              <div className="text-center mb-16">
-                <h2 className="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight">O que dizem nossos alunos</h2>
-                <div className="flex items-center justify-center gap-1 text-amber-500">
-                  {[1,2,3,4,5].map(i => <Star key={i} className="w-5 h-5 fill-current" />)}
-                  <span className="ml-2 text-slate-300 font-bold">4.9/5 de satisfação</span>
-                </div>
-              </div>
-              <TestimonialsCarousel testimonials={lp.testimonials} layout={layout} primaryColor={lp.primary_color} />
-            </div>
-          </section>
-        )}
 
         {/* FAQ - Dark */}
         {lp.faq?.length > 0 && (
@@ -1735,37 +1747,61 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
 
       {/* About Section */}
       <section id="sobre" className="py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-start">
-            <div className="space-y-6">
-              {/* #7 Configurable about_title */}
-              <h2 className="text-4xl font-bold text-slate-900">{lp.about_title || 'Tudo o que você precisa em um só lugar.'}</h2>
-              <div className="h-1.5 w-20 bg-primary rounded-full"></div>
-              <div className="text-lg text-slate-600 leading-relaxed space-y-4">
-                <div className="prose max-w-none text-slate-600">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                    {lp.about || item.descricao}
-                  </ReactMarkdown>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-slate-50 p-8 md:p-12 rounded-[40px] border border-slate-100">
-              <h3 className="text-2xl font-bold mb-8">O que você vai dominar:</h3>
-              <div className="space-y-4">
-                {(lp.benefits || []).filter(Boolean).map((benefit: string, idx: number) => (
-                  <div key={idx} className="flex items-start gap-4 p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
-                    <div className="w-6 h-6 shrink-0 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center">
-                      <CheckCircle className="w-4 h-4" />
-                    </div>
-                    <span className="font-bold text-slate-800 leading-snug">{benefit}</span>
-                  </div>
-                ))}
-              </div>
+        <div className="max-w-4xl mx-auto px-6 text-center">
+          {/* #7 Configurable about_title */}
+          <h2 className="text-4xl font-bold text-slate-900 mb-6">{lp.about_title || 'Tudo o que você precisa em um só lugar.'}</h2>
+          <div className="h-1.5 w-20 bg-primary rounded-full mx-auto mb-10"></div>
+          <div className="text-lg text-slate-600 leading-relaxed text-left">
+            <div className="prose max-w-none text-slate-600">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {lp.about || item.descricao}
+              </ReactMarkdown>
             </div>
           </div>
         </div>
       </section>
+
+      {/* Benefits & Testimonials Section */}
+      {(lp.benefits?.length > 0 || lp.testimonials?.length > 0) && (
+        <section id="vantagens-depoimentos-light" className="py-24 bg-slate-50 border-y border-slate-100">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className={`grid grid-cols-1 ${(lp.benefits?.length > 0 && lp.testimonials?.length > 0) ? 'lg:grid-cols-2 gap-16' : 'gap-16'}`}>
+              
+              {/* Vantagens */}
+              {lp.benefits?.length > 0 && (
+                <div className={(lp.benefits?.length > 0 && lp.testimonials?.length > 0) ? '' : 'max-w-4xl mx-auto w-full'}>
+                  <h3 className={`font-bold text-slate-900 mb-8 ${(lp.benefits?.length > 0 && lp.testimonials?.length > 0) ? 'text-3xl text-center lg:text-left' : 'text-4xl text-center'}`}>O que você vai dominar</h3>
+                  <div className="space-y-4">
+                    {(lp.benefits || []).filter(Boolean).map((benefit: string, idx: number) => (
+                      <div key={idx} className="flex items-start gap-4 p-5 bg-white rounded-2xl border border-slate-200 shadow-sm">
+                        <div className="w-8 h-8 shrink-0 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center">
+                          <CheckCircle className="w-5 h-5" />
+                        </div>
+                        <span className="font-bold text-slate-800 leading-snug">{benefit}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Depoimentos */}
+              {lp.testimonials?.length > 0 && (
+                <div className={(lp.benefits?.length > 0 && lp.testimonials?.length > 0) ? '' : 'max-w-4xl mx-auto w-full'}>
+                  <div className="text-center mb-10">
+                    <h3 className={`font-bold text-slate-900 mb-4 ${(lp.benefits?.length > 0 && lp.testimonials?.length > 0) ? 'text-3xl' : 'text-4xl md:text-5xl'}`}>O que dizem nossos alunos</h3>
+                    <div className="flex items-center justify-center gap-1 text-amber-500">
+                      {[1,2,3,4,5].map(i => <Star key={i} className="w-5 h-5 fill-current" />)}
+                      <span className="ml-2 text-slate-900 font-bold">4.9/5 de satisfação</span>
+                    </div>
+                  </div>
+                  <TestimonialsCarousel testimonials={lp.testimonials} layout={layout} primaryColor={lp.primary_color} />
+                </div>
+              )}
+
+            </div>
+          </div>
+        </section>
+      )}
 
       <TargetAudienceSection targetAudience={lp.target_audience} layout={layout} />
 
@@ -1848,22 +1884,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
         </div>
       </section>
 
-      {/* Testimonials */}
-      {lp.testimonials?.length > 0 && (
-        <section className="py-24 bg-slate-50 overflow-hidden relative border-t border-slate-100/80">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl font-bold text-slate-900 mb-4">O que dizem nossos alunos</h2>
-              <div className="flex items-center justify-center gap-1 text-amber-500">
-                {[1,2,3,4,5].map(i => <Star key={i} className="w-5 h-5 fill-current" />)}
-                <span className="ml-2 text-slate-900 font-bold">4.9/5 de satisfação</span>
-              </div>
-            </div>
-            
-            <TestimonialsCarousel testimonials={lp.testimonials} layout={layout} primaryColor={lp.primary_color} />
-          </div>
-        </section>
-      )}
+
 
       {/* Track Courses Detail */}
       {isTrilha && cursosTrilha.length > 0 && (
