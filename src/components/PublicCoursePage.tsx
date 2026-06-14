@@ -1195,7 +1195,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
               {[
                 { icon: BookOpen, label: isTrilha ? 'Cursos' : 'Módulos', value: `${isTrilha ? cursosTrilha.length : (item.curriculo_json?.length || 0)} ${isTrilha ? 'cursos' : 'aulas'}` },
                 { icon: Clock, label: 'Duração', value: `${item.carga_horaria || '--'} Horas` },
-                { icon: Calendar, label: 'Acesso', value: item.tempo ? `${item.tempo} ${item.duracao_tipo || 'dias'}` : 'Vitalício' },
+                { icon: Calendar, label: 'Acesso', value: item.tempo === 'com_limite' ? `${item.duracao || ''} ${item.duracao_tipo || 'meses'}` : 'Vitalício' },
                 ...(item.tem_certificado ? [{ icon: Award, label: 'Certificado', value: 'Incluso' }] : [])
               ].map((stat, i) => (
                 <div key={i} className="flex flex-col items-center md:items-start text-center md:text-left gap-2 group">
@@ -1733,7 +1733,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
               <Calendar className="w-8 h-8 text-primary mb-3" />
               <span className="text-sm font-bold text-slate-400 uppercase">Acesso</span>
               <span className="text-lg font-bold text-slate-900 capitalize">
-                {item.tempo ? `${item.tempo} ${item.duracao_tipo || 'dias'}` : 'Vitalício'}
+                {item.tempo === 'com_limite' ? `${item.duracao || ''} ${item.duracao_tipo || 'meses'}` : 'Vitalício'}
               </span>
             </div>
             {item.tem_certificado && (
