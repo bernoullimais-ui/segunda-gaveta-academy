@@ -2818,28 +2818,67 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                   {/* Live URL */}
                   <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                     <div className="p-5 border-b border-slate-200">
-                      <h3 className="font-bold text-slate-900">Transmissão (YouTube Live)</h3>
+                      <h3 className="font-bold text-slate-900">Sala de Reunião (Daily.co)</h3>
                     </div>
                     <div className="p-5">
-                      <div className="border border-dashed border-red-400 bg-red-50/10 rounded-lg p-12 flex flex-col items-center justify-center">
+                      <div className="border border-dashed border-blue-400 bg-blue-50/50 rounded-lg p-12 flex flex-col items-center justify-center">
                          <div className="text-center w-full max-w-md space-y-4">
-                           <div className="mx-auto w-10 h-10 text-red-500 flex items-center justify-center mb-2">
+                           <div className="mx-auto w-10 h-10 text-blue-500 flex items-center justify-center mb-2">
                              <VideoIcon className="w-8 h-8 font-light" />
                            </div>
-                           <input 
-                             type="text" 
-                             placeholder="Cole a URL do YouTube Live" 
-                             value={editingStep.url_video || ''}
-                             onChange={(e) => setEditingStep({...editingStep, url_video: e.target.value})}
-                             className="w-full px-4 py-2 border border-slate-300 rounded focus:border-red-500 outline-none"
-                           />
-                           {editingStep.url_video && (editingStep.url_video.includes('youtube.com') || editingStep.url_video.includes('youtu.be')) && (
-                             <div className="aspect-video w-full mt-4 bg-slate-900 rounded overflow-hidden">
-                               <iframe 
-                                 src={getFormattedVideoUrl(editingStep.url_video)} 
-                                 className="w-full h-full border-0"
-                                 allowFullScreen
-                               ></iframe>
+                           
+                           {editingStep.url_video && editingStep.url_video.includes('daily.co') ? (
+                             <div className="bg-white border border-green-200 rounded p-4 text-center">
+                               <p className="text-sm font-bold text-green-600 mb-1">Sala gerada com sucesso!</p>
+                               <a href={editingStep.url_video} target="_blank" rel="noreferrer" className="text-xs text-blue-500 hover:underline">{editingStep.url_video}</a>
+                               <button onClick={() => setEditingStep({...editingStep, url_video: ''})} className="text-xs text-red-500 mt-2 block mx-auto hover:underline">Remover sala</button>
+                             </div>
+                           ) : (
+                             <div className="space-y-4">
+                               <button 
+                                 onClick={async () => {
+                                   try {
+                                     setIsSaving(true);
+                                     const res = await fetch('/api/daily/create-room', { method: 'POST' });
+                                     if (res.ok) {
+                                       const data = await res.json();
+                                       setEditingStep(prev => ({ ...prev, url_video: data.url }));
+                                     } else {
+                                       alert("Erro ao criar sala. Verifique se a API Key do Daily está configurada.");
+                                     }
+                                   } catch (err) {
+                                     alert("Erro de conexão com o servidor.");
+                                   } finally {
+                                     setIsSaving(false);
+                                   }
+                                 }}
+                                 disabled={isSaving}
+                                 className="w-full px-4 py-3 bg-blue-600 text-white rounded font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                               >
+                                 <VideoIcon className="w-5 h-5" />
+                                 Gerar Sala de Reunião Automática
+                               </button>
+                               <div className="flex items-center gap-2 text-slate-400 text-xs uppercase font-bold justify-center py-2">
+                                 <span className="w-12 h-px bg-slate-200"></span>
+                                 <span>ou colar link (YouTube Live)</span>
+                                 <span className="w-12 h-px bg-slate-200"></span>
+                               </div>
+                               <input 
+                                 type="text" 
+                                 placeholder="Cole a URL do YouTube Live ou Daily.co" 
+                                 value={editingStep.url_video || ''}
+                                 onChange={(e) => setEditingStep({...editingStep, url_video: e.target.value})}
+                                 className="w-full px-4 py-2 border border-slate-300 rounded focus:border-blue-500 outline-none"
+                               />
+                               {editingStep.url_video && (editingStep.url_video.includes('youtube.com') || editingStep.url_video.includes('youtu.be')) && (
+                                 <div className="aspect-video w-full mt-4 bg-slate-900 rounded overflow-hidden">
+                                   <iframe 
+                                     src={getFormattedVideoUrl(editingStep.url_video)} 
+                                     className="w-full h-full border-0"
+                                     allowFullScreen
+                                   ></iframe>
+                                 </div>
+                               )}
                              </div>
                            )}
                          </div>

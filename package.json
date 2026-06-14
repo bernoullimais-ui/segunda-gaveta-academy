@@ -14,6 +14,7 @@
     "node": ">=20"
   },
   "dependencies": {
+    "@daily-co/daily-js": "^0.91.0",
     "@google/genai": "^1.29.0",
     "@hello-pangea/dnd": "^18.0.1",
     "@supabase/supabase-js": "^2.105.3",

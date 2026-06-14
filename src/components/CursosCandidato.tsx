@@ -8,6 +8,7 @@ import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import ReactPlayer from 'react-player/youtube';
 import { motion, AnimatePresence } from 'motion/react';
+import { DailyVideoRoom } from './DailyVideoRoom';
 
 
 export function CursosCandidato({ 
@@ -1631,14 +1632,18 @@ export function CursosCandidato({
                   {selectedLesson.tipo === 'ao_vivo' && (
                     <div className="flex flex-col gap-6 mb-8">
                       {selectedLesson.url_video && (
-                        <div className="aspect-video w-full bg-black rounded-xl overflow-hidden shadow-md">
-                          <iframe 
-                            src={getFormattedVideoUrl(selectedLesson.url_video)} 
-                            className="w-full h-full border-0"
-                            allowFullScreen
-                            title="Live Player"
-                          ></iframe>
-                        </div>
+                        selectedLesson.url_video.includes('daily.co') ? (
+                          <DailyVideoRoom roomUrl={selectedLesson.url_video} />
+                        ) : (
+                          <div className="aspect-video w-full bg-black rounded-xl overflow-hidden shadow-md">
+                            <iframe 
+                              src={getFormattedVideoUrl(selectedLesson.url_video)} 
+                              className="w-full h-full border-0"
+                              allowFullScreen
+                              title="Live Player"
+                            ></iframe>
+                          </div>
+                        )
                       )}
                       
                       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
