@@ -3428,14 +3428,38 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                 <p className="text-slate-500 mt-1 italic">Personalize como o mundo vê seu programa e transforme visitantes em alunos.</p>
               </div>
               <div className="flex gap-3">
-                <a 
-                  href={`${window.location.origin}/public/curso/${createdCourseId}`} 
-                  target="_blank" 
-                  rel="noreferrer"
-                  className="px-6 py-2 border border-slate-200 text-slate-700 rounded-full font-medium hover:bg-slate-50 flex items-center gap-2 transition-colors"
-                >
-                  <Eye className="w-4 h-4" /> Visualizar
-                </a>
+                {(() => {
+                  const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                  const orgSlug = loggedUser?.organizacoes?.slug;
+                  const baseUrl = isLocalhost 
+                    ? window.location.origin 
+                    : orgSlug 
+                      ? `https://${orgSlug}.segundagaveta.com.br` 
+                      : window.location.origin;
+                  const finalUrl = `${baseUrl}/public/${editingTrilha ? 'trilha' : 'curso'}/${activeCurso?.slug || activeTrilha?.slug || createdCourseId}`;
+                  
+                  return (
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={() => {
+                          navigator.clipboard.writeText(finalUrl);
+                          showToast('Link da página de vendas copiado!', 'success');
+                        }}
+                        className="px-6 py-2 border border-slate-200 text-slate-700 rounded-full font-medium hover:bg-slate-50 flex items-center gap-2 transition-colors"
+                      >
+                        <Share2 className="w-4 h-4" /> Copiar Link
+                      </button>
+                      <a 
+                        href={finalUrl}
+                        target="_blank" 
+                        rel="noreferrer"
+                        className="px-6 py-2 border border-slate-200 text-slate-700 rounded-full font-medium hover:bg-slate-50 flex items-center gap-2 transition-colors"
+                      >
+                        <Eye className="w-4 h-4" /> Visualizar
+                      </a>
+                    </div>
+                  );
+                })()}
                 <button 
                   onClick={saveLandingPage}
                   className="px-8 py-2 bg-blue-600 text-white rounded-full font-bold hover:bg-blue-700 shadow-md active:scale-95 transition-all flex items-center gap-2"
@@ -4597,6 +4621,13 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                     const completeData = { 
                       ...updateData, 
                       thumbnail_url: formatGoogleDriveUrl(editingSettingsData.thumbnail_url),
+                      slug: currentCurso?.slug || editingSettingsData.nome.toString().toLowerCase()
+                        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                        .replace(/\s+/g, '-')
+                        .replace(/[^\w\-]+/g, '')
+                        .replace(/\-\-+/g, '-')
+                        .replace(/^-+/, '')
+                        .replace(/-+$/, ''),
                       configuracao_json: {
                         ...baseConfig,
                         pagamento_modelo: editingSettingsData.pagamento_modelo,

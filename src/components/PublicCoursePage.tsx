@@ -837,24 +837,27 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
   useEffect(() => {
     async function fetchData() {
       try {
+        const isUuid = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+        const idColumn = isUuid(courseId) ? 'id' : 'slug';
+
         if (isTrilha) {
           const { data: trilha, error: trilhaErr } = await supabase
             .from('trilhas')
             .select('*, organizacoes(*)')
-            .eq('id', courseId)
+            .eq(idColumn, courseId)
             .single();
           if (trilhaErr) throw trilhaErr;
           setItem(trilha);
           const { data: tc, error: tcErr } = await supabase
             .from('trilha_cursos')
             .select('curso_id, cursos(*)')
-            .eq('trilha_id', courseId);
+            .eq('trilha_id', trilha.id);
           if (!tcErr && tc) setCursosTrilha(tc.map((t: any) => t.cursos));
         } else {
           const { data, error } = await supabase
             .from('cursos')
             .select('*, organizacoes(*)')
-            .eq('id', courseId)
+            .eq(idColumn, courseId)
             .single();
           if (error) throw error;
           setItem(data);
