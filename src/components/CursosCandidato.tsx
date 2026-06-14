@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, PlayCircle, CheckCircle, CheckCircle2, ChevronRight, Lock, BookOpen, Clock, FileText, Download, Target, ChevronLeft, Search, Plus, Filter, MessageSquare, Menu, X, Check, Eye, ExternalLink, Calendar, Users, Award, FileQuestion, ArrowRight, Settings, Info, ChevronDown, ChevronUp, Video, RefreshCcw, Maximize2, Sparkles, Bot, Loader2, Trophy, Star, PartyPopper, List } from 'lucide-react';
+import { Play, PlayCircle, CheckCircle, CheckCircle2, ChevronRight, Lock, BookOpen, Clock, FileText, Download, Target, ChevronLeft, Search, Plus, Filter, MessageSquare, Menu, X, Check, Eye, ExternalLink, Calendar, Users, Award, FileQuestion, ArrowRight, Settings, Info, ChevronDown, ChevronUp, Video, RefreshCcw, Maximize2, Sparkles, Bot, Loader2, Trophy, Star, PartyPopper, List, Moon, Sun } from 'lucide-react';
 import { PaymentModal } from './PaymentModal';
 import { supabase } from '../lib/supabase';
 import { generateCertificatePDF } from '../lib/certificateUtils';
@@ -9,6 +9,7 @@ import remarkGfm from 'remark-gfm';
 import ReactPlayer from 'react-player/youtube';
 import { motion, AnimatePresence } from 'motion/react';
 import { DailyVideoRoom } from './DailyVideoRoom';
+import { jsPDF } from 'jspdf';
 
 
 export function CursosCandidato({ 
@@ -115,6 +116,25 @@ export function CursosCandidato({
   const [notesSavedAt, setNotesSavedAt] = useState<Date | null>(null);
   const [isNotesExpanded, setIsNotesExpanded] = useState(false);
   const notesTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Dark Mode
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const savedMode = localStorage.getItem('segunda_gaveta_dark_mode');
+      return savedMode === 'true';
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('segunda_gaveta_dark_mode', 'true');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('segunda_gaveta_dark_mode', 'false');
+    }
+  }, [isDarkMode]);
 
   useEffect(() => {
     const init = async () => {
@@ -230,6 +250,97 @@ export function CursosCandidato({
     notesTimeoutRef.current = setTimeout(() => {
       saveNotes(text);
     }, 2000); // 2 segundos de debounce
+  };
+
+  // Função para exportar PDF do Diário
+  const exportToPDF = async () => {
+    if (!currentUserId || !selectedCurso) return;
+    
+    try {
+      const { data: anotacoes, error } = await supabase
+        .from('curso_anotacoes')
+        .select('etapa_id, conteudo')
+        .eq('usuario_id', currentUserId)
+        .eq('curso_id', selectedCurso.id)
+        .neq('conteudo', '')
+        .not('conteudo', 'is', null);
+
+      if (error) throw error;
+
+      if (!anotacoes || anotacoes.length === 0) {
+        alert('Você ainda não tem anotações neste curso para exportar.');
+        return;
+      }
+
+      const doc = new jsPDF();
+      let yPos = 20;
+      
+      // Título
+      doc.setFontSize(18);
+      doc.setTextColor(30, 58, 138); // blue-900
+      doc.text('Diário de Bordo', 20, yPos);
+      yPos += 10;
+      
+      doc.setFontSize(14);
+      doc.setTextColor(71, 85, 105); // slate-600
+      doc.text(selectedCurso.nome, 20, yPos);
+      yPos += 15;
+
+      doc.setDrawColor(226, 232, 240); // slate-200
+      doc.line(20, yPos, 190, yPos);
+      yPos += 15;
+
+      const curriculo = Array.isArray(selectedCurso.curriculo_json) ? selectedCurso.curriculo_json : [];
+
+      anotacoes.forEach((nota) => {
+        // Encontrar nome do módulo e aula baseado no etapa_id
+        let moduloNome = 'Módulo Desconhecido';
+        let aulaNome = 'Aula Desconhecida';
+        
+        curriculo.forEach((secao: any, sIdx: number) => {
+          secao.etapas?.forEach((etapa: any, eIdx: number) => {
+            const stepId = etapa.id || `step-${sIdx}-${eIdx}`;
+            if (stepId === nota.etapa_id) {
+              moduloNome = secao.nome || `Módulo ${sIdx + 1}`;
+              aulaNome = etapa.nome || `Aula ${eIdx + 1}`;
+            }
+          });
+        });
+
+        // Adiciona nova página se estiver muito no fim
+        if (yPos > 250) {
+          doc.addPage();
+          yPos = 20;
+        }
+
+        doc.setFontSize(12);
+        doc.setTextColor(51, 65, 85); // slate-700
+        doc.setFont('helvetica', 'bold');
+        doc.text(`${moduloNome} - ${aulaNome}`, 20, yPos);
+        yPos += 8;
+
+        doc.setFontSize(10);
+        doc.setTextColor(100, 116, 139); // slate-500
+        doc.setFont('helvetica', 'normal');
+        
+        const textLines = doc.splitTextToSize(nota.conteudo, 170);
+        
+        // Verifica se o texto vai ultrapassar a página
+        if (yPos + (textLines.length * 5) > 280) {
+          doc.addPage();
+          yPos = 20;
+        }
+        
+        doc.text(textLines, 20, yPos);
+        yPos += (textLines.length * 5) + 15;
+      });
+
+      doc.save(`Resumo - ${selectedCurso.nome}.pdf`);
+      
+    } catch (err) {
+      console.error('Erro ao gerar PDF:', err);
+      alert('Houve um erro ao tentar gerar o seu PDF de anotações.');
+    }
   };
 
   useEffect(() => {
@@ -1488,10 +1599,10 @@ export function CursosCandidato({
     const isLastStep = selectedLesson && selectedLesson.secaoIdx === lastSecaoIdx && selectedLesson.etapaIdx === lastEtapaIdx;
 
     return (
-      <div className={isGestor ? 'h-full w-full flex overflow-hidden bg-white' : '-mx-4 md:-mx-8 -my-6 bg-white min-h-[calc(100vh-64px)] flex overflow-hidden relative'}>
+      <div className={isGestor ? 'h-full w-full flex overflow-hidden bg-white dark:bg-slate-900' : '-mx-4 md:-mx-8 -my-6 bg-white dark:bg-slate-900 min-h-[calc(100vh-64px)] flex overflow-hidden relative'}>
         {/* Sidebar */}
-        <div className={`w-full md:w-80 bg-white border-r border-slate-200 flex-shrink-0 flex flex-col transition-all duration-300 ${selectedLesson ? 'hidden md:flex' : 'flex'}`}>
-          <div className="p-4 border-b border-slate-200">
+        <div className={`w-full md:w-80 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex-shrink-0 flex flex-col transition-all duration-300 ${selectedLesson ? 'hidden md:flex' : 'flex'}`}>
+          <div className="p-4 border-b border-slate-200 dark:border-slate-800">
             {!previewCourseId && (
               <button 
                 onClick={() => {
@@ -1499,22 +1610,42 @@ export function CursosCandidato({
                   setSelectedLesson(null);
                   if (onClearInitialCourse) onClearInitialCourse();
                 }}
-                className="flex items-center gap-2 text-slate-500 hover:text-slate-800 font-medium mb-4"
+                className="flex items-center gap-2 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 font-medium mb-4"
               >
                 <ChevronLeft className="w-5 h-5" />
-                <span className="truncate">{selectedCurso.nome}</span>
+                <span className="truncate dark:text-slate-200">{selectedCurso.nome}</span>
               </button>
             )}
             {previewCourseId && (
-              <div className="flex items-center gap-2 text-slate-800 font-medium mb-4">
+              <div className="flex items-center gap-2 text-slate-800 dark:text-slate-200 font-medium mb-4">
                 <span className="truncate">{selectedCurso.nome}</span>
               </div>
             )}
             <div className="flex items-center gap-3">
-              <div className="flex-1 h-1.5 bg-slate-200 rounded-full overflow-hidden">
-                <div className="h-full bg-blue-600 rounded-full" style={{ width: `${progressoPercent}%` }}></div>
+              <div className="flex-1 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                <div className="h-full bg-blue-600 dark:bg-blue-500 rounded-full" style={{ width: `${progressoPercent}%` }}></div>
               </div>
-              <span className="text-xs font-bold text-slate-700">{progressoPercent}%</span>
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{progressoPercent}%</span>
+            </div>
+
+            <div className="flex items-center gap-2 mt-4">
+              <button 
+                onClick={() => setIsDarkMode(!isDarkMode)}
+                className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-medium rounded-lg transition-colors"
+              >
+                {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                {isDarkMode ? 'Modo Claro' : 'Modo Escuro'}
+              </button>
+              
+              {!previewCourseId && userRole !== 'avaliador' && (
+                <button
+                  onClick={exportToPDF}
+                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-400 text-xs font-medium rounded-lg transition-colors"
+                >
+                  <Download className="w-4 h-4" />
+                  Baixar Diário
+                </button>
+              )}
             </div>
 
           </div>
@@ -1522,9 +1653,9 @@ export function CursosCandidato({
           <div className="flex-1 overflow-y-auto">
             <button 
               onClick={() => setSelectedLesson(null)}
-              className={`w-full px-5 py-4 flex items-center gap-3 hover:bg-slate-50 border-b border-slate-200 text-sm font-medium transition-colors ${!selectedLesson ? 'bg-blue-50 text-blue-700' : 'text-slate-700'}`}
+              className={`w-full px-5 py-4 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-sm font-medium transition-colors ${!selectedLesson ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400' : 'text-slate-700 dark:text-slate-300'}`}
             >
-              <Info className={`w-5 h-5 ${!selectedLesson ? 'text-blue-600' : 'text-slate-400'}`} />
+              <Info className={`w-5 h-5 ${!selectedLesson ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 dark:text-slate-500'}`} />
               Visão geral
             </button>
             
@@ -1534,16 +1665,16 @@ export function CursosCandidato({
               const completedInSection = secao.etapas?.filter((e: any, eIdx: number) => completedSteps.includes(getStepId(e, sIdx, eIdx))).length || 0;
 
               return (
-                <div key={sIdx} className="border-b border-slate-200">
+                <div className="border-b border-slate-200 dark:border-slate-800" key={sIdx}>
                   <button 
                     onClick={() => setExpandedSections(prev => ({...prev, [sIdx]: !isExpanded}))}
-                    className="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-slate-50"
+                    className="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors"
                   >
                     <div>
-                      <h4 className="font-bold text-slate-900 text-sm mb-1">{secao.nome || `Seção ${sIdx + 1}`}</h4>
-                      <p className="text-xs text-slate-500">{completedInSection}/{numEtapas} etapas</p>
+                      <h4 className="font-bold text-slate-900 dark:text-slate-200 text-sm mb-1">{secao.nome || `Seção ${sIdx + 1}`}</h4>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">{completedInSection}/{numEtapas} etapas</p>
                     </div>
-                    {isExpanded ? <ChevronUp className="w-5 h-5 text-slate-400 shrink-0" /> : <ChevronDown className="w-5 h-5 text-slate-400 shrink-0" />}
+                    {isExpanded ? <ChevronUp className="w-5 h-5 text-slate-400 dark:text-slate-500 shrink-0" /> : <ChevronDown className="w-5 h-5 text-slate-400 dark:text-slate-500 shrink-0" />}
                   </button>
 
                   {isExpanded && secao.etapas && (
@@ -1589,7 +1720,7 @@ export function CursosCandidato({
         </div>
 
         {/* Content Area */}
-        <div className={`flex-1 bg-white flex flex-col relative h-[calc(100vh-64px)] overflow-hidden ${!selectedLesson ? 'hidden md:flex' : 'flex'}`}>
+        <div className={`flex-1 bg-white dark:bg-slate-900 flex flex-col relative h-[calc(100vh-64px)] overflow-hidden ${!selectedLesson ? 'hidden md:flex' : 'flex'}`}>
           <div className="flex-1 overflow-y-auto">
             {selectedLesson ? (
               <div>
@@ -1597,13 +1728,13 @@ export function CursosCandidato({
                   {/* Mobile Back Button */}
                   <button 
                     onClick={() => setSelectedLesson(null)}
-                    className="flex md:hidden items-center gap-2 text-blue-600 font-bold mb-6"
+                    className="flex md:hidden items-center gap-2 text-blue-600 dark:text-blue-400 font-bold mb-6"
                   >
                     <ChevronLeft className="w-5 h-5" />
                     Voltar para a lista
                   </button>
 
-                  <h1 className="text-2xl md:text-4xl font-bold text-slate-900 mb-8">{selectedLesson.nome}</h1>
+                  <h1 className="text-2xl md:text-4xl font-bold text-slate-900 dark:text-slate-100 mb-8">{selectedLesson.nome}</h1>
                   
                   {selectedLesson.tipo === 'video' && selectedLesson.url_video && (
                     <div className="aspect-video bg-black rounded-lg overflow-hidden mb-8 shadow-sm">
@@ -1771,47 +1902,47 @@ export function CursosCandidato({
                   )}
 
                   {selectedLesson.descricao && selectedLesson.tipo !== 'quiz' && (
-                    <div className="prose prose-slate max-w-none text-slate-700 mb-8" dangerouslySetInnerHTML={{ __html: selectedLesson.descricao.replace(/<a([^>]+)>/g, (match, attrs) => attrs.includes('target=') ? match : `<a${attrs} target="_blank" rel="noopener noreferrer">`) }} />
+                    <div className="prose prose-slate dark:prose-invert max-w-none text-slate-700 dark:text-slate-300 mb-8" dangerouslySetInnerHTML={{ __html: selectedLesson.descricao.replace(/<a([^>]+)>/g, (match, attrs) => attrs.includes('target=') ? match : `<a${attrs} target="_blank" rel="noopener noreferrer">`) }} />
                   )}
 
                   {/* Diário de Bordo */}
                   {userRole !== 'avaliador' && !previewCourseId && (
                     <div className="mb-8">
-                      <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm transition-all duration-300">
+                      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-sm transition-all duration-300">
                         <button 
                           onClick={() => setIsNotesExpanded(!isNotesExpanded)}
-                          className="w-full flex items-center justify-between p-5 bg-slate-50 hover:bg-slate-100 transition-colors border-b border-slate-200"
+                          className="w-full flex items-center justify-between p-5 bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border-b border-slate-200 dark:border-slate-800"
                         >
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                            <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
                               <BookOpen className="w-5 h-5" />
                             </div>
                             <div className="text-left">
-                              <h3 className="font-bold text-slate-800 text-lg">Meu Diário de Bordo</h3>
-                              <p className="text-sm text-slate-500">Anotações privadas para você revisar depois</p>
+                              <h3 className="font-bold text-slate-800 dark:text-slate-200 text-lg">Meu Diário de Bordo</h3>
+                              <p className="text-sm text-slate-500 dark:text-slate-400">Anotações privadas para você revisar depois</p>
                             </div>
                           </div>
                           <div className="flex items-center gap-4">
                             {notesSavedAt && (
-                              <span className="text-xs text-slate-400 font-medium flex items-center gap-1">
+                              <span className="text-xs text-slate-400 dark:text-slate-500 font-medium flex items-center gap-1">
                                 {isSavingNotes ? (
-                                  <><span className="w-3 h-3 border-2 border-slate-300 border-t-slate-500 rounded-full animate-spin"></span> Salvando...</>
+                                  <><span className="w-3 h-3 border-2 border-slate-300 dark:border-slate-600 border-t-slate-500 dark:border-t-slate-400 rounded-full animate-spin"></span> Salvando...</>
                                 ) : (
-                                  <><Check className="w-3 h-3 text-emerald-500" /> Salvo às {notesSavedAt.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</>
+                                  <><Check className="w-3 h-3 text-emerald-500 dark:text-emerald-400" /> Salvo às {notesSavedAt.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</>
                                 )}
                               </span>
                             )}
-                            <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform duration-300 ${isNotesExpanded ? 'rotate-180' : ''}`} />
+                            <ChevronDown className={`w-5 h-5 text-slate-400 dark:text-slate-500 transition-transform duration-300 ${isNotesExpanded ? 'rotate-180' : ''}`} />
                           </div>
                         </button>
                         
                         {isNotesExpanded && (
-                          <div className="p-5 bg-slate-50">
+                          <div className="p-5 bg-slate-50 dark:bg-slate-900">
                             <textarea
                               value={notes}
                               onChange={handleNotesChange}
                               placeholder="Escreva seus principais aprendizados e insights desta aula..."
-                              className="w-full min-h-[200px] p-4 bg-white border border-slate-200 rounded-lg shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y text-slate-700"
+                              className="w-full min-h-[200px] p-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y text-slate-700 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500"
                             />
                           </div>
                         )}
@@ -1822,16 +1953,16 @@ export function CursosCandidato({
                   {selectedLesson.tipo === 'quiz' && (
                     <div className="space-y-6">
                       {quizQuestions.length === 0 ? (
-                        <div className="text-slate-500 italic p-6 bg-slate-50 rounded-lg text-center">
+                        <div className="text-slate-500 dark:text-slate-400 italic p-6 bg-slate-50 dark:bg-slate-800 rounded-lg text-center">
                           O instrutor não adicionou questões a este quiz ainda.
                         </div>
                       ) : (
                         <>
-                          <div className="bg-blue-50 border border-blue-100 p-4 rounded-lg flex items-start gap-3">
-                            <Info className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
+                          <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-900/50 p-4 rounded-lg flex items-start gap-3">
+                            <Info className="w-5 h-5 text-blue-500 dark:text-blue-400 shrink-0 mt-0.5" />
                             <div>
-                              <p className="text-blue-900 font-medium">Instruções</p>
-                              <p className="text-sm text-blue-800 mt-1">Responda a todas as perguntas abaixo para concluir a etapa. Você pode tentar quantas vezes quiser, as respostas não precisam estar corretas para avançar.</p>
+                              <p className="text-blue-900 dark:text-blue-300 font-medium">Instruções</p>
+                              <p className="text-sm text-blue-800 dark:text-blue-400 mt-1">Responda a todas as perguntas abaixo para concluir a etapa. Você pode tentar quantas vezes quiser, as respostas não precisam estar corretas para avançar.</p>
                             </div>
                           </div>
                           
@@ -1847,9 +1978,9 @@ export function CursosCandidato({
                                 : (q.correta ? String.fromCharCode(65 + parseInt(q.correta, 10)) : '');
 
                               return (
-                                <div key={q.id} className="bg-white border text-left border-slate-200 rounded-xl overflow-hidden shadow-sm">
-                                  <div className="p-5 bg-slate-50 border-b border-slate-200">
-                                    <h3 className="font-medium text-slate-900"><span className="text-slate-500 mr-2">{qIdx + 1}.</span> {text}</h3>
+                                <div key={q.id} className="bg-white dark:bg-slate-900 border text-left border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-sm">
+                                  <div className="p-5 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
+                                    <h3 className="font-medium text-slate-900 dark:text-slate-100"><span className="text-slate-500 dark:text-slate-400 mr-2">{qIdx + 1}.</span> {text}</h3>
                                   </div>
                                   <div className="p-5 space-y-3">
                                     {optionsList.map((optText, optIdx) => {
@@ -1858,19 +1989,19 @@ export function CursosCandidato({
                                       const isSelected = quizAnswers[q.id] === letterChar;
                                       const isCorrect = correctLetter === letterChar;
                                       
-                                      let optionClass = 'border-slate-200 hover:border-blue-300';
-                                      let bgClass = 'bg-white';
-                                      let circleClass = 'border-slate-300';
+                                      let optionClass = 'border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-500';
+                                      let bgClass = 'bg-white dark:bg-slate-800';
+                                      let circleClass = 'border-slate-300 dark:border-slate-600';
                                       
                                       if (quizSubmitted) {
                                         if (isSelected) {
                                           if (isCorrect) {
-                                            optionClass = 'border-emerald-500';
-                                            bgClass = 'bg-emerald-50';
+                                            optionClass = 'border-emerald-500 dark:border-emerald-500';
+                                            bgClass = 'bg-emerald-50 dark:bg-emerald-900/30';
                                             circleClass = 'border-emerald-500 bg-emerald-500 text-white';
                                           } else {
-                                            optionClass = 'border-red-500';
-                                            bgClass = 'bg-red-50';
+                                            optionClass = 'border-red-500 dark:border-red-500';
+                                            bgClass = 'bg-red-50 dark:bg-red-900/30';
                                             circleClass = 'border-red-500 bg-red-500 text-white';
                                           }
                                         } else if (isCorrect) {

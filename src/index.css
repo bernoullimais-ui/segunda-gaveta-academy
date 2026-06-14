@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-indigo-50: var(--brand-color-50, #f5f3ff);
   --color-indigo-100: var(--brand-color-100, #ede9fe);
