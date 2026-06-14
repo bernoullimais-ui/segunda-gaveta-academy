@@ -15,11 +15,13 @@ router.get(['/public/curso/:slug', '/public/trilha/:slug'], async (req, res) => 
     const supabase = getSupabase();
     const table = isTrilha ? 'trilhas' : 'cursos';
     
-    const { data: curso } = await supabase
+    const { data: curso, error: cursoErr } = await supabase
       .from(table)
       .select('nome, descricao, thumbnail_url, capa_url')
       .eq(idColumn, slug)
       .single();
+
+    const debugError = cursoErr ? JSON.stringify(cursoErr) : 'none';
 
     // Busca o index.html gerado pelo Vite (servido pela Vercel na rota principal /)
     const protocol = req.headers['x-forwarded-proto'] || 'https';
@@ -59,7 +61,7 @@ router.get(['/public/curso/:slug', '/public/trilha/:slug'], async (req, res) => 
       
       html = html.replace('</head>', `\n${ogTags}\n</head>`);
     } else {
-      html = html.replace('</head>', `\n<meta name="x-debug" content="curso-nao-encontrado" />\n</head>`);
+      html = html.replace('</head>', `\n<meta name="x-debug" content="curso-nao-encontrado" /><meta name="x-err" content='${debugError}' />\n</head>`);
     }
 
     res.send(html);
