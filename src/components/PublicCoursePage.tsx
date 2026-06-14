@@ -1102,16 +1102,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                     )}
                   </div>
                 </div>
-                {/* Floating pill in dark mode */}
-                <div className="absolute -left-4 -bottom-4 bg-slate-800/80 backdrop-blur-xl p-6 rounded-3xl border border-slate-700 shadow-2xl flex items-center gap-4">
-                  <div className="w-12 h-12 bg-primary/20 text-primary rounded-2xl flex items-center justify-center">
-                    <Star className="w-6 h-6 fill-current" />
-                  </div>
-                  <div>
-                    <div className="text-white font-bold text-left">Conteúdo Premium</div>
-                    <div className="text-xs text-slate-400 font-medium tracking-wide text-left">ASSISTA AGORA</div>
-                  </div>
-                </div>
+
               </div>
 
               <div className="space-y-10 order-1 lg:order-2 animate-in fade-in slide-in-from-right-12 duration-1000 text-left">
@@ -1703,15 +1694,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                   />
                 )}
               </div>
-              <div className="hidden md:block absolute -right-6 -bottom-6 bg-white p-6 rounded-2xl shadow-xl border border-slate-100 max-w-[200px] animate-bounce">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center">
-                    <Clock className="w-5 h-5" />
-                  </div>
-                  <span className="text-xs font-bold uppercase text-slate-400">Acesso</span>
-                </div>
-                <p className="text-slate-800 font-bold leading-tight">Imediato e Vitalício</p>
-              </div>
+
             </div>
           </div>
         </div>
