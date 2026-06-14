@@ -2306,7 +2306,7 @@ export function CursosCandidato({
 
           {/* Bottom Bar */}
           {selectedLesson && (
-            <div className="border-t border-slate-200 bg-white p-4 flex flex-col sm:flex-row justify-between items-center gap-4 sticky bottom-0">
+            <div className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 flex flex-col sm:flex-row justify-between items-center gap-4 sticky bottom-0 z-10">
               <button 
                 disabled={userRole !== 'avaliador' && ((selectedLesson.tipo === 'video' && videoSettings?.assistirObrigatorio && !videoWatched) || (selectedLesson.tipo === 'ao_vivo' && !completedSteps.includes(selectedLesson._calculatedId)))}
                 onClick={() => {
@@ -2319,8 +2319,8 @@ export function CursosCandidato({
                 }}
                 className={`flex items-center gap-2 font-medium text-sm transition-colors ${
                   userRole !== 'avaliador' && ((selectedLesson.tipo === 'video' && videoSettings?.assistirObrigatorio && !videoWatched) || (selectedLesson.tipo === 'ao_vivo' && !completedSteps.includes(selectedLesson._calculatedId)))
-                  ? 'text-slate-400 cursor-not-allowed'
-                  : 'text-blue-600 hover:underline'
+                  ? 'text-slate-400 dark:text-slate-500 cursor-not-allowed'
+                  : 'text-blue-600 dark:text-blue-400 hover:underline'
                 }`}
               >
                 {completedSteps.includes(selectedLesson._calculatedId) ? (
@@ -2345,8 +2345,8 @@ export function CursosCandidato({
                 }}
                 className={`w-full sm:w-auto px-8 py-2.5 rounded-lg font-medium flex justify-center items-center gap-2 transition-colors ${
                   userRole !== 'avaliador' && ((selectedLesson.tipo === 'video' && videoSettings?.assistirObrigatorio && !videoWatched) || (selectedLesson.tipo === 'ao_vivo' && !completedSteps.includes(selectedLesson._calculatedId)))
-                  ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
-                  : 'bg-blue-600 hover:bg-blue-700 text-white'
+                  ? 'bg-slate-300 dark:bg-slate-700 text-slate-500 dark:text-slate-400 cursor-not-allowed'
+                  : 'bg-blue-600 dark:bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-500 text-white'
                 }`}
               >
                 {isLastStep ? (
