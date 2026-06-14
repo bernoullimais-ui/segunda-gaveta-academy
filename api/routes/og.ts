@@ -54,10 +54,12 @@ router.get(['/public/curso/:slug', '/public/trilha/:slug'], async (req, res) => 
         <meta name="twitter:title" content="${title}" />
         <meta name="twitter:description" content="${description}..." />
         ${imageUrl ? `<meta name="twitter:image" content="${imageUrl}" />` : ''}
+        <meta name="x-debug" content="curso-encontrado" />
       `;
       
-      // Substitui o final do head pelas tags Open Graph
       html = html.replace('</head>', `\n${ogTags}\n</head>`);
+    } else {
+      html = html.replace('</head>', `\n<meta name="x-debug" content="curso-nao-encontrado" />\n</head>`);
     }
 
     res.send(html);
