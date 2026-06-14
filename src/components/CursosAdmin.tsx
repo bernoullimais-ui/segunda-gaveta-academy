@@ -2874,6 +2874,13 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                           <button onPointerDown={(e) => { e.preventDefault(); applyCommand('underline'); }} className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-200 rounded transition-colors" title="Sublinhado">
                             <Underline className="w-4 h-4" />
                           </button>
+                          <button onPointerDown={(e) => { 
+                            e.preventDefault(); 
+                            const url = window.prompt('Digite a URL do link (ex: https://...):');
+                            if (url) applyCommand('createLink', url); 
+                          }} className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-200 rounded transition-colors" title="Adicionar Link">
+                            <LinkIcon className="w-4 h-4" />
+                          </button>
                           <div className="w-px h-5 bg-slate-300 mx-1"></div>
                           <button onPointerDown={(e) => { e.preventDefault(); applyCommand('insertUnorderedList'); }} className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-200 rounded transition-colors" title="Marcadores (Lista)">
                             <List className="w-4 h-4" />
@@ -3219,6 +3226,13 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                           </button>
                           <button onPointerDown={(e) => { e.preventDefault(); applyCommand('underline'); }} className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-200 rounded transition-colors" title="Sublinhado">
                             <Underline className="w-4 h-4" />
+                          </button>
+                          <button onPointerDown={(e) => { 
+                            e.preventDefault(); 
+                            const url = window.prompt('Digite a URL do link (ex: https://...):');
+                            if (url) applyCommand('createLink', url); 
+                          }} className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-200 rounded transition-colors" title="Adicionar Link">
+                            <LinkIcon className="w-4 h-4" />
                           </button>
                           <div className="w-px h-5 bg-slate-300 mx-1"></div>
                           <button onPointerDown={(e) => { e.preventDefault(); applyCommand('insertUnorderedList'); }} className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-200 rounded transition-colors" title="Marcadores (Lista)">
