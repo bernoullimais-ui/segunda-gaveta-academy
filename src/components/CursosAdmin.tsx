@@ -831,7 +831,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
 
       let queryCursos = supabase
         .from('cursos')
-        .select('id, nome, preco, status, ordem, created_at, thumbnail_url, professor_nome, professor_titulo, professor_foto_url, descricao, carga_horaria, ritmo, tempo, duracao, duracao_tipo, valor, em_breve, configuracao_json, curriculo_json, tem_certificado');
+        .select('id, nome, slug, preco, status, ordem, created_at, thumbnail_url, professor_nome, professor_titulo, professor_foto_url, descricao, carga_horaria, ritmo, tempo, duracao, duracao_tipo, valor, em_breve, configuracao_json, curriculo_json, tem_certificado');
         
       let queryTrilhas = supabase
         .from('trilhas')
