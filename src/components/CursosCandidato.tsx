@@ -1689,7 +1689,7 @@ export function CursosCandidato({
                             onClick={() => {
                               setSelectedLesson({ ...etapa, _calculatedId: stepId, cursoNome: selectedCurso.nome, secaoNome: secao.nome, secaoIdx: sIdx, etapaIdx: eIdx });
                             }}
-                            className={`w-full text-left px-5 py-4 flex gap-4 ${isSelected ? 'bg-blue-50' : 'hover:bg-slate-50'}`}
+                            className={`w-full text-left px-5 py-4 flex gap-4 ${isSelected ? 'bg-blue-50 dark:bg-blue-900/30' : 'hover:bg-slate-50 dark:hover:bg-slate-800/30'}`}
                           >
                             <div className="mt-0.5">
                               {isCompleted ? (
@@ -1697,13 +1697,13 @@ export function CursosCandidato({
                                   <CheckCircle className="w-3.5 h-3.5 text-white" />
                                 </div>
                               ) : (
-                                <div className="w-5 h-5 rounded-full border-2 border-slate-300 flex items-center justify-center">
+                                <div className="w-5 h-5 rounded-full border-2 border-slate-300 dark:border-slate-600 flex items-center justify-center">
                                 </div>
                               )}
                             </div>
                             <div className="flex-1">
-                              <span className={`text-sm ${isCompleted ? 'text-slate-500' : 'text-slate-800'}`}>{etapa.nome}</span>
-                              <div className="flex items-center gap-1.5 mt-1 text-slate-400">
+                              <span className={`text-sm ${isCompleted ? 'text-slate-500 dark:text-slate-500' : 'text-slate-800 dark:text-slate-200'}`}>{etapa.nome}</span>
+                              <div className="flex items-center gap-1.5 mt-1 text-slate-400 dark:text-slate-500">
                                 {etapa.tipo === 'video' ? <Video className="w-3.5 h-3.5" /> : (etapa.tipo === 'multi_video' ? <List className="w-3.5 h-3.5" /> : (etapa.tipo === 'quiz' ? <CheckCircle className="w-3.5 h-3.5" /> : (etapa.tipo === 'ao_vivo' ? <Video className="w-3.5 h-3.5" /> : <FileText className="w-3.5 h-3.5" />)))}
                                 <span className="text-xs">{etapa.tempo_video || (etapa.tipo === 'video' ? 'Vídeo' : (etapa.tipo === 'multi_video' ? 'Multi-vídeo' : (etapa.tipo === 'quiz' ? 'Quiz' : (etapa.tipo === 'ao_vivo' ? 'Ao vivo' : 'Artigo'))))}</span>
                               </div>
@@ -1861,9 +1861,9 @@ export function CursosCandidato({
                       )}
                       
                       {!selectedLesson.url_video?.includes('daily.co') && (
-                        <div className="bg-slate-50 rounded-xl border border-slate-200 flex flex-col overflow-hidden" style={{ minHeight: '400px', maxHeight: '500px' }}>
-                          <div className="bg-white border-b border-slate-200 p-4 flex justify-between items-center">
-                             <h3 className="font-bold text-slate-800 text-sm flex items-center gap-2"><MessageSquare className="w-4 h-4 text-blue-600"/> Chat ao vivo</h3>
+                        <div className="bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col overflow-hidden" style={{ minHeight: '400px', maxHeight: '500px' }}>
+                          <div className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-800 p-4 flex justify-between items-center">
+                             <h3 className="font-bold text-slate-800 dark:text-slate-200 text-sm flex items-center gap-2"><MessageSquare className="w-4 h-4 text-blue-600 dark:text-blue-400"/> Chat ao vivo</h3>
                              {participantCount > 0 && (
                                <div className="flex items-center gap-1.5 px-2 py-1 bg-green-50 text-green-700 rounded-lg border border-green-100 text-[10px] font-bold">
                                  <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
@@ -1872,15 +1872,15 @@ export function CursosCandidato({
                              )}
                           </div>
                           <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                             <div className="text-center text-xs text-slate-400 my-4">O chat foi iniciado. Seja respeitoso e siga as diretrizes.</div>
+                             <div className="text-center text-xs text-slate-400 dark:text-slate-500 my-4">O chat foi iniciado. Seja respeitoso e siga as diretrizes.</div>
                              {chatMessages.map(msg => (
                                <div key={msg.id} className="text-sm">
-                                 <span className="font-bold text-slate-700 mr-2">{msg.user_name}:</span>
-                                 <span className="text-slate-600">{msg.text}</span>
+                                 <span className="font-bold text-slate-700 dark:text-slate-300 mr-2">{msg.user_name}:</span>
+                                 <span className="text-slate-600 dark:text-slate-400">{msg.text}</span>
                                </div>
                              ))}
                           </div>
-                          <div className="bg-white border-t border-slate-200 p-3">
+                          <div className="bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-800 p-3">
                              <div className="flex gap-2 relative">
                                 <input 
                                   type="text" 
@@ -1888,7 +1888,7 @@ export function CursosCandidato({
                                   value={chatInput}
                                   onChange={e => setChatInput(e.target.value)}
                                   onKeyDown={e => e.key === 'Enter' && sendChatMessage()}
-                                  className="w-full px-4 py-2 bg-slate-100 border-transparent rounded-full text-sm outline-none focus:bg-white focus:border-slate-300 border transition-colors pr-16" 
+                                  className="w-full px-4 py-2 bg-slate-100 dark:bg-slate-900 border-transparent dark:border-slate-700 rounded-full text-sm outline-none focus:bg-white dark:focus:bg-slate-800 focus:border-slate-300 dark:focus:border-slate-600 border transition-colors pr-16 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500" 
                                 />
                                 <button 
                                   onClick={sendChatMessage}
