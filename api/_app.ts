@@ -25,6 +25,7 @@ import webhookRouter from './routes/webhook.js';
 import cronRouter from './routes/cron.js';
 import notificationsRouter from './routes/notifications.js';
 import refundRouter from './routes/refund.js';
+import ogRouter from './routes/og.js';
 
 // ─── Middleware de segurança para webhook ────────────────────────────────────
 import { validatePagarmeWebhook } from './lib/webhookAuth.js';
@@ -47,6 +48,9 @@ app.use(
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', ts: new Date().toISOString() });
 });
+
+// Middleware de Open Graph para links amigáveis
+app.use(ogRouter);
 
 app.get('/api/diag', (req, res) => {
   const secretToken = process.env.DIAG_SECRET_TOKEN;
