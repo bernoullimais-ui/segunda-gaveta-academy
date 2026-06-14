@@ -4564,6 +4564,15 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                   if (!createdCourseId) return;
                   setIsSaving(true);
                   try {
+                    const formatGoogleDriveUrl = (url: string | undefined | null) => {
+                      if (!url) return url;
+                      const match1 = url.match(/drive\.google\.com\/file\/d\/([^\/]+)/i);
+                      if (match1 && match1[1]) return `https://drive.google.com/uc?export=view&id=${match1[1]}`;
+                      const match2 = url.match(/drive\.google\.com\/open\?id=([^&]+)/i);
+                      if (match2 && match2[1]) return `https://drive.google.com/uc?export=view&id=${match2[1]}`;
+                      return url;
+                    };
+
                     const updateData: any = {
                       nome: editingSettingsData.nome,
                       descricao: editingSettingsData.descricao,
@@ -4575,7 +4584,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                       valor: editingSettingsData.preco === 'pago' && editingSettingsData.valor ? parseFloat(editingSettingsData.valor) : null,
                       professor_nome: editingSettingsData.professor_nome,
                       professor_titulo: editingSettingsData.professor_titulo,
-                      professor_foto_url: editingSettingsData.professor_foto_url,
+                      professor_foto_url: formatGoogleDriveUrl(editingSettingsData.professor_foto_url),
                       carga_horaria: editingSettingsData.carga_horaria,
                       em_breve: editingSettingsData.em_breve
                     };
@@ -4585,7 +4594,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
 
                     const completeData = { 
                       ...updateData, 
-                      thumbnail_url: editingSettingsData.thumbnail_url,
+                      thumbnail_url: formatGoogleDriveUrl(editingSettingsData.thumbnail_url),
                       configuracao_json: {
                         ...baseConfig,
                         pagamento_modelo: editingSettingsData.pagamento_modelo,
