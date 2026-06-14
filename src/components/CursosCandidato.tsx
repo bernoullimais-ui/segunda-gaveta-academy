@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { PlayCircle, Clock, Award, ChevronRight, FileText, CheckCircle, ChevronLeft, Calendar, Maximize2, RefreshCcw, Info, ChevronDown, ChevronUp, Video, Check, X, MessageSquare, Download, List, Users, Sparkles, Bot, Loader2, BookOpen, Trophy, Star, PartyPopper } from 'lucide-react';
+import { Play, CheckCircle2, ChevronRight, Lock, BookOpen, Clock, FileText, Download, Target, ChevronLeft, Search, Plus, Filter, MessageSquare, Menu, X, Check, Eye, ExternalLink, Calendar, Users, Award, FileQuestion, ArrowRight, Settings, Info, ChevronDown, ChevronUp, Video, RefreshCcw, Maximize2, Sparkles, Bot, Loader2, Trophy, Star, PartyPopper, List } from 'lucide-react';
 import { PaymentModal } from './PaymentModal';
 import { supabase } from '../lib/supabase';
 import { generateCertificatePDF } from '../lib/certificateUtils';
@@ -108,6 +108,13 @@ export function CursosCandidato({
   // Current user state
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [stats, setStats] = useState<{[key: string]: {participantes: number, concluintes: number}}>({});
+  
+  // Diário de Bordo
+  const [notes, setNotes] = useState<string>('');
+  const [isSavingNotes, setIsSavingNotes] = useState(false);
+  const [notesSavedAt, setNotesSavedAt] = useState<Date | null>(null);
+  const [isNotesExpanded, setIsNotesExpanded] = useState(false);
+  const notesTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const init = async () => {
@@ -147,6 +154,82 @@ export function CursosCandidato({
 
   const getStepId = (etapa: any, sIdx: number, eIdx: number) => {
     return etapa.id || `step-${sIdx}-${eIdx}`;
+  };
+
+  // Carregar anotações ao mudar de aula
+  useEffect(() => {
+    if (!selectedLesson || !currentUserId || !selectedCurso) return;
+
+    const fetchNotes = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('curso_anotacoes')
+          .select('conteudo, updated_at')
+          .eq('usuario_id', currentUserId)
+          .eq('curso_id', selectedCurso.id)
+          .eq('etapa_id', selectedLesson._calculatedId)
+          .maybeSingle();
+
+        if (data) {
+          setNotes(data.conteudo || '');
+          setNotesSavedAt(new Date(data.updated_at));
+        } else {
+          setNotes('');
+          setNotesSavedAt(null);
+        }
+        setIsSavingNotes(false);
+      } catch (err) {
+        console.error('Erro ao carregar anotações:', err);
+      }
+    };
+
+    fetchNotes();
+
+    return () => {
+      if (notesTimeoutRef.current) {
+        clearTimeout(notesTimeoutRef.current);
+      }
+    };
+  }, [selectedLesson, currentUserId, selectedCurso]);
+
+  // Função para salvar anotações no Supabase
+  const saveNotes = async (text: string) => {
+    if (!selectedLesson || !currentUserId || !selectedCurso) return;
+    
+    setIsSavingNotes(true);
+    try {
+      const { error } = await supabase
+        .from('curso_anotacoes')
+        .upsert({
+          usuario_id: currentUserId,
+          curso_id: selectedCurso.id,
+          etapa_id: selectedLesson._calculatedId,
+          conteudo: text,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'usuario_id,curso_id,etapa_id' });
+
+      if (!error) {
+        setNotesSavedAt(new Date());
+      }
+    } catch (err) {
+      console.error('Erro ao salvar anotação:', err);
+    } finally {
+      setIsSavingNotes(false);
+    }
+  };
+
+  // Tratar mudança no texto com debounce
+  const handleNotesChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const text = e.target.value;
+    setNotes(text);
+    
+    if (notesTimeoutRef.current) {
+      clearTimeout(notesTimeoutRef.current);
+    }
+    
+    notesTimeoutRef.current = setTimeout(() => {
+      saveNotes(text);
+    }, 2000); // 2 segundos de debounce
   };
 
   useEffect(() => {
@@ -1688,7 +1771,52 @@ export function CursosCandidato({
                   )}
 
                   {selectedLesson.descricao && selectedLesson.tipo !== 'quiz' && (
-                    <div className="prose prose-slate max-w-none text-slate-700" dangerouslySetInnerHTML={{ __html: selectedLesson.descricao.replace(/<a([^>]+)>/g, (match, attrs) => attrs.includes('target=') ? match : `<a${attrs} target="_blank" rel="noopener noreferrer">`) }} />
+                    <div className="prose prose-slate max-w-none text-slate-700 mb-8" dangerouslySetInnerHTML={{ __html: selectedLesson.descricao.replace(/<a([^>]+)>/g, (match, attrs) => attrs.includes('target=') ? match : `<a${attrs} target="_blank" rel="noopener noreferrer">`) }} />
+                  )}
+
+                  {/* Diário de Bordo */}
+                  {userRole !== 'avaliador' && !previewCourseId && (
+                    <div className="mb-8">
+                      <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm transition-all duration-300">
+                        <button 
+                          onClick={() => setIsNotesExpanded(!isNotesExpanded)}
+                          className="w-full flex items-center justify-between p-5 bg-slate-50 hover:bg-slate-100 transition-colors border-b border-slate-200"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                              <BookOpen className="w-5 h-5" />
+                            </div>
+                            <div className="text-left">
+                              <h3 className="font-bold text-slate-800 text-lg">Meu Diário de Bordo</h3>
+                              <p className="text-sm text-slate-500">Anotações privadas para você revisar depois</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            {notesSavedAt && (
+                              <span className="text-xs text-slate-400 font-medium flex items-center gap-1">
+                                {isSavingNotes ? (
+                                  <><span className="w-3 h-3 border-2 border-slate-300 border-t-slate-500 rounded-full animate-spin"></span> Salvando...</>
+                                ) : (
+                                  <><Check className="w-3 h-3 text-emerald-500" /> Salvo às {notesSavedAt.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</>
+                                )}
+                              </span>
+                            )}
+                            <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform duration-300 ${isNotesExpanded ? 'rotate-180' : ''}`} />
+                          </div>
+                        </button>
+                        
+                        {isNotesExpanded && (
+                          <div className="p-5 bg-slate-50">
+                            <textarea
+                              value={notes}
+                              onChange={handleNotesChange}
+                              placeholder="Escreva seus principais aprendizados e insights desta aula..."
+                              className="w-full min-h-[200px] p-4 bg-white border border-slate-200 rounded-lg shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y text-slate-700"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   )}
 
                   {selectedLesson.tipo === 'quiz' && (
