@@ -1633,7 +1633,7 @@ export function CursosCandidato({
                     <div className="flex flex-col gap-6 mb-8">
                       {selectedLesson.url_video && (
                         selectedLesson.url_video.includes('daily.co') ? (
-                          <DailyVideoRoom roomUrl={selectedLesson.url_video} />
+                          <DailyVideoRoom key={selectedLesson.id || selectedLesson.url_video} roomUrl={selectedLesson.url_video} />
                         ) : (
                           <div className="aspect-video w-full bg-black rounded-xl overflow-hidden shadow-md">
                             <iframe 
