@@ -1728,7 +1728,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
             <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex justify-between items-start">
               <div className="flex gap-6 items-start">
                 <div 
-                  className="w-24 h-16 bg-slate-100 border border-slate-200 rounded flex items-center justify-center font-bold text-lg text-slate-800 bg-cover bg-center"
+                  className="w-32 aspect-video bg-slate-100 border border-slate-200 rounded flex items-center justify-center font-bold text-lg text-slate-800 bg-cover bg-center"
                   style={{ backgroundImage: (activeCurso?.thumbnail_url || activeTrilha?.capa_url) ? `url("${activeCurso?.thumbnail_url || activeTrilha?.capa_url}")` : undefined }}
                 >
                   {!(activeCurso?.thumbnail_url || activeTrilha?.capa_url) && (

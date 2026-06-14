@@ -1109,7 +1109,7 @@ export function CursosCandidato({
             coursesToDisplay.map((curso: any) => (
               <div key={curso.id} className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-6">
                 <div className="w-full md:w-64 flex flex-col gap-3 shrink-0">
-                  <div className="w-full h-40 bg-slate-100 rounded-lg flex items-center justify-center font-bold text-xl text-slate-800 border border-slate-200 bg-cover bg-center" style={{ backgroundImage: curso.thumbnail_url ? `url("${curso.thumbnail_url}")` : undefined }}>
+                  <div className="w-full aspect-video bg-slate-100 rounded-lg flex items-center justify-center font-bold text-xl text-slate-800 border border-slate-200 bg-cover bg-center" style={{ backgroundImage: curso.thumbnail_url ? `url("${curso.thumbnail_url}")` : undefined }}>
                     {!curso.thumbnail_url && curso.nome}
                   </div>
                 <div className="flex flex-col gap-2 w-full items-center">

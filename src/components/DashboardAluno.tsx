@@ -342,7 +342,7 @@ export function DashboardAluno({ loggedUser, onNavigateToCourse }: DashboardAlun
                 onClick={() => onNavigateToCourse(course)}
               >
                 <div 
-                  className="h-40 bg-slate-100 bg-cover bg-center flex items-center justify-center font-bold text-slate-300"
+                  className="aspect-video w-full bg-slate-100 bg-cover bg-center flex items-center justify-center font-bold text-slate-300"
                   style={{ backgroundImage: course.thumbnail_url ? `url(${course.thumbnail_url})` : undefined }}
                 >
                   {!course.thumbnail_url && "Sem Thumbnail"}
