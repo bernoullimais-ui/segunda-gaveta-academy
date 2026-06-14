@@ -9,7 +9,7 @@ interface DailyVideoRoomProps {
 export function DailyVideoRoom({ roomUrl, onLeave }: DailyVideoRoomProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const callFrameRef = useRef<DailyCall | null>(null);
-  const [hasJoined, setHasJoined] = useState(false);
+  const [isIframeLoaded, setIsIframeLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -30,12 +30,12 @@ export function DailyVideoRoom({ roomUrl, onLeave }: DailyVideoRoomProps) {
 
       callFrameRef.current = callFrame;
 
-      callFrame.on('joined-meeting', () => {
-        setHasJoined(true);
+      callFrame.on('loaded', () => {
+        setIsIframeLoaded(true);
       });
 
       callFrame.on('left-meeting', () => {
-        setHasJoined(false);
+        setIsIframeLoaded(false);
         callFrame.destroy();
         callFrameRef.current = null;
         if (onLeave) onLeave();
@@ -63,7 +63,7 @@ export function DailyVideoRoom({ roomUrl, onLeave }: DailyVideoRoomProps) {
 
   return (
     <div className="w-full aspect-video md:h-[600px] bg-slate-900 rounded-2xl flex items-center justify-center relative overflow-hidden">
-      {!hasJoined && !error && (
+      {!isIframeLoaded && !error && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900 z-10">
           <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
           <p className="text-slate-400 font-medium">Conectando ao encontro ao vivo...</p>
