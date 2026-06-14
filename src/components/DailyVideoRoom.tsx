@@ -18,6 +18,7 @@ export function DailyVideoRoom({ roomUrl, onLeave }: DailyVideoRoomProps) {
     try {
       const callFrame = DailyIframe.createFrame(containerRef.current, {
         showLeaveButton: true,
+        lang: 'pt',
         iframeStyle: {
           width: '100%',
           height: '100%',
