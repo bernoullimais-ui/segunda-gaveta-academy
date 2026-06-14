@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, CheckCircle2, ChevronRight, Lock, BookOpen, Clock, FileText, Download, Target, ChevronLeft, Search, Plus, Filter, MessageSquare, Menu, X, Check, Eye, ExternalLink, Calendar, Users, Award, FileQuestion, ArrowRight, Settings, Info, ChevronDown, ChevronUp, Video, RefreshCcw, Maximize2, Sparkles, Bot, Loader2, Trophy, Star, PartyPopper, List } from 'lucide-react';
+import { Play, PlayCircle, CheckCircle, CheckCircle2, ChevronRight, Lock, BookOpen, Clock, FileText, Download, Target, ChevronLeft, Search, Plus, Filter, MessageSquare, Menu, X, Check, Eye, ExternalLink, Calendar, Users, Award, FileQuestion, ArrowRight, Settings, Info, ChevronDown, ChevronUp, Video, RefreshCcw, Maximize2, Sparkles, Bot, Loader2, Trophy, Star, PartyPopper, List } from 'lucide-react';
 import { PaymentModal } from './PaymentModal';
 import { supabase } from '../lib/supabase';
 import { generateCertificatePDF } from '../lib/certificateUtils';
