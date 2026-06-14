@@ -4567,9 +4567,11 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                     const formatGoogleDriveUrl = (url: string | undefined | null) => {
                       if (!url) return url;
                       const match1 = url.match(/drive\.google\.com\/file\/d\/([^\/]+)/i);
-                      if (match1 && match1[1]) return `https://drive.google.com/uc?export=view&id=${match1[1]}`;
+                      if (match1 && match1[1]) return `https://lh3.googleusercontent.com/d/${match1[1]}`;
                       const match2 = url.match(/drive\.google\.com\/open\?id=([^&]+)/i);
-                      if (match2 && match2[1]) return `https://drive.google.com/uc?export=view&id=${match2[1]}`;
+                      if (match2 && match2[1]) return `https://lh3.googleusercontent.com/d/${match2[1]}`;
+                      const match3 = url.match(/drive\.google\.com\/uc\?export=view&id=([^&]+)/i);
+                      if (match3 && match3[1]) return `https://lh3.googleusercontent.com/d/${match3[1]}`;
                       return url;
                     };
 
