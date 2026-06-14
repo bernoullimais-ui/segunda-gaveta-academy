@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Settings, Users, BarChart2, BookOpen, Clock, Lock, PlayCircle, Plus, Eye, Share2, Download, Search, Filter, MoreHorizontal, MessageSquare, Award, CheckCircle, ChevronLeft, Calendar, FileText, Gift, DollarSign, Loader2, Image as ImageIcon, Minus, Code, Video as VideoIcon, ShoppingBag, User, CalendarCheck, List, Paperclip, Volume2, Pencil, Trash2, Check, X, Table, Bold, Italic, Underline, ListOrdered, GripVertical, AlertTriangle, Database, Upload, LayoutDashboard, Sparkles, AlertCircle, Info } from 'lucide-react';
+import { Settings, Users, BarChart2, BookOpen, Clock, Lock, PlayCircle, Plus, Eye, Share2, Download, Search, Filter, MoreHorizontal, MessageSquare, Award, CheckCircle, ChevronLeft, Calendar, FileText, Gift, DollarSign, Loader2, Image as ImageIcon, Minus, Code, Video as VideoIcon, ShoppingBag, User, CalendarCheck, List, Paperclip, Volume2, Pencil, Trash2, Check, X, Table, Bold, Italic, Underline, ListOrdered, GripVertical, AlertTriangle, Database, Upload, LayoutDashboard, Sparkles, AlertCircle, Info, Link as LinkIcon } from 'lucide-react';
 import { motion, AnimatePresence, Reorder } from 'motion/react';
 import { MarketingLinksModal } from './MarketingLinksModal';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
@@ -2474,6 +2474,13 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                           </button>
                           <button onPointerDown={(e) => { e.preventDefault(); applyCommand('underline'); }} className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-200 rounded transition-colors" title="Sublinhado">
                             <Underline className="w-4 h-4" />
+                          </button>
+                          <button onPointerDown={(e) => { 
+                            e.preventDefault(); 
+                            const url = window.prompt('Digite a URL do link (ex: https://...):');
+                            if (url) applyCommand('createLink', url); 
+                          }} className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-200 rounded transition-colors" title="Adicionar Link">
+                            <LinkIcon className="w-4 h-4" />
                           </button>
                           <div className="w-px h-5 bg-slate-300 mx-1"></div>
                           <button onPointerDown={(e) => { e.preventDefault(); applyCommand('insertUnorderedList'); }} className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-200 rounded transition-colors" title="Marcadores (Lista)">
