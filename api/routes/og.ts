@@ -15,9 +15,10 @@ router.get(['/public/curso/:slug', '/public/trilha/:slug'], async (req, res) => 
     const supabase = getSupabase();
     const table = isTrilha ? 'trilhas' : 'cursos';
     
+    const selectFields = isTrilha ? 'nome, descricao, thumbnail_url' : 'nome, descricao, thumbnail_url';
     const { data: curso, error: cursoErr } = await supabase
       .from(table)
-      .select('nome, descricao, thumbnail_url, capa_url')
+      .select(selectFields)
       .eq(idColumn, slug)
       .single();
 
@@ -43,7 +44,7 @@ router.get(['/public/curso/:slug', '/public/trilha/:slug'], async (req, res) => 
     }
 
     if (curso) {
-      const imageUrl = curso.thumbnail_url || curso.capa_url || '';
+      const imageUrl = curso.thumbnail_url || '';
       const title = curso.nome?.replace(/"/g, '&quot;') || 'Curso Online';
       const description = curso.descricao?.substring(0, 150)?.replace(/"/g, '&quot;') || 'Acesse a página de vendas para mais detalhes.';
       
