@@ -1563,9 +1563,9 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                       className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl outline-none text-slate-700"
                       defaultValue=""
                     >
-                      <option value="" disabled>Selecione um especialista...</option>
+                      <option value="" disabled>Selecione um especialista/parceiro...</option>
                       {orgUsers
-                        .filter(u => u.role === 'especialista' || u.role === 'coordenador')
+                        .filter(u => !['aluno', 'candidato', 'avaliador'].includes(u.role))
                         .filter(u => !courseSplits.some(s => s.usuario_id === u.id))
                         .map(u => (
                           <option key={u.id} value={u.id}>{u.nome || u.email} ({u.role})</option>
