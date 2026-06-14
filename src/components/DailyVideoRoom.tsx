@@ -15,47 +15,64 @@ export function DailyVideoRoom({ roomUrl, onLeave }: DailyVideoRoomProps) {
   useEffect(() => {
     if (!containerRef.current || !roomUrl) return;
 
-    try {
-      const callFrame = DailyIframe.createFrame(containerRef.current, {
-        showLeaveButton: true,
-        lang: 'pt',
-        iframeStyle: {
-          width: '100%',
-          height: '100%',
-          border: '0',
-          borderRadius: '16px',
-          backgroundColor: '#0f172a', // slate-900
-        },
-      });
+    let isMounted = true;
 
-      callFrameRef.current = callFrame;
+    const initFrame = async () => {
+      try {
+        // Daily supports only one instance at a time. Let's make sure any dangling instance is destroyed.
+        const existingFrame = DailyIframe.getCallInstance();
+        if (existingFrame) {
+          await existingFrame.destroy();
+        }
 
-      callFrame.on('loaded', () => {
-        setIsIframeLoaded(true);
-      });
+        if (!isMounted || !containerRef.current) return;
 
-      callFrame.on('left-meeting', () => {
-        setIsIframeLoaded(false);
-        callFrame.destroy();
-        callFrameRef.current = null;
-        if (onLeave) onLeave();
-      });
+        const callFrame = DailyIframe.createFrame(containerRef.current, {
+          showLeaveButton: true,
+          lang: 'pt',
+          iframeStyle: {
+            width: '100%',
+            height: '100%',
+            border: '0',
+            borderRadius: '16px',
+            backgroundColor: '#0f172a', // slate-900
+          },
+        });
 
-      callFrame.on('error', (e) => {
-        console.error('Erro no Daily:', e);
-        setError('Ocorreu um erro ao conectar na sala de vídeo.');
-      });
+        callFrameRef.current = callFrame;
 
-      callFrame.join({ url: roomUrl });
+        callFrame.on('loaded', () => {
+          if (isMounted) setIsIframeLoaded(true);
+        });
 
-    } catch (e) {
-      console.error('Erro ao inicializar DailyIframe:', e);
-      setError('Falha ao inicializar o reprodutor de vídeo.');
-    }
+        callFrame.on('left-meeting', () => {
+          if (isMounted) {
+            setIsIframeLoaded(false);
+            callFrame.destroy();
+            callFrameRef.current = null;
+            if (onLeave) onLeave();
+          }
+        });
+
+        callFrame.on('error', (e) => {
+          console.error('Erro no Daily:', e);
+          if (isMounted) setError('Ocorreu um erro ao conectar na sala de vídeo.');
+        });
+
+        await callFrame.join({ url: roomUrl });
+
+      } catch (e) {
+        console.error('Erro ao inicializar DailyIframe:', e);
+        if (isMounted) setError('Falha ao inicializar o reprodutor de vídeo.');
+      }
+    };
+
+    initFrame();
 
     return () => {
+      isMounted = false;
       if (callFrameRef.current) {
-        callFrameRef.current.destroy();
+        callFrameRef.current.destroy().catch(console.error);
         callFrameRef.current = null;
       }
     };
