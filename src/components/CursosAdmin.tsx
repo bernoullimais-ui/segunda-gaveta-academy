@@ -1052,7 +1052,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
       <div className="bg-slate-50 min-h-screen p-8">
         <div className="max-w-5xl mx-auto space-y-6">
           <div className="flex justify-between items-center mb-8">
-            <h1 className="text-2xl font-bold text-slate-800">Cursos online</h1>
+            <h1 className="text-2xl font-bold text-slate-800">Produtos</h1>
             <div className="flex gap-2">
               <button 
                 onClick={() => setIsMarketingModalOpen(true)}
