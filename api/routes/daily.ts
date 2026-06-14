@@ -23,7 +23,6 @@ dailyRouter.post('/daily/create-room', async (req, res) => {
         properties: {
           enable_chat: true,
           enable_screenshare: true,
-          enable_recording: 'local',
           start_audio_off: true,
           start_video_off: true,
         },
