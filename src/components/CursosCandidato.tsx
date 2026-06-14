@@ -1731,7 +1731,7 @@ export function CursosCandidato({
                   )}
 
                   {selectedLesson.descricao && selectedLesson.tipo !== 'quiz' && (
-                    <div className="prose prose-slate max-w-none text-slate-700" dangerouslySetInnerHTML={{ __html: selectedLesson.descricao }} />
+                    <div className="prose prose-slate max-w-none text-slate-700" dangerouslySetInnerHTML={{ __html: selectedLesson.descricao.replace(/<a([^>]+)>/g, (match, attrs) => attrs.includes('target=') ? match : `<a${attrs} target="_blank" rel="noopener noreferrer">`) }} />
                   )}
 
                   {selectedLesson.tipo === 'quiz' && (
