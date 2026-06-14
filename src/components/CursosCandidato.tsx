@@ -1646,8 +1646,8 @@ export function CursosCandidato({
                         )
                       )}
                       
-                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div className="lg:col-span-2 bg-slate-50 rounded-xl border border-slate-200 flex flex-col overflow-hidden" style={{ minHeight: '400px', maxHeight: '500px' }}>
+                      {!selectedLesson.url_video?.includes('daily.co') && (
+                        <div className="bg-slate-50 rounded-xl border border-slate-200 flex flex-col overflow-hidden" style={{ minHeight: '400px', maxHeight: '500px' }}>
                           <div className="bg-white border-b border-slate-200 p-4 flex justify-between items-center">
                              <h3 className="font-bold text-slate-800 text-sm flex items-center gap-2"><MessageSquare className="w-4 h-4 text-blue-600"/> Chat ao vivo</h3>
                              {participantCount > 0 && (
@@ -1683,55 +1683,7 @@ export function CursosCandidato({
                              </div>
                           </div>
                         </div>
-
-                        <div className="lg:col-span-1">
-                          <div className="bg-red-50 border border-red-100 rounded-xl p-6 flex flex-col items-center justify-center gap-4 text-center h-full min-h-[200px]">
-                             <div>
-                               <h4 className="font-bold text-red-900 flex items-center justify-center gap-2">
-                                 <div className="w-2 h-2 rounded-full bg-red-600 animate-pulse"></div> 
-                                 Confirmação de Presença
-                               </h4>
-                               {!isGestor && !attendanceWindow.active && !completedSteps.includes(selectedLesson._calculatedId) && (
-                                 <p className="text-xs text-red-800 mt-2">A confirmação de presença será liberada pelo gestor durante a aula e ficará disponível por 3 minutos.</p>
-                               )}
-                               {(attendanceWindow.active || completedSteps.includes(selectedLesson._calculatedId) || isGestor) && (
-                                 <p className="text-sm text-red-800 mt-2">Sua presença ficará registrada no relatório do curso.</p>
-                               )}
-                             </div>
-                             
-                             {isGestor ? (
-                               <button 
-                                 onClick={handleReleaseAttendance}
-                                 disabled={attendanceWindow.active}
-                                 className={`w-full py-3 rounded-xl font-bold transition-colors ${attendanceWindow.active ? 'bg-slate-300 text-slate-500 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700 text-white shadow-md'}`}
-                               >
-                                 {attendanceWindow.active ? `Liberado (${Math.floor(attendanceTimeLeft / 60)}:${String(attendanceTimeLeft % 60).padStart(2, '0')})` : 'Liberar Presença (3 min)'}
-                               </button>
-                             ) : (
-                               <>
-                                 {!attendanceWindow.active && !completedSteps.includes(selectedLesson._calculatedId) ? (
-                                   <div className="w-full py-3 rounded-xl font-medium bg-red-100/50 text-red-500/50 cursor-not-allowed border border-red-200/50">
-                                     Aguardando Liberação...
-                                   </div>
-                                 ) : (
-                                   <button 
-                                     onClick={() => {
-                                       if (!completedSteps.includes(selectedLesson._calculatedId)) {
-                                          toggleStepComplete(selectedLesson._calculatedId);
-                                          setAttendanceWindow({ active: false, expiresAt: null });
-                                          goToNextStep();
-                                       }
-                                     }}
-                                     className={`w-full py-3 rounded-xl font-bold transition-colors ${completedSteps.includes(selectedLesson._calculatedId) ? 'bg-red-600 text-white' : 'bg-red-600 hover:bg-red-700 text-white shadow-md shadow-red-600/20'}`}
-                                   >
-                                      {completedSteps.includes(selectedLesson._calculatedId) ? 'Presença Confirmada' : `Confirmar Presença (${Math.floor(attendanceTimeLeft / 60)}:${String(attendanceTimeLeft % 60).padStart(2, '0')})`}
-                                   </button>
-                                 )}
-                               </>
-                             )}
-                          </div>
-                        </div>
-                      </div>
+                      )}
                     </div>
                   )}
 
