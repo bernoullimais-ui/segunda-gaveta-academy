@@ -1253,7 +1253,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             </div>
 
             {/* Price and CTA Button */}
-            <div className="flex flex-col md:flex-row items-center justify-between gap-8 w-full border-t border-slate-850 pt-8 mt-4">
+            <div className="flex flex-col md:flex-row items-center justify-center gap-12 md:gap-16 w-full border-t border-slate-850 pt-8 mt-4">
               {renderPriceBlock(true)}
               <button 
                 onClick={handleEnrollClick}
@@ -1329,7 +1329,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
         <section className={`py-16 border-b ${
           layout === 'escuro' ? 'bg-slate-950/40 border-slate-900' : 'bg-slate-50 border-slate-100'
         }`}>
-          <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-8">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-center gap-12 md:gap-16">
             {!isFree ? renderPriceBlock(layout === 'escuro') : (
               <div className="text-left">
                 <span className="text-emerald-500 font-black text-3xl uppercase">Grátis</span>
@@ -1786,7 +1786,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
           </div>
 
           {/* Price and CTA Button */}
-          <div className="flex flex-col md:flex-row items-center justify-between gap-8 w-full border-t border-slate-255 pt-8 mt-4">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-12 md:gap-16 w-full border-t border-slate-200 pt-8 mt-4">
             {renderPriceBlock(false)}
             <button 
               onClick={handleEnrollClick}
@@ -1862,7 +1862,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
       <section className={`py-16 border-b ${
         layout === 'escuro' ? 'bg-slate-950/40 border-slate-900' : 'bg-slate-50 border-slate-100'
       }`}>
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-8">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-center gap-12 md:gap-16">
           {!isFree ? renderPriceBlock(layout === 'escuro') : (
             <div className="text-left">
               <span className="text-emerald-500 font-black text-3xl uppercase">Grátis</span>
