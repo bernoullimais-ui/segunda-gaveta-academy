@@ -48,19 +48,30 @@ router.get(['/public/curso/:slug', '/public/trilha/:slug'], async (req, res) => 
       const title = curso.nome?.replace(/"/g, '&quot;') || 'Curso Online';
       const description = curso.descricao?.substring(0, 150)?.replace(/"/g, '&quot;') || 'Acesse a página de vendas para mais detalhes.';
       
-      const ogTags = `
-        <title>${title}</title>
+      const absoluteUrl = `${protocol}://${host}${req.originalUrl || req.url}`;
+      const imageType = imageUrl.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg';
+      
+      const ogTags = `<title>${title}</title>
+        <meta name="description" content="${description}..." />
         <meta property="og:title" content="${title}" />
         <meta property="og:description" content="${description}..." />
-        ${imageUrl ? `<meta property="og:image" content="${imageUrl}" />` : ''}
+        <meta property="og:url" content="${absoluteUrl}" />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="Segunda Gaveta Academy" />
+        ${imageUrl ? `
+        <meta property="og:image" content="${imageUrl}" />
+        <meta property="og:image:secure_url" content="${imageUrl}" />
+        <meta property="og:image:type" content="${imageType}" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />` : ''}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="${title}" />
         <meta name="twitter:description" content="${description}..." />
         ${imageUrl ? `<meta name="twitter:image" content="${imageUrl}" />` : ''}
-        <meta name="x-debug" content="curso-encontrado" />
-      `;
+        <meta name="x-debug" content="curso-encontrado" />`;
       
-      html = html.replace('</head>', `\n${ogTags}\n</head>`);
+      // Substitui o title original pelo bloco completo de OG tags no topo do head
+      html = html.replace(/<title>.*?<\/title>/gi, ogTags);
     } else {
       html = html.replace('</head>', `\n<meta name="x-debug" content="curso-nao-encontrado" /><meta name="x-err" content='${debugError}' />\n</head>`);
     }
