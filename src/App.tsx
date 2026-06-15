@@ -23,6 +23,7 @@ import { SpecialistOnboarding } from './components/SpecialistOnboarding';
 import { ParticiparInvite } from './components/ParticiparInvite';
 import { ResetPasswordScreen } from './components/ResetPasswordScreen';
 import { InstitutionalPage } from './components/InstitutionalPage';
+import { PaymentSuccessPage } from './components/PaymentSuccessPage';
 import { 
   User, 
   BookOpen, 
@@ -111,6 +112,8 @@ export default function App() {
   const [isGestaoRoute, setIsGestaoRoute] = useState(false);
   const [inviteConfig, setInviteConfig] = useState<any>(null);
   const [resumeOnboarding, setResumeOnboarding] = useState<any>(null);
+  const [isPaymentSuccessRoute, setIsPaymentSuccessRoute] = useState(false);
+  const [paymentSuccessParams, setPaymentSuccessParams] = useState<{ participantId: string; type?: string; subStatus?: string } | null>(null);
 
   const checkOnboardingStatus = async (userId: string, role: string) => {
     if (role === 'gestor' || role === 'especialista') {
@@ -210,6 +213,19 @@ export default function App() {
     const hash = window.location.hash;
     if (resetMatch || hash.includes('type=recovery')) {
       setIsResetPasswordRoute(true);
+    }
+
+    // Detect payment success route
+    const successMatch = path.match(/^\/pagamento-sucesso/);
+    if (successMatch) {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('id');
+      const type = params.get('type') || 'curso';
+      const subStatus = params.get('sub_status') || undefined;
+      if (id) {
+        setIsPaymentSuccessRoute(true);
+        setPaymentSuccessParams({ participantId: id, type, subStatus });
+      }
     }
   }, []);
 
@@ -637,6 +653,16 @@ export default function App() {
 
   if (isResetPasswordRoute) {
     return <ResetPasswordScreen activeOrg={activeOrg} />;
+  }
+
+  if (isPaymentSuccessRoute && paymentSuccessParams) {
+    return (
+      <PaymentSuccessPage
+        participantId={paymentSuccessParams.participantId}
+        type={paymentSuccessParams.type}
+        subStatus={paymentSuccessParams.subStatus}
+      />
+    );
   }
 
   if (!authInitialized) {

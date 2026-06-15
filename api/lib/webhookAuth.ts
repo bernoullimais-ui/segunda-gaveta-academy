@@ -45,9 +45,12 @@ export function validatePagarmeWebhook(req: Request, res: Response, next: NextFu
   const secret = process.env.PAGARME_WEBHOOK_SECRET;
 
   if (!secret) {
-    // Not configured — allow traffic but warn in logs
-    console.warn('[WebhookAuth] PAGARME_WEBHOOK_SECRET not set. Skipping HMAC validation. Set this variable in production!');
-    return next();
+    // SECURITY: Secret not configured — BLOCK all webhook traffic to prevent spoofed order.paid events
+    console.error('[WebhookAuth] PAGARME_WEBHOOK_SECRET is not set. Blocking webhook request. Configure this variable in production to prevent payment fraud!');
+    return res.status(500).json({ 
+      error: 'Webhook secret not configured. Set PAGARME_WEBHOOK_SECRET environment variable.',
+      action: 'Configure PAGARME_WEBHOOK_SECRET in your environment variables (Vercel Settings > Environment Variables).'
+    });
   }
 
   const signature = req.headers['x-pagarme-signature'] as string | undefined;

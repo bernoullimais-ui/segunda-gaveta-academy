@@ -975,7 +975,8 @@ export function CursosCandidato({
         const { data: participacoes, error: pErr } = await supabase
           .from('curso_participantes')
           .select('curso_id, progresso, status, completed_steps, cursos(nome, curriculo_json)')
-          .eq('usuario_id', targetUserId);
+          .eq('usuario_id', targetUserId)
+          .in('status', ['inscrito', 'andamento', 'concluido']); // ← Apenas status ativos liberam acesso
           
         if (!pErr && participacoes) {
           const m: {[key: string]: {progresso: number, nome: string}} = {};
@@ -1061,7 +1062,15 @@ export function CursosCandidato({
   }
 
   const handleAccessCourse = async (curso: any) => {
-    if (cursosProgress[curso.id] !== undefined || isGestor || userRole === 'avaliador') {
+    // Gestores e avaliadores têm acesso direto sem verificar pagamento
+    if (isGestor || userRole === 'avaliador') {
+      setSelectedCurso(curso);
+      setView('course');
+      return;
+    }
+
+    // Alunos: só libera acesso se houver progress registrado (= status ativo: inscrito/andamento/concluido)
+    if (cursosProgress[curso.id] !== undefined) {
       setSelectedCurso(curso);
       setView('course');
       return;
@@ -1121,7 +1130,8 @@ export function CursosCandidato({
         }
       }
 
-      const isFree = parseFloat(curso.preco) === 0;
+      // Padroniza: curso é gratuito se preco for 0, '0', 'gratuito', null ou vazio
+      const isFree = !curso.preco || curso.preco === 'gratuito' || parseFloat(curso.preco) === 0;
 
       let participantId;
       const { data: existingParticipation } = await supabase
@@ -1133,12 +1143,18 @@ export function CursosCandidato({
 
       if (existingParticipation) {
         participantId = existingParticipation.id;
-        if (existingParticipation.status === 'inscrito') {
-           setSelectedCurso(curso);
-           setView('course');
-           setIsProcessingPurchase(null);
-           return;
+        // Status ativos: acesso direto
+        if (['inscrito', 'andamento', 'concluido'].includes(existingParticipation.status)) {
+          setSelectedCurso(curso);
+          setView('course');
+          setIsProcessingPurchase(null);
+          return;
         }
+        // Status 'suspenso': bloquear com mensagem
+        if (existingParticipation.status === 'suspenso') {
+          throw new Error('Seu acesso a este curso está suspenso. Entre em contato com o suporte.');
+        }
+        // Status 'pendente': pagamento não confirmado — cair no fluxo de pagamento abaixo
       } else {
         const { data: participant, error: partErr } = await supabase
           .from('curso_participantes')
