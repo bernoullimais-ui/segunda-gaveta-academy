@@ -705,12 +705,104 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
 
   const isFree = isTrilha ? (item?.preco === 0) : (item?.preco === 'gratuito');
   const selectedPlan = planosAssinatura?.find(p => p.pagarme_plan_id === selectedPlanId);
-  const itemPrice = selectedPlan ? (selectedPlan.valor_cents / 100) : (isTrilha ? (item?.preco || 0) : (parseFloat(item?.valor) || 0));
-
   const config = item?.configuracao_json || {};
+  const discountedPrice = !selectedPlan && !isTrilha && config.valor_com_desconto ? parseFloat(config.valor_com_desconto) : null;
+  const itemPrice = selectedPlan ? (selectedPlan.valor_cents / 100) : (isTrilha ? (item?.preco || 0) : (parseFloat(item?.valor) || 0));
+  const finalPrice = discountedPrice !== null ? discountedPrice : itemPrice;
+
   const paymentModel = config.pagamento_modelo || 'fixo';
   const paymentCycle = config.pagamento_ciclo || '30';
   const paymentInstallmentsLimit = config.pagamento_parcelas_limite || '12';
+
+  const renderPriceBlock = (isDarkLayout: boolean) => {
+    if (isFree) {
+      return (
+        <div className="flex items-center gap-2">
+          <span className={`text-3xl font-black ${isDarkLayout ? 'text-emerald-400' : 'text-emerald-600'} uppercase`}>Grátis</span>
+          <span className="text-slate-400 line-through text-sm">R$ {isTrilha ? '497,00' : '197,00'}</span>
+        </div>
+      );
+    }
+
+    if (planosAssinatura && planosAssinatura.length > 0) {
+      return (
+        <div className="space-y-2">
+          <span className={`text-xs font-bold ${isDarkLayout ? 'text-slate-500' : 'text-slate-400'} uppercase tracking-widest`}>Escolha seu Plano</span>
+          <div className="flex flex-col gap-2">
+            {planosAssinatura.map(plano => (
+              <button
+                key={plano.id}
+                onClick={() => setSelectedPlanId(plano.pagarme_plan_id)}
+                className={`flex items-center justify-between p-3 rounded-xl border-2 transition-all w-full sm:w-64 ${
+                  selectedPlanId === plano.pagarme_plan_id 
+                    ? (isDarkLayout ? 'border-primary bg-primary/10' : 'border-primary bg-primary/5') 
+                    : (isDarkLayout ? 'border-slate-700 hover:border-slate-600' : 'border-slate-200 hover:border-slate-300')
+                }`}
+              >
+                <div className="text-left">
+                  <div className={`font-bold ${selectedPlanId === plano.pagarme_plan_id ? 'text-primary' : (isDarkLayout ? 'text-slate-300' : 'text-slate-700')}`}>{plano.nome}</div>
+                  <div className="text-xs text-slate-500">{plano.intervalo === 'month' ? 'Mensal' : 'Anual'}</div>
+                </div>
+                <div className={`font-black ${selectedPlanId === plano.pagarme_plan_id ? (isDarkLayout ? 'text-white' : 'text-slate-900') : (isDarkLayout ? 'text-slate-400' : 'text-slate-600')}`}>
+                  R$ {(plano.valor_cents / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    if (paymentModel === 'recorrente') {
+      return (
+        <div>
+          <span className={`text-[10px] font-black ${isDarkLayout ? 'text-slate-500' : 'text-slate-400'} uppercase tracking-widest mb-1 block`}>Assinatura</span>
+          <div className="flex items-baseline gap-2">
+            <span className={`text-xl font-bold ${isDarkLayout ? 'text-white' : 'text-slate-900'}`}>R$</span>
+            <span className={`text-5xl font-black ${isDarkLayout ? 'text-white' : 'text-slate-900'}`}>{finalPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+            <span className={`text-lg font-medium ${isDarkLayout ? 'text-slate-300' : 'text-slate-500'}`}>/ {paymentCycle === '30' ? 'mês' : paymentCycle === '365' ? 'ano' : paymentCycle + ' dias'}</span>
+          </div>
+        </div>
+      );
+    }
+
+    if (paymentModel === 'parcelado') {
+      return (
+        <div>
+          <span className={`text-[10px] font-black ${isDarkLayout ? 'text-slate-500' : 'text-slate-400'} uppercase tracking-widest mb-1 block`}>Investimento</span>
+          <div className="flex items-baseline gap-2">
+            <span className={`text-xl font-bold ${isDarkLayout ? 'text-white' : 'text-slate-900'}`}>R$</span>
+            <span className={`text-5xl font-black ${isDarkLayout ? 'text-white' : 'text-slate-900'}`}>{finalPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+            <span className={`text-lg font-medium ${isDarkLayout ? 'text-slate-300' : 'text-slate-500'}`}>/ mês (x{paymentInstallmentsLimit})</span>
+          </div>
+        </div>
+      );
+    }
+
+    // Fixo com Destaque para Parcelas
+    const installmentValue = finalPrice / 10;
+    return (
+      <div className="flex flex-col text-left">
+        <span className={`text-[10px] font-black ${isDarkLayout ? 'text-slate-500' : 'text-slate-400'} uppercase tracking-widest mb-1 block`}>Valor do Investimento</span>
+        
+        {discountedPrice !== null && (
+          <div className={`text-sm ${isDarkLayout ? 'text-slate-400' : 'text-slate-500'} mb-1 font-medium`}>
+            De <span className="line-through">R$ {itemPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span> por apenas:
+          </div>
+        )}
+
+        <div className="flex items-baseline gap-2">
+          <span className={`text-3xl font-black ${isDarkLayout ? 'text-white' : 'text-slate-900'}`}>10x de</span>
+          <span className={`text-xl font-bold ${isDarkLayout ? 'text-white' : 'text-slate-900'}`}>R$</span>
+          <span className={`text-6xl font-black ${isDarkLayout ? 'text-white' : 'text-slate-900'}`}>{installmentValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+          <span className={`text-xs font-bold ${isDarkLayout ? 'text-emerald-400' : 'text-emerald-600'} uppercase tracking-wider ml-1`}>sem juros</span>
+        </div>
+        <div className={`text-sm ${isDarkLayout ? 'text-slate-400' : 'text-slate-500'} mt-1 font-semibold`}>
+          ou R$ {finalPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} à vista
+        </div>
+      </div>
+    );
+  };
 
   const handleEnrollClick = () => {
     if (isFree) {
@@ -1033,13 +1125,13 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                 <>
                   <div className="flex items-baseline gap-1">
                     <span className="text-white text-xs font-bold">R$</span>
-                    <span className="text-white font-black text-xl">{itemPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                    <span className="text-white font-black text-xl">{finalPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                     {paymentModel === 'recorrente' && <span className="text-sm text-slate-300 font-medium">/ {paymentCycle === '30' ? 'mês' : paymentCycle === '365' ? 'ano' : paymentCycle + ' dias'}</span>}
                     {paymentModel === 'parcelado' && <span className="text-sm text-slate-300 font-medium">/ mês (x{paymentInstallmentsLimit})</span>}
                   </div>
-                  {paymentModel === 'fixo' && !isFree && itemPrice > 0 && (
+                  {paymentModel === 'fixo' && !isFree && finalPrice > 0 && (
                     <div className="text-slate-400 text-[10px] font-medium -mt-1 mb-1">
-                      ou 10x de R$ {(itemPrice / 10).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      ou 10x de R$ {(finalPrice / 10).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </div>
                   )}
                 </>
@@ -1129,64 +1221,14 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                 <CountdownTimer timeLeft={timeLeft} title={lp.countdown_title} layout={layout} />
 
                 <div className="flex flex-col sm:flex-row items-center gap-8 pt-4">
-                   <div className="text-left w-full sm:w-auto">
-                     {isFree ? (
-                       <div className="flex items-center gap-3">
-                         <span className="text-4xl font-black text-emerald-500">GRÁTIS</span>
-                       </div>
-                     ) : (
-                       <div className="flex flex-col text-left space-y-4">
-                         {planosAssinatura && planosAssinatura.length > 0 ? (
-                           <div className="space-y-2">
-                             <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Escolha seu Plano</span>
-                             <div className="flex flex-col gap-2">
-                               {planosAssinatura.map(plano => (
-                                 <button
-                                   key={plano.id}
-                                   onClick={() => setSelectedPlanId(plano.pagarme_plan_id)}
-                                   className={`flex items-center justify-between p-3 rounded-xl border-2 transition-all w-full sm:w-64 ${
-                                     selectedPlanId === plano.pagarme_plan_id 
-                                       ? 'border-primary bg-primary/10' 
-                                       : 'border-slate-700 hover:border-slate-600'
-                                   }`}
-                                 >
-                                   <div className="text-left">
-                                     <div className={`font-bold ${selectedPlanId === plano.pagarme_plan_id ? 'text-primary' : 'text-slate-300'}`}>{plano.nome}</div>
-                                     <div className="text-xs text-slate-500">{plano.intervalo === 'month' ? 'Mensal' : 'Anual'}</div>
-                                   </div>
-                                   <div className={`font-black ${selectedPlanId === plano.pagarme_plan_id ? 'text-white' : 'text-slate-400'}`}>
-                                     R$ {(plano.valor_cents / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                                   </div>
-                                 </button>
-                               ))}
-                             </div>
-                           </div>
-                         ) : (
-                            <div>
-                              <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Valor do Investimento</span>
-                              <div className="flex items-baseline gap-2">
-                                <span className="text-xl font-bold text-white">R$</span>
-                                <span className="text-6xl font-black text-white">{itemPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                                {paymentModel === 'recorrente' && <span className="text-lg text-slate-300 font-medium">/ {paymentCycle === '30' ? 'mês' : paymentCycle === '365' ? 'ano' : paymentCycle + ' dias'}</span>}
-                                {paymentModel === 'parcelado' && <span className="text-lg text-slate-300 font-medium">/ mês (x{paymentInstallmentsLimit})</span>}
-                              </div>
-                              {!isFree && itemPrice > 0 && paymentModel === 'fixo' && (
-                                <div className="text-slate-400 text-sm mt-2 font-medium">
-                                  ou em até 10x de R$ {(itemPrice / 10).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} sem juros
-                                </div>
-                              )}
-                            </div>
-                         )}
-                       </div>
-                     )}
-                   </div>
-                   
-                   <button 
-                     onClick={handleEnrollClick}
-                     className="w-full sm:w-auto px-12 py-6 bg-primary text-white rounded-3xl font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(37,99,235,0.3)] flex items-center justify-center gap-3"
-                   >
-                     {lp.cta_text || 'COMPRAR AGORA'} <ArrowRight className="w-6 h-6" />
-                   </button>
+                  {renderPriceBlock(true)}
+                  
+                  <button 
+                    onClick={handleEnrollClick}
+                    className="w-full sm:w-auto px-12 py-6 bg-primary text-white rounded-3xl font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(37,99,235,0.3)] flex items-center justify-center gap-3"
+                  >
+                    {lp.cta_text || 'COMPRAR AGORA'} <ArrowRight className="w-6 h-6" />
+                  </button>
                 </div>
               </div>
             </div>
@@ -1195,8 +1237,8 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
 
         {/* Modern Dark Info Bar */}
         <section className="bg-slate-950/50 border-y border-slate-800 py-16">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-12">
+          <div className="max-w-7xl mx-auto px-6 flex flex-col items-center gap-12">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-12 w-full">
               {/* #3 Conditional stats based on real data */}
               {[
                 { icon: BookOpen, label: isTrilha ? 'Cursos' : 'Módulos', value: `${isTrilha ? cursosTrilha.length : (item.curriculo_json?.length || 0)} ${isTrilha ? 'cursos' : 'aulas'}` },
@@ -1210,6 +1252,17 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                   <span className="text-xl font-bold text-white tracking-tight">{stat.value}</span>
                 </div>
               ))}
+            </div>
+
+            {/* Price and CTA Button */}
+            <div className="flex flex-col md:flex-row items-center justify-between gap-8 w-full border-t border-slate-850 pt-8 mt-4">
+              {renderPriceBlock(true)}
+              <button 
+                onClick={handleEnrollClick}
+                className="w-full sm:w-auto px-12 py-5 bg-primary text-white rounded-3xl font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(37,99,235,0.3)] flex items-center justify-center gap-3"
+              >
+                {lp.cta_text || 'COMPRAR AGORA'} <ArrowRight className="w-6 h-6" />
+              </button>
             </div>
           </div>
         </section>
@@ -1273,6 +1326,26 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
         )}
 
         <TargetAudienceSection targetAudience={lp.target_audience} layout={layout} />
+
+        {/* Additional CTA below Target Audience Section */}
+        <section className={`py-16 border-b ${
+          layout === 'escuro' ? 'bg-slate-950/40 border-slate-900' : 'bg-slate-50 border-slate-100'
+        }`}>
+          <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-8">
+            {!isFree ? renderPriceBlock(layout === 'escuro') : (
+              <div className="text-left">
+                <span className="text-emerald-500 font-black text-3xl uppercase">Grátis</span>
+                <p className={`text-sm ${layout === 'escuro' ? 'text-slate-400' : 'text-slate-500'} mt-1`}>Garanta sua inscrição gratuita agora mesmo.</p>
+              </div>
+            )}
+            <button 
+              onClick={handleEnrollClick}
+              className="w-full sm:w-auto px-12 py-5 bg-primary text-white rounded-3xl font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(37,99,235,0.3)] flex items-center justify-center gap-3"
+            >
+              {lp.cta_text || 'COMPRAR AGORA'} <ArrowRight className="w-6 h-6" />
+            </button>
+          </div>
+        </section>
 
         {/* Bonus Section - Dark */}
         {lp.bonuses?.length > 0 && (
@@ -1507,7 +1580,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
           item={{
             id: courseId,
             description: item.nome,
-            amount: itemPrice,
+            amount: finalPrice,
             type: isTrilha ? 'trilha' : 'curso',
             paymentModel,
             paymentCycle,
@@ -1572,13 +1645,13 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                     <>
                       <div className="flex items-baseline gap-1">
                         <span className="text-slate-900 text-xs font-bold">R$</span>
-                        <span className="text-slate-900 font-black text-xl">{itemPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                        <span className="text-slate-900 font-black text-xl">{finalPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                         {paymentModel === 'recorrente' && <span className="text-sm text-slate-500 font-medium">/ {paymentCycle === '30' ? 'mês' : paymentCycle === '365' ? 'ano' : paymentCycle + ' dias'}</span>}
                         {paymentModel === 'parcelado' && <span className="text-sm text-slate-500 font-medium">/ mês (x{paymentInstallmentsLimit})</span>}
                       </div>
-                      {paymentModel === 'fixo' && !isFree && itemPrice > 0 && (
+                      {paymentModel === 'fixo' && !isFree && finalPrice > 0 && (
                         <div className="text-slate-500 text-[10px] font-medium -mt-1 mb-1">
-                          ou 10x de R$ {(itemPrice / 10).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          ou 10x de R$ {(finalPrice / 10).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </div>
                       )}
                     </>
@@ -1615,56 +1688,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
               <CountdownTimer timeLeft={timeLeft} title={lp.countdown_title} layout={layout} />
               
               <div className="py-4">
-                {isFree ? (
-                  <div className="flex items-center gap-2">
-                    <span className="text-3xl font-black text-emerald-600 uppercase">Grátis</span>
-                    <span className="text-slate-400 line-through text-sm">R$ {isTrilha ? '497,00' : '197,00'}</span>
-                  </div>
-                ) : (
-                  <div className="flex flex-col space-y-4">
-                    {planosAssinatura && planosAssinatura.length > 0 ? (
-                      <div className="space-y-2">
-                        <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">Escolha seu Plano</span>
-                        <div className="flex flex-col gap-2">
-                          {planosAssinatura.map(plano => (
-                            <button
-                              key={plano.id}
-                              onClick={() => setSelectedPlanId(plano.pagarme_plan_id)}
-                              className={`flex items-center justify-between p-3 rounded-xl border-2 transition-all w-full sm:w-64 ${
-                                selectedPlanId === plano.pagarme_plan_id 
-                                  ? 'border-primary bg-primary/5' 
-                                  : 'border-slate-200 hover:border-slate-300'
-                              }`}
-                            >
-                              <div className="text-left">
-                                <div className={`font-bold ${selectedPlanId === plano.pagarme_plan_id ? 'text-primary' : 'text-slate-700'}`}>{plano.nome}</div>
-                                <div className="text-xs text-slate-500">{plano.intervalo === 'month' ? 'Mensal' : 'Anual'}</div>
-                              </div>
-                              <div className={`font-black ${selectedPlanId === plano.pagarme_plan_id ? 'text-slate-900' : 'text-slate-600'}`}>
-                                R$ {(plano.valor_cents / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                              </div>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    ) : (
-                      <div>
-                        <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">Invista em você por apenas</span>
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-sm font-bold text-slate-900">R$</span>
-                          <span className="text-5xl font-black text-slate-900">{itemPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                          {paymentModel === 'recorrente' && <span className="text-lg text-slate-500 font-medium">/ {paymentCycle === '30' ? 'mês' : paymentCycle === '365' ? 'ano' : paymentCycle + ' dias'}</span>}
-                          {paymentModel === 'parcelado' && <span className="text-lg text-slate-500 font-medium">/ mês (x{paymentInstallmentsLimit})</span>}
-                        </div>
-                        {!isFree && itemPrice > 0 && paymentModel === 'fixo' && (
-                          <div className="text-slate-500 text-sm mt-2 font-medium">
-                            ou em até 10x de R$ {(itemPrice / 10).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} sem juros
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )}
+                {renderPriceBlock(false)}
               </div>
 
                 <div className="flex flex-col sm:flex-row items-center gap-4">
@@ -1738,9 +1762,9 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
 
       {/* Info bar */}
       <section className="bg-slate-50 border-y border-slate-100">
-        <div className="max-w-7xl mx-auto px-6 py-12">
+        <div className="max-w-7xl mx-auto px-6 py-12 flex flex-col items-center gap-8">
           {/* #3 Conditional stats based on real data */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 w-full">
             <div className="flex flex-col items-center text-center">
               <BookOpen className="w-8 h-8 text-primary mb-3" />
               <span className="text-sm font-bold text-slate-400 uppercase">{isTrilha ? 'Cursos' : 'Módulos'}</span>
@@ -1765,6 +1789,17 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                 <span className="text-lg font-bold text-slate-900">Incluso</span>
               </div>
             )}
+          </div>
+
+          {/* Price and CTA Button */}
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8 w-full border-t border-slate-255 pt-8 mt-4">
+            {renderPriceBlock(false)}
+            <button 
+              onClick={handleEnrollClick}
+              className="w-full sm:w-auto px-12 py-5 bg-primary text-white rounded-3xl font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(37,99,235,0.2)] flex items-center justify-center gap-3"
+            >
+              {lp.cta_text || 'COMPRAR AGORA'} <ArrowRight className="w-6 h-6" />
+            </button>
           </div>
         </div>
       </section>
@@ -1828,6 +1863,26 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
       )}
 
       <TargetAudienceSection targetAudience={lp.target_audience} layout={layout} />
+
+      {/* Additional CTA below Target Audience Section */}
+      <section className={`py-16 border-b ${
+        layout === 'escuro' ? 'bg-slate-950/40 border-slate-900' : 'bg-slate-50 border-slate-100'
+      }`}>
+        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-8">
+          {!isFree ? renderPriceBlock(layout === 'escuro') : (
+            <div className="text-left">
+              <span className="text-emerald-500 font-black text-3xl uppercase">Grátis</span>
+              <p className={`text-sm ${layout === 'escuro' ? 'text-slate-400' : 'text-slate-500'} mt-1`}>Garanta sua inscrição gratuita agora mesmo.</p>
+            </div>
+          )}
+          <button 
+            onClick={handleEnrollClick}
+            className="w-full sm:w-auto px-12 py-5 bg-primary text-white rounded-3xl font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(37,99,235,0.3)] flex items-center justify-center gap-3"
+          >
+            {lp.cta_text || 'COMPRAR AGORA'} <ArrowRight className="w-6 h-6" />
+          </button>
+        </div>
+      </section>
 
       {/* Bonus Section */}
       {lp.bonuses?.length > 0 && (
@@ -2117,7 +2172,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
         item={{
           id: courseId,
           description: item.nome,
-          amount: itemPrice,
+          amount: finalPrice,
           type: isTrilha ? 'trilha' : 'curso',
           paymentModel,
           paymentCycle,

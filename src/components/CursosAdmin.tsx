@@ -379,7 +379,8 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
     em_breve: false,
     pagamento_modelo: 'fixo',
     pagamento_ciclo: '30',
-    pagamento_parcelas_limite: '12'
+    pagamento_parcelas_limite: '12',
+    valor_com_desconto: ''
   });
 
   useEffect(() => {
@@ -1805,7 +1806,8 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                       em_breve: activeCurso?.em_breve || false,
                       pagamento_modelo: config.pagamento_modelo || 'fixo',
                       pagamento_ciclo: config.pagamento_ciclo?.toString() || '30',
-                      pagamento_parcelas_limite: config.pagamento_parcelas_limite?.toString() || '12'
+                      pagamento_parcelas_limite: config.pagamento_parcelas_limite?.toString() || '12',
+                      valor_com_desconto: config.valor_com_desconto?.toString() || ''
                     });
                     setIsEditingSettingsModalOpen(true);
                   }
@@ -4499,6 +4501,17 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                         placeholder="0.00"
                       />
                     </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Valor com Desconto (R$) — Opcional</label>
+                      <input 
+                        type="number" 
+                        step="0.01"
+                        value={editingSettingsData.valor_com_desconto || ''}
+                        onChange={(e) => setEditingSettingsData({...editingSettingsData, valor_com_desconto: e.target.value})}
+                        className="w-full px-3 py-2 border border-slate-300 rounded outline-none focus:border-blue-500 bg-white"
+                        placeholder="Ex: 47.00"
+                      />
+                    </div>
                   </div>
                   
                   {editingSettingsData.pagamento_modelo === 'recorrente' && (
@@ -4671,7 +4684,8 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                         ...baseConfig,
                         pagamento_modelo: editingSettingsData.pagamento_modelo,
                         pagamento_ciclo: editingSettingsData.pagamento_ciclo,
-                        pagamento_parcelas_limite: editingSettingsData.pagamento_parcelas_limite
+                        pagamento_parcelas_limite: editingSettingsData.pagamento_parcelas_limite,
+                        valor_com_desconto: editingSettingsData.valor_com_desconto ? parseFloat(editingSettingsData.valor_com_desconto) : null
                       }
                     };
                     console.log('Salvando configurações do curso:', completeData);
