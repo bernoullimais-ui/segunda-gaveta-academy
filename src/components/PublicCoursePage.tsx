@@ -792,7 +792,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
         )}
 
         <div className="flex items-baseline gap-2">
-          <span className={`text-3xl font-black ${isDarkLayout ? 'text-white' : 'text-slate-900'}`}>10x de</span>
+          <span className={`text-3xl font-black ${isDarkLayout ? 'text-white' : 'text-slate-900'}`}>10x</span>
           <span className={`text-xl font-bold ${isDarkLayout ? 'text-white' : 'text-slate-900'}`}>R$</span>
           <span className={`text-6xl font-black ${isDarkLayout ? 'text-white' : 'text-slate-900'}`}>{installmentValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
           <span className={`text-xs font-bold ${isDarkLayout ? 'text-emerald-400' : 'text-emerald-600'} uppercase tracking-wider ml-1`}>sem juros</span>
@@ -1131,7 +1131,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                   </div>
                   {paymentModel === 'fixo' && !isFree && finalPrice > 0 && (
                     <div className="text-slate-400 text-[10px] font-medium -mt-1 mb-1">
-                      ou 10x de R$ {(finalPrice / 10).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      ou 10x R$ {(finalPrice / 10).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </div>
                   )}
                 </>
@@ -1221,8 +1221,6 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                 <CountdownTimer timeLeft={timeLeft} title={lp.countdown_title} layout={layout} />
 
                 <div className="flex flex-col sm:flex-row items-center gap-8 pt-4">
-                  {renderPriceBlock(true)}
-                  
                   <button 
                     onClick={handleEnrollClick}
                     className="w-full sm:w-auto px-12 py-6 bg-primary text-white rounded-3xl font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(37,99,235,0.3)] flex items-center justify-center gap-3"
@@ -1651,7 +1649,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                       </div>
                       {paymentModel === 'fixo' && !isFree && finalPrice > 0 && (
                         <div className="text-slate-500 text-[10px] font-medium -mt-1 mb-1">
-                          ou 10x de R$ {(finalPrice / 10).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          ou 10x R$ {(finalPrice / 10).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </div>
                       )}
                     </>
@@ -1687,11 +1685,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
               
               <CountdownTimer timeLeft={timeLeft} title={lp.countdown_title} layout={layout} />
               
-              <div className="py-4">
-                {renderPriceBlock(false)}
-              </div>
-
-                <div className="flex flex-col sm:flex-row items-center gap-4">
+              <div className="flex flex-col sm:flex-row items-center gap-4 pt-4">
                 <button
                   onClick={handleEnrollClick}
                   className="w-full sm:w-auto px-10 py-5 bg-primary text-white rounded-2xl font-bold text-lg hover:opacity-90 shadow-xl shadow-primary/20 active:scale-95 transition-all flex items-center justify-center gap-3"
