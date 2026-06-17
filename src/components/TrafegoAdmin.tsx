@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Bot, Copy, Download, Loader2, Sparkles, AlertCircle, BarChart3, TrendingUp, DollarSign, Target } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
+import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { supabase } from '../lib/supabase.js';
+import { supabase } from '../lib/supabase';
 
 interface TrafegoAdminProps {
   courseId: string;
@@ -233,9 +233,9 @@ export const TrafegoAdmin: React.FC<TrafegoAdminProps> = ({
                 </div>
               ) : (
                 <div className="prose prose-slate max-w-none prose-h1:text-xl prose-h2:text-lg prose-h3:text-md prose-p:text-slate-600 prose-table:w-full prose-th:bg-slate-50 prose-th:p-3 prose-td:p-3 prose-td:border-t">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  <Markdown remarkPlugins={[remarkGfm]}>
                     {generatedText}
-                  </ReactMarkdown>
+                  </Markdown>
                 </div>
               )}
             </div>
