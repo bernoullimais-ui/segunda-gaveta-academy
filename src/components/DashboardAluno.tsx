@@ -56,12 +56,14 @@ export function DashboardAluno({ loggedUser, onNavigateToCourse }: DashboardAlun
 
       let formatted: any[] = [];
       if (participacoes) {
-        formatted = participacoes.map(p => ({
-          ...p.cursos,
-          progresso: p.progresso,
-          status: p.status,
-          participacao_id: p.id
-        }));
+        formatted = participacoes
+          .filter(p => p.status !== 'pendente')
+          .map(p => ({
+            ...p.cursos,
+            progresso: p.progresso,
+            status: p.status,
+            participacao_id: p.id
+          }));
 
         setCourses(formatted);
 

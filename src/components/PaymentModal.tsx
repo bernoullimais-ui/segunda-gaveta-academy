@@ -244,6 +244,10 @@ export function PaymentModal({ isOpen, onClose, item, customer, participantId, o
           });
           const orderData = await orderRes.json();
           if (!orderRes.ok) throw new Error(orderData.message || 'Erro ao criar pedido');
+          if (orderData.status === 'failed') {
+            const failMsg = orderData.charges?.[0]?.last_transaction?.gateway_response?.errors?.[0]?.message;
+            throw new Error(failMsg ? `Falha no pagamento: ${failMsg}` : 'O pagamento foi recusado pelo banco ou sistema antifraude.');
+          }
           window.location.href = `${window.location.origin}/pagamento-sucesso?id=${participantId}`;
         }
       } else {
