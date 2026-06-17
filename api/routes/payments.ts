@@ -17,7 +17,7 @@
  */
 import { Router } from 'express';
 import { createClient } from '@supabase/supabase-js';
-import { pagarmeRequest, buildPagarmePhone, buildSplitRules } from '../lib/pagarme.js';
+import { pagarmeRequest, buildPagarmePhone, buildSplitRules, getPagarmePublicKey } from '../lib/pagarme.js';
 import { validateCPF, validateAffiliate } from '../lib/validators.js';
 
 const router = Router();
@@ -351,7 +351,11 @@ router.post('/pagarme/create-order', async (req, res) => {
 router.post('/pagarme/tokenize', async (req, res) => {
   try {
     const { card } = req.body;
-    const { ok, status, data } = await pagarmeRequest('/tokens?appId=v5', { type: 'card', card });
+    const publicKey = getPagarmePublicKey();
+    if (!publicKey) {
+      return res.status(500).json({ message: 'Public Key do Pagar.me não configurada na Vercel.' });
+    }
+    const { ok, status, data } = await pagarmeRequest(`/tokens?appId=${publicKey}`, { type: 'card', card });
     if (!ok) return res.status(status).json(data);
     res.json(data);
   } catch (e: any) {
