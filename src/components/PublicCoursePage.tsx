@@ -2164,7 +2164,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
         onClose={() => setShowPaymentModal(false)}
         participantId={participantId!}
         item={{
-          id: courseId,
+          id: item.id,
           description: item.nome,
           amount: finalPrice,
           type: isTrilha ? 'trilha' : 'curso',
