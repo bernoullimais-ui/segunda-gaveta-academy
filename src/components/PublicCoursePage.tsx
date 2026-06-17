@@ -1568,39 +1568,41 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
         <Footer layout={layout} item={item} />
         
         {/* Modals */}
-        <EnrollmentModal 
-          isOpen={showEnrollModal}
-          onClose={() => setShowEnrollModal(false)}
-          enrollStep={enrollStep}
-          isFree={isFree}
-          enrollData={enrollData}
-          onEnrollDataChange={setEnrollData}
-          isProcessing={isProcessing}
-          onRegister={processRegistration}
-          isTrilha={!!isTrilha}
-          itemName={item.nome}
-        />
-        <PaymentModal 
-          isOpen={showPaymentModal}
-          onClose={() => setShowPaymentModal(false)}
-          participantId={participantId!}
-          item={{
-            id: courseId,
-            description: item.nome,
-            amount: finalPrice,
-            type: isTrilha ? 'trilha' : 'curso',
-            paymentModel,
-            paymentCycle,
-            paymentInstallmentsLimit
-          }}
-          customer={{
-            name: enrollData.nome,
-            email: enrollData.email,
-            cpf: enrollData.cpf
-          }}
-          organizacaoId={item.organizacao_id}
-          planId={selectedPlanId || undefined}
-        />
+        <ModalErrorBoundary>
+          <EnrollmentModal 
+            isOpen={showEnrollModal}
+            onClose={() => setShowEnrollModal(false)}
+            enrollStep={enrollStep}
+            isFree={isFree}
+            enrollData={enrollData}
+            onEnrollDataChange={setEnrollData}
+            isProcessing={isProcessing}
+            onRegister={processRegistration}
+            isTrilha={!!isTrilha}
+            itemName={item.nome}
+          />
+          <PaymentModal 
+            isOpen={showPaymentModal}
+            onClose={() => setShowPaymentModal(false)}
+            participantId={participantId!}
+            item={{
+              id: item.id,
+              description: item.nome,
+              amount: finalPrice,
+              type: isTrilha ? 'trilha' : 'curso',
+              paymentModel,
+              paymentCycle,
+              paymentInstallmentsLimit
+            }}
+            customer={{
+              name: enrollData.nome,
+              email: enrollData.email,
+              cpf: enrollData.cpf
+            }}
+            organizacaoId={item.organizacao_id}
+            planId={selectedPlanId || undefined}
+          />
+        </ModalErrorBoundary>
         <WhatsAppFloatingButton item={item} />
       </div>
     );
