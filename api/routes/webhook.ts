@@ -403,8 +403,8 @@ router.post('/', async (req, res) => {
           affiliate_id: validatedAffiliateId || null,           // M2: apenas afiliado validado
           comissao_afiliado: Number(affiliateShare.toFixed(2)),
           comissao_coprodutores: calculatedCoproducersList,
-          pagarme_order_id: pagarmeOrderId,                     // M11: para estorno
-          pagarme_charge_id: pagarmeChargeId,                   // M11: para estorno
+          // pagarme_order_id: pagarmeOrderId,                     // M11: para estorno (coluna faltando no DB)
+          // pagarme_charge_id: pagarmeChargeId,                   // M11: para estorno (coluna faltando no DB)
           pagarme_subscription_id: order.subscription?.id || order.charges?.[0]?.subscription_id || null // M6: Assinatura
         }]);
 
