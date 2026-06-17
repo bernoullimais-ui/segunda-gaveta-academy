@@ -27,6 +27,7 @@ import notificationsRouter from './routes/notifications.js';
 import refundRouter from './routes/refund.js';
 import ogRouter from './routes/og.js';
 import { dailyRouter } from './routes/daily.js';
+import trafegoRouter from './routes/trafego.js';
 
 // ─── Middleware de segurança para webhook ────────────────────────────────────
 import { validatePagarmeWebhook } from './lib/webhookAuth.js';
@@ -81,6 +82,7 @@ app.use('/api/notifications', notificationsRouter);
 app.use('/api', notificationsRouter);                                      // /api/traffic/track
 app.use('/api/pagarme', refundRouter);                                     // /api/pagarme/refund
 app.use('/api', dailyRouter);                                              // /api/daily/create-room
+app.use('/api/trafego', trafegoRouter);
 
 // ─── Export ───────────────────────────────────────────────────────────────────
 export default app;

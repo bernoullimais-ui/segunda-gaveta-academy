@@ -11,6 +11,7 @@ import { TrilhaModal } from './TrilhaModal';
 import { FinanceiroAdmin } from './FinanceiroAdmin';
 import { ActionModal } from './ActionModal';
 import { getFormattedVideoUrl } from '../lib/videoUtils';
+import { TrafegoAdmin } from './TrafegoAdmin';
 
 // getFormattedVideoUrl migrado para src/lib/videoUtils.ts
 // A função é re-exportada aqui para compatibilidade com código interno ainda não migrado
@@ -154,7 +155,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
     em_breve: false
   });
 
-  const [activeTab, setActiveTab] = useState<'visao_geral' | 'conteudo' | 'participantes' | 'configuracoes' | 'engajamento' | 'acessar_curso' | 'landing_page' | 'split' | 'financeiro' | 'planos'>('visao_geral');
+  const [activeTab, setActiveTab] = useState<'visao_geral' | 'conteudo' | 'participantes' | 'configuracoes' | 'engajamento' | 'acessar_curso' | 'landing_page' | 'split' | 'financeiro' | 'planos' | 'trafego'>('visao_geral');
   const [orgUsers, setOrgUsers] = useState<any[]>([]);
   const [courseSplits, setCourseSplits] = useState<{ usuario_id: string, porcentagem: number }[]>([]);
   const [pagarmeMarketplaceEnabled, setPagarmeMarketplaceEnabled] = useState(false);
@@ -1463,10 +1464,15 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
         </div>
 
         <div className="bg-white border-b border-slate-100 px-8 flex gap-8 shrink-0 overflow-x-auto scrollbar-hide">
-          {(['visao_geral', 'conteudo', 'participantes', 'engajamento', 'landing_page', 'planos', 'split', 'financeiro'] as const).map(tab => (
+          {(
+            [
+              'visao_geral', 'conteudo', 'participantes', 'engajamento', 'landing_page', 'planos', 'split', 'financeiro',
+              ...(loggedUser?.role === 'super_admin' ? ['trafego' as const] : [])
+            ]
+          ).map(tab => (
             <button 
               key={tab} 
-              onClick={() => setActiveTab(tab)}
+              onClick={() => setActiveTab(tab as any)}
               className={`py-4 font-bold text-sm tracking-tight transition-all relative whitespace-nowrap ${
                 activeTab === tab 
                 ? 'text-blue-600' 
@@ -1480,7 +1486,8 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                tab === 'landing_page' ? 'Página de Vendas' : 
                tab === 'planos' ? 'Assinaturas' :
                tab === 'split' ? 'Coprodução / Split' :
-               tab === 'financeiro' ? 'Financeiro' : 'Configurações'}
+               tab === 'financeiro' ? 'Financeiro' : 
+               tab === 'trafego' ? 'Tráfego' : 'Configurações'}
               {activeTab === tab && (
                 <motion.div 
                   layoutId="activeTabIndicatorCurso"
@@ -1495,6 +1502,15 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
           <div className="max-w-5xl mx-auto">
         {activeTab === 'financeiro' && (
           <FinanceiroAdmin orgId={orgId} />
+        )}
+        {activeTab === 'trafego' && (
+          <TrafegoAdmin 
+            courseId={editingCursoId || ''} 
+            courseName={activeCurso?.nome || activeTrilha?.nome || ''} 
+            courseDescription={activeCurso?.descricao || activeTrilha?.descricao || ''}
+            targetAudience={activeCurso?.landing_page_json?.target_audience || ''}
+            curriculoJson={activeCurso?.curriculo_json || []}
+          />
         )}
         {activeTab === 'planos' && (
           <div className="space-y-6">
