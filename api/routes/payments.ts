@@ -222,18 +222,30 @@ router.post('/pagarme/create-order', async (req, res) => {
       return res.status(400).json({ message: cpfResult.error });
     }
 
-    // Get orgId and split configuration from item
-    let orgId: string | null = null;
-    let itemConfig: any = null;
+    let orgName: string | null = null;
     
     if (targetType === 'curso' && targetId) {
-      const { data: c } = await supabase.from('cursos').select('organizacao_id, configuracao_json').eq('id', targetId).maybeSingle();
+      const { data: c } = await supabase.from('cursos').select('organizacao_id, configuracao_json, organizacoes(nome)').eq('id', targetId).maybeSingle();
       orgId = c?.organizacao_id || null;
       itemConfig = c?.configuracao_json;
+      orgName = (c?.organizacoes as any)?.nome || null;
     } else if (targetType === 'trilha' && targetId) {
-      const { data: t } = await supabase.from('trilhas').select('organizacao_id, configuracao_json').eq('id', targetId).maybeSingle();
+      const { data: t } = await supabase.from('trilhas').select('organizacao_id, configuracao_json, organizacoes(nome)').eq('id', targetId).maybeSingle();
       orgId = t?.organizacao_id || null;
       itemConfig = t?.configuracao_json;
+      orgName = (t?.organizacoes as any)?.nome || null;
+    }
+
+    let statementDescriptor = 'ACADEMIA';
+    if (orgName) {
+      const cleanName = orgName
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^A-Za-z0-9]/gi, "")
+        .toUpperCase();
+      if (cleanName.length > 0) {
+        statementDescriptor = cleanName.substring(0, 13);
+      }
     }
 
     // M2: Validate affiliate_id if provided
@@ -288,6 +300,9 @@ router.post('/pagarme/create-order', async (req, res) => {
           customer_editable: true,
           // M8: boleto adicionado como método aceito
           accepted_payment_methods: ['credit_card', 'pix', 'boleto'],
+          credit_card: {
+            statement_descriptor: statementDescriptor
+          },
           pix: { expires_in: 3600 },
           boleto: { due_at: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(), instructions: 'Pagar até o vencimento' },
           success_url: metadata.success_url,
@@ -384,20 +399,36 @@ router.post('/pagarme/create-cc-order', async (req, res) => {
     let orgId: string | null = null;
     let itemConfig: any = null;
     
+    let orgName: string | null = null;
+    
     if (targetType === 'curso' && targetId) {
-      const { data: c } = await supabase.from('cursos').select('organizacao_id, configuracao_json').eq('id', targetId).maybeSingle();
+      const { data: c } = await supabase.from('cursos').select('organizacao_id, configuracao_json, organizacoes(nome)').eq('id', targetId).maybeSingle();
       orgId = c?.organizacao_id || null;
       itemConfig = c?.configuracao_json;
+      orgName = (c?.organizacoes as any)?.nome || null;
     } else if (targetType === 'trilha' && targetId) {
-      const { data: t } = await supabase.from('trilhas').select('organizacao_id, configuracao_json').eq('id', targetId).maybeSingle();
+      const { data: t } = await supabase.from('trilhas').select('organizacao_id, configuracao_json, organizacoes(nome)').eq('id', targetId).maybeSingle();
       orgId = t?.organizacao_id || null;
       itemConfig = t?.configuracao_json;
+      orgName = (t?.organizacoes as any)?.nome || null;
     }
 
     if (validAffiliateId) {
       const affResult = await validateAffiliate(validAffiliateId, orgId, supabase);
       if (!affResult.valid) {
         validAffiliateId = null;
+      }
+    }
+
+    let statementDescriptor = 'ACADEMIA';
+    if (orgName) {
+      const cleanName = orgName
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^A-Za-z0-9]/gi, "")
+        .toUpperCase();
+      if (cleanName.length > 0) {
+        statementDescriptor = cleanName.substring(0, 13);
       }
     }
 
@@ -446,7 +477,7 @@ router.post('/pagarme/create-cc-order', async (req, res) => {
         payment_method: 'credit_card',
         credit_card: {
           installments,   // M1: parcelamento passado dinamicamente
-          statement_descriptor: 'ACADEMIA',
+          statement_descriptor: statementDescriptor,
           card: { 
             token: card_token,
             billing_address: {
