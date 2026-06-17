@@ -136,7 +136,8 @@ export async function notifyWelcome({
   phone,
   courseName,
   specialistName,
-  orgSlug
+  orgSlug,
+  actionLink
 }: {
   email: string;
   name: string;
@@ -144,13 +145,14 @@ export async function notifyWelcome({
   courseName: string;
   specialistName?: string;
   orgSlug?: string;
+  actionLink?: string;
 }) {
   const subject = `Seja bem-vindo ao ${courseName}!`;
   
   const senderNameOverride = specialistName;
   const signatureName = specialistName || 'Equipe Segunda Gaveta';
   const baseUrl = orgSlug ? `https://${orgSlug}.segundagaveta.com.br` : 'https://segunda-gaveta-academy.vercel.app';
-  const platformUrl = `${baseUrl}/login?reset=true`;
+  const platformUrl = actionLink || `${baseUrl}/login`;
 
   const htmlContent = `
     <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">

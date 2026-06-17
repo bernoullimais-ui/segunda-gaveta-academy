@@ -202,6 +202,8 @@ router.post('/', async (req, res) => {
           }
         }
 
+        let generatedActionLink: string | undefined;
+
         // Find or create profile
         let { data: existingUser, error: userErr } = await supabase
           .from('usuarios')
@@ -253,7 +255,16 @@ router.post('/', async (req, res) => {
           // Notify new user with access credentials
           try {
             const baseUrl = orgSlug ? `https://${orgSlug}.segundagaveta.com.br` : (process.env.APP_URL || 'https://segunda-gaveta-academy.vercel.app');
-            const platformUrl = `${baseUrl}/login?reset=true`;
+            
+            const { data: linkData } = await supabase.auth.admin.generateLink({
+              type: 'recovery',
+              email: customerEmail,
+              options: { redirectTo: `${baseUrl}/reset-password` }
+            });
+            
+            const platformUrl = linkData?.properties?.action_link || `${baseUrl}/login`;
+            generatedActionLink = platformUrl;
+            
             const signatureName = orgName || 'Equipe Segunda Gaveta';
 
             const { sendEmail } = await import('../lib/notification.js');
@@ -484,7 +495,8 @@ router.post('/', async (req, res) => {
             phone: customerPhone || undefined,
             courseName: itemName,
             specialistName,
-            orgSlug
+            orgSlug,
+            actionLink: generatedActionLink
           });
         } catch (errWelcome) {
           console.error('[Notification Error] Failed to send welcome notification:', errWelcome);
