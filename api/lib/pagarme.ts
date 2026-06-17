@@ -24,6 +24,18 @@ export function getPagarmeAuthHeader(): string {
   return `Basic ${Buffer.from(key + ':').toString('base64')}`;
 }
 
+export function getPagarmePublicKey(): string | null {
+  return process.env.VITE_PAGAR_ME_PUBLIC_KEY || process.env.VITE_PAGARME_PUBLIC_KEY || null;
+}
+
+export function getPagarmePublicAuthHeader(): string {
+  const key = getPagarmePublicKey();
+  if (!key) {
+    throw new Error('Pagar.me public key not configured. Set VITE_PAGAR_ME_PUBLIC_KEY in environment variables.');
+  }
+  return `Basic ${Buffer.from(key + ':').toString('base64')}`;
+}
+
 /**
  * Builds a Pagar.me phone object from a raw phone string.
  * Returns undefined if the phone is missing or invalid (< 10 digits).
@@ -67,7 +79,7 @@ export async function pagarmeRequest(
   payload: any,
   method: 'GET' | 'POST' | 'DELETE' | 'PATCH' = 'POST'
 ): Promise<{ ok: boolean; status: number; data: any }> {
-  const authHeader = getPagarmeAuthHeader();
+  const authHeader = path.startsWith('/tokens') ? getPagarmePublicAuthHeader() : getPagarmeAuthHeader();
   const response = await fetch(`https://api.pagar.me/core/v5${path}`, {
     method,
     headers: {
