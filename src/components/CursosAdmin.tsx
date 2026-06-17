@@ -1505,7 +1505,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
         )}
         {activeTab === 'trafego' && (
           <TrafegoAdmin 
-            courseId={editingCursoId || ''} 
+            courseId={createdCourseId || ''} 
             courseName={activeCurso?.nome || activeTrilha?.nome || ''} 
             courseDescription={activeCurso?.descricao || activeTrilha?.descricao || ''}
             targetAudience={activeCurso?.landing_page_json?.target_audience || ''}
