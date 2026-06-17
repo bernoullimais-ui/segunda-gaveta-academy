@@ -575,6 +575,15 @@ const WhatsAppFloatingButton = ({ item }: { item: any }) => {
   );
 };
 
+class ModalErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean, error: any}> {
+  constructor(props: any) { super(props); this.state = { hasError: false, error: null }; }
+  static getDerivedStateFromError(error: any) { return { hasError: true, error }; }
+  render() { 
+    if (this.state.hasError) return <div className="fixed inset-0 z-[200] bg-white p-10 overflow-auto"><h1 className="text-red-500 font-bold text-2xl">Erro de Renderização no Modal</h1><pre className="text-sm bg-slate-100 p-4 mt-4">{String(this.state.error?.stack || this.state.error)}</pre></div>; 
+    return this.props.children; 
+  }
+}
+
 export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, isTrilha }) => {
   const [item, setItem] = useState<any>(null);
   const [cursosTrilha, setCursosTrilha] = useState<any[]>([]);
@@ -2147,39 +2156,41 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
       </section>
 
       <Footer layout={layout} item={item} />
-      <EnrollmentModal 
-        isOpen={showEnrollModal}
-        onClose={() => setShowEnrollModal(false)}
-        enrollStep={enrollStep}
-        isFree={isFree}
-        enrollData={enrollData}
-        onEnrollDataChange={setEnrollData}
-        isProcessing={isProcessing}
-        onRegister={processRegistration}
-        isTrilha={!!isTrilha}
-        itemName={item.nome}
-      />
-      <PaymentModal 
-        isOpen={showPaymentModal}
-        onClose={() => setShowPaymentModal(false)}
-        participantId={participantId!}
-        item={{
-          id: item.id,
-          description: item.nome,
-          amount: finalPrice,
-          type: isTrilha ? 'trilha' : 'curso',
-          paymentModel,
-          paymentCycle,
-          paymentInstallmentsLimit
-        }}
-        customer={{
-          name: enrollData.nome,
-          email: enrollData.email,
-          cpf: enrollData.cpf
-        }}
-        organizacaoId={item.organizacao_id}
-        planId={selectedPlanId || undefined}
-      />
+      <ModalErrorBoundary>
+        <EnrollmentModal 
+          isOpen={showEnrollModal}
+          onClose={() => setShowEnrollModal(false)}
+          enrollStep={enrollStep}
+          isFree={isFree}
+          enrollData={enrollData}
+          onEnrollDataChange={setEnrollData}
+          isProcessing={isProcessing}
+          onRegister={processRegistration}
+          isTrilha={!!isTrilha}
+          itemName={item.nome}
+        />
+        <PaymentModal 
+          isOpen={showPaymentModal}
+          onClose={() => setShowPaymentModal(false)}
+          participantId={participantId!}
+          item={{
+            id: item.id,
+            description: item.nome,
+            amount: finalPrice,
+            type: isTrilha ? 'trilha' : 'curso',
+            paymentModel,
+            paymentCycle,
+            paymentInstallmentsLimit
+          }}
+          customer={{
+            name: enrollData.nome,
+            email: enrollData.email,
+            cpf: enrollData.cpf
+          }}
+          organizacaoId={item.organizacao_id}
+          planId={selectedPlanId || undefined}
+        />
+      </ModalErrorBoundary>
       <WhatsAppFloatingButton item={item} />
     </div>
   );
