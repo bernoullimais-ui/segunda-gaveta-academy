@@ -1170,37 +1170,41 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                 <div className="aspect-video bg-slate-950 rounded-[40px] overflow-hidden shadow-[0_0_80px_rgba(0,0,0,0.5)] border border-slate-800 p-2">
                   <div className="w-full h-full rounded-[32px] overflow-hidden">
                     {lp.hero_video_url ? (
-                      <div className="w-full h-full relative group">
-                        <ReactPlayer 
-                          url={lp.hero_video_url} 
-                          width="100%" 
-                          height="100%" 
-                          playing={true}
-                          controls={false}
-                          light={item.thumbnail_url || item.capa_url || true}
-                          playIcon={
-                            <div className="absolute inset-0 cursor-pointer flex items-center justify-center z-10 group">
-                              <div className="absolute inset-0 bg-slate-900/40 group-hover:bg-slate-900/20 transition-colors" />
-                              <div className="relative z-20 w-24 h-24 bg-primary rounded-full flex items-center justify-center text-white shadow-2xl scale-110 group-hover:scale-125 transition-transform duration-500">
-                                <Play className="w-10 h-10 fill-current" />
+                      (lp.hero_video_url.includes('youtube.com') || lp.hero_video_url.includes('youtu.be') || lp.hero_video_url.includes('vimeo.com')) ? (
+                        <div className="w-full h-full relative group">
+                          <ReactPlayer 
+                            url={lp.hero_video_url} 
+                            width="100%" 
+                            height="100%" 
+                            playing={true}
+                            controls={false}
+                            light={item.thumbnail_url || item.capa_url || true}
+                            playIcon={
+                              <div className="absolute inset-0 cursor-pointer flex items-center justify-center z-10 group">
+                                <div className="absolute inset-0 bg-slate-900/40 group-hover:bg-slate-900/20 transition-colors" />
+                                <div className="relative z-20 w-24 h-24 bg-primary rounded-full flex items-center justify-center text-white shadow-2xl scale-110 group-hover:scale-125 transition-transform duration-500">
+                                  <Play className="w-10 h-10 fill-current" />
+                                </div>
                               </div>
-                            </div>
-                          }
-                          config={{
-                            youtube: {
-                              playerVars: {
-                                modestbranding: 1,
-                                rel: 0,
-                                iv_load_policy: 3,
-                                showinfo: 0,
-                                cc_load_policy: 0,
-                                controls: 0,
-                                fs: 0,
-                              }
                             }
-                          }}
-                        />
-                      </div>
+                            config={{
+                              youtube: {
+                                playerVars: {
+                                  modestbranding: 1,
+                                  rel: 0,
+                                  iv_load_policy: 3,
+                                  showinfo: 0,
+                                  cc_load_policy: 0,
+                                  controls: 0,
+                                  fs: 0,
+                                }
+                              }
+                            }}
+                          />
+                        </div>
+                      ) : (
+                        <img src={lp.hero_video_url} alt="Apresentação" className="w-full h-full object-cover" />
+                      )
                     ) : (
                       <img 
                         src={item.capa_url || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070'} 
@@ -1720,37 +1724,41 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             <div className="relative animate-in fade-in slide-in-from-right-8 duration-700 delay-200">
               <div className="aspect-video bg-slate-900 rounded-3xl overflow-hidden shadow-2xl border border-slate-800 relative group">
                 {lp.hero_video_url ? (
-                  <div className="w-full h-full relative">
-                    <ReactPlayer 
-                      url={lp.hero_video_url} 
-                      width="100%" 
-                      height="100%" 
-                      playing={true}
-                      controls={false}
-                      light={item.thumbnail_url || item.capa_url || true}
-                      playIcon={
-                        <div className="absolute inset-0 cursor-pointer flex items-center justify-center z-10 group">
-                          <div className="absolute inset-0 bg-slate-900/40 group-hover:bg-slate-900/20 transition-colors" />
-                          <div className="relative z-20 w-24 h-24 bg-primary rounded-full flex items-center justify-center text-white shadow-2xl scale-110 group-hover:scale-125 transition-transform duration-500">
-                            <Play className="w-10 h-10 fill-current" />
+                  (lp.hero_video_url.includes('youtube.com') || lp.hero_video_url.includes('youtu.be') || lp.hero_video_url.includes('vimeo.com')) ? (
+                    <div className="w-full h-full relative">
+                      <ReactPlayer 
+                        url={lp.hero_video_url} 
+                        width="100%" 
+                        height="100%" 
+                        playing={true}
+                        controls={false}
+                        light={item.thumbnail_url || item.capa_url || true}
+                        playIcon={
+                          <div className="absolute inset-0 cursor-pointer flex items-center justify-center z-10 group">
+                            <div className="absolute inset-0 bg-slate-900/40 group-hover:bg-slate-900/20 transition-colors" />
+                            <div className="relative z-20 w-24 h-24 bg-primary rounded-full flex items-center justify-center text-white shadow-2xl scale-110 group-hover:scale-125 transition-transform duration-500">
+                              <Play className="w-10 h-10 fill-current" />
+                            </div>
                           </div>
-                        </div>
-                      }
-                      config={{
-                        youtube: {
-                          playerVars: {
-                            modestbranding: 1,
-                            rel: 0,
-                            iv_load_policy: 3,
-                            showinfo: 0,
-                            cc_load_policy: 0,
-                            controls: 0,
-                            fs: 0,
-                          }
                         }
-                      }}
-                    />
-                  </div>
+                        config={{
+                          youtube: {
+                            playerVars: {
+                              modestbranding: 1,
+                              rel: 0,
+                              iv_load_policy: 3,
+                              showinfo: 0,
+                              cc_load_policy: 0,
+                              controls: 0,
+                              fs: 0,
+                            }
+                          }
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <img src={lp.hero_video_url} alt="Apresentação" className="w-full h-full object-cover" />
+                  )
                 ) : (
                   <img 
                     src={item.capa_url || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070'} 
