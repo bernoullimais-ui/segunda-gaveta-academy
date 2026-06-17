@@ -392,7 +392,7 @@ router.post('/', async (req, res) => {
           curso_id: targetType === 'curso' ? targetItemId : null,
           trilha_id: targetType === 'trilha' ? targetItemId : null,
           valor_pago: totalPaidBrl,
-          valor_liquido: Number(netRevenueBrl.toFixed(2)),     // M5: valor líquido armazenado
+          // valor_liquido: Number(netRevenueBrl.toFixed(2)),     // M5: valor líquido armazenado (coluna faltando no DB)
           metodo_pagamento: paymentMethod,
           status: 'pago',
           cupom_codigo: coupon_code || null,
