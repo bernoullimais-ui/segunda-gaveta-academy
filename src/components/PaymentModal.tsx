@@ -406,7 +406,7 @@ export function PaymentModal({ isOpen, onClose, item, customer, participantId, o
                 value={couponInput}
                 onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
                 disabled={isValidatingCoupon || isCouponApplied}
-                className="flex-1 px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold uppercase tracking-wider focus:ring-1 focus:ring-indigo-500 outline-none disabled:opacity-50"
+                className="flex-1 px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold uppercase tracking-wider focus:ring-1 focus:ring-indigo-500 outline-none disabled:opacity-50 text-slate-900 placeholder:text-slate-400"
               />
               {isCouponApplied ? (
                 <button type="button" onClick={handleRemoveCoupon}
@@ -442,7 +442,7 @@ export function PaymentModal({ isOpen, onClose, item, customer, participantId, o
             <input
               type="text"
               placeholder="000.000.000-00"
-              className={`w-full p-3 bg-white border-2 rounded-xl outline-none transition-colors ${
+              className={`w-full p-3 bg-white border-2 rounded-xl outline-none transition-colors text-slate-900 placeholder:text-slate-400 ${
                 cpf.replace(/\D/g, '').length === 11
                   ? cpfIsValid ? 'border-green-400 focus:border-green-500' : 'border-red-400 focus:border-red-500'
                   : 'border-slate-200 focus:border-indigo-500'
@@ -460,7 +460,7 @@ export function PaymentModal({ isOpen, onClose, item, customer, participantId, o
               <input
                 type="tel"
                 placeholder="(11) 99999-9999"
-                className="w-full p-3 bg-white border-2 border-slate-200 rounded-xl focus:border-indigo-500 outline-none"
+                className="w-full p-3 bg-white border-2 border-slate-200 rounded-xl focus:border-indigo-500 outline-none text-slate-900 placeholder:text-slate-400"
                 value={phone}
                 onChange={(e) => setPhone(formatPhone(e.target.value))}
                 maxLength={15}
@@ -474,31 +474,31 @@ export function PaymentModal({ isOpen, onClose, item, customer, participantId, o
               <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">Dados do Cartão</label>
               <input
                 placeholder="Número do Cartão"
-                className="w-full p-3 border border-slate-200 rounded-lg text-sm focus:ring-1 focus:ring-indigo-500 outline-none"
+                className="w-full p-3 border border-slate-200 rounded-lg text-sm focus:ring-1 focus:ring-indigo-500 outline-none text-slate-900 placeholder:text-slate-400"
                 onChange={e => setCard({ ...card, number: e.target.value })}
               />
               <input
                 placeholder="Nome no Cartão"
-                className="w-full p-3 border border-slate-200 rounded-lg text-sm focus:ring-1 focus:ring-indigo-500 outline-none"
+                className="w-full p-3 border border-slate-200 rounded-lg text-sm focus:ring-1 focus:ring-indigo-500 outline-none text-slate-900 placeholder:text-slate-400"
                 onChange={e => setCard({ ...card, holder_name: e.target.value })}
               />
               <div className="flex gap-2">
                 <input
                   placeholder="MM"
                   maxLength={2}
-                  className="w-full p-3 border border-slate-200 rounded-lg text-sm focus:ring-1 focus:ring-indigo-500 outline-none"
+                  className="w-full p-3 border border-slate-200 rounded-lg text-sm focus:ring-1 focus:ring-indigo-500 outline-none text-slate-900 placeholder:text-slate-400"
                   onChange={e => setCard({ ...card, exp_month: e.target.value })}
                 />
                 <input
                   placeholder="AA"
                   maxLength={4}
-                  className="w-full p-3 border border-slate-200 rounded-lg text-sm focus:ring-1 focus:ring-indigo-500 outline-none"
+                  className="w-full p-3 border border-slate-200 rounded-lg text-sm focus:ring-1 focus:ring-indigo-500 outline-none text-slate-900 placeholder:text-slate-400"
                   onChange={e => setCard({ ...card, exp_year: e.target.value })}
                 />
                 <input
                   placeholder="CVV"
                   maxLength={4}
-                  className="w-full p-3 border border-slate-200 rounded-lg text-sm focus:ring-1 focus:ring-indigo-500 outline-none"
+                  className="w-full p-3 border border-slate-200 rounded-lg text-sm focus:ring-1 focus:ring-indigo-500 outline-none text-slate-900 placeholder:text-slate-400"
                   onChange={e => setCard({ ...card, cvv: e.target.value })}
                 />
               </div>

@@ -208,7 +208,7 @@ const EnrollmentModal = ({
                     value={enrollData.nome}
                     onChange={e => onEnrollDataChange({...enrollData, nome: e.target.value})}
                     placeholder="Seu nome completo"
-                    className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:border-primary focus:bg-white transition-all"
+                    className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:border-primary focus:bg-white transition-all text-slate-900 placeholder:text-slate-400"
                   />
                 </div>
                 <div className="relative">
@@ -219,7 +219,7 @@ const EnrollmentModal = ({
                     onChange={e => { onEnrollDataChange({...enrollData, email: e.target.value}); setEmailError(''); }}
                     onBlur={e => setEmailError(validateEmail(e.target.value))}
                     placeholder="Seu melhor e-mail"
-                    className={`w-full pl-12 pr-4 py-4 bg-slate-50 border rounded-2xl outline-none focus:bg-white transition-all ${
+                    className={`w-full pl-12 pr-4 py-4 bg-slate-50 border rounded-2xl outline-none focus:bg-white transition-all text-slate-900 placeholder:text-slate-400 ${
                       emailError ? 'border-red-300 focus:border-red-400' : 'border-slate-100 focus:border-primary'
                     }`}
                   />
@@ -233,7 +233,7 @@ const EnrollmentModal = ({
                       value={enrollData.cpf}
                       onChange={e => onEnrollDataChange({...enrollData, cpf: e.target.value})}
                       placeholder="Seu CPF (para emissão de nota)"
-                      className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:border-primary focus:bg-white transition-all"
+                      className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:border-primary focus:bg-white transition-all text-slate-900 placeholder:text-slate-400"
                     />
                   </div>
                 )}
@@ -245,7 +245,7 @@ const EnrollmentModal = ({
                       value={enrollData.password}
                       onChange={e => onEnrollDataChange({...enrollData, password: e.target.value})}
                       placeholder="Crie uma senha de acesso"
-                      className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:border-primary focus:bg-white transition-all"
+                      className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:border-primary focus:bg-white transition-all text-slate-900 placeholder:text-slate-400"
                     />
                   </div>
                 )}
