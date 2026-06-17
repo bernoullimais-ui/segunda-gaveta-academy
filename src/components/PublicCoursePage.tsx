@@ -886,7 +886,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
       const { data: existingParticipation } = await supabase
         .from(table)
         .select('id, status')
-        .eq(idField, courseId)
+        .eq(idField, item.id)
         .eq('usuario_id', userId)
         .maybeSingle();
 
@@ -901,7 +901,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
       const { data: participant, error: partErr } = await supabase
         .from(table)
         .upsert({
-          [idField]: courseId,
+          [idField]: item.id,
           usuario_id: userId,
           status: isFree ? 'inscrito' : 'pendente',
           progresso: 0
