@@ -244,7 +244,7 @@ router.post('/pagarme/create-order', async (req, res) => {
         .replace(/[^A-Za-z0-9]/gi, "")
         .toUpperCase();
       if (cleanName.length > 0) {
-        statementDescriptor = cleanName.substring(0, 13);
+        statementDescriptor = cleanName.substring(0, 12);
       }
     }
 
@@ -428,7 +428,7 @@ router.post('/pagarme/create-cc-order', async (req, res) => {
         .replace(/[^A-Za-z0-9]/gi, "")
         .toUpperCase();
       if (cleanName.length > 0) {
-        statementDescriptor = cleanName.substring(0, 13);
+        statementDescriptor = cleanName.substring(0, 12);
       }
     }
 
