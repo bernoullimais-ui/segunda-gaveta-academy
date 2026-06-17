@@ -433,14 +433,30 @@ router.post('/pagarme/create-cc-order', async (req, res) => {
         type: 'individual',
         document: cpfResult.sanitized || '00000000000',
         document_type: 'CPF',
-        ...(phone && { phones: { mobile_phone: phone } })
+        ...(phone && { phones: { mobile_phone: phone } }),
+        address: {
+          line_1: 'Endereço não informado, 1',
+          zip_code: '01001000',
+          city: 'São Paulo',
+          state: 'SP',
+          country: 'BR'
+        }
       },
       payments: [{
         payment_method: 'credit_card',
         credit_card: {
           installments,   // M1: parcelamento passado dinamicamente
           statement_descriptor: 'ACADEMIA',
-          card: { token: card_token }
+          card: { 
+            token: card_token,
+            billing_address: {
+              line_1: 'Endereço não informado, 1',
+              zip_code: '01001000',
+              city: 'São Paulo',
+              state: 'SP',
+              country: 'BR'
+            }
+          }
         }
       }],
       metadata: {
