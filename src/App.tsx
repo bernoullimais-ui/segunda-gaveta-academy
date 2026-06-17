@@ -1,4 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
+
+class AppErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean, error: any}> {
+  constructor(props: any) { super(props); this.state = { hasError: false, error: null }; }
+  static getDerivedStateFromError(error: any) { return { hasError: true, error }; }
+  render() { 
+    if (this.state.hasError) return <div className="fixed inset-0 z-[9999] bg-white p-10 overflow-auto"><h1 className="text-red-600 font-black text-3xl">Erro Fatal no App</h1><pre className="text-sm bg-slate-100 p-6 mt-6 rounded-xl border border-red-200">{String(this.state.error?.stack || this.state.error)}</pre></div>; 
+    return this.props.children; 
+  }
+}
+
 import { supabase } from './lib/supabase';
 import { LoginScreen } from './components/LoginScreen';
 import { PerfisAdmin } from './components/PerfisAdmin';
@@ -644,11 +654,11 @@ export default function App() {
   };
 
   if (publicCourseId) {
-    return <PublicCoursePage courseId={publicCourseId} />;
+    return <AppErrorBoundary><PublicCoursePage courseId={publicCourseId} /></AppErrorBoundary>;
   }
 
   if (publicTrilhaId) {
-    return <PublicCoursePage courseId={publicTrilhaId} isTrilha />;
+    return <AppErrorBoundary><PublicCoursePage courseId={publicTrilhaId} isTrilha /></AppErrorBoundary>;
   }
 
   if (isResetPasswordRoute) {
