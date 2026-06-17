@@ -91,8 +91,6 @@ export function PaymentModal({ isOpen, onClose, item, customer, participantId, o
     }
   }, [isOpen, item.id, item.type, organizacaoId]);
 
-  if (!isOpen) return null;
-
   const finalAmount = Math.max(0, item.amount - discountApplied);
 
   // M1: calculate installment value
@@ -100,6 +98,8 @@ export function PaymentModal({ isOpen, onClose, item, customer, participantId, o
     () => (installments > 1 ? finalAmount / installments : finalAmount),
     [finalAmount, installments]
   );
+
+  if (!isOpen) return null;
 
   const formatBRL = (val: number) =>
     new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
