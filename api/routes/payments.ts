@@ -61,14 +61,16 @@ async function getDiscountedPrice(
   if (itemType === 'curso') {
     const { data: curso, error: cursoErr } = await supabase
       .from('cursos')
-      .select('preco, valor, organizacao_id')
+      .select('preco, valor, organizacao_id, configuracao_json')
       .eq('id', itemId)
       .maybeSingle();
 
     if (cursoErr || !curso) {
       return { originalPrice: 0, discount: 0, finalPrice: 0, error: 'Curso não encontrado ou erro na busca.' };
     }
-    originalPrice = curso.preco === 'gratuito' ? 0 : Number(curso.valor || 0);
+    const baseValor = curso.preco === 'gratuito' ? 0 : Number(curso.valor || 0);
+    const discountedPrice = curso.configuracao_json?.valor_com_desconto ? Number(curso.configuracao_json.valor_com_desconto) : null;
+    originalPrice = discountedPrice !== null ? discountedPrice : baseValor;
     orgId = curso.organizacao_id;
   } else if (itemType === 'trilha') {
     const { data: trilha, error: trilhaErr } = await supabase
