@@ -182,13 +182,24 @@ router.post('/', async (req, res) => {
       } else if (targetItemId && customerEmail) {
         console.log(`Processing direct checkout for email: ${customerEmail} - Item: ${targetItemId} (${targetType})`);
 
-        // Find org_id
+        let orgSlug = undefined;
+        let orgName = undefined;
+
+        // Find org_id and details
         if (targetType === 'trilha') {
-          const { data: trilha } = await supabase.from('trilhas').select('organizacao_id').eq('id', targetItemId).maybeSingle();
-          if (trilha) finalOrgId = trilha.organizacao_id;
+          const { data: trilha } = await supabase.from('trilhas').select('organizacao_id, organizacoes(nome, slug)').eq('id', targetItemId).maybeSingle();
+          if (trilha) {
+            finalOrgId = trilha.organizacao_id;
+            orgSlug = (trilha.organizacoes as any)?.slug;
+            orgName = (trilha.organizacoes as any)?.nome;
+          }
         } else {
-          const { data: curso } = await supabase.from('cursos').select('organizacao_id').eq('id', targetItemId).maybeSingle();
-          if (curso) finalOrgId = curso.organizacao_id;
+          const { data: curso } = await supabase.from('cursos').select('organizacao_id, organizacoes(nome, slug)').eq('id', targetItemId).maybeSingle();
+          if (curso) {
+            finalOrgId = curso.organizacao_id;
+            orgSlug = (curso.organizacoes as any)?.slug;
+            orgName = (curso.organizacoes as any)?.nome;
+          }
         }
 
         // Find or create profile
@@ -241,24 +252,30 @@ router.post('/', async (req, res) => {
 
           // Notify new user with access credentials
           try {
-            const appUrl = process.env.APP_URL || 'https://segunda-gaveta-academy.vercel.app';
+            const baseUrl = orgSlug ? `https://${orgSlug}.segundagaveta.com.br` : (process.env.APP_URL || 'https://segunda-gaveta-academy.vercel.app');
+            const platformUrl = `${baseUrl}/login?reset=true`;
+            const signatureName = orgName || 'Equipe Segunda Gaveta';
+
             const { sendEmail } = await import('../lib/notification.js');
             await sendEmail({
               to: customerEmail,
               name: customerName,
               subject: 'Sua conta foi criada — Bem-vindo(a)!',
+              senderNameOverride: orgName,
               htmlContent: `
                 <div style="font-family: sans-serif; max-width: 520px; margin: auto; padding: 32px; background: #f8fafc; border-radius: 12px;">
                   <h2 style="color: #1e293b; margin-bottom: 8px;">Olá, ${customerName}! 🎉</h2>
                   <p style="color: #475569;">Seu pagamento foi confirmado e sua conta foi criada automaticamente.</p>
                   <p style="color: #475569;">Para acessar a plataforma, clique no botão abaixo para definir sua senha:</p>
                   <div style="text-align: center; margin: 32px 0;">
-                    <a href="${appUrl}/login?reset=true" style="background: #4f46e5; color: #fff; padding: 14px 28px; border-radius: 8px; font-weight: bold; text-decoration: none; display: inline-block;">
+                    <a href="${platformUrl}" style="background-color: #4f46e5; color: white; padding: 14px 28px; border-radius: 8px; font-weight: bold; text-decoration: none; display: inline-block;">
                       Definir Minha Senha de Acesso
                     </a>
                   </div>
                   <p style="color: #94a3b8; font-size: 12px;">Seu e-mail de acesso é: <strong>${customerEmail}</strong></p>
                   <p style="color: #94a3b8; font-size: 12px;">Se não realizou esta compra, ignore este e-mail.</p>
+                  <br />
+                  <p style="color: #475569;">Atenciosamente,<br /><strong>${signatureName}</strong></p>
                 </div>
               `
             });
@@ -450,12 +467,24 @@ router.post('/', async (req, res) => {
             customerEmail
           );
 
+          let specialistName = undefined;
+          let orgSlug = undefined;
+          if (finalOrgId) {
+             const { data: org } = await supabase.from('organizacoes').select('nome, slug').eq('id', finalOrgId).maybeSingle();
+             if (org) {
+               specialistName = org.nome;
+               orgSlug = org.slug;
+             }
+          }
+
           console.log(`[Notification] Dispatching welcome notification to ${customerEmail}`);
           await notifyWelcome({
             email: customerEmail,
             name: customerName,
             phone: customerPhone || undefined,
-            courseName: itemName
+            courseName: itemName,
+            specialistName,
+            orgSlug
           });
         } catch (errWelcome) {
           console.error('[Notification Error] Failed to send welcome notification:', errWelcome);

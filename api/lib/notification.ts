@@ -21,15 +21,17 @@ export async function sendEmail({
   name,
   subject,
   htmlContent,
+  senderNameOverride,
 }: {
   to: string;
   name: string;
   subject: string;
   htmlContent: string;
+  senderNameOverride?: string;
 }): Promise<boolean> {
   const apiKey = process.env.BREVO_API_KEY;
   const senderEmail = process.env.BREVO_SENDER_EMAIL || 'noreply@segundagaveta.com.br';
-  const senderName = process.env.BREVO_SENDER_NAME || 'Segunda Gaveta Academy';
+  const senderName = senderNameOverride || process.env.BREVO_SENDER_NAME || 'Segunda Gaveta Academy';
 
   if (!apiKey) {
     console.warn('[Notification Warning] BREVO_API_KEY não configurado no ambiente. E-mail não enviado.');
@@ -133,33 +135,43 @@ export async function notifyWelcome({
   name,
   phone,
   courseName,
+  specialistName,
+  orgSlug
 }: {
   email: string;
   name: string;
   phone?: string;
   courseName: string;
+  specialistName?: string;
+  orgSlug?: string;
 }) {
   const subject = `Seja bem-vindo ao ${courseName}!`;
+  
+  const senderNameOverride = specialistName;
+  const signatureName = specialistName || 'Equipe Segunda Gaveta';
+  const baseUrl = orgSlug ? `https://${orgSlug}.segundagaveta.com.br` : 'https://segunda-gaveta-academy.vercel.app';
+  const platformUrl = `${baseUrl}/login?reset=true`;
+
   const htmlContent = `
     <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
       <h2 style="color: #4F46E5;">Olá, ${name}!</h2>
       <p>Parabéns por sua inscrição no curso <strong>${courseName}</strong>! Seu acesso foi liberado com sucesso.</p>
       <p>Para começar a assistir às aulas e interagir com o conteúdo, acesse nossa plataforma de estudos:</p>
       <p style="margin: 20px 0;">
-        <a href="https://segunda-gaveta-academy.vercel.app" style="background-color: #4F46E5; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;">Entrar na Plataforma</a>
+        <a href="${platformUrl}" style="background-color: #4F46E5; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;">Entrar na Plataforma</a>
       </p>
       <p>Caso tenha alguma dúvida, responda a este e-mail ou entre em contato com nosso suporte.</p>
       <br />
-      <p>Atenciosamente,<br /><strong>Equipe Sport for Kids</strong></p>
+      <p>Atenciosamente,<br /><strong>${signatureName}</strong></p>
     </div>
   `;
 
   // Envia E-mail
-  await sendEmail({ to: email, name, subject, htmlContent });
+  await sendEmail({ to: email, name, subject, htmlContent, senderNameOverride });
 
   // Envia WhatsApp (se o telefone estiver disponível)
   if (phone) {
-    const waMessage = `Olá, ${name}! Seja bem-vindo ao curso ${courseName} 🚀\nSeu acesso foi liberado com sucesso. Acesse a plataforma clicando aqui: https://segunda-gaveta-academy.vercel.app e insira seu e-mail para fazer login. Bons estudos!`;
+    const waMessage = `Olá, ${name}! Seja bem-vindo ao curso ${courseName} 🚀\nSeu acesso foi liberado com sucesso. Acesse a plataforma clicando aqui: ${platformUrl} para fazer login. Bons estudos!`;
     await sendWhatsApp({ to: phone, message: waMessage });
   }
 }
