@@ -57,7 +57,7 @@ export function FinanceiroAdmin({ orgId }: { orgId?: string }) {
           .from('compras')
           .select(`
             *,
-            usuarios (nome, email),
+            usuarios!compras_usuario_id_fkey (nome, email),
             cursos (nome, organizacao_id, configuracao_json),
             trilhas (nome, organizacao_id, configuracao_json)
           `)

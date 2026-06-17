@@ -51,7 +51,7 @@ export function AreaAfiliados({ loggedUser, orgSlug, organizacaoId }: AreaAfilia
       // 2. Fetch referred sales
       const { data: salesData } = await supabase
         .from('compras')
-        .select('*, usuarios(nome, email), cursos(nome)')
+        .select('*, usuarios!compras_usuario_id_fkey(nome, email), cursos(nome)')
         .eq('affiliate_id', loggedUser.id)
         .eq('status', 'pago')
         .order('criado_em', { ascending: false });

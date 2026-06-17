@@ -47,7 +47,7 @@ export function SuperAdminPanel({ loggedUser }: { loggedUser: any }) {
     try {
       const [trafficRes, purchasesRes] = await Promise.all([
         supabase.from('traffic_events').select('*'),
-        supabase.from('compras').select('*, usuarios(nome, email, organizacao_id)')
+        supabase.from('compras').select('*, usuarios!compras_usuario_id_fkey(nome, email, organizacao_id)')
       ]);
 
       if (trafficRes.data) setTrafficData(trafficRes.data);
