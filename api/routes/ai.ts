@@ -144,23 +144,32 @@ router.post('/tutor-chat', async (req, res) => {
     // Extract base64 attachments from HTML/text
     const dataUriRegex = /data:([a-zA-Z0-9/+-.]+);base64,([a-zA-Z0-9+/=]+)/g;
     cleanContext = cleanContext.replace(dataUriRegex, (match, mimeType, base64Data) => {
-      // Allowed mime types by Gemini (images, pdfs, texts)
-      if (
-        mimeType.startsWith('image/') ||
-        mimeType === 'application/pdf' ||
-        mimeType.startsWith('text/') ||
-        mimeType === 'application/x-javascript' ||
-        mimeType === 'text/javascript'
-      ) {
-        inlineDataParts.push({
-          inlineData: {
-            mimeType,
-            data: base64Data
-          }
-        });
-        return '[ARQUIVO ANEXADO E DISPONIBILIZADO PARA A IA]';
+      let finalMimeType = mimeType;
+      
+      const explicitlySupported = [
+        'application/pdf',
+        'image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif',
+        'text/plain', 'text/csv', 'text/html', 'text/xml', 'text/markdown', 'application/json',
+        'application/x-javascript', 'text/javascript'
+      ];
+
+      if (explicitlySupported.includes(mimeType)) {
+        // Supported natively
+      } else if (mimeType.startsWith('text/') || mimeType === 'application/rtf') {
+        // Coerce other text formats (like text/rtf) to text/plain to prevent Gemini API from crashing
+        finalMimeType = 'text/plain';
+      } else {
+        // Not supported
+        return `[ARQUIVO ANEXADO IGNORADO - FORMATO NÃO SUPORTADO PELA IA: ${mimeType}]`;
       }
-      return '[ARQUIVO NÃO SUPORTADO PELA IA]';
+
+      inlineDataParts.push({
+        inlineData: {
+          mimeType: finalMimeType,
+          data: base64Data
+        }
+      });
+      return '[ARQUIVO ANEXADO E DISPONIBILIZADO PARA A IA]';
     });
 
     const historyPrompt = (message_history || [])
