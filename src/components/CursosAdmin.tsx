@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Settings, Users, BarChart2, BookOpen, Clock, Lock, PlayCircle, Plus, Eye, Share2, Download, Search, Filter, MoreHorizontal, MessageSquare, Award, CheckCircle, ChevronLeft, Calendar, FileText, Gift, DollarSign, Loader2, Image as ImageIcon, Minus, Code, Video as VideoIcon, ShoppingBag, User, CalendarCheck, List, Paperclip, Volume2, Pencil, Trash2, Check, X, Table, Bold, Italic, Underline, ListOrdered, GripVertical, AlertTriangle, Database, Upload, LayoutDashboard, Sparkles, AlertCircle, Info, Link as LinkIcon } from 'lucide-react';
+import { Settings, Users, BarChart2, BookOpen, Clock, Lock, PlayCircle, Plus, Eye, Share2, Download, Search, Filter, MoreHorizontal, MessageSquare, Award, CheckCircle, ChevronLeft, Calendar, FileText, Gift, DollarSign, Loader2, Image as ImageIcon, Minus, Code, Video as VideoIcon, ShoppingBag, User, CalendarCheck, List, Paperclip, Volume2, Pencil, Trash2, Check, X, Table, Bold, Italic, Underline, ListOrdered, GripVertical, AlertTriangle, Database, Upload, LayoutDashboard, Sparkles, AlertCircle, Info, Link as LinkIcon, BrainCircuit } from 'lucide-react';
 import { motion, AnimatePresence, Reorder } from 'motion/react';
 import { MarketingLinksModal } from './MarketingLinksModal';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
@@ -301,6 +301,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
 
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const imageInputRef = React.useRef<HTMLInputElement>(null);
+  const aiFileInputRef = React.useRef<HTMLInputElement>(null);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -353,6 +354,18 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
     reader.onload = (event) => {
       const dataUrl = event.target?.result as string;
       applyCommand('insertHTML', `<br/><a href="${dataUrl}" download="${file.name}" class="text-blue-600 underline font-medium" target="_blank">📄 Baixar arquivo: ${file.name}</a><br/>`);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  const handleAiFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result as string;
+      applyCommand('insertHTML', `<div data-ai-context="true" style="display: none;"><a href="${dataUrl}" download="${file.name}">[BASE DE CONHECIMENTO IA: ${file.name}]</a></div>`);
     };
     reader.readAsDataURL(file);
     e.target.value = '';
@@ -2517,6 +2530,11 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                           <button onClick={() => fileInputRef.current?.click()} className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 border border-slate-200 rounded-lg transition-colors">
                             <Paperclip className="w-4 h-4" /> Adicionar arquivo para download
                           </button>
+                          
+                          <input type="file" ref={aiFileInputRef} className="hidden" onChange={handleAiFileUpload} />
+                          <button onClick={() => aiFileInputRef.current?.click()} title="Adicionar Base de Conhecimento Invisível para o Tutor de IA" className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-purple-600 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-lg transition-colors">
+                            <BrainCircuit className="w-4 h-4" /> Anexo Oculto (Apenas IA)
+                          </button>
                           <button 
                             onClick={() => setIsAddTableModalOpen(true)}
                             className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 border border-slate-200 rounded-lg transition-colors"
@@ -2955,6 +2973,11 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                           <button onClick={() => fileInputRef.current?.click()} className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 border border-slate-200 rounded-lg transition-colors">
                             <Paperclip className="w-4 h-4" /> Adicionar arquivo para download
                           </button>
+                          
+                          <input type="file" ref={aiFileInputRef} className="hidden" onChange={handleAiFileUpload} />
+                          <button onClick={() => aiFileInputRef.current?.click()} title="Adicionar Base de Conhecimento Invisível para o Tutor de IA" className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-purple-600 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-lg transition-colors">
+                            <BrainCircuit className="w-4 h-4" /> Anexo Oculto (Apenas IA)
+                          </button>
                           <button 
                             onClick={() => setIsAddTableModalOpen(true)}
                             className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 border border-slate-200 rounded-lg transition-colors"
@@ -3307,6 +3330,11 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                           <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileUpload} />
                           <button onClick={() => fileInputRef.current?.click()} className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 border border-slate-200 rounded-lg transition-colors">
                             <Paperclip className="w-4 h-4" /> Adicionar arquivo para download
+                          </button>
+                          
+                          <input type="file" ref={aiFileInputRef} className="hidden" onChange={handleAiFileUpload} />
+                          <button onClick={() => aiFileInputRef.current?.click()} title="Adicionar Base de Conhecimento Invisível para o Tutor de IA" className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-purple-600 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-lg transition-colors">
+                            <BrainCircuit className="w-4 h-4" /> Anexo Oculto (Apenas IA)
                           </button>
                           <button 
                             onClick={() => setIsAddTableModalOpen(true)}

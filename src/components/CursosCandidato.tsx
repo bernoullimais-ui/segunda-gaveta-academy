@@ -1918,7 +1918,7 @@ export function CursosCandidato({
                   )}
 
                   {selectedLesson.descricao && selectedLesson.tipo !== 'quiz' && (
-                    <div className="prose prose-slate dark:prose-invert max-w-none text-slate-700 dark:text-slate-300 mb-8" dangerouslySetInnerHTML={{ __html: selectedLesson.descricao.replace(/<a([^>]+)>/g, (match, attrs) => attrs.includes('target=') ? match : `<a${attrs} target="_blank" rel="noopener noreferrer">`) }} />
+                    <div className="prose prose-slate dark:prose-invert max-w-none text-slate-700 dark:text-slate-300 mb-8" dangerouslySetInnerHTML={{ __html: selectedLesson.descricao.replace(/<div data-ai-context="true"[\s\S]*?<\/div>/g, '').replace(/<a([^>]+)>/g, (match, attrs) => attrs.includes('target=') ? match : `<a${attrs} target="_blank" rel="noopener noreferrer">`) }} />
                   )}
 
                   {/* Diário de Bordo */}
