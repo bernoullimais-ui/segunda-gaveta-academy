@@ -39,6 +39,7 @@ const PORT = 3000;
 // express.json com capture de rawBody para validação HMAC do webhook
 app.use(
   express.json({
+    limit: '10mb',
     verify: (req: Request, _res: Response, buf: Buffer) => {
       // Armazena o buffer original no request para uso no middleware de HMAC
       (req as any).rawBody = buf;
