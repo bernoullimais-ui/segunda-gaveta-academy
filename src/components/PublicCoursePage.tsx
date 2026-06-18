@@ -1249,15 +1249,21 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
         {/* Modern Dark Info Bar */}
         <section className="bg-slate-950/50 border-y border-slate-800 py-16">
           <div className="max-w-7xl mx-auto px-6 flex flex-col items-center gap-12">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-12 w-full">
+            <div className="flex flex-wrap justify-center gap-8 md:gap-16 w-full">
               {/* #3 Conditional stats based on real data */}
-              {[
-                { icon: BookOpen, label: isTrilha ? 'Cursos' : 'Módulos', value: `${isTrilha ? cursosTrilha.length : (item.curriculo_json?.length || 0)} ${isTrilha ? 'cursos' : 'aulas'}` },
+              {(isTrilha ? [
+                { icon: BookOpen, label: 'Cursos', value: `${cursosTrilha.length} cursos` },
                 { icon: Clock, label: 'Duração', value: `${item.carga_horaria || '--'} Horas` },
                 { icon: Calendar, label: 'Acesso', value: item.tempo === 'com_limite' ? `${item.duracao || ''} ${item.duracao_tipo || 'meses'}` : 'Vitalício' },
                 ...(item.tem_certificado ? [{ icon: Award, label: 'Certificado', value: 'Incluso' }] : [])
-              ].map((stat, i) => (
-                <div key={i} className="flex flex-col items-center md:items-start text-center md:text-left gap-2 group">
+              ] : [
+                { icon: BookOpen, label: 'Módulos', value: `${item.curriculo_json?.length || 0} módulos` },
+                { icon: Play, label: 'Aulas', value: `${item.curriculo_json?.reduce((acc: number, secao: any) => acc + (secao.etapas?.length || 0), 0) || 0} aulas` },
+                { icon: Clock, label: 'Duração', value: `${item.carga_horaria || '--'} Horas` },
+                { icon: Calendar, label: 'Acesso', value: item.tempo === 'com_limite' ? `${item.duracao || ''} ${item.duracao_tipo || 'meses'}` : 'Vitalício' },
+                ...(item.tem_certificado ? [{ icon: Award, label: 'Certificado', value: 'Incluso' }] : [])
+              ]).map((stat, i) => (
+                <div key={i} className="flex flex-col items-center md:items-start text-center md:text-left gap-2 group min-w-[120px]">
                   <stat.icon className="w-8 h-8 text-primary mb-2 group-hover:scale-110 transition-transform" />
                   <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">{stat.label}</span>
                   <span className="text-xl font-bold text-white tracking-tight">{stat.value}</span>
@@ -1777,31 +1783,25 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
       <section className="bg-slate-50 border-y border-slate-100">
         <div className="max-w-7xl mx-auto px-6 py-12 flex flex-col items-center gap-8">
           {/* #3 Conditional stats based on real data */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 w-full">
-            <div className="flex flex-col items-center text-center">
-              <BookOpen className="w-8 h-8 text-primary mb-3" />
-              <span className="text-sm font-bold text-slate-400 uppercase">{isTrilha ? 'Cursos' : 'Módulos'}</span>
-              <span className="text-lg font-bold text-slate-900">{isTrilha ? cursosTrilha.length : (item.curriculo_json?.length || 0)} {isTrilha ? 'programas' : 'módulos'}</span>
-            </div>
-            <div className="flex flex-col items-center text-center">
-              <Clock className="w-8 h-8 text-primary mb-3" />
-              <span className="text-sm font-bold text-slate-400 uppercase">Duração</span>
-              <span className="text-lg font-bold text-slate-900">{item.carga_horaria || '--'} h</span>
-            </div>
-            <div className="flex flex-col items-center text-center">
-              <Calendar className="w-8 h-8 text-primary mb-3" />
-              <span className="text-sm font-bold text-slate-400 uppercase">Acesso</span>
-              <span className="text-lg font-bold text-slate-900 capitalize">
-                {item.tempo === 'com_limite' ? `${item.duracao || ''} ${item.duracao_tipo || 'meses'}` : 'Vitalício'}
-              </span>
-            </div>
-            {item.tem_certificado && (
-              <div className="flex flex-col items-center text-center">
-                <Award className="w-8 h-8 text-primary mb-3" />
-                <span className="text-sm font-bold text-slate-400 uppercase">Certificado</span>
-                <span className="text-lg font-bold text-slate-900">Incluso</span>
+          <div className="flex flex-wrap justify-center gap-8 md:gap-16 w-full">
+            {(isTrilha ? [
+              { icon: BookOpen, label: 'Cursos', value: `${cursosTrilha.length} cursos` },
+              { icon: Clock, label: 'Duração', value: `${item.carga_horaria || '--'} Horas` },
+              { icon: Calendar, label: 'Acesso', value: item.tempo === 'com_limite' ? `${item.duracao || ''} ${item.duracao_tipo || 'meses'}` : 'Vitalício' },
+              ...(item.tem_certificado ? [{ icon: Award, label: 'Certificado', value: 'Incluso' }] : [])
+            ] : [
+              { icon: BookOpen, label: 'Módulos', value: `${item.curriculo_json?.length || 0} módulos` },
+              { icon: Play, label: 'Aulas', value: `${item.curriculo_json?.reduce((acc: number, secao: any) => acc + (secao.etapas?.length || 0), 0) || 0} aulas` },
+              { icon: Clock, label: 'Duração', value: `${item.carga_horaria || '--'} Horas` },
+              { icon: Calendar, label: 'Acesso', value: item.tempo === 'com_limite' ? `${item.duracao || ''} ${item.duracao_tipo || 'meses'}` : 'Vitalício' },
+              ...(item.tem_certificado ? [{ icon: Award, label: 'Certificado', value: 'Incluso' }] : [])
+            ]).map((stat, i) => (
+              <div key={i} className="flex flex-col items-center text-center gap-2 group min-w-[120px]">
+                <stat.icon className="w-8 h-8 text-primary mb-1 group-hover:scale-110 transition-transform" />
+                <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">{stat.label}</span>
+                <span className="text-lg font-bold text-slate-900 capitalize">{stat.value}</span>
               </div>
-            )}
+            ))}
           </div>
 
           {/* Price and CTA Button */}
