@@ -138,16 +138,43 @@ router.post('/tutor-chat', async (req, res) => {
     }
     if (!requireGeminiKey(res)) return;
 
+    let cleanContext = lesson_context || '';
+    const inlineDataParts: any[] = [];
+    
+    // Extract base64 attachments from HTML/text
+    const dataUriRegex = /data:([a-zA-Z0-9/+-.]+);base64,([a-zA-Z0-9+/=]+)/g;
+    cleanContext = cleanContext.replace(dataUriRegex, (match, mimeType, base64Data) => {
+      // Allowed mime types by Gemini (images, pdfs, texts)
+      if (
+        mimeType.startsWith('image/') ||
+        mimeType === 'application/pdf' ||
+        mimeType.startsWith('text/') ||
+        mimeType === 'application/x-javascript' ||
+        mimeType === 'text/javascript'
+      ) {
+        inlineDataParts.push({
+          inlineData: {
+            mimeType,
+            data: base64Data
+          }
+        });
+        return '[ARQUIVO ANEXADO E DISPONIBILIZADO PARA A IA]';
+      }
+      return '[ARQUIVO NÃO SUPORTADO PELA IA]';
+    });
+
     const historyPrompt = (message_history || [])
       .map((m: any) => `${m.role === 'user' ? 'Aluno' : 'Tutor'}: ${m.content}`)
       .join('\n');
 
-    const prompt = `Você é um Tutor Virtual amigável e didático na plataforma Academia Digital.
+    const promptText = `Você é um Tutor Virtual amigável e didático na plataforma Academia Digital.
 Seu objetivo é auxiliar os alunos em suas dúvidas sobre o conteúdo das aulas de forma atenciosa, didática e clara, respondendo sempre em português.
 
-Use como base estrita para sua resposta o contexto da aula atual descrito abaixo:
+Use como base estrita para sua resposta o contexto da aula atual descrito abaixo e leia qualquer anexo disponibilizado com atenção.
+Se o aluno fizer uma pergunta que pode ser respondida com base nos arquivos anexados, priorize a informação dos anexos.
+
 [INÍCIO DO CONTEXTO DA AULA]
-${lesson_context || 'Nenhum contexto textual fornecido para esta aula.'}
+${cleanContext || 'Nenhum contexto textual fornecido para esta aula.'}
 [FIM DO CONTEXTO DA AULA]
 
 Histórico da Conversa:
@@ -156,7 +183,12 @@ Aluno: ${user_message}
 
 Tutor:`;
 
-    const response = await generateContentWithRetry({ contents: prompt });
+    const contents = [
+      ...inlineDataParts,
+      { text: promptText }
+    ];
+
+    const response = await generateContentWithRetry({ contents });
     res.json({ response: response.text || 'Desculpe, não consegui processar a resposta no momento.' });
   } catch (error: any) {
     console.error('AI Tutor Chat Error:', error);
