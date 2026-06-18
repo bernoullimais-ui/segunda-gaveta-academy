@@ -141,9 +141,10 @@ router.post('/tutor-chat', async (req, res) => {
     let cleanContext = lesson_context || '';
     const inlineDataParts: any[] = [];
     
-    // Extract base64 attachments from HTML/text
-    const dataUriRegex = /data:([a-zA-Z0-9/+-.]+);base64,([a-zA-Z0-9+/=]+)/g;
-    cleanContext = cleanContext.replace(dataUriRegex, (match, mimeType, base64Data) => {
+    // Extract base64 attachments from HTML/text (handles charset=utf-8 etc.)
+    const dataUriRegex = /data:(.*?);base64,([a-zA-Z0-9+/=]+)/g;
+    cleanContext = cleanContext.replace(dataUriRegex, (match, fullMimeType, base64Data) => {
+      let mimeType = fullMimeType.split(';')[0].trim();
       let finalMimeType = mimeType;
       
       const explicitlySupported = [
