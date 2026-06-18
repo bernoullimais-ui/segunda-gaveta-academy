@@ -60,22 +60,22 @@ const Nav = ({ layout, item, lp, onEnrollClick }: NavProps) => {
     <nav className={`fixed top-0 left-0 right-0 z-50 backdrop-blur-md border-b transition-all ${
       layout === 'escuro' ? 'bg-slate-900/80 border-slate-800' : 'bg-white/80 border-slate-100'
     }`}>
-      <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
+        <div className="flex items-center gap-3 shrink-0">
           {item.organizacoes?.logo_url ? (
-            <img src={item.organizacoes.logo_url} alt="Logo" className="w-10 h-10 object-contain rounded-xl" />
+            <img src={item.organizacoes.logo_url} alt="Logo" className="w-10 h-10 object-contain rounded-xl shrink-0" />
           ) : (
-            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white font-bold text-lg tracking-tighter uppercase">
+            <div className="w-10 h-10 shrink-0 bg-primary rounded-xl flex items-center justify-center text-white font-bold text-lg tracking-tighter uppercase">
               {item.organizacoes?.nome?.[0] || 'S'}
             </div>
           )}
-          <span className={`font-black text-xl tracking-tight hidden sm:block ${layout === 'escuro' ? 'text-white' : 'text-slate-900'}`}>
+          <span className={`font-black text-xl tracking-tight hidden md:block ${layout === 'escuro' ? 'text-white' : 'text-slate-900'}`}>
             {item.organizacoes?.nome || 'Academia Digital'}
           </span>
         </div>
 
-        <div className="flex items-center gap-6">
-          <div className="hidden md:flex items-center gap-8">
+        <div className="flex items-center gap-3 sm:gap-6">
+          <div className="hidden lg:flex items-center gap-8">
             <a href="#sobre" className={`font-bold text-sm hover:text-primary transition-colors ${layout === 'escuro' ? 'text-slate-400' : 'text-slate-500'}`}>Sobre</a>
             <a href="#curriculo" className={`font-bold text-sm hover:text-primary transition-colors ${layout === 'escuro' ? 'text-slate-400' : 'text-slate-500'}`}>Conteúdo</a>
             <a href="#instrutor" className={`font-bold text-sm hover:text-primary transition-colors ${layout === 'escuro' ? 'text-slate-400' : 'text-slate-500'}`}>Instrutor</a>
@@ -83,15 +83,15 @@ const Nav = ({ layout, item, lp, onEnrollClick }: NavProps) => {
           {/* #9 Smart redirect: if logged in go to dashboard, else to login */}
           <a
             href={loggedIn && orgSlug ? `/projeto/${orgSlug}` : '/login'}
-            className={`font-bold text-sm transition-all ${layout === 'escuro' ? 'text-white hover:text-primary' : 'text-slate-900 hover:text-primary'}`}
+            className={`font-bold text-sm sm:text-base transition-all shrink-0 ${layout === 'escuro' ? 'text-white hover:text-primary' : 'text-slate-900 hover:text-primary'}`}
           >
-            {loggedIn ? 'Minha Área' : 'Acessar curso'}
+            {loggedIn ? 'Minha Área' : 'Entrar'}
           </a>
           <button
             onClick={onEnrollClick}
-            className="px-6 py-2.5 bg-primary text-white rounded-full font-bold text-sm hover:opacity-90 shadow-lg shadow-primary/20 active:scale-95 transition-all"
+            className="px-4 sm:px-6 py-2 sm:py-2.5 bg-primary text-white rounded-full font-bold text-sm hover:opacity-90 shadow-lg shadow-primary/20 active:scale-95 transition-all whitespace-nowrap"
           >
-            {lp.cta_text || 'Inscrever-se Agora'}
+            {lp.cta_text || 'Inscrever-se'}
           </button>
         </div>
       </div>
@@ -800,11 +800,13 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
           </div>
         )}
 
-        <div className="flex items-baseline gap-2">
-          <span className={`text-3xl font-black ${isDarkLayout ? 'text-white' : 'text-slate-900'}`}>10x</span>
-          <span className={`text-xl font-bold ${isDarkLayout ? 'text-white' : 'text-slate-900'}`}>R$</span>
-          <span className={`text-6xl font-black ${isDarkLayout ? 'text-white' : 'text-slate-900'}`}>{installmentValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-          <span className={`text-xs font-bold ${isDarkLayout ? 'text-emerald-400' : 'text-emerald-600'} uppercase tracking-wider ml-1`}>sem juros</span>
+        <div className="flex flex-wrap items-baseline gap-1 md:gap-2">
+          <span className={`text-2xl md:text-3xl font-black ${isDarkLayout ? 'text-white' : 'text-slate-900'}`}>10x</span>
+          <span className={`text-lg md:text-xl font-bold ${isDarkLayout ? 'text-white' : 'text-slate-900'}`}>R$</span>
+          <span className={`text-5xl md:text-6xl font-black tracking-tight ${isDarkLayout ? 'text-white' : 'text-slate-900'}`}>{installmentValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+          <span className={`text-[10px] md:text-xs font-bold ${isDarkLayout ? 'text-emerald-400' : 'text-emerald-600'} uppercase tracking-wider ml-1 self-center md:self-baseline`}>
+            sem <br className="hidden sm:block md:hidden" /> juros
+          </span>
         </div>
         <div className={`text-sm ${isDarkLayout ? 'text-slate-400' : 'text-slate-500'} mt-1 font-semibold`}>
           ou R$ {finalPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} à vista
