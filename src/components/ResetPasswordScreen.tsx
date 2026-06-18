@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Lock, AlertTriangle, ShieldCheck, CheckCircle2, BookOpen, Globe } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
@@ -12,6 +12,15 @@ export function ResetPasswordScreen({ activeOrg }: ResetPasswordScreenProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [isLinkExpired, setIsLinkExpired] = useState(false);
+
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash.includes('error=') || hash.includes('error_code=otp_expired')) {
+      setError('O link de recuperação de senha expirou ou é inválido. Por favor, retorne à página de login e solicite uma nova redefinição de senha.');
+      setIsLinkExpired(true);
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -127,6 +136,22 @@ export function ResetPasswordScreen({ activeOrg }: ResetPasswordScreenProps) {
                 className="w-full mt-4 bg-emerald-600 hover:bg-emerald-700 text-white p-3 rounded-xl font-bold text-sm transition-all"
               >
                 Ir para o Login Agora
+              </button>
+            </div>
+          ) : isLinkExpired ? (
+            <div className="bg-red-50 border border-red-200 p-6 rounded-2xl text-center space-y-4 animate-in fade-in slide-in-from-top-4">
+              <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto">
+                <AlertTriangle className="w-8 h-8" />
+              </div>
+              <div>
+                <h3 className="text-red-800 font-bold text-lg">Link Expirado</h3>
+                <p className="text-red-600 text-sm mt-1">{error}</p>
+              </div>
+              <button
+                onClick={() => window.location.href = '/login'}
+                className="w-full mt-4 bg-red-600 hover:bg-red-700 text-white p-3 rounded-xl font-bold text-sm transition-all"
+              >
+                Voltar para o Login
               </button>
             </div>
           ) : (

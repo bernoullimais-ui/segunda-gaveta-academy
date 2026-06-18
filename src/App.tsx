@@ -221,7 +221,7 @@ export default function App() {
 
     const resetMatch = path.match(/^\/reset-password/);
     const hash = window.location.hash;
-    if (resetMatch || hash.includes('type=recovery')) {
+    if (resetMatch || hash.includes('type=recovery') || hash.includes('error_code=otp_expired') || hash.includes('error_description=')) {
       setIsResetPasswordRoute(true);
     }
 
