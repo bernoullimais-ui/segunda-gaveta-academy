@@ -78,6 +78,7 @@ app.get('/api/diag', (req, res) => {
 app.use('/api/ai', aiRouter);
 app.use('/api', paymentsRouter);                                           // /api/coupons/* e /api/pagarme/* exceto webhook
 app.use('/api/pagarme/webhook', validatePagarmeWebhook, webhookRouter);    // HMAC guard aplicado aqui
+app.use('/api/webhook', validatePagarmeWebhook, webhookRouter);            // Fallback para webhooks antigos do Pagar.me
 app.use('/api/cron', cronRouter);
 app.use('/api/notifications', notificationsRouter);
 app.use('/api', notificationsRouter);                                      // /api/traffic/track
