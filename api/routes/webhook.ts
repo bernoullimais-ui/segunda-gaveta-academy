@@ -135,6 +135,7 @@ router.post('/', async (req, res) => {
 
       let finalUserId: string | null = null;
       let finalOrgId: string | null = null;
+      let generatedActionLink: string | undefined;
       const table = targetType === 'trilha' ? 'trilha_participantes' : 'curso_participantes';
       const idField = targetType === 'trilha' ? 'trilha_id' : 'curso_id';
 
@@ -201,9 +202,6 @@ router.post('/', async (req, res) => {
             orgName = (curso.organizacoes as any)?.nome;
           }
         }
-
-        let generatedActionLink: string | undefined;
-
         // Find or create profile
         let { data: existingUser, error: userErr } = await supabase
           .from('usuarios')
