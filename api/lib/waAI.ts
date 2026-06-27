@@ -82,7 +82,8 @@ export async function generateAIReply(
       .replace(/\n\s*\n\s*\n/g, '\n\n')
       .trim();
 
-    return { resposta: respostaLimpa, transbordo };
+    const assinatura = '\n\n[Gabi, assistente virtual da Segunda Gaveta Academy]';
+    return { resposta: respostaLimpa + assinatura, transbordo };
   } catch (error: any) {
     console.error('[WaAI] Erro ao gerar resposta:', error?.message);
     return {

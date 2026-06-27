@@ -226,11 +226,20 @@ router.post('/send', async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Conversa não encontrada.' });
     }
 
+    let nomeAtendente = 'Atendente';
+    if (atendente_id) {
+      const { data: usr } = await supabase.from('usuarios').select('nome').eq('id', atendente_id).maybeSingle();
+      if (usr?.nome) {
+        nomeAtendente = usr.nome.trim();
+      }
+    }
+    const mensagemAssinada = `${mensagem}\n\n[${nomeAtendente}]`;
+
     // Salva mensagem no banco
     const { error: msgErr } = await supabase.from('wa_mensagens').insert([{
       conversa_id,
       direcao: 'saida',
-      conteudo: mensagem,
+      conteudo: mensagemAssinada,
       enviado_por: 'humano',
     }]);
 
@@ -247,7 +256,7 @@ router.post('/send', async (req: Request, res: Response) => {
     // Envia pelo uTalk
     const utalkConfig = await getUtalkConfig(conversa.organizacao_id || undefined);
     if (utalkConfig) {
-      const sent = await sendUtalkMessage(conversa.contato_telefone, mensagem, utalkConfig);
+      const sent = await sendUtalkMessage(conversa.contato_telefone, mensagemAssinada, utalkConfig);
       if (!sent) {
         return res.status(500).json({ error: 'Mensagem salva mas falha ao enviar pelo WhatsApp.' });
       }
