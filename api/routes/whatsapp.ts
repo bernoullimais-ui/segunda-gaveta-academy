@@ -44,6 +44,8 @@ router.post('/webhook', async (req: Request, res: Response) => {
       '';
     const messageText: string =
       content.Text ||
+      content.LastMessage?.Content ||
+      content.LastMessage?.text ||
       content.message?.text ||
       content.message?.body ||
       content.message ||
