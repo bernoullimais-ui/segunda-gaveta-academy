@@ -28,6 +28,7 @@ import refundRouter from './routes/refund.js';
 import ogRouter from './routes/og.js';
 import { dailyRouter } from './routes/daily.js';
 import trafegoRouter from './routes/trafego.js';
+import whatsappRouter from './routes/whatsapp.js';
 
 // ─── Middleware de segurança para webhook ────────────────────────────────────
 import { validatePagarmeWebhook } from './lib/webhookAuth.js';
@@ -85,6 +86,7 @@ app.use('/api', notificationsRouter);                                      // /a
 app.use('/api/pagarme', refundRouter);                                     // /api/pagarme/refund
 app.use('/api', dailyRouter);                                              // /api/daily/create-room
 app.use('/api/trafego', trafegoRouter);
+app.use('/api/whatsapp', whatsappRouter);               // Atendimento IA WhatsApp
 
 // ─── Export ───────────────────────────────────────────────────────────────────
 export default app;

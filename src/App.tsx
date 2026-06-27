@@ -46,11 +46,16 @@ import {
   Ghost,
   DollarSign,
   Share2,
+  MessageCircle,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
+const AtendimentoIA = React.lazy(() =>
+  import('./components/AtendimentoIA').then(module => ({ default: module.AtendimentoIA }))
+);
+
 type UserRole = 'gestor' | 'curador' | 'design' | 'especialista' | 'professor_convidado' | 'membro' | 'super_admin';
-type ViewState = 'dashboard' | 'cursos' | 'comunidade' | 'perfil' | 'configuracao' | 'super_admin' | 'dados_recebimento' | 'afiliados';
+type ViewState = 'dashboard' | 'cursos' | 'comunidade' | 'perfil' | 'configuracao' | 'super_admin' | 'dados_recebimento' | 'afiliados' | 'atendimento_ia';
 
 function hexToHSL(hex: string) {
   hex = hex.replace(/^#/, '');
@@ -904,6 +909,14 @@ export default function App() {
                   onClick={() => setCurrentView('dados_recebimento')} 
                 />
               )}
+              {(loggedRole === 'gestor' || loggedRole === 'especialista' || loggedRole === 'super_admin') && (
+                <NavItem
+                  icon={<MessageCircle size={20} />}
+                  label="Atendimento IA"
+                  active={currentView === 'atendimento_ia'}
+                  onClick={() => setCurrentView('atendimento_ia' as ViewState)}
+                />
+              )}
               <NavItem 
                 icon={<Settings size={20} />} 
                 label="Configurações" 
@@ -1092,6 +1105,8 @@ function RenderContent({
           showToast={showToast} 
         />
       );
+    case 'atendimento_ia':
+      return <AtendimentoIA loggedUser={user} loggedRole={role} />;
     case 'super_admin':
       return <SuperAdminPanel loggedUser={user} />;
     default:
