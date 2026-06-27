@@ -67,7 +67,13 @@ router.post('/webhook', async (req: Request, res: Response) => {
     }
 
     // Ignora mensagens enviadas (só processa recebidas)
-    if (content.message?.fromMe === true || content.direction === 'outgoing' || content.IsFromMe === true) {
+    const isOutgoing = 
+      content.message?.fromMe === true || 
+      content.direction === 'outgoing' || 
+      content.IsFromMe === true ||
+      (content.LastMessage?.Source && content.LastMessage.Source !== 'Contact');
+
+    if (isOutgoing) {
       console.log(`[WA Webhook] EARLY EXIT 2: Mensagem de saída ignorada.`);
       return res.status(200).json({ received: true });
     }
