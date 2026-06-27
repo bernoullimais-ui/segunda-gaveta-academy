@@ -29,39 +29,44 @@ const router = Router();
 router.post('/webhook', async (req: Request, res: Response) => {
   try {
     const body = req.body;
-    console.log('[WA Webhook] Payload recebido:', JSON.stringify(body).slice(0, 500));
+    console.log('[WA Webhook] Payload recebido:', JSON.stringify(body).slice(0, 1500));
+
+    // O uTalk pode enviar o payload de duas formas (Webhook global vs API)
+    const content = body.Payload?.Content || body;
 
     // Extrai campos do payload do uTalk
-    // Formato uTalk: { event, contact: { phone, name }, message: { text, type }, channel: { phone } }
     const fromPhone: string =
-      body.contact?.phone ||
-      body.fromPhone ||
-      body.from ||
-      body.sender?.phone ||
+      content.Contact?.PhoneNumber ||
+      content.contact?.phone ||
+      content.fromPhone ||
+      content.from ||
+      content.sender?.phone ||
       '';
     const messageText: string =
-      body.message?.text ||
-      body.message?.body ||
-      body.message ||
-      body.text ||
-      body.body ||
+      content.Text ||
+      content.message?.text ||
+      content.message?.body ||
+      content.message ||
+      content.text ||
+      content.body ||
       '';
     const contatoNome: string =
-      body.contact?.name ||
-      body.senderName ||
-      body.pushName ||
+      content.Contact?.Name ||
+      content.contact?.name ||
+      content.senderName ||
+      content.pushName ||
       '';
 
     // Ignora eventos que não sejam mensagens de texto recebidas
-    const event: string = body.event || '';
-    if (event && !event.includes('message') && !event.includes('conversa') && event !== '') {
+    const event: string = body.event || body.Type || '';
+    if (event && !event.includes('message') && !event.includes('conversa') && !event.includes('Message') && event !== '') {
       console.log(`[WA Webhook] EARLY EXIT 1: Evento ignorado: ${event}`);
       return res.status(200).json({ received: true });
     }
 
     // Ignora mensagens enviadas (só processa recebidas)
-    if (body.message?.fromMe === true || body.direction === 'outgoing') {
-      console.log(`[WA Webhook] EARLY EXIT 2: Mensagem de saída ignorada. fromMe: ${body.message?.fromMe}, direction: ${body.direction}`);
+    if (content.message?.fromMe === true || content.direction === 'outgoing' || content.IsFromMe === true) {
+      console.log(`[WA Webhook] EARLY EXIT 2: Mensagem de saída ignorada.`);
       return res.status(200).json({ received: true });
     }
 
