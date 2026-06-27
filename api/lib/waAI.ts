@@ -29,6 +29,7 @@ export interface WaAIConfig {
   promptGlobal: string;
   promptOverride?: string | null;
   orgName?: string;
+  iaAtiva: boolean;
 }
 
 export interface AIReplyResult {
@@ -144,28 +145,34 @@ export async function resolveContatoInfo(telefone: string): Promise<WaContatoInf
 export async function getWaAIConfig(organizacaoId?: string): Promise<WaAIConfig> {
   const supabase = getSupabase();
 
-  // Busca prompt global
+  // Busca prompt adequado (Triagem se nulo, Global se houver org mas sem override)
+  const chavePrompt = organizacaoId ? 'wa_ia_prompt_global' : 'wa_ia_prompt_triagem';
+  
   const { data: globalConfig } = await supabase
     .from('configuracoes_globais')
     .select('valor')
-    .eq('chave', 'wa_ia_prompt_global')
+    .eq('chave', chavePrompt)
     .maybeSingle();
 
-  const promptGlobal = globalConfig?.valor || 'Você é um assistente virtual da Segunda Gaveta Academy. Responda em português, seja amigável e profissional.';
+  const promptGlobal = globalConfig?.valor || 'Você é um assistente virtual. Por favor, pergunte sobre qual curso o usuário tem interesse.';
 
   // Busca configuração e prompt da organização (se houver)
   let promptOverride: string | null = null;
   let orgName: string | undefined;
+  let iaAtiva = true;
 
   if (organizacaoId) {
     const { data: waConfig } = await supabase
       .from('wa_config')
-      .select('ia_prompt_override')
+      .select('ia_prompt_override, ia_ativa')
       .eq('organizacao_id', organizacaoId)
       .maybeSingle();
 
-    if (waConfig?.ia_prompt_override) {
-      promptOverride = waConfig.ia_prompt_override;
+    if (waConfig) {
+      if (waConfig.ia_prompt_override) promptOverride = waConfig.ia_prompt_override;
+      if (waConfig.ia_ativa !== null && waConfig.ia_ativa !== undefined) {
+        iaAtiva = waConfig.ia_ativa;
+      }
     }
 
     const { data: org } = await supabase
@@ -177,7 +184,7 @@ export async function getWaAIConfig(organizacaoId?: string): Promise<WaAIConfig>
     orgName = org?.nome;
   }
 
-  return { promptGlobal, promptOverride, orgName };
+  return { promptGlobal, promptOverride, orgName, iaAtiva };
 }
 
 // ─── Envia mensagem pelo Umbler uTalk ────────────────────────────────────────
@@ -231,43 +238,44 @@ export async function getUtalkConfig(organizacaoId?: string): Promise<{
 } | null> {
   const supabase = getSupabase();
 
-  // Busca config específica da organização
+  let orgToken = '';
+  let orgFromPhone = '';
+  let orgOrgId = '';
+
+  // 1. Busca config específica da organização
   if (organizacaoId) {
     const { data } = await supabase
       .from('wa_config')
-      .select('utalk_token, utalk_from_phone, utalk_organization_id, ia_ativa')
+      .select('utalk_token, utalk_from_phone, utalk_organization_id')
       .eq('organizacao_id', organizacaoId)
       .maybeSingle();
 
-    if (data?.utalk_token && data?.utalk_from_phone && data?.utalk_organization_id) {
-      return {
-        token: data.utalk_token,
-        fromPhone: data.utalk_from_phone,
-        organizationId: data.utalk_organization_id
-      };
+    if (data) {
+      orgToken = data.utalk_token || '';
+      orgFromPhone = data.utalk_from_phone || '';
+      orgOrgId = data.utalk_organization_id || '';
     }
   }
 
-  // Fallback: primeira config disponível (número centralizado)
-  const { data } = await supabase
-    .from('wa_config')
-    .select('utalk_token, utalk_from_phone, utalk_organization_id')
-    .not('utalk_token', 'is', null)
-    .limit(1)
-    .maybeSingle();
+  // 2. Busca config Global de fallback
+  const { data: globData } = await supabase
+    .from('configuracoes_globais')
+    .select('chave, valor')
+    .in('chave', ['wa_utalk_global_token', 'wa_utalk_global_from_phone', 'wa_utalk_global_organization_id']);
 
-  if (data?.utalk_token && data?.utalk_from_phone && data?.utalk_organization_id) {
-    return {
-      token: data.utalk_token,
-      fromPhone: data.utalk_from_phone,
-      organizationId: data.utalk_organization_id
-    };
+  const globMap: Record<string, string> = {};
+  if (globData) {
+    globData.forEach((row: any) => { globMap[row.chave] = row.valor; });
   }
 
-  // Fallback final: variáveis de ambiente
-  const token = process.env.UTALK_TOKEN;
-  const fromPhone = process.env.UTALK_FROM_PHONE;
-  const organizationId = process.env.UTALK_ORGANIZATION_ID;
+  const globalToken = globMap['wa_utalk_global_token'] || process.env.UTALK_TOKEN || '';
+  const globalFromPhone = globMap['wa_utalk_global_from_phone'] || process.env.UTALK_FROM_PHONE || '';
+  const globalOrgId = globMap['wa_utalk_global_organization_id'] || process.env.UTALK_ORGANIZATION_ID || '';
+
+  // 3. Mescla Híbrido: Privilegia a Organização, se vazio usa o Global
+  const token = orgToken || globalToken;
+  const fromPhone = orgFromPhone || globalFromPhone;
+  const organizationId = orgOrgId || globalOrgId;
 
   if (token && fromPhone && organizationId) {
     return { token, fromPhone, organizationId };

@@ -98,6 +98,36 @@ router.post('/webhook', async (req: Request, res: Response) => {
       .limit(1)
       .maybeSingle();
 
+    // ── Roteamento Automático por Palavras-chave ──────────────
+    let orgIdRoteada = conversa?.organizacao_id || null;
+
+    if (!orgIdRoteada) {
+      const { data: configs } = await supabase
+        .from('wa_config')
+        .select('organizacao_id, palavras_chave_roteamento')
+        .not('palavras_chave_roteamento', 'is', null);
+
+      if (configs && configs.length > 0) {
+        const textoMsg = messageText.toLowerCase();
+        for (const config of configs) {
+          if (!config.palavras_chave_roteamento) continue;
+          const palavras = config.palavras_chave_roteamento.split(',').map((p: string) => p.trim().toLowerCase());
+          
+          if (palavras.some((p: string) => p && textoMsg.includes(p))) {
+            orgIdRoteada = config.organizacao_id;
+            console.log(`[WA Webhook] Roteado para org ${orgIdRoteada} por palavra-chave na mensagem: ${textoMsg}`);
+            
+            // Se já existia conversa, atualiza no banco
+            if (conversa) {
+              await supabase.from('wa_conversas').update({ organizacao_id: orgIdRoteada }).eq('id', conversa.id);
+              conversa.organizacao_id = orgIdRoteada;
+            }
+            break;
+          }
+        }
+      }
+    }
+
     if (!conversa) {
       // Resolve info do contato (aluno ou lead?)
       const contatoInfo = await resolveContatoInfo(foneNorm);
@@ -105,6 +135,7 @@ router.post('/webhook', async (req: Request, res: Response) => {
       const { data: novaConversa, error: insertErr } = await supabase
         .from('wa_conversas')
         .insert([{
+          organizacao_id: orgIdRoteada,
           contato_telefone: foneNorm,
           contato_nome: contatoNome || contatoInfo.nome || null,
           contato_email: contatoInfo.email || null,
@@ -149,6 +180,19 @@ router.post('/webhook', async (req: Request, res: Response) => {
       return res.status(200).json({ received: true });
     }
 
+    const aiConfig = await getWaAIConfig(conversa.organizacao_id || undefined);
+
+    if (aiConfig.iaAtiva === false) {
+      console.log(`[WA Webhook] IA desativada para a org ${conversa.organizacao_id}. Ignorando IA.`);
+      if (conversa.status === 'ia_ativa') {
+        await supabase
+          .from('wa_conversas')
+          .update({ status: 'aguardando_humano', ultima_mensagem_em: new Date().toISOString() })
+          .eq('id', conversa.id);
+      }
+      return res.status(200).json({ received: true });
+    }
+
     // ── Busca histórico da conversa para contexto da IA ─────────────────────
     const { data: historico } = await supabase
       .from('wa_mensagens')
@@ -164,7 +208,6 @@ router.post('/webhook', async (req: Request, res: Response) => {
     }));
 
     // ── Gera resposta da IA ─────────────────────────────────────────────────
-    const aiConfig = await getWaAIConfig(conversa.organizacao_id || undefined);
     const contatoInfo = await resolveContatoInfo(foneNorm);
     const { resposta, transbordo } = await generateAIReply(historicoParsed, aiConfig, contatoInfo);
 
@@ -343,7 +386,8 @@ router.get('/conversas', async (req: Request, res: Response) => {
       .from('wa_conversas')
       .select(`
         *,
-        atendente:usuarios!wa_conversas_atendente_id_fkey(id, nome, email)
+        atendente:usuarios!wa_conversas_atendente_id_fkey(id, nome, email),
+        organizacao:organizacoes(nome)
       `)
       .order('ultima_mensagem_em', { ascending: false })
       .limit(Number(limit));
@@ -471,7 +515,7 @@ router.get('/config/:orgId', async (req: Request, res: Response) => {
 router.post('/config/:orgId', async (req: Request, res: Response) => {
   try {
     const { orgId } = req.params;
-    const { utalk_token, utalk_from_phone, utalk_organization_id, ia_ativa, ia_prompt_override } = req.body;
+    const { utalk_token, utalk_from_phone, utalk_organization_id, ia_ativa, ia_prompt_override, palavras_chave_roteamento } = req.body;
     const supabase = getSupabase();
 
     const { error } = await supabase
@@ -481,6 +525,7 @@ router.post('/config/:orgId', async (req: Request, res: Response) => {
         utalk_token: utalk_token || null,
         utalk_from_phone: utalk_from_phone || null,
         utalk_organization_id: utalk_organization_id || null,
+        palavras_chave_roteamento: palavras_chave_roteamento || null,
         ia_ativa: ia_ativa !== undefined ? ia_ativa : true,
         ia_prompt_override: ia_prompt_override || null,
         atualizado_em: new Date().toISOString(),

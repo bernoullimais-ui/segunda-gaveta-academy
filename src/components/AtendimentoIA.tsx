@@ -44,6 +44,7 @@ interface WaConversa {
   ultima_mensagem_em: string;
   encerrado_em: string | null;
   atendente?: { nome: string; email: string } | null;
+  organizacao?: { nome: string } | null;
   _preview?: string;
 }
 
@@ -96,6 +97,8 @@ export function AtendimentoIA({ loggedUser, loggedRole }: AtendimentoIAProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'chat' | 'metricas' | 'config'>('chat');
   const [metrics, setMetrics] = useState<any>(null);
+  const [organizacoes, setOrganizacoes] = useState<any[]>([]);
+  const [filtroOrg, setFiltroOrg] = useState<string>('todas');
   const chatEndRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [notificacoesPermitidas, setNotificacoesPermitidas] = useState(false);
@@ -103,6 +106,15 @@ export function AtendimentoIA({ loggedUser, loggedRole }: AtendimentoIAProps) {
 
   const isSuperAdmin = loggedRole === 'super_admin';
   const orgId = loggedUser?.organizacao_id;
+
+  // ── Carrega organizações (apenas para super_admin) ─────────────
+  useEffect(() => {
+    if (isSuperAdmin) {
+      supabase.from('organizacoes').select('id, nome').order('nome').then(({ data }) => {
+        if (data) setOrganizacoes(data);
+      });
+    }
+  }, [isSuperAdmin]);
 
   // ── Solicita permissão de notificação push ────────────────────────────────
   useEffect(() => {
@@ -139,6 +151,7 @@ export function AtendimentoIA({ loggedUser, loggedRole }: AtendimentoIAProps) {
     try {
       const params = new URLSearchParams();
       if (!isSuperAdmin && orgId) params.set('org_id', orgId);
+      if (isSuperAdmin && filtroOrg !== 'todas') params.set('org_id', filtroOrg);
       if (filtroStatus !== 'todas') params.set('status', filtroStatus);
       params.set('limit', '100');
 
@@ -235,6 +248,18 @@ export function AtendimentoIA({ loggedUser, loggedRole }: AtendimentoIAProps) {
   }, [activeTab, isSuperAdmin, orgId]);
 
   // ── Ações da conversa ─────────────────────────────────────────────────────
+  const [transferindo, setTransferindo] = useState(false);
+  const [atendentesList, setAtendentesList] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (isSuperAdmin) {
+      supabase.from('usuarios').select('id, nome, perfil')
+        .in('perfil', ['super_admin', 'admin', 'gestor', 'especialista'])
+        .order('nome')
+        .then(({ data }) => { if (data) setAtendentesList(data); });
+    }
+  }, [isSuperAdmin]);
+
   const assumirConversa = async () => {
     if (!conversaSelecionada) return;
     await fetch(`/api/whatsapp/conversas/${conversaSelecionada.id}/takeover`, {
@@ -244,6 +269,18 @@ export function AtendimentoIA({ loggedUser, loggedRole }: AtendimentoIAProps) {
     });
     setConversaSelecionada(prev => prev ? { ...prev, status: 'em_atendimento', atendente_id: loggedUser.id } : null);
     carregarConversas();
+  };
+
+  const transferirConversa = async (novoAtendenteId: string) => {
+    if (!conversaSelecionada) return;
+    await fetch(`/api/whatsapp/conversas/${conversaSelecionada.id}/takeover`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ atendente_id: novoAtendenteId }),
+    });
+    setConversaSelecionada(prev => prev ? { ...prev, status: 'em_atendimento', atendente_id: novoAtendenteId } : null);
+    carregarConversas();
+    setTransferindo(false);
   };
 
   const devolverParaIA = async () => {
@@ -336,6 +373,22 @@ export function AtendimentoIA({ loggedUser, loggedRole }: AtendimentoIAProps) {
         <div className="flex flex-1 overflow-hidden">
           {/* Coluna Esquerda — Lista de Conversas */}
           <div className="w-80 border-r border-slate-100 flex flex-col bg-slate-50/50">
+            {/* Filtro Org (Admin) */}
+            {isSuperAdmin && (
+              <div className="px-3 pt-3">
+                <select
+                  className="w-full text-xs font-semibold bg-white border border-slate-200 text-slate-700 rounded-lg p-1.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  value={filtroOrg}
+                  onChange={(e) => setFiltroOrg(e.target.value)}
+                >
+                  <option value="todas">Todas as Organizações</option>
+                  {organizacoes.map(o => (
+                    <option key={o.id} value={o.id}>{o.nome}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
             {/* Filtros */}
             <div className="p-3 border-b border-slate-100 flex gap-1 flex-wrap">
               {[
@@ -386,13 +439,18 @@ export function AtendimentoIA({ loggedUser, loggedRole }: AtendimentoIAProps) {
                             </span>
                             <span className="text-slate-400 text-xs flex-shrink-0">{formatTime(conversa.ultima_mensagem_em)}</span>
                           </div>
-                          <div className="flex items-center gap-1 mt-0.5">
+                          <div className="flex items-center gap-1 mt-0.5 flex-wrap">
                             <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-semibold ${cfg.color}`}>
                               {cfg.label}
                             </span>
                             {conversa.is_aluno && (
                               <span className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold bg-teal-50 text-teal-700">
                                 Aluno
+                              </span>
+                            )}
+                            {conversa.organizacao?.nome && (
+                              <span className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold border border-slate-200 text-slate-500 truncate max-w-[120px]">
+                                {conversa.organizacao.nome}
                               </span>
                             )}
                           </div>
@@ -567,6 +625,32 @@ export function AtendimentoIA({ loggedUser, loggedRole }: AtendimentoIAProps) {
                   </button>
                 )}
 
+                {isSuperAdmin && (
+                  <div className="mt-4 pt-4 border-t border-slate-100">
+                    <button
+                      onClick={() => setTransferindo(!transferindo)}
+                      className="w-full flex items-center gap-2 px-3 py-2.5 bg-white text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold hover:bg-indigo-50 transition-all mb-2"
+                    >
+                      <User size={14} />
+                      {transferindo ? 'Cancelar Transferência' : 'Transferir Conversa'}
+                    </button>
+                    {transferindo && (
+                      <div className="flex gap-2">
+                        <select
+                          className="flex-1 text-xs border border-slate-200 rounded-lg p-2 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                          onChange={(e) => transferirConversa(e.target.value)}
+                          defaultValue=""
+                        >
+                          <option value="" disabled>Selecione um atendente...</option>
+                          {atendentesList.map(a => (
+                            <option key={a.id} value={a.id}>{a.nome}</option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {conversaSelecionada.status === 'ia_ativa' && (
                   <button
                     onClick={assumirConversa}
@@ -653,7 +737,10 @@ export function AtendimentoIA({ loggedUser, loggedRole }: AtendimentoIAProps) {
 function AtendimentoIAConfig({
   loggedUser, loggedRole, isSuperAdmin, orgId
 }: { loggedUser: any; loggedRole: string; isSuperAdmin: boolean; orgId: string }) {
-  const [config, setConfig] = useState({ utalk_token: '', utalk_from_phone: '', utalk_organization_id: '', ia_ativa: true, ia_prompt_override: '' });
+  const [config, setConfig] = useState({ 
+    utalk_token: '', utalk_from_phone: '', utalk_organization_id: '', 
+    ia_ativa: true, ia_prompt_override: '', palavras_chave_roteamento: '' 
+  });
   const [promptGlobal, setPromptGlobal] = useState('');
   const [editPromptGlobal, setEditPromptGlobal] = useState('');
   const [isSaving, setIsSaving] = useState(false);
@@ -709,12 +796,13 @@ function AtendimentoIAConfig({
           { key: 'utalk_token', label: 'Token de Autorização', placeholder: 'Bearer eyJ...' },
           { key: 'utalk_from_phone', label: 'Número de Origem (fromPhone)', placeholder: '5511999999999' },
           { key: 'utalk_organization_id', label: 'Organization ID', placeholder: 'org_...' },
+          { key: 'palavras_chave_roteamento', label: 'Palavras-Chave de Roteamento (separadas por vírgula)', placeholder: 'Ex: Dojo One, dojo' },
         ].map(field => (
           <div key={field.key}>
             <label className="block text-xs font-semibold text-slate-500 mb-1 uppercase tracking-wider">{field.label}</label>
             <input
               type="text"
-              value={(config as any)[field.key]}
+              value={(config as any)[field.key] || ''}
               onChange={e => setConfig(prev => ({ ...prev, [field.key]: e.target.value }))}
               placeholder={field.placeholder}
               className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
