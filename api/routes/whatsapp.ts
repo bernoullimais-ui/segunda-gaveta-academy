@@ -55,20 +55,22 @@ router.post('/webhook', async (req: Request, res: Response) => {
     // Ignora eventos que não sejam mensagens de texto recebidas
     const event: string = body.event || '';
     if (event && !event.includes('message') && !event.includes('conversa') && event !== '') {
-      console.log(`[WA Webhook] Evento ignorado: ${event}`);
+      console.log(`[WA Webhook] EARLY EXIT 1: Evento ignorado: ${event}`);
       return res.status(200).json({ received: true });
     }
 
     // Ignora mensagens enviadas (só processa recebidas)
     if (body.message?.fromMe === true || body.direction === 'outgoing') {
-      console.log('[WA Webhook] Mensagem de saída ignorada.');
+      console.log(`[WA Webhook] EARLY EXIT 2: Mensagem de saída ignorada. fromMe: ${body.message?.fromMe}, direction: ${body.direction}`);
       return res.status(200).json({ received: true });
     }
 
     if (!fromPhone || !messageText) {
-      console.warn('[WA Webhook] Payload incompleto, ignorando.', { fromPhone, messageText });
+      console.warn(`[WA Webhook] EARLY EXIT 3: Payload incompleto. fromPhone: "${fromPhone}", messageText: "${messageText}"`);
       return res.status(200).json({ received: true });
     }
+
+    console.log(`[WA Webhook] Passou pelas validações iniciais. fromPhone: ${fromPhone}, messageText: ${messageText.slice(0, 50)}...`);
 
     const supabase = getSupabase();
 
