@@ -82,8 +82,8 @@ export async function generateAIReply(
       .replace(/\n\s*\n\s*\n/g, '\n\n')
       .trim();
 
-    const assinatura = '\n\n[Gabi, assistente virtual da Segunda Gaveta Academy]';
-    return { resposta: respostaLimpa + assinatura, transbordo };
+    const assinatura = '*[Gabi, assistente virtual da Segunda Gaveta Academy]*\n\n';
+    return { resposta: assinatura + respostaLimpa, transbordo };
   } catch (error: any) {
     console.error('[WaAI] Erro ao gerar resposta:', error?.message);
     return {

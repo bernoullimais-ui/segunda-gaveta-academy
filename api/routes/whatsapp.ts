@@ -233,7 +233,7 @@ router.post('/send', async (req: Request, res: Response) => {
         nomeAtendente = usr.nome.trim();
       }
     }
-    const mensagemAssinada = `${mensagem}\n\n[${nomeAtendente}]`;
+    const mensagemAssinada = `*[${nomeAtendente}]*\n\n${mensagem}`;
 
     // Salva mensagem no banco
     const { error: msgErr } = await supabase.from('wa_mensagens').insert([{
