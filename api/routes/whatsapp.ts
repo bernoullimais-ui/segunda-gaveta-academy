@@ -27,9 +27,6 @@ const router = Router();
 // ─── 1. WEBHOOK — Recebe mensagens do Umbler uTalk ───────────────────────────
 
 router.post('/webhook', async (req: Request, res: Response) => {
-  // Responde imediatamente para o uTalk não dar timeout
-  res.status(200).json({ received: true });
-
   try {
     const body = req.body;
     console.log('[WA Webhook] Payload recebido:', JSON.stringify(body).slice(0, 500));
@@ -183,8 +180,12 @@ router.post('/webhook', async (req: Request, res: Response) => {
     } else {
       console.warn('[WA Webhook] Sem configuração uTalk. Mensagem salva mas não enviada.');
     }
+
+    // Responde ao uTalk SÓ no final para a Vercel não matar a função antes de terminar
+    return res.status(200).json({ received: true });
   } catch (error: any) {
     console.error('[WA Webhook] Erro geral:', error?.message);
+    return res.status(500).json({ error: error?.message });
   }
 });
 
