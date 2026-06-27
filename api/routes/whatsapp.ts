@@ -56,18 +56,18 @@ router.post('/webhook', async (req: Request, res: Response) => {
     const event: string = body.event || '';
     if (event && !event.includes('message') && !event.includes('conversa') && event !== '') {
       console.log(`[WA Webhook] Evento ignorado: ${event}`);
-      return;
+      return res.status(200).json({ received: true });
     }
 
     // Ignora mensagens enviadas (só processa recebidas)
     if (body.message?.fromMe === true || body.direction === 'outgoing') {
       console.log('[WA Webhook] Mensagem de saída ignorada.');
-      return;
+      return res.status(200).json({ received: true });
     }
 
     if (!fromPhone || !messageText) {
       console.warn('[WA Webhook] Payload incompleto, ignorando.', { fromPhone, messageText });
-      return;
+      return res.status(200).json({ received: true });
     }
 
     const supabase = getSupabase();
@@ -102,7 +102,7 @@ router.post('/webhook', async (req: Request, res: Response) => {
 
       if (insertErr || !novaConversa) {
         console.error('[WA Webhook] Erro ao criar conversa:', insertErr);
-        return;
+        return res.status(500).json({ error: 'Erro ao criar conversa' });
       }
       conversa = novaConversa;
     }
@@ -124,14 +124,14 @@ router.post('/webhook', async (req: Request, res: Response) => {
     // ── Se conversa está com humano, não processa IA ─────────────────────────
     if (conversa.status === 'em_atendimento') {
       console.log(`[WA Webhook] Conversa ${conversa.id} está com humano, ignorando IA.`);
-      return;
+      return res.status(200).json({ received: true });
     }
 
     if (conversa.status === 'aguardando_humano') {
       console.log(`[WA Webhook] Conversa ${conversa.id} aguardando humano, IA pausada.`);
       // Notifica via Supabase que chegou nova mensagem mesmo aguardando humano
       // (o Realtime no frontend vai pegar automaticamente)
-      return;
+      return res.status(200).json({ received: true });
     }
 
     // ── Busca histórico da conversa para contexto da IA ─────────────────────
