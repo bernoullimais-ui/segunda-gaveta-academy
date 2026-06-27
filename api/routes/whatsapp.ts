@@ -35,13 +35,38 @@ router.post('/webhook', async (req: Request, res: Response) => {
     console.log('[WA Webhook] Payload recebido:', JSON.stringify(body).slice(0, 500));
 
     // Extrai campos do payload do uTalk
-    // Formato típico uTalk: { fromPhone, toPhone, message, contact: { name } }
+    // Formato uTalk: { event, contact: { phone, name }, message: { text, type }, channel: { phone } }
     const fromPhone: string =
-      body.fromPhone || body.from || body.contact?.phone || body.sender?.phone || '';
+      body.contact?.phone ||
+      body.fromPhone ||
+      body.from ||
+      body.sender?.phone ||
+      '';
     const messageText: string =
-      body.message?.text || body.message || body.text || body.body || '';
+      body.message?.text ||
+      body.message?.body ||
+      body.message ||
+      body.text ||
+      body.body ||
+      '';
     const contatoNome: string =
-      body.contact?.name || body.senderName || body.pushName || '';
+      body.contact?.name ||
+      body.senderName ||
+      body.pushName ||
+      '';
+
+    // Ignora eventos que não sejam mensagens de texto recebidas
+    const event: string = body.event || '';
+    if (event && !event.includes('message') && !event.includes('conversa') && event !== '') {
+      console.log(`[WA Webhook] Evento ignorado: ${event}`);
+      return;
+    }
+
+    // Ignora mensagens enviadas (só processa recebidas)
+    if (body.message?.fromMe === true || body.direction === 'outgoing') {
+      console.log('[WA Webhook] Mensagem de saída ignorada.');
+      return;
+    }
 
     if (!fromPhone || !messageText) {
       console.warn('[WA Webhook] Payload incompleto, ignorando.', { fromPhone, messageText });
