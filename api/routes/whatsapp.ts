@@ -574,7 +574,7 @@ router.post('/config/global', async (req: Request, res: Response) => {
     if (wa_utalk_global_organization_id !== undefined) updates.push({ chave: 'wa_utalk_global_organization_id', valor: wa_utalk_global_organization_id, atualizado_em: new Date().toISOString() });
 
     if (updates.length > 0) {
-      const { error } = await supabase.from('configuracoes_globais').upsert(updates);
+      const { error } = await supabase.from('configuracoes_globais').upsert(updates, { onConflict: 'chave' });
       if (error) return res.status(500).json({ error: error.message });
     }
 
