@@ -415,50 +415,75 @@ export function AtendimentoIA({ loggedUser, loggedRole }: AtendimentoIAProps) {
             <div className="flex-1 overflow-y-auto">
               {isLoading ? (
                 <div className="p-6 text-center text-slate-400 text-sm">Carregando...</div>
-              ) : conversasFiltradas.length === 0 ? (
-                <div className="p-8 text-center">
-                  <MessageCircle size={32} className="mx-auto text-slate-300 mb-2" />
-                  <p className="text-slate-400 text-sm">Nenhuma conversa</p>
-                </div>
               ) : (
-                conversasFiltradas.map(conversa => {
-                  const cfg = STATUS_CONFIG[conversa.status];
-                  const isSelected = conversaSelecionada?.id === conversa.id;
-                  return (
-                    <button
-                      key={conversa.id}
-                      onClick={() => setConversaSelecionada(conversa)}
-                      className={`w-full text-left px-4 py-3 border-b border-slate-100 hover:bg-white transition-all ${isSelected ? 'bg-indigo-50 border-l-4 border-l-indigo-500' : ''}`}
-                    >
-                      <div className="flex items-start gap-2">
-                        <div className={`mt-0.5 w-2 h-2 rounded-full flex-shrink-0 ${cfg.dot} ${conversa.status === 'aguardando_humano' ? 'animate-pulse' : ''}`} />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between gap-1">
-                            <span className="font-semibold text-slate-800 text-sm truncate">
-                              {conversa.contato_nome || conversa.contato_telefone}
-                            </span>
-                            <span className="text-slate-400 text-xs flex-shrink-0">{formatTime(conversa.ultima_mensagem_em)}</span>
-                          </div>
-                          <div className="flex items-center gap-1 mt-0.5 flex-wrap">
-                            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-semibold ${cfg.color}`}>
-                              {cfg.label}
-                            </span>
-                            {conversa.is_aluno && (
-                              <span className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold bg-teal-50 text-teal-700">
-                                Aluno
+                (() => {
+                  const map = new Map<string, WaConversa>();
+                  conversasFiltradas.forEach(c => {
+                    const existing = map.get(c.contato_telefone);
+                    if (!existing) {
+                      map.set(c.contato_telefone, c);
+                    } else {
+                      const existingIsActive = existing.status !== 'encerrada';
+                      const newIsActive = c.status !== 'encerrada';
+                      if (newIsActive && !existingIsActive) {
+                        map.set(c.contato_telefone, c);
+                      } else if (newIsActive === existingIsActive) {
+                        if (new Date(c.ultima_mensagem_em || c.criado_em).getTime() > new Date(existing.ultima_mensagem_em || existing.criado_em).getTime()) {
+                          map.set(c.contato_telefone, c);
+                        }
+                      }
+                    }
+                  });
+                  const agrupadas = Array.from(map.values()).sort((a, b) => new Date(b.ultima_mensagem_em || b.criado_em).getTime() - new Date(a.ultima_mensagem_em || a.criado_em).getTime());
+
+                  if (agrupadas.length === 0) {
+                    return (
+                      <div className="p-8 text-center">
+                        <MessageCircle size={32} className="mx-auto text-slate-300 mb-2" />
+                        <p className="text-slate-400 text-sm">Nenhuma conversa</p>
+                      </div>
+                    );
+                  }
+
+                  return agrupadas.map(conversa => {
+                    const cfg = STATUS_CONFIG[conversa.status];
+                    const isSelected = conversaSelecionada?.contato_telefone === conversa.contato_telefone;
+                    return (
+                      <button
+                        key={conversa.id}
+                        onClick={() => setConversaSelecionada(conversa)}
+                        className={`w-full text-left px-4 py-3 border-b border-slate-100 hover:bg-white transition-all ${isSelected ? 'bg-indigo-50 border-l-4 border-l-indigo-500' : ''}`}
+                      >
+                        <div className="flex items-start gap-2">
+                          <div className={`mt-0.5 w-2 h-2 rounded-full flex-shrink-0 ${cfg.dot} ${conversa.status === 'aguardando_humano' ? 'animate-pulse' : ''}`} />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between gap-1">
+                              <span className="font-semibold text-slate-800 text-sm truncate">
+                                {conversa.contato_nome || conversa.contato_telefone}
                               </span>
-                            )}
-                            {conversa.organizacao?.nome && (
-                              <span className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold border border-slate-200 text-slate-500 truncate max-w-[120px]">
-                                {conversa.organizacao.nome}
+                              <span className="text-slate-400 text-xs flex-shrink-0">{formatTime(conversa.ultima_mensagem_em)}</span>
+                            </div>
+                            <div className="flex items-center gap-1 mt-0.5 flex-wrap">
+                              <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-semibold ${cfg.color}`}>
+                                {cfg.label}
                               </span>
-                            )}
+                              {conversa.is_aluno && (
+                                <span className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold bg-teal-50 text-teal-700">
+                                  Aluno
+                                </span>
+                              )}
+                              {conversa.organizacao?.nome && (
+                                <span className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold border border-slate-200 text-slate-500 truncate max-w-[120px]">
+                                  {conversa.organizacao.nome}
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </button>
-                  );
-                })
+                      </button>
+                    );
+                  });
+                })()
               )}
             </div>
           </div>
@@ -488,7 +513,8 @@ export function AtendimentoIA({ loggedUser, loggedRole }: AtendimentoIAProps) {
 
                 {/* Mensagens */}
                 <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50">
-                  {mensagens.map(msg => {
+                  {mensagens.map((msg, index) => {
+                    const isFirstOfGroup = index > 0 && mensagens[index - 1].conversa_id !== msg.conversa_id;
                     const isEntrada = msg.direcao === 'entrada';
                     const isSistema = msg.direcao === 'sistema';
 
@@ -505,27 +531,38 @@ export function AtendimentoIA({ loggedUser, loggedRole }: AtendimentoIAProps) {
                     }
 
                     return (
-                      <div key={msg.id} className={`flex ${isEntrada ? 'justify-start' : 'justify-end'}`}>
-                        <div className={`max-w-[72%] group`}>
-                          {!isEntrada && (
-                            <p className="text-[10px] text-slate-400 text-right mb-1 mr-1">
-                              {msg.enviado_por === 'ia' ? '🤖 IA' : '👤 Atendente'}
-                            </p>
-                          )}
-                          <div className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
-                            isEntrada
-                              ? 'bg-white border border-slate-200 text-slate-800 rounded-tl-sm'
-                              : msg.enviado_por === 'ia'
-                              ? 'bg-indigo-600 text-white rounded-tr-sm'
-                              : 'bg-violet-600 text-white rounded-tr-sm'
-                          }`}>
-                            {msg.conteudo}
+                      <React.Fragment key={msg.id}>
+                        {isFirstOfGroup && (
+                          <div className="flex items-center justify-center my-6 opacity-70">
+                            <div className="h-px bg-slate-300 flex-1"></div>
+                            <span className="px-3 text-[10px] uppercase font-bold text-slate-400">
+                              Conversa Encerrada
+                            </span>
+                            <div className="h-px bg-slate-300 flex-1"></div>
                           </div>
-                          <p className={`text-[10px] text-slate-400 mt-1 ${isEntrada ? 'ml-1' : 'text-right mr-1'}`}>
-                            {formatFullTime(msg.criado_em)}
-                          </p>
+                        )}
+                        <div className={`flex ${isEntrada ? 'justify-start' : 'justify-end'}`}>
+                          <div className={`max-w-[72%] group`}>
+                            {!isEntrada && (
+                              <p className="text-[10px] text-slate-400 text-right mb-1 mr-1">
+                                {msg.enviado_por === 'ia' ? '🤖 IA' : '👤 Atendente'}
+                              </p>
+                            )}
+                            <div className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
+                              isEntrada
+                                ? 'bg-white border border-slate-200 text-slate-800 rounded-tl-sm'
+                                : msg.enviado_por === 'ia'
+                                ? 'bg-indigo-600 text-white rounded-tr-sm'
+                                : 'bg-violet-600 text-white rounded-tr-sm'
+                            }`}>
+                              {msg.conteudo}
+                            </div>
+                            <p className={`text-[10px] text-slate-400 mt-1 ${isEntrada ? 'ml-1' : 'text-right mr-1'}`}>
+                              {formatFullTime(msg.criado_em)}
+                            </p>
+                          </div>
                         </div>
-                      </div>
+                      </React.Fragment>
                     );
                   })}
                   <div ref={chatEndRef} />

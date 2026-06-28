@@ -459,10 +459,28 @@ router.get('/conversas/:id/mensagens', async (req: Request, res: Response) => {
     const { id } = req.params;
     const supabase = getSupabase();
 
+    // Descobre o contato dessa conversa para agrupar todas as conversas do mesmo número
+    const { data: conv } = await supabase
+      .from('wa_conversas')
+      .select('contato_telefone')
+      .eq('id', id)
+      .maybeSingle();
+
+    let convIds = [id];
+    if (conv) {
+      const { data: allConvs } = await supabase
+        .from('wa_conversas')
+        .select('id')
+        .eq('contato_telefone', conv.contato_telefone);
+      if (allConvs && allConvs.length > 0) {
+        convIds = allConvs.map(c => c.id);
+      }
+    }
+
     const { data, error } = await supabase
       .from('wa_mensagens')
       .select('*')
-      .eq('conversa_id', id)
+      .in('conversa_id', convIds)
       .order('criado_em', { ascending: true });
 
     if (error) return res.status(500).json({ error: error.message });
