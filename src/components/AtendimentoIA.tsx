@@ -774,7 +774,8 @@ function AtendimentoIAConfig({
   const [config, setConfig] = useState({ 
     utalk_token: '', utalk_from_phone: '', utalk_organization_id: '', 
     ia_ativa: true, ia_prompt_override: '', palavras_chave_roteamento: '',
-    wa_utalk_global_token: '', wa_utalk_global_from_phone: '', wa_utalk_global_organization_id: ''
+    wa_utalk_global_token: '', wa_utalk_global_from_phone: '', wa_utalk_global_organization_id: '',
+    wa_ia_ativa_global: true
   });
   const [promptGlobal, setPromptGlobal] = useState('');
   const [editPromptGlobal, setEditPromptGlobal] = useState('');
@@ -826,7 +827,8 @@ function AtendimentoIAConfig({
         prompt: editPromptGlobal,
         wa_utalk_global_token: (config as any).wa_utalk_global_token,
         wa_utalk_global_from_phone: (config as any).wa_utalk_global_from_phone,
-        wa_utalk_global_organization_id: (config as any).wa_utalk_global_organization_id
+        wa_utalk_global_organization_id: (config as any).wa_utalk_global_organization_id,
+        wa_ia_ativa_global: (config as any).wa_ia_ativa_global
       }),
     });
     setStatus(res.ok ? { type: 'success', msg: 'Configurações globais salvas!' } : { type: 'error', msg: 'Erro ao salvar.' });
@@ -911,6 +913,16 @@ function AtendimentoIAConfig({
               </div>
             ))}
           </div>
+
+          <label className="flex items-center gap-3 p-4 bg-slate-50 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-100 transition-colors mb-6">
+            <input
+              type="checkbox"
+              checked={(config as any).wa_ia_ativa_global}
+              onChange={e => setConfig(prev => ({ ...prev, wa_ia_ativa_global: e.target.checked }))}
+              className="w-5 h-5 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500"
+            />
+            <span className="font-semibold text-slate-700 text-sm">IA Ativa Globalmente (Triagem / Fallback)</span>
+          </label>
 
           <h4 className="text-xs font-bold text-slate-500 uppercase mt-4 mb-2">Prompt Global da IA</h4>
           <textarea

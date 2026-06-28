@@ -549,7 +549,7 @@ router.get('/config/:orgId', async (req: Request, res: Response) => {
     const { data: globalData } = await supabase
       .from('configuracoes_globais')
       .select('chave, valor')
-      .in('chave', ['wa_ia_prompt_global', 'wa_utalk_global_token', 'wa_utalk_global_from_phone', 'wa_utalk_global_organization_id']);
+      .in('chave', ['wa_ia_prompt_global', 'wa_utalk_global_token', 'wa_utalk_global_from_phone', 'wa_utalk_global_organization_id', 'wa_ia_ativa_global']);
 
     const globMap: Record<string, string> = {};
     if (globalData) {
@@ -563,6 +563,7 @@ router.get('/config/:orgId', async (req: Request, res: Response) => {
         wa_utalk_global_token: globMap['wa_utalk_global_token'] || '',
         wa_utalk_global_from_phone: globMap['wa_utalk_global_from_phone'] || '',
         wa_utalk_global_organization_id: globMap['wa_utalk_global_organization_id'] || '',
+        wa_ia_ativa_global: globMap['wa_ia_ativa_global'] === 'false' ? false : true,
       }
     });
   } catch (error: any) {
@@ -574,7 +575,7 @@ router.get('/config/:orgId', async (req: Request, res: Response) => {
 
 router.post('/config/global', async (req: Request, res: Response) => {
   try {
-    const { prompt, wa_utalk_global_token, wa_utalk_global_from_phone, wa_utalk_global_organization_id } = req.body;
+    const { prompt, wa_utalk_global_token, wa_utalk_global_from_phone, wa_utalk_global_organization_id, wa_ia_ativa_global } = req.body;
     const supabase = getSupabase();
     
     const updates = [];
@@ -582,6 +583,7 @@ router.post('/config/global', async (req: Request, res: Response) => {
     if (wa_utalk_global_token !== undefined) updates.push({ chave: 'wa_utalk_global_token', valor: wa_utalk_global_token, atualizado_em: new Date().toISOString() });
     if (wa_utalk_global_from_phone !== undefined) updates.push({ chave: 'wa_utalk_global_from_phone', valor: wa_utalk_global_from_phone, atualizado_em: new Date().toISOString() });
     if (wa_utalk_global_organization_id !== undefined) updates.push({ chave: 'wa_utalk_global_organization_id', valor: wa_utalk_global_organization_id, atualizado_em: new Date().toISOString() });
+    if (wa_ia_ativa_global !== undefined) updates.push({ chave: 'wa_ia_ativa_global', valor: wa_ia_ativa_global ? 'true' : 'false', atualizado_em: new Date().toISOString() });
 
     if (updates.length > 0) {
       const { error } = await supabase.from('configuracoes_globais').upsert(updates, { onConflict: 'chave' });

@@ -148,18 +148,28 @@ export async function getWaAIConfig(organizacaoId?: string): Promise<WaAIConfig>
   // Busca prompt adequado (Triagem se nulo, Global se houver org mas sem override)
   const chavePrompt = organizacaoId ? 'wa_ia_prompt_global' : 'wa_ia_prompt_triagem';
   
-  const { data: globalConfig } = await supabase
+  // Busca configurações globais (Prompt e Ativação)
+  const { data: globalConfigs } = await supabase
     .from('configuracoes_globais')
-    .select('valor')
-    .eq('chave', chavePrompt)
-    .maybeSingle();
+    .select('chave, valor')
+    .in('chave', [chavePrompt, 'wa_ia_ativa_global']);
 
-  const promptGlobal = globalConfig?.valor || 'Você é um assistente virtual. Por favor, pergunte sobre qual curso o usuário tem interesse.';
+  let promptGlobal = 'Você é um assistente virtual. Por favor, pergunte sobre qual curso o usuário tem interesse.';
+  let iaAtiva = true;
+
+  if (globalConfigs) {
+    const promptObj = globalConfigs.find(c => c.chave === chavePrompt);
+    if (promptObj && promptObj.valor) promptGlobal = promptObj.valor;
+
+    const ativaObj = globalConfigs.find(c => c.chave === 'wa_ia_ativa_global');
+    if (ativaObj && ativaObj.valor === 'false') {
+      iaAtiva = false;
+    }
+  }
 
   // Busca configuração e prompt da organização (se houver)
   let promptOverride: string | null = null;
   let orgName: string | undefined;
-  let iaAtiva = true;
 
   if (organizacaoId) {
     const { data: waConfig } = await supabase
