@@ -98,32 +98,50 @@ router.post('/webhook', async (req: Request, res: Response) => {
       .limit(1)
       .maybeSingle();
 
-    // ── Roteamento Automático por Palavras-chave ──────────────
+    // ── Roteamento Automático ──────────────
     let orgIdRoteada = conversa?.organizacao_id || null;
 
     if (!orgIdRoteada) {
+      const toPhone = (content.toPhone || content.to || '').replace(/\D/g, '');
       const { data: configs } = await supabase
         .from('wa_config')
-        .select('organizacao_id, palavras_chave_roteamento')
-        .not('palavras_chave_roteamento', 'is', null);
+        .select('organizacao_id, palavras_chave_roteamento, utalk_from_phone');
 
       if (configs && configs.length > 0) {
-        const textoMsg = messageText.toLowerCase();
-        for (const config of configs) {
-          if (!config.palavras_chave_roteamento) continue;
-          const palavras = config.palavras_chave_roteamento.split(',').map((p: string) => p.trim().toLowerCase());
-          
-          if (palavras.some((p: string) => p && textoMsg.includes(p))) {
-            orgIdRoteada = config.organizacao_id;
-            console.log(`[WA Webhook] Roteado para org ${orgIdRoteada} por palavra-chave na mensagem: ${textoMsg}`);
-            
-            // Se já existia conversa, atualiza no banco
-            if (conversa) {
-              await supabase.from('wa_conversas').update({ organizacao_id: orgIdRoteada }).eq('id', conversa.id);
-              conversa.organizacao_id = orgIdRoteada;
-            }
-            break;
+        // 1. Tenta rotear pelo número de destino (se o cliente enviou mensagem para um número exclusivo de uma org)
+        if (toPhone) {
+          const toPhoneNorm = toPhone.startsWith('55') ? toPhone : `55${toPhone}`;
+          const configMatch = configs.find(c => {
+            if (!c.utalk_from_phone) return false;
+            const configFone = c.utalk_from_phone.replace(/\D/g, '');
+            const configFoneNorm = configFone.startsWith('55') ? configFone : `55${configFone}`;
+            return configFoneNorm === toPhoneNorm;
+          });
+          if (configMatch) {
+            orgIdRoteada = configMatch.organizacao_id;
+            console.log(`[WA Webhook] Roteado para org ${orgIdRoteada} por número de destino (${toPhoneNorm})`);
           }
+        }
+
+        // 2. Se não roteou pelo número, tenta pelas palavras-chave
+        if (!orgIdRoteada) {
+          const textoMsg = messageText.toLowerCase();
+          for (const config of configs) {
+            if (!config.palavras_chave_roteamento) continue;
+            const palavras = config.palavras_chave_roteamento.split(',').map((p: string) => p.trim().toLowerCase());
+            
+            if (palavras.some((p: string) => p && textoMsg.includes(p))) {
+              orgIdRoteada = config.organizacao_id;
+              console.log(`[WA Webhook] Roteado para org ${orgIdRoteada} por palavra-chave na mensagem`);
+              break;
+            }
+          }
+        }
+
+        // Se conseguiu rotear, atualiza a conversa existente
+        if (orgIdRoteada && conversa) {
+          await supabase.from('wa_conversas').update({ organizacao_id: orgIdRoteada }).eq('id', conversa.id);
+          conversa.organizacao_id = orgIdRoteada;
         }
       }
     }
@@ -151,6 +169,26 @@ router.post('/webhook', async (req: Request, res: Response) => {
         return res.status(500).json({ error: 'Erro ao criar conversa' });
       }
       conversa = novaConversa;
+    }
+
+    // ── Deduplicação de Retries do Webhook ──────────────────────────────────
+    if (conversa) {
+      const { data: ultimaMsg } = await supabase
+        .from('wa_mensagens')
+        .select('conteudo, criado_em')
+        .eq('conversa_id', conversa.id)
+        .eq('enviado_por', 'contato')
+        .order('criado_em', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (ultimaMsg && ultimaMsg.conteudo === messageText) {
+        const diffSecs = (new Date().getTime() - new Date(ultimaMsg.criado_em).getTime()) / 1000;
+        if (diffSecs < 60) {
+          console.log(`[WA Webhook] EARLY EXIT: Mensagem duplicada (retry). Ignorando.`);
+          return res.status(200).json({ received: true });
+        }
+      }
     }
 
     // ── Salva mensagem recebida no banco ────────────────────────────────────
