@@ -532,7 +532,31 @@ router.get('/config/:orgId', async (req: Request, res: Response) => {
   }
 });
 
-// ─── 10. CONFIG SAVE — Salva configuração do canal ────────────────────────────
+// ─── 10. GLOBAL CONFIG SAVE — Salva configurações globais (super_admin) ────────
+
+router.post('/config/global', async (req: Request, res: Response) => {
+  try {
+    const { prompt, wa_utalk_global_token, wa_utalk_global_from_phone, wa_utalk_global_organization_id } = req.body;
+    const supabase = getSupabase();
+    
+    const updates = [];
+    if (prompt !== undefined) updates.push({ chave: 'wa_ia_prompt_global', valor: prompt, atualizado_em: new Date().toISOString() });
+    if (wa_utalk_global_token !== undefined) updates.push({ chave: 'wa_utalk_global_token', valor: wa_utalk_global_token, atualizado_em: new Date().toISOString() });
+    if (wa_utalk_global_from_phone !== undefined) updates.push({ chave: 'wa_utalk_global_from_phone', valor: wa_utalk_global_from_phone, atualizado_em: new Date().toISOString() });
+    if (wa_utalk_global_organization_id !== undefined) updates.push({ chave: 'wa_utalk_global_organization_id', valor: wa_utalk_global_organization_id, atualizado_em: new Date().toISOString() });
+
+    if (updates.length > 0) {
+      const { error } = await supabase.from('configuracoes_globais').upsert(updates, { onConflict: 'chave' });
+      if (error) return res.status(500).json({ error: error.message });
+    }
+
+    return res.json({ success: true });
+  } catch (error: any) {
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+// ─── 11. CONFIG SAVE — Salva configuração do canal ────────────────────────────
 
 router.post('/config/:orgId', async (req: Request, res: Response) => {
   try {
@@ -554,30 +578,6 @@ router.post('/config/:orgId', async (req: Request, res: Response) => {
       }], { onConflict: 'organizacao_id' });
 
     if (error) return res.status(500).json({ error: error.message });
-    return res.json({ success: true });
-  } catch (error: any) {
-    return res.status(500).json({ error: error.message });
-  }
-});
-
-// ─── 11. GLOBAL CONFIG SAVE — Salva configurações globais (super_admin) ────────
-
-router.post('/config/global', async (req: Request, res: Response) => {
-  try {
-    const { prompt, wa_utalk_global_token, wa_utalk_global_from_phone, wa_utalk_global_organization_id } = req.body;
-    const supabase = getSupabase();
-    
-    const updates = [];
-    if (prompt !== undefined) updates.push({ chave: 'wa_ia_prompt_global', valor: prompt, atualizado_em: new Date().toISOString() });
-    if (wa_utalk_global_token !== undefined) updates.push({ chave: 'wa_utalk_global_token', valor: wa_utalk_global_token, atualizado_em: new Date().toISOString() });
-    if (wa_utalk_global_from_phone !== undefined) updates.push({ chave: 'wa_utalk_global_from_phone', valor: wa_utalk_global_from_phone, atualizado_em: new Date().toISOString() });
-    if (wa_utalk_global_organization_id !== undefined) updates.push({ chave: 'wa_utalk_global_organization_id', valor: wa_utalk_global_organization_id, atualizado_em: new Date().toISOString() });
-
-    if (updates.length > 0) {
-      const { error } = await supabase.from('configuracoes_globais').upsert(updates, { onConflict: 'chave' });
-      if (error) return res.status(500).json({ error: error.message });
-    }
-
     return res.json({ success: true });
   } catch (error: any) {
     return res.status(500).json({ error: error.message });
