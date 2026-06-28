@@ -25,3 +25,5 @@ placar_components.txt
 
 # Arquivos temporários de desenvolvimento
 metadata.json
+.vercel
+.env*

@@ -808,8 +808,9 @@ export function AtendimentoIA({ loggedUser, loggedRole }: AtendimentoIAProps) {
 function AtendimentoIAConfig({
   loggedUser, loggedRole, isSuperAdmin, orgId
 }: { loggedUser: any; loggedRole: string; isSuperAdmin: boolean; orgId: string }) {
-  const [config, setConfig] = useState({ 
-    utalk_token: '', utalk_from_phone: '', utalk_organization_id: '', 
+  const [configTab, setConfigTab] = useState<'agente' | 'base' | 'mensagens' | 'etiquetas'>('agente');
+  const [config, setConfig] = useState({
+    utalk_token: '', utalk_from_phone: '', utalk_organization_id: '',
     ia_ativa: true, ia_prompt_override: '', palavras_chave_roteamento: '',
     wa_utalk_global_token: '', wa_utalk_global_from_phone: '', wa_utalk_global_organization_id: '',
     wa_ia_ativa_global: true
@@ -818,6 +819,8 @@ function AtendimentoIAConfig({
   const [editPromptGlobal, setEditPromptGlobal] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [status, setStatus] = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
+  const [organizacoes, setOrganizacoes] = useState<any[]>([]);
+  const [orgEditandoBase, setOrgEditandoBase] = useState<{ id: string; nome: string } | null>(null);
 
   const carregarConfig = async () => {
     try {
@@ -828,7 +831,7 @@ function AtendimentoIAConfig({
         setConfig(prev => ({
           ...prev,
           ...(d.config || {}),
-          ...(d.global_tokens || {})
+          ...(d.global_tokens || {}),
         }));
       }
     } catch (err) {
@@ -840,6 +843,20 @@ function AtendimentoIAConfig({
     if (!orgId) return;
     carregarConfig();
   }, [orgId]);
+
+  useEffect(() => {
+    if (isSuperAdmin) {
+      fetch('/api/whatsapp/conversas?limit=1')
+        .then(() => {})
+        .catch(() => {});
+      // carrega orgs para a seção de base de conhecimento
+      import('../lib/supabase').then(({ supabase }) => {
+        supabase.from('organizacoes').select('id, nome').order('nome').then(({ data }) => {
+          if (data) setOrganizacoes(data);
+        });
+      });
+    }
+  }, [isSuperAdmin]);
 
   const salvarConfig = async () => {
     setIsSaving(true);
@@ -860,122 +877,538 @@ function AtendimentoIAConfig({
     const res = await fetch('/api/whatsapp/config/global', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
+      body: JSON.stringify({
         prompt: editPromptGlobal,
         wa_utalk_global_token: (config as any).wa_utalk_global_token,
         wa_utalk_global_from_phone: (config as any).wa_utalk_global_from_phone,
         wa_utalk_global_organization_id: (config as any).wa_utalk_global_organization_id,
-        wa_ia_ativa_global: (config as any).wa_ia_ativa_global
+        wa_ia_ativa_global: (config as any).wa_ia_ativa_global,
       }),
     });
     setStatus(res.ok ? { type: 'success', msg: 'Configurações globais salvas!' } : { type: 'error', msg: 'Erro ao salvar.' });
   };
 
+  const configTabs = [
+    { key: 'agente' as const, label: 'Agente IA' },
+    { key: 'base' as const, label: 'Base de Conhecimento' },
+  ];
+
   return (
-    <div className="flex-1 overflow-y-auto p-6 space-y-6 max-w-2xl">
-      <h2 className="text-xl font-bold text-slate-800">Configurações do Canal WhatsApp</h2>
-
-      {status && (
-        <div className={`p-3 rounded-xl text-sm font-semibold ${status.type === 'success' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'}`}>
-          {status.msg}
-        </div>
-      )}
-
-      <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4">
-        <h3 className="font-bold text-slate-700 flex items-center gap-2"><Zap size={16} className="text-amber-500" />Credenciais Umbler uTalk</h3>
-        {[
-          { key: 'utalk_token', label: 'Token de Autorização', placeholder: 'Bearer eyJ...' },
-          { key: 'utalk_from_phone', label: 'Número de Origem (fromPhone)', placeholder: '5511999999999' },
-          { key: 'utalk_organization_id', label: 'Organization ID', placeholder: 'org_...' },
-          { key: 'palavras_chave_roteamento', label: 'Palavras-Chave de Roteamento (separadas por vírgula)', placeholder: 'Ex: Dojo One, dojo' },
-        ].map(field => (
-          <div key={field.key}>
-            <label className="block text-xs font-semibold text-slate-500 mb-1 uppercase tracking-wider">{field.label}</label>
-            <input
-              type="text"
-              value={(config as any)[field.key] || ''}
-              onChange={e => setConfig(prev => ({ ...prev, [field.key]: e.target.value }))}
-              placeholder={field.placeholder}
-              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
+    <div className="flex-1 flex flex-col overflow-hidden">
+      {/* Sub-tabs de Configuração */}
+      <div className="flex gap-1 px-6 pt-4 border-b border-slate-100 bg-white">
+        {configTabs.map(t => (
+          <button
+            key={t.key}
+            onClick={() => setConfigTab(t.key)}
+            className={`px-4 py-2 text-sm font-semibold rounded-t-lg border-b-2 transition-all ${
+              configTab === t.key
+                ? 'border-indigo-600 text-indigo-700 bg-indigo-50'
+                : 'border-transparent text-slate-500 hover:text-slate-700'
+            }`}
+          >
+            {t.label}
+          </button>
         ))}
-
-        <div className="flex items-center gap-3">
-          <input
-            type="checkbox"
-            id="ia_ativa"
-            checked={config.ia_ativa}
-            onChange={e => setConfig(prev => ({ ...prev, ia_ativa: e.target.checked }))}
-            className="w-4 h-4 accent-indigo-600"
-          />
-          <label htmlFor="ia_ativa" className="text-sm font-semibold text-slate-700">IA ativa para esta organização</label>
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-slate-500 mb-1 uppercase tracking-wider">Prompt personalizado (opcional)</label>
-          <textarea
-            value={config.ia_prompt_override}
-            onChange={e => setConfig(prev => ({ ...prev, ia_prompt_override: e.target.value }))}
-            placeholder="Deixe em branco para usar o prompt global..."
-            rows={4}
-            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
-        </div>
-
-        <button
-          onClick={salvarConfig}
-          disabled={isSaving}
-          className="w-full py-2.5 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 transition-all disabled:opacity-50"
-        >
-          {isSaving ? 'Salvando...' : 'Salvar Configurações'}
-        </button>
       </div>
 
-      {isSuperAdmin && (
-        <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4">
-          <h3 className="font-bold text-slate-700 flex items-center gap-2"><Bot size={16} className="text-indigo-500" />Configuração Global (Super Admin)</h3>
-          
-          <div className="space-y-3 mb-6">
-            <h4 className="text-xs font-bold text-slate-500 uppercase">Tokens uTalk Globais (Fallback)</h4>
-            {['wa_utalk_global_token', 'wa_utalk_global_from_phone', 'wa_utalk_global_organization_id'].map(key => (
-              <div key={key}>
-                <label className="block text-[10px] font-semibold text-slate-500 mb-1 uppercase">{key.replace('wa_utalk_global_', '')}</label>
+      {/* Aba: Agente IA */}
+      {configTab === 'agente' && (
+        <div className="flex-1 overflow-y-auto p-6 space-y-6 max-w-2xl">
+          <h2 className="text-xl font-bold text-slate-800">Configurações do Canal WhatsApp</h2>
+
+          {status && (
+            <div className={`p-3 rounded-xl text-sm font-semibold ${status.type === 'success' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'}`}>
+              {status.msg}
+            </div>
+          )}
+
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4">
+            <h3 className="font-bold text-slate-700 flex items-center gap-2"><Zap size={16} className="text-amber-500" />Credenciais Umbler uTalk</h3>
+            {[
+              { key: 'utalk_token', label: 'Token de Autorização', placeholder: 'Bearer eyJ...' },
+              { key: 'utalk_from_phone', label: 'Número de Origem (fromPhone)', placeholder: '5511999999999' },
+              { key: 'utalk_organization_id', label: 'Organization ID', placeholder: 'org_...' },
+              { key: 'palavras_chave_roteamento', label: 'Palavras-Chave de Roteamento (separadas por vírgula)', placeholder: 'Ex: Dojo One, dojo' },
+            ].map(field => (
+              <div key={field.key}>
+                <label className="block text-xs font-semibold text-slate-500 mb-1 uppercase tracking-wider">{field.label}</label>
                 <input
                   type="text"
-                  value={(config as any)[key] || ''}
-                  onChange={e => setConfig(prev => ({ ...prev, [key]: e.target.value }))}
-                  className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  value={(config as any)[field.key] || ''}
+                  onChange={e => setConfig(prev => ({ ...prev, [field.key]: e.target.value }))}
+                  placeholder={field.placeholder}
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
             ))}
+
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                id="ia_ativa"
+                checked={config.ia_ativa}
+                onChange={e => setConfig(prev => ({ ...prev, ia_ativa: e.target.checked }))}
+                className="w-4 h-4 accent-indigo-600"
+              />
+              <label htmlFor="ia_ativa" className="text-sm font-semibold text-slate-700">IA ativa para esta organização</label>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 mb-1 uppercase tracking-wider">Prompt personalizado (opcional)</label>
+              <textarea
+                value={config.ia_prompt_override}
+                onChange={e => setConfig(prev => ({ ...prev, ia_prompt_override: e.target.value }))}
+                placeholder="Deixe em branco para usar o prompt global..."
+                rows={4}
+                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+
+            <button
+              onClick={salvarConfig}
+              disabled={isSaving}
+              className="w-full py-2.5 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 transition-all disabled:opacity-50"
+            >
+              {isSaving ? 'Salvando...' : 'Salvar Configurações'}
+            </button>
           </div>
 
-          <label className="flex items-center gap-3 p-4 bg-slate-50 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-100 transition-colors mb-6">
-            <input
-              type="checkbox"
-              checked={(config as any).wa_ia_ativa_global}
-              onChange={e => setConfig(prev => ({ ...prev, wa_ia_ativa_global: e.target.checked }))}
-              className="w-5 h-5 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500"
-            />
-            <span className="font-semibold text-slate-700 text-sm">IA Ativa Globalmente (Triagem / Fallback)</span>
-          </label>
+          {isSuperAdmin && (
+            <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4">
+              <h3 className="font-bold text-slate-700 flex items-center gap-2"><Bot size={16} className="text-indigo-500" />Configuração Global (Super Admin)</h3>
 
-          <h4 className="text-xs font-bold text-slate-500 uppercase mt-4 mb-2">Prompt Global da IA</h4>
-          <textarea
-            value={editPromptGlobal}
-            onChange={e => setEditPromptGlobal(e.target.value)}
-            rows={10}
-            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono"
-          />
-          <button
-            onClick={salvarPromptGlobal}
-            className="w-full py-2.5 bg-violet-600 text-white rounded-xl font-bold text-sm hover:bg-violet-700 transition-all"
-          >
-            Salvar Configurações Globais
-          </button>
+              <div className="space-y-3 mb-6">
+                <h4 className="text-xs font-bold text-slate-500 uppercase">Tokens uTalk Globais (Fallback)</h4>
+                {['wa_utalk_global_token', 'wa_utalk_global_from_phone', 'wa_utalk_global_organization_id'].map(key => (
+                  <div key={key}>
+                    <label className="block text-[10px] font-semibold text-slate-500 mb-1 uppercase">{key.replace('wa_utalk_global_', '')}</label>
+                    <input
+                      type="text"
+                      value={(config as any)[key] || ''}
+                      onChange={e => setConfig(prev => ({ ...prev, [key]: e.target.value }))}
+                      className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                ))}
+              </div>
+
+              <label className="flex items-center gap-3 p-4 bg-slate-50 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-100 transition-colors mb-6">
+                <input
+                  type="checkbox"
+                  checked={(config as any).wa_ia_ativa_global}
+                  onChange={e => setConfig(prev => ({ ...prev, wa_ia_ativa_global: e.target.checked }))}
+                  className="w-5 h-5 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500"
+                />
+                <span className="font-semibold text-slate-700 text-sm">IA Ativa Globalmente (Triagem / Fallback)</span>
+              </label>
+
+              <h4 className="text-xs font-bold text-slate-500 uppercase mt-4 mb-2">Prompt Global da IA</h4>
+              <textarea
+                value={editPromptGlobal}
+                onChange={e => setEditPromptGlobal(e.target.value)}
+                rows={10}
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono"
+              />
+              <button
+                onClick={salvarPromptGlobal}
+                className="w-full py-2.5 bg-violet-600 text-white rounded-xl font-bold text-sm hover:bg-violet-700 transition-all"
+              >
+                Salvar Configurações Globais
+              </button>
+            </div>
+          )}
         </div>
       )}
+
+      {/* Aba: Base de Conhecimento */}
+      {configTab === 'base' && (
+        <div className="flex-1 overflow-y-auto p-6">
+          <div className="max-w-3xl">
+            <div className="flex items-center gap-3 mb-2">
+              <BookOpen size={20} className="text-indigo-600" />
+              <h2 className="text-xl font-bold text-slate-800">Base de Conhecimento</h2>
+            </div>
+            <p className="text-sm text-slate-500 mb-6">
+              Adicione textos ou faça upload de documentos (PDF, TXT, DOCX, CSV) para orientar a assistente virtual.
+            </p>
+
+            {/* Lista de organizações */}
+            <div className="space-y-3">
+              {(isSuperAdmin ? organizacoes : [{ id: orgId, nome: 'Esta Organização' }]).map(org => (
+                <div
+                  key={org.id}
+                  className="bg-white border border-slate-200 rounded-2xl p-5 flex items-center justify-between hover:shadow-sm transition-shadow"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white font-bold text-sm">
+                      {org.nome.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-slate-800 text-sm">{org.nome}</p>
+                      <p className="text-xs text-slate-400">Identidade / Franquia</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setOrgEditandoBase(org)}
+                    className="flex items-center gap-1.5 px-4 py-2 bg-indigo-50 text-indigo-700 rounded-xl text-xs font-bold hover:bg-indigo-100 transition-all border border-indigo-100"
+                  >
+                    <BookOpen size={13} />
+                    Editar Base
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Drawer: Editor da Base de Conhecimento */}
+      {orgEditandoBase && (
+        <BaseConhecimentoEditor
+          org={orgEditandoBase}
+          onClose={() => setOrgEditandoBase(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+// ─── Sub-componente: Editor da Base de Conhecimento ──────────────────────────
+
+interface BaseConhecimento {
+  comportamento: { nome_assistente: string; persona: string; tom_de_voz: string; regras_formatacao: string };
+  regras_de_negocio: { texto: string };
+  tabelas_banco: Array<{ tabela: string; colunas: string; filtro: string; descricao: string }>;
+  websites: Array<{ url: string; descricao: string }>;
+  documentos: Array<{ nome: string; conteudo: string }>;
+  perguntas_respostas: Array<{ pergunta: string; resposta: string }>;
+  script_de_vendas_e_objecoes: { texto: string };
+  fluxo_de_transbordo: { condicoes: string; mensagem_transbordo: string; horario_atendimento: string };
+}
+
+const BASE_VAZIA: BaseConhecimento = {
+  comportamento: { nome_assistente: '', persona: '', tom_de_voz: '', regras_formatacao: '' },
+  regras_de_negocio: { texto: '' },
+  tabelas_banco: [],
+  websites: [],
+  documentos: [],
+  perguntas_respostas: [],
+  script_de_vendas_e_objecoes: { texto: '' },
+  fluxo_de_transbordo: { condicoes: '', mensagem_transbordo: '', horario_atendimento: '' },
+};
+
+function BaseConhecimentoEditor({ org, onClose }: { org: { id: string; nome: string }; onClose: () => void }) {
+  const [base, setBase] = useState<BaseConhecimento>(JSON.parse(JSON.stringify(BASE_VAZIA)));
+  const [abertas, setAbertas] = useState<Record<string, boolean>>({ comportamento: true });
+  const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
+
+  useEffect(() => {
+    fetch(`/api/whatsapp/base/${org.id}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data) {
+          setBase(prev => ({
+            comportamento: { ...prev.comportamento, ...(data.comportamento || {}) },
+            regras_de_negocio: { ...prev.regras_de_negocio, ...(data.regras_de_negocio || {}) },
+            tabelas_banco: data.tabelas_banco || [],
+            websites: data.websites || [],
+            documentos: data.documentos || [],
+            perguntas_respostas: data.perguntas_respostas || [],
+            script_de_vendas_e_objecoes: { ...prev.script_de_vendas_e_objecoes, ...(data.script_de_vendas_e_objecoes || {}) },
+            fluxo_de_transbordo: { ...prev.fluxo_de_transbordo, ...(data.fluxo_de_transbordo || {}) },
+          }));
+        }
+      })
+      .catch(console.error)
+      .finally(() => setIsLoading(false));
+  }, [org.id]);
+
+  const toggleSecao = (key: string) => setAbertas(prev => ({ ...prev, [key]: !prev[key] }));
+
+  const salvar = async () => {
+    setIsSaving(true);
+    setSaveStatus('idle');
+    try {
+      const res = await fetch(`/api/whatsapp/base/${org.id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(base),
+      });
+      setSaveStatus(res.ok ? 'success' : 'error');
+      setTimeout(() => setSaveStatus('idle'), 3000);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const secaoHeader = (key: string, icon: string, label: string, badge?: number) => (
+    <button
+      onClick={() => toggleSecao(key)}
+      className="w-full flex items-center justify-between p-4 text-left hover:bg-slate-50 transition-colors rounded-xl"
+    >
+      <div className="flex items-center gap-3">
+        <span className="text-lg">{icon}</span>
+        <span className="font-semibold text-slate-800 text-sm">{label}</span>
+        {badge !== undefined && badge > 0 && (
+          <span className="bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-0.5 rounded-full">{badge}</span>
+        )}
+      </div>
+      <ChevronRight size={16} className={`text-slate-400 transition-transform ${abertas[key] ? 'rotate-90' : ''}`} />
+    </button>
+  );
+
+  const addItem = (campo: 'tabelas_banco' | 'websites' | 'documentos' | 'perguntas_respostas', item: any) => {
+    setBase(prev => ({ ...prev, [campo]: [...(prev[campo] as any[]), item] }));
+  };
+
+  const removeItem = (campo: 'tabelas_banco' | 'websites' | 'documentos' | 'perguntas_respostas', idx: number) => {
+    setBase(prev => ({ ...prev, [campo]: (prev[campo] as any[]).filter((_, i) => i !== idx) }));
+  };
+
+  const updateItem = (campo: 'tabelas_banco' | 'websites' | 'documentos' | 'perguntas_respostas', idx: number, patch: any) => {
+    setBase(prev => ({
+      ...prev,
+      [campo]: (prev[campo] as any[]).map((item, i) => i === idx ? { ...item, ...patch } : item),
+    }));
+  };
+
+  const inputCls = "w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400";
+  const textareaCls = "w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none";
+
+  return (
+    <div className="fixed inset-0 z-50 flex justify-end">
+      {/* Overlay */}
+      <div className="flex-1 bg-black/30 backdrop-blur-sm" onClick={onClose} />
+
+      {/* Drawer */}
+      <div className="w-full max-w-2xl bg-white shadow-2xl flex flex-col h-full overflow-hidden">
+        {/* Header */}
+        <div className="px-6 py-4 border-b border-slate-100 bg-gradient-to-r from-indigo-600 to-violet-600 flex items-center justify-between flex-shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center text-white font-bold text-sm">
+              {org.nome.charAt(0)}
+            </div>
+            <div>
+              <p className="font-bold text-white text-sm">{org.nome}</p>
+              <p className="text-indigo-200 text-xs">Base de Conhecimento da IA</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-2 rounded-xl text-white/70 hover:text-white hover:bg-white/10 transition-all">
+            <XCircle size={20} />
+          </button>
+        </div>
+
+        {isLoading ? (
+          <div className="flex-1 flex items-center justify-center">
+            <RefreshCw size={24} className="animate-spin text-slate-400" />
+          </div>
+        ) : (
+          <>
+            {/* Corpo rolável */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-2">
+
+              {/* 1. Comportamento */}
+              <div className="border border-slate-200 rounded-xl overflow-hidden">
+                {secaoHeader('comportamento', '🎭', 'Comportamento', undefined)}
+                {abertas['comportamento'] && (
+                  <div className="px-4 pb-4 space-y-3 border-t border-slate-100">
+                    <div className="grid grid-cols-2 gap-3 pt-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-500 mb-1">Nome do Assistente</label>
+                        <input className={inputCls} placeholder="Ex: Sofia, Gabi, Lara..." value={base.comportamento.nome_assistente} onChange={e => setBase(p => ({ ...p, comportamento: { ...p.comportamento, nome_assistente: e.target.value } }))} />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-500 mb-1">Tom de Voz</label>
+                        <input className={inputCls} placeholder="amigável, profissional, animado..." value={base.comportamento.tom_de_voz} onChange={e => setBase(p => ({ ...p, comportamento: { ...p.comportamento, tom_de_voz: e.target.value } }))} />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-500 mb-1">Persona</label>
+                      <input className={inputCls} placeholder="Ex: Especialista simpática em educação digital..." value={base.comportamento.persona} onChange={e => setBase(p => ({ ...p, comportamento: { ...p.comportamento, persona: e.target.value } }))} />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-500 mb-1">Regras de Formatação</label>
+                      <textarea className={textareaCls} rows={3} placeholder="Ex: Mensagens curtas. Usar emojis com moderação. Nunca listas longas no WhatsApp..." value={base.comportamento.regras_formatacao} onChange={e => setBase(p => ({ ...p, comportamento: { ...p.comportamento, regras_formatacao: e.target.value } }))} />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* 2. Regras de Negócio */}
+              <div className="border border-slate-200 rounded-xl overflow-hidden">
+                {secaoHeader('regras', '📋', 'Regras de Negócio')}
+                {abertas['regras'] && (
+                  <div className="px-4 pb-4 border-t border-slate-100 pt-3">
+                    <label className="block text-xs font-semibold text-slate-500 mb-1">Limites operacionais, cupons, trocas e devoluções</label>
+                    <textarea className={textareaCls} rows={6} placeholder="Ex: Cupons de desconto só são válidos por 48h após emissão. Não há trocas após 7 dias. Reembolsos levam até 5 dias úteis..." value={base.regras_de_negocio.texto} onChange={e => setBase(p => ({ ...p, regras_de_negocio: { texto: e.target.value } }))} />
+                  </div>
+                )}
+              </div>
+
+              {/* 3. Tabelas do Banco */}
+              <div className="border border-slate-200 rounded-xl overflow-hidden">
+                {secaoHeader('tabelas', '🗄️', 'Tabelas do Banco de Dados', base.tabelas_banco.length)}
+                {abertas['tabelas'] && (
+                  <div className="px-4 pb-4 border-t border-slate-100 pt-3 space-y-3">
+                    <p className="text-xs text-slate-500">A IA consultará estas tabelas em tempo real para responder com dados atualizados (vagas, preços, turmas, etc.)</p>
+                    {base.tabelas_banco.map((t, i) => (
+                      <div key={i} className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold text-slate-600">Tabela #{i + 1}</span>
+                          <button onClick={() => removeItem('tabelas_banco', i)} className="text-red-400 hover:text-red-600 transition-colors"><XCircle size={14} /></button>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="block text-[10px] font-semibold text-slate-400 mb-1">Nome da tabela</label>
+                            <input className={inputCls} placeholder="Ex: turmas" value={t.tabela} onChange={e => updateItem('tabelas_banco', i, { tabela: e.target.value })} />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-semibold text-slate-400 mb-1">Colunas (vírgula)</label>
+                            <input className={inputCls} placeholder="nome, horario, vagas" value={t.colunas} onChange={e => updateItem('tabelas_banco', i, { colunas: e.target.value })} />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-semibold text-slate-400 mb-1">Filtro (opcional)</label>
+                            <input className={inputCls} placeholder="ativo=true" value={t.filtro} onChange={e => updateItem('tabelas_banco', i, { filtro: e.target.value })} />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-semibold text-slate-400 mb-1">Descrição (contexto para IA)</label>
+                            <input className={inputCls} placeholder="Turmas ativas da academia" value={t.descricao} onChange={e => updateItem('tabelas_banco', i, { descricao: e.target.value })} />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    <button onClick={() => addItem('tabelas_banco', { tabela: '', colunas: '', filtro: '', descricao: '' })} className="w-full py-2 border-2 border-dashed border-slate-300 rounded-xl text-slate-500 text-xs font-semibold hover:border-indigo-400 hover:text-indigo-600 transition-all">
+                      + Adicionar Tabela
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* 4. Websites */}
+              <div className="border border-slate-200 rounded-xl overflow-hidden">
+                {secaoHeader('websites', '🌐', 'Websites', base.websites.length)}
+                {abertas['websites'] && (
+                  <div className="px-4 pb-4 border-t border-slate-100 pt-3 space-y-3">
+                    <p className="text-xs text-slate-500">Links de referência externa, blogs ou páginas de vendas que a IA poderá citar.</p>
+                    {base.websites.map((w, i) => (
+                      <div key={i} className="flex gap-2 items-start">
+                        <div className="flex-1 grid grid-cols-2 gap-2">
+                          <input className={inputCls} placeholder="https://..." value={w.url} onChange={e => updateItem('websites', i, { url: e.target.value })} />
+                          <input className={inputCls} placeholder="Descrição (ex: Site oficial)" value={w.descricao} onChange={e => updateItem('websites', i, { descricao: e.target.value })} />
+                        </div>
+                        <button onClick={() => removeItem('websites', i)} className="text-red-400 hover:text-red-600 mt-2 flex-shrink-0"><XCircle size={15} /></button>
+                      </div>
+                    ))}
+                    <button onClick={() => addItem('websites', { url: '', descricao: '' })} className="w-full py-2 border-2 border-dashed border-slate-300 rounded-xl text-slate-500 text-xs font-semibold hover:border-indigo-400 hover:text-indigo-600 transition-all">
+                      + Adicionar Website
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* 5. Documentos */}
+              <div className="border border-slate-200 rounded-xl overflow-hidden">
+                {secaoHeader('docs', '📄', 'Documentos', base.documentos.length)}
+                {abertas['docs'] && (
+                  <div className="px-4 pb-4 border-t border-slate-100 pt-3 space-y-3">
+                    <p className="text-xs text-slate-500">Manuais, PDFs institucionais, termos de uso. Cole o texto extraído do documento.</p>
+                    {base.documentos.map((d, i) => (
+                      <div key={i} className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <input className={`${inputCls} flex-1 mr-2`} placeholder="Nome do documento" value={d.nome} onChange={e => updateItem('documentos', i, { nome: e.target.value })} />
+                          <button onClick={() => removeItem('documentos', i)} className="text-red-400 hover:text-red-600 flex-shrink-0"><XCircle size={14} /></button>
+                        </div>
+                        <textarea className={textareaCls} rows={4} placeholder="Cole aqui o texto do documento (PDF, manual, termos de uso)..." value={d.conteudo} onChange={e => updateItem('documentos', i, { conteudo: e.target.value })} />
+                      </div>
+                    ))}
+                    <button onClick={() => addItem('documentos', { nome: '', conteudo: '' })} className="w-full py-2 border-2 border-dashed border-slate-300 rounded-xl text-slate-500 text-xs font-semibold hover:border-indigo-400 hover:text-indigo-600 transition-all">
+                      + Adicionar Documento
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* 6. FAQ */}
+              <div className="border border-slate-200 rounded-xl overflow-hidden">
+                {secaoHeader('faq', '💬', 'Perguntas e Respostas (FAQ)', base.perguntas_respostas.length)}
+                {abertas['faq'] && (
+                  <div className="px-4 pb-4 border-t border-slate-100 pt-3 space-y-3">
+                    <p className="text-xs text-slate-500">Respostas diretas para as dúvidas mais comuns e recorrentes.</p>
+                    {base.perguntas_respostas.map((qa, i) => (
+                      <div key={i} className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold text-slate-500">Q{i + 1}</span>
+                          <button onClick={() => removeItem('perguntas_respostas', i)} className="text-red-400 hover:text-red-600"><XCircle size={14} /></button>
+                        </div>
+                        <input className={inputCls} placeholder="Pergunta frequente..." value={qa.pergunta} onChange={e => updateItem('perguntas_respostas', i, { pergunta: e.target.value })} />
+                        <textarea className={textareaCls} rows={3} placeholder="Resposta ideal para essa pergunta..." value={qa.resposta} onChange={e => updateItem('perguntas_respostas', i, { resposta: e.target.value })} />
+                      </div>
+                    ))}
+                    <button onClick={() => addItem('perguntas_respostas', { pergunta: '', resposta: '' })} className="w-full py-2 border-2 border-dashed border-slate-300 rounded-xl text-slate-500 text-xs font-semibold hover:border-indigo-400 hover:text-indigo-600 transition-all">
+                      + Adicionar Pergunta e Resposta
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* 7. Script de Vendas e Objeções */}
+              <div className="border border-slate-200 rounded-xl overflow-hidden">
+                {secaoHeader('script', '🎯', 'Script de Vendas e Objeções')}
+                {abertas['script'] && (
+                  <div className="px-4 pb-4 border-t border-slate-100 pt-3">
+                    <label className="block text-xs font-semibold text-slate-500 mb-1">Técnicas de contorno de objeções e gatilhos mentais</label>
+                    <textarea className={textareaCls} rows={7} placeholder={'Ex: Quando o lead disser "está caro", responda com: "Entendo! Mas pensa bem — você vai ter acesso a X horas de conteúdo por apenas R$Y por mês. É menos que um café por dia."\n\nGatilhos mentais: escassez, prova social, autoridade...'}
+                      value={base.script_de_vendas_e_objecoes.texto}
+                      onChange={e => setBase(p => ({ ...p, script_de_vendas_e_objecoes: { texto: e.target.value } }))}
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* 8. Fluxo de Transbordo */}
+              <div className="border border-slate-200 rounded-xl overflow-hidden">
+                {secaoHeader('transbordo', '🔀', 'Fluxo de Transbordo')}
+                {abertas['transbordo'] && (
+                  <div className="px-4 pb-4 border-t border-slate-100 pt-3 space-y-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-500 mb-1">Condições para transferir ao humano</label>
+                      <textarea className={textareaCls} rows={3} placeholder="Ex: Transferir quando: reclamação, pedido de reembolso, lead pergunta sobre parcelamento especial, ou após 3ª mensagem sem conversão..." value={base.fluxo_de_transbordo.condicoes} onChange={e => setBase(p => ({ ...p, fluxo_de_transbordo: { ...p.fluxo_de_transbordo, condicoes: e.target.value } }))} />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-500 mb-1">Mensagem ao transferir</label>
+                      <input className={inputCls} placeholder="Ex: Um especialista vai te atender em instantes! 😊" value={base.fluxo_de_transbordo.mensagem_transbordo} onChange={e => setBase(p => ({ ...p, fluxo_de_transbordo: { ...p.fluxo_de_transbordo, mensagem_transbordo: e.target.value } }))} />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-500 mb-1">Horário de atendimento humano</label>
+                      <input className={inputCls} placeholder="Ex: Seg–Sex, 9h–18h (Brasília)" value={base.fluxo_de_transbordo.horario_atendimento} onChange={e => setBase(p => ({ ...p, fluxo_de_transbordo: { ...p.fluxo_de_transbordo, horario_atendimento: e.target.value } }))} />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Footer Salvar */}
+            <div className="flex-shrink-0 px-6 py-4 border-t border-slate-100 bg-white flex items-center gap-3">
+              {saveStatus === 'success' && <span className="text-emerald-600 text-sm font-semibold flex-1">✓ Base salva com sucesso!</span>}
+              {saveStatus === 'error' && <span className="text-red-600 text-sm font-semibold flex-1">✗ Erro ao salvar. Tente novamente.</span>}
+              {saveStatus === 'idle' && <span className="flex-1 text-xs text-slate-400">As alterações ficam ativas imediatamente.</span>}
+              <button onClick={onClose} className="px-5 py-2.5 text-sm font-semibold text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition-all">
+                Cancelar
+              </button>
+              <button
+                onClick={salvar}
+                disabled={isSaving}
+                className="px-6 py-2.5 text-sm font-bold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition-all flex items-center gap-2"
+              >
+                {isSaving ? <><RefreshCw size={14} className="animate-spin" /> Salvando...</> : '💾 Salvar Base'}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }

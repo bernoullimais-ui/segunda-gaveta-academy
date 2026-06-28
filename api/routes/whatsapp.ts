@@ -642,4 +642,61 @@ router.post('/config/:orgId', async (req: Request, res: Response) => {
   }
 });
 
+// ─── 12. BASE DE CONHECIMENTO — Busca e salva a base enriquecida ─────────────
+
+router.get('/base/:orgId', async (req: Request, res: Response) => {
+  try {
+    const { orgId } = req.params;
+    const supabase = getSupabase();
+
+    const { data, error } = await supabase
+      .from('wa_base_conhecimento')
+      .select('*')
+      .eq('organizacao_id', orgId)
+      .maybeSingle();
+
+    if (error) return res.status(500).json({ error: error.message });
+    return res.json(data || { organizacao_id: orgId });
+  } catch (error: any) {
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+router.post('/base/:orgId', async (req: Request, res: Response) => {
+  try {
+    const { orgId } = req.params;
+    const {
+      comportamento,
+      regras_de_negocio,
+      tabelas_banco,
+      websites,
+      documentos,
+      perguntas_respostas,
+      script_de_vendas_e_objecoes,
+      fluxo_de_transbordo,
+    } = req.body;
+    const supabase = getSupabase();
+
+    const { error } = await supabase
+      .from('wa_base_conhecimento')
+      .upsert([{
+        organizacao_id: orgId,
+        comportamento: comportamento ?? null,
+        regras_de_negocio: regras_de_negocio ?? null,
+        tabelas_banco: tabelas_banco ?? null,
+        websites: websites ?? null,
+        documentos: documentos ?? null,
+        perguntas_respostas: perguntas_respostas ?? null,
+        script_de_vendas_e_objecoes: script_de_vendas_e_objecoes ?? null,
+        fluxo_de_transbordo: fluxo_de_transbordo ?? null,
+        atualizado_em: new Date().toISOString(),
+      }], { onConflict: 'organizacao_id' });
+
+    if (error) return res.status(500).json({ error: error.message });
+    return res.json({ success: true });
+  } catch (error: any) {
+    return res.status(500).json({ error: error.message });
+  }
+});
+
 export default router;

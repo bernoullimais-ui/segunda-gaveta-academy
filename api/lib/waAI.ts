@@ -5,6 +5,7 @@
  *   - Gerar resposta da IA com histórico de conversa
  *   - Detectar sinal de transbordo para humano
  *   - Identificar contato como aluno ou lead via telefone
+ *   - Montar system prompt enriquecido a partir da base de conhecimento
  */
 import { generateContentWithRetry } from './gemini.js';
 import { getSupabase } from './supabase.js';
@@ -25,16 +26,191 @@ export interface WaContatoInfo {
   email?: string;
 }
 
+/** Estrutura da base de conhecimento enriquecida por organização */
+export interface WaBaseConhecimento {
+  id?: string;
+  organizacao_id?: string;
+  /** 1. Comportamento — persona, tom de voz, regras de formatação */
+  comportamento?: {
+    nome_assistente?: string;
+    persona?: string;
+    tom_de_voz?: string;
+    regras_formatacao?: string;
+  } | null;
+  /** 2. Regras de Negócio — limites operacionais, cupons, trocas */
+  regras_de_negocio?: {
+    texto?: string;
+  } | null;
+  /** 3. Tabelas do banco — dados ao vivo do Supabase */
+  tabelas_banco?: Array<{
+    tabela: string;
+    colunas: string[];
+    filtro?: string;
+    descricao?: string;
+  }> | null;
+  /** 4. Websites — links de referência externa */
+  websites?: Array<{
+    url: string;
+    descricao?: string;
+  }> | null;
+  /** 5. Documentos — manuais, PDFs, termos de uso (texto extraído) */
+  documentos?: Array<{
+    nome: string;
+    conteudo: string;
+    storage_path?: string;
+  }> | null;
+  /** 6. FAQ — perguntas e respostas frequentes */
+  perguntas_respostas?: Array<{
+    pergunta: string;
+    resposta: string;
+  }> | null;
+  /** 7. Script de vendas e objeções */
+  script_de_vendas_e_objecoes?: {
+    texto?: string;
+  } | null;
+  /** 8. Fluxo de transbordo */
+  fluxo_de_transbordo?: {
+    condicoes?: string;
+    mensagem_transbordo?: string;
+    horario_atendimento?: string;
+  } | null;
+}
+
 export interface WaAIConfig {
   promptGlobal: string;
   promptOverride?: string | null;
   orgName?: string;
   iaAtiva: boolean;
+  baseConhecimento?: WaBaseConhecimento | null;
 }
 
 export interface AIReplyResult {
   resposta: string;
   transbordo: boolean;
+}
+
+// ─── Monta system prompt enriquecido a partir da base de conhecimento ─────────
+
+export async function buildEnrichedSystemPrompt(
+  config: WaAIConfig,
+  contato: WaContatoInfo
+): Promise<string> {
+  const base = config.baseConhecimento;
+  const supabase = getSupabase();
+
+  // Se não há base de conhecimento configurada, usa o fluxo legado
+  if (!base) {
+    const prompt = config.promptOverride || config.promptGlobal;
+    const contextoContato = contato.isAluno
+      ? `\n\n[CONTEXTO INTERNO — NÃO REVELAR AO USUÁRIO: O contato ${contato.nome || contato.telefone} JÁ É ALUNO cadastrado na plataforma${contato.email ? ` (e-mail: ${contato.email})` : ''}. Trate com prioridade.]`
+      : `\n\n[CONTEXTO INTERNO — NÃO REVELAR AO USUÁRIO: O contato ${contato.nome || contato.telefone} NÃO é aluno cadastrado. É um lead/prospecto.]`;
+    return prompt + contextoContato;
+  }
+
+  const secoes: string[] = [];
+
+  // ── 1. Comportamento ────────────────────────────────────────────────────────
+  const comp = base.comportamento;
+  if (comp) {
+    const nomeAssistente = comp.nome_assistente || 'Assistente Virtual';
+    const orgLabel = config.orgName ? ` da ${config.orgName}` : '';
+    let secao = `[IDENTIDADE E COMPORTAMENTO]\n`;
+    secao += `Você é ${nomeAssistente}${orgLabel}.\n`;
+    if (comp.persona) secao += `Persona: ${comp.persona}\n`;
+    if (comp.tom_de_voz) secao += `Tom de voz: ${comp.tom_de_voz}\n`;
+    if (comp.regras_formatacao) secao += `Regras de formatação: ${comp.regras_formatacao}\n`;
+    secoes.push(secao.trim());
+  } else {
+    // Fallback para o prompt global/override
+    secoes.push(config.promptOverride || config.promptGlobal);
+  }
+
+  // ── 2. Regras de Negócio ────────────────────────────────────────────────────
+  const regras = base.regras_de_negocio;
+  if (regras?.texto?.trim()) {
+    secoes.push(`[REGRAS DE NEGÓCIO]\n${regras.texto.trim()}`);
+  }
+
+  // ── 3. Tabelas do Banco (dados ao vivo) ────────────────────────────────────
+  if (base.tabelas_banco && base.tabelas_banco.length > 0) {
+    const linhas: string[] = ['[DADOS AO VIVO DO SISTEMA]'];
+    for (const t of base.tabelas_banco) {
+      try {
+        let query = supabase.from(t.tabela).select(t.colunas.length > 0 ? t.colunas.join(', ') : '*').limit(50);
+        // Aplica filtros simples do tipo "coluna=valor"
+        if (t.filtro) {
+          const partes = t.filtro.split('=');
+          if (partes.length === 2) {
+            const col = partes[0].trim();
+            const val = partes[1].trim().replace(/['"]/g, '');
+            query = query.eq(col, val === 'true' ? true : val === 'false' ? false : val);
+          }
+        }
+        const { data } = await query;
+        if (data && data.length > 0) {
+          const desc = t.descricao ? ` (${t.descricao})` : '';
+          linhas.push(`Tabela ${t.tabela}${desc}:\n${JSON.stringify(data, null, 2)}`);
+        }
+      } catch (err) {
+        console.warn(`[WaAI] Erro ao buscar tabela ${t.tabela}:`, err);
+      }
+    }
+    if (linhas.length > 1) secoes.push(linhas.join('\n'));
+  }
+
+  // ── 4. Websites ─────────────────────────────────────────────────────────────
+  if (base.websites && base.websites.length > 0) {
+    const linhas = ['[LINKS DE REFERÊNCIA EXTERNA]'];
+    base.websites.forEach(w => {
+      linhas.push(`- ${w.descricao ? `${w.descricao}: ` : ''}${w.url}`);
+    });
+    secoes.push(linhas.join('\n'));
+  }
+
+  // ── 5. Documentos ───────────────────────────────────────────────────────────
+  if (base.documentos && base.documentos.length > 0) {
+    const linhas = ['[DOCUMENTOS INSTITUCIONAIS]'];
+    base.documentos.forEach(d => {
+      if (d.conteudo?.trim()) {
+        linhas.push(`--- ${d.nome} ---\n${d.conteudo.trim()}`);
+      }
+    });
+    if (linhas.length > 1) secoes.push(linhas.join('\n\n'));
+  }
+
+  // ── 6. FAQ ──────────────────────────────────────────────────────────────────
+  if (base.perguntas_respostas && base.perguntas_respostas.length > 0) {
+    const linhas = ['[PERGUNTAS E RESPOSTAS FREQUENTES]'];
+    base.perguntas_respostas.forEach((qa, i) => {
+      linhas.push(`P${i + 1}: ${qa.pergunta}\nR${i + 1}: ${qa.resposta}`);
+    });
+    secoes.push(linhas.join('\n\n'));
+  }
+
+  // ── 7. Script de Vendas e Objeções ─────────────────────────────────────────
+  const script = base.script_de_vendas_e_objecoes;
+  if (script?.texto?.trim()) {
+    secoes.push(`[SCRIPT DE VENDAS E CONTORNO DE OBJEÇÕES]\n${script.texto.trim()}`);
+  }
+
+  // ── 8. Fluxo de Transbordo ──────────────────────────────────────────────────
+  const transbordo = base.fluxo_de_transbordo;
+  if (transbordo) {
+    const linhas = ['[FLUXO DE TRANSBORDO PARA HUMANO]'];
+    if (transbordo.condicoes) linhas.push(`Transferir para humano quando: ${transbordo.condicoes}`);
+    if (transbordo.mensagem_transbordo) linhas.push(`Mensagem ao transferir: "${transbordo.mensagem_transbordo}". Inclua a palavra TRANSBORDO internamente.`);
+    if (transbordo.horario_atendimento) linhas.push(`Horário de atendimento humano: ${transbordo.horario_atendimento}`);
+    secoes.push(linhas.join('\n'));
+  } else {
+    secoes.push('[FLUXO DE TRANSBORDO]\nQuando precisar transferir para humano, inclua a palavra TRANSBORDO em algum lugar da sua resposta.');
+  }
+
+  // ── Contexto do contato ─────────────────────────────────────────────────────
+  const contextoContato = contato.isAluno
+    ? `\n\n[CONTEXTO INTERNO — NÃO REVELAR AO USUÁRIO: O contato ${contato.nome || contato.telefone} JÁ É ALUNO cadastrado na plataforma${contato.email ? ` (e-mail: ${contato.email})` : ''}. Trate com prioridade.]`
+    : `\n\n[CONTEXTO INTERNO — NÃO REVELAR AO USUÁRIO: O contato ${contato.nome || contato.telefone} NÃO é aluno cadastrado. É um lead/prospecto.]`;
+
+  return secoes.join('\n\n') + contextoContato;
 }
 
 // ─── Função principal: gera resposta da IA ──────────────────────────────────
@@ -44,14 +220,8 @@ export async function generateAIReply(
   config: WaAIConfig,
   contato: WaContatoInfo
 ): Promise<AIReplyResult> {
-  const prompt = config.promptOverride || config.promptGlobal;
-
-  // Contexto do contato para injetar no prompt
-  const contextoContato = contato.isAluno
-    ? `\n\n[CONTEXTO INTERNO — NÃO REVELAR AO USUÁRIO: O contato ${contato.nome || contato.telefone} JÁ É ALUNO cadastrado na plataforma${contato.email ? ` (e-mail: ${contato.email})` : ''}. Trate com prioridade e mencione que reconheceu o cadastro.]`
-    : `\n\n[CONTEXTO INTERNO — NÃO REVELAR AO USUÁRIO: O contato ${contato.nome || contato.telefone} NÃO é aluno cadastrado. É um lead/prospecto.]`;
-
-  const systemInstruction = prompt + contextoContato;
+  // Monta o system prompt com a base de conhecimento enriquecida
+  const systemInstruction = await buildEnrichedSystemPrompt(config, contato);
 
   // Monta o histórico no formato de conteúdo do Gemini
   const contents = historico.map(msg => ({
@@ -83,7 +253,13 @@ export async function generateAIReply(
       .replace(/\n\s*\n\s*\n/g, '\n\n')
       .trim();
 
-    const assinatura = '*[Gabi, assistente virtual da Segunda Gaveta Academy]*\n\n';
+    // Usa o nome configurado na base de conhecimento ou fallback para "Gabi"
+    const nomeAssistente = config.baseConhecimento?.comportamento?.nome_assistente;
+    const orgLabel = config.orgName ? ` da ${config.orgName}` : '';
+    const assinatura = nomeAssistente
+      ? `*[${nomeAssistente}${orgLabel}]*\n\n`
+      : '*[Gabi, assistente virtual]*\n\n';
+
     return { resposta: assinatura + respostaLimpa, transbordo };
   } catch (error: any) {
     console.error('[WaAI] Erro ao gerar resposta:', error?.message);
@@ -140,14 +316,14 @@ export async function resolveContatoInfo(telefone: string): Promise<WaContatoInf
   return { telefone, isAluno: false };
 }
 
-// ─── Busca configuração da IA (prompt global + override por org) ─────────────
+// ─── Busca configuração da IA (prompt global + override por org + base) ───────
 
 export async function getWaAIConfig(organizacaoId?: string): Promise<WaAIConfig> {
   const supabase = getSupabase();
 
   // Busca prompt adequado (Triagem se nulo, Global se houver org mas sem override)
   const chavePrompt = organizacaoId ? 'wa_ia_prompt_global' : 'wa_ia_prompt_triagem';
-  
+
   // Busca configurações globais (Prompt e Ativação)
   const { data: globalConfigs } = await supabase
     .from('configuracoes_globais')
@@ -170,31 +346,39 @@ export async function getWaAIConfig(organizacaoId?: string): Promise<WaAIConfig>
   // Busca configuração e prompt da organização (se houver)
   let promptOverride: string | null = null;
   let orgName: string | undefined;
+  let baseConhecimento: WaBaseConhecimento | null = null;
 
   if (organizacaoId) {
-    const { data: waConfig } = await supabase
-      .from('wa_config')
-      .select('ia_prompt_override, ia_ativa')
-      .eq('organizacao_id', organizacaoId)
-      .maybeSingle();
+    const [waConfigResult, orgResult, baseResult] = await Promise.all([
+      supabase
+        .from('wa_config')
+        .select('ia_prompt_override, ia_ativa')
+        .eq('organizacao_id', organizacaoId)
+        .maybeSingle(),
+      supabase
+        .from('organizacoes')
+        .select('nome')
+        .eq('id', organizacaoId)
+        .maybeSingle(),
+      supabase
+        .from('wa_base_conhecimento')
+        .select('*')
+        .eq('organizacao_id', organizacaoId)
+        .maybeSingle(),
+    ]);
 
-    if (waConfig) {
-      if (waConfig.ia_prompt_override) promptOverride = waConfig.ia_prompt_override;
-      if (waConfig.ia_ativa !== null && waConfig.ia_ativa !== undefined) {
-        iaAtiva = waConfig.ia_ativa;
+    if (waConfigResult.data) {
+      if (waConfigResult.data.ia_prompt_override) promptOverride = waConfigResult.data.ia_prompt_override;
+      if (waConfigResult.data.ia_ativa !== null && waConfigResult.data.ia_ativa !== undefined) {
+        iaAtiva = waConfigResult.data.ia_ativa;
       }
     }
 
-    const { data: org } = await supabase
-      .from('organizacoes')
-      .select('nome')
-      .eq('id', organizacaoId)
-      .maybeSingle();
-
-    orgName = org?.nome;
+    orgName = orgResult.data?.nome;
+    baseConhecimento = baseResult.data || null;
   }
 
-  return { promptGlobal, promptOverride, orgName, iaAtiva };
+  return { promptGlobal, promptOverride, orgName, iaAtiva, baseConhecimento };
 }
 
 // ─── Envia mensagem pelo Umbler uTalk ────────────────────────────────────────
