@@ -317,7 +317,7 @@ router.post('/send', async (req: Request, res: Response) => {
 router.patch('/conversas/:id/takeover', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { atendente_id } = req.body;
+    const { atendente_id, contexto } = req.body;
 
     const supabase = getSupabase();
     const { error } = await supabase
@@ -330,6 +330,16 @@ router.patch('/conversas/:id/takeover', async (req: Request, res: Response) => {
       .eq('id', id);
 
     if (error) return res.status(500).json({ error: error.message });
+
+    if (contexto && typeof contexto === 'string' && contexto.trim().length > 0) {
+      await supabase.from('wa_mensagens').insert({
+        conversa_id: id,
+        direcao: 'sistema',
+        conteudo: contexto.trim(),
+        enviado_por: 'sistema'
+      });
+    }
+
     return res.json({ success: true });
   } catch (error: any) {
     return res.status(500).json({ error: error.message });

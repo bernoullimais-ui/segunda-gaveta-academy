@@ -271,12 +271,12 @@ export function AtendimentoIA({ loggedUser, loggedRole }: AtendimentoIAProps) {
     carregarConversas();
   };
 
-  const transferirConversa = async (novoAtendenteId: string) => {
+  const transferirConversa = async (novoAtendenteId: string, contexto?: string) => {
     if (!conversaSelecionada) return;
     await fetch(`/api/whatsapp/conversas/${conversaSelecionada.id}/takeover`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ atendente_id: novoAtendenteId }),
+      body: JSON.stringify({ atendente_id: novoAtendenteId, contexto }),
     });
     setConversaSelecionada(prev => prev ? { ...prev, status: 'em_atendimento', atendente_id: novoAtendenteId } : null);
     carregarConversas();
@@ -490,6 +490,20 @@ export function AtendimentoIA({ loggedUser, loggedRole }: AtendimentoIAProps) {
                 <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50">
                   {mensagens.map(msg => {
                     const isEntrada = msg.direcao === 'entrada';
+                    const isSistema = msg.direcao === 'sistema';
+
+                    if (isSistema) {
+                      return (
+                        <div key={msg.id} className="flex justify-center my-4">
+                          <div className="bg-amber-50 border border-amber-200 text-amber-800 text-xs px-4 py-2 rounded-lg max-w-[80%] text-center shadow-sm">
+                            <span className="font-bold block mb-1">🔒 Nota Interna de Transferência</span>
+                            {msg.conteudo}
+                            <span className="block text-[10px] text-amber-600/70 mt-1">{formatFullTime(msg.criado_em)}</span>
+                          </div>
+                        </div>
+                      );
+                    }
+
                     return (
                       <div key={msg.id} className={`flex ${isEntrada ? 'justify-start' : 'justify-end'}`}>
                         <div className={`max-w-[72%] group`}>
@@ -635,10 +649,10 @@ export function AtendimentoIA({ loggedUser, loggedRole }: AtendimentoIAProps) {
                       {transferindo ? 'Cancelar Transferência' : 'Transferir Conversa'}
                     </button>
                     {transferindo && (
-                      <div className="flex gap-2">
+                      <div className="flex flex-col gap-2 mt-2">
                         <select
-                          className="flex-1 text-xs border border-slate-200 rounded-lg p-2 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                          onChange={(e) => transferirConversa(e.target.value)}
+                          className="w-full text-xs border border-slate-200 rounded-lg p-2 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                          id="selectTransfer"
                           defaultValue=""
                         >
                           <option value="" disabled>Selecione um atendente...</option>
@@ -648,6 +662,24 @@ export function AtendimentoIA({ loggedUser, loggedRole }: AtendimentoIAProps) {
                             </option>
                           ))}
                         </select>
+                        <textarea 
+                          id="contextoTransfer"
+                          className="w-full text-xs border border-slate-200 rounded-lg p-2 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+                          rows={3}
+                          placeholder="Mensagem de contexto interno (visível apenas para a equipe)..."
+                        />
+                        <button
+                          onClick={() => {
+                            const select = document.getElementById('selectTransfer') as HTMLSelectElement;
+                            const ctx = document.getElementById('contextoTransfer') as HTMLTextAreaElement;
+                            if (select.value) {
+                              transferirConversa(select.value, ctx.value);
+                            }
+                          }}
+                          className="w-full py-2 bg-indigo-600 text-white rounded-lg text-xs font-bold hover:bg-indigo-700 transition-all"
+                        >
+                          Confirmar
+                        </button>
                       </div>
                     )}
                   </div>
