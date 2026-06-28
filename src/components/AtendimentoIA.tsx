@@ -253,8 +253,8 @@ export function AtendimentoIA({ loggedUser, loggedRole }: AtendimentoIAProps) {
 
   useEffect(() => {
     if (isSuperAdmin) {
-      supabase.from('usuarios').select('id, nome, perfil')
-        .in('perfil', ['super_admin', 'admin', 'gestor', 'especialista'])
+      supabase.from('usuarios').select('id, nome, role')
+        .in('role', ['super_admin', 'admin', 'gestor', 'especialista'])
         .order('nome')
         .then(({ data }) => { if (data) setAtendentesList(data); });
     }
