@@ -253,7 +253,7 @@ export function AtendimentoIA({ loggedUser, loggedRole }: AtendimentoIAProps) {
 
   useEffect(() => {
     if (isSuperAdmin) {
-      supabase.from('usuarios').select('id, nome, role')
+      supabase.from('usuarios').select('id, nome, role, organizacao:organizacoes(nome)')
         .in('role', ['super_admin', 'admin', 'gestor', 'especialista'])
         .order('nome')
         .then(({ data }) => { if (data) setAtendentesList(data); });
@@ -643,7 +643,9 @@ export function AtendimentoIA({ loggedUser, loggedRole }: AtendimentoIAProps) {
                         >
                           <option value="" disabled>Selecione um atendente...</option>
                           {atendentesList.map(a => (
-                            <option key={a.id} value={a.id}>{a.nome}</option>
+                            <option key={a.id} value={a.id}>
+                              {a.nome} {a.organizacao?.nome ? `(${a.organizacao.nome})` : ''}
+                            </option>
                           ))}
                         </select>
                       </div>
