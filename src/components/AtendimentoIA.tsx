@@ -773,21 +773,34 @@ function AtendimentoIAConfig({
 }: { loggedUser: any; loggedRole: string; isSuperAdmin: boolean; orgId: string }) {
   const [config, setConfig] = useState({ 
     utalk_token: '', utalk_from_phone: '', utalk_organization_id: '', 
-    ia_ativa: true, ia_prompt_override: '', palavras_chave_roteamento: '' 
+    ia_ativa: true, ia_prompt_override: '', palavras_chave_roteamento: '',
+    wa_utalk_global_token: '', wa_utalk_global_from_phone: '', wa_utalk_global_organization_id: ''
   });
   const [promptGlobal, setPromptGlobal] = useState('');
   const [editPromptGlobal, setEditPromptGlobal] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [status, setStatus] = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
 
+  const carregarConfig = async () => {
+    try {
+      const res = await fetch(`/api/whatsapp/config/${orgId}`);
+      const d = await res.json();
+      if (d?.prompt_global) { setPromptGlobal(d.prompt_global); setEditPromptGlobal(d.prompt_global); }
+      if (d?.config || d?.global_tokens) {
+        setConfig(prev => ({
+          ...prev,
+          ...(d.config || {}),
+          ...(d.global_tokens || {})
+        }));
+      }
+    } catch (err) {
+      console.error('Erro ao carregar config:', err);
+    }
+  };
+
   useEffect(() => {
     if (!orgId) return;
-    fetch(`/api/whatsapp/config/${orgId}`)
-      .then(r => r.ok ? r.json() : null)
-      .then(d => {
-        if (d?.config) setConfig({ ...config, ...d.config });
-        if (d?.prompt_global) { setPromptGlobal(d.prompt_global); setEditPromptGlobal(d.prompt_global); }
-      });
+    carregarConfig();
   }, [orgId]);
 
   const salvarConfig = async () => {
@@ -806,12 +819,17 @@ function AtendimentoIAConfig({
   };
 
   const salvarPromptGlobal = async () => {
-    const res = await fetch('/api/whatsapp/config/global/prompt', {
+    const res = await fetch('/api/whatsapp/config/global', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: editPromptGlobal }),
+      body: JSON.stringify({ 
+        prompt: editPromptGlobal,
+        wa_utalk_global_token: (config as any).wa_utalk_global_token,
+        wa_utalk_global_from_phone: (config as any).wa_utalk_global_from_phone,
+        wa_utalk_global_organization_id: (config as any).wa_utalk_global_organization_id
+      }),
     });
-    setStatus(res.ok ? { type: 'success', msg: 'Prompt global salvo!' } : { type: 'error', msg: 'Erro ao salvar prompt.' });
+    setStatus(res.ok ? { type: 'success', msg: 'Configurações globais salvas!' } : { type: 'error', msg: 'Erro ao salvar.' });
   };
 
   return (
@@ -877,7 +895,24 @@ function AtendimentoIAConfig({
 
       {isSuperAdmin && (
         <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4">
-          <h3 className="font-bold text-slate-700 flex items-center gap-2"><Bot size={16} className="text-indigo-500" />Prompt Global da IA (super_admin)</h3>
+          <h3 className="font-bold text-slate-700 flex items-center gap-2"><Bot size={16} className="text-indigo-500" />Configuração Global (Super Admin)</h3>
+          
+          <div className="space-y-3 mb-6">
+            <h4 className="text-xs font-bold text-slate-500 uppercase">Tokens uTalk Globais (Fallback)</h4>
+            {['wa_utalk_global_token', 'wa_utalk_global_from_phone', 'wa_utalk_global_organization_id'].map(key => (
+              <div key={key}>
+                <label className="block text-[10px] font-semibold text-slate-500 mb-1 uppercase">{key.replace('wa_utalk_global_', '')}</label>
+                <input
+                  type="text"
+                  value={(config as any)[key] || ''}
+                  onChange={e => setConfig(prev => ({ ...prev, [key]: e.target.value }))}
+                  className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+            ))}
+          </div>
+
+          <h4 className="text-xs font-bold text-slate-500 uppercase mt-4 mb-2">Prompt Global da IA</h4>
           <textarea
             value={editPromptGlobal}
             onChange={e => setEditPromptGlobal(e.target.value)}
@@ -888,7 +923,7 @@ function AtendimentoIAConfig({
             onClick={salvarPromptGlobal}
             className="w-full py-2.5 bg-violet-600 text-white rounded-xl font-bold text-sm hover:bg-violet-700 transition-all"
           >
-            Salvar Prompt Global
+            Salvar Configurações Globais
           </button>
         </div>
       )}
