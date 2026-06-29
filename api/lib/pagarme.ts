@@ -155,17 +155,18 @@ export function buildSplitRules(
 // ─── Recebedores (Recipients) / Split ─────────────────────────────────────────
 
 export async function createPagarmeRecipient(dadosBancarios: any) {
-  const isCompany = (dadosBancarios.documento || '').replace(/\D/g, '').length > 11;
+  const cleanDocument = (dadosBancarios.documento || '').replace(/\D/g, '');
+  const isCompany = cleanDocument.length > 11;
   const nameStr = (dadosBancarios.nome_recebedor || '').substring(0, 30);
   const payload = {
     name: nameStr,
     email: dadosBancarios.email || 'nao_informado@sistema.com',
-    document: dadosBancarios.documento,
+    document: cleanDocument,
     type: isCompany ? 'company' : 'individual',
     default_bank_account: {
       holder_name: nameStr,
       holder_type: isCompany ? 'company' : 'individual',
-      holder_document: dadosBancarios.documento,
+      holder_document: cleanDocument,
       bank: dadosBancarios.banco_codigo,
       branch_number: dadosBancarios.agencia,
       branch_check_digit: dadosBancarios.agencia_dv || '0',
@@ -184,12 +185,13 @@ export async function createPagarmeRecipient(dadosBancarios: any) {
 }
 
 export async function updatePagarmeRecipientBankAccount(recipientId: string, dadosBancarios: any) {
-  const isCompany = (dadosBancarios.documento || '').replace(/\D/g, '').length > 11;
+  const cleanDocument = (dadosBancarios.documento || '').replace(/\D/g, '');
+  const isCompany = cleanDocument.length > 11;
   const nameStr = (dadosBancarios.nome_recebedor || '').substring(0, 30);
   const payload = {
     holder_name: nameStr,
     holder_type: isCompany ? 'company' : 'individual',
-    holder_document: dadosBancarios.documento,
+    holder_document: cleanDocument,
     bank: dadosBancarios.banco_codigo,
     branch_number: dadosBancarios.agencia,
     branch_check_digit: dadosBancarios.agencia_dv || '0',
