@@ -725,6 +725,17 @@ router.post('/pagarme/recipients', async (req, res) => {
   }
 
   try {
+    // Busca o email do usuário
+    const { data: userData } = await supabase
+      .from('usuarios')
+      .select('email')
+      .eq('id', usuario_id)
+      .single();
+    
+    if (userData?.email) {
+      dados_bancarios.email = userData.email;
+    }
+
     // 1. Checar se já existe na base
     const { data: existing, error: errFetch } = await supabase
       .from('dados_bancarios_pagarme')
