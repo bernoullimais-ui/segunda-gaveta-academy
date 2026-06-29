@@ -18,7 +18,7 @@ export function DadosRecebimento({ loggedUser, onSave }: DadosRecebimentoProps) 
     agencia_dv: '',
     conta: '',
     conta_dv: '',
-    tipo_conta: 'checking_account',
+    tipo_conta: 'checking',
     tipo_chave_pix: 'cpf',
     chave_pix: '',
     pagarme_recipient_id: ''
@@ -171,8 +171,8 @@ export function DadosRecebimento({ loggedUser, onSave }: DadosRecebimentoProps) 
               onChange={e => setFormData({...formData, tipo_conta: e.target.value})}
               className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:bg-white focus:border-indigo-500 transition-all text-slate-800 cursor-pointer"
             >
-              <option value="checking_account">Conta Corrente</option>
-              <option value="savings_account">Conta Poupança</option>
+              <option value="checking">Conta Corrente</option>
+              <option value="savings">Conta Poupança</option>
             </select>
           </div>
 
