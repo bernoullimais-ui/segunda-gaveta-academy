@@ -13,9 +13,12 @@ export function DadosRecebimento({ loggedUser, onSave }: DadosRecebimentoProps) 
   const [formData, setFormData] = useState({
     nome_recebedor: '',
     documento: '',
-    banco: '',
+    banco_codigo: '',
     agencia: '',
+    agencia_dv: '',
     conta: '',
+    conta_dv: '',
+    tipo_conta: 'checking_account',
     tipo_chave_pix: 'cpf',
     chave_pix: '',
     pagarme_recipient_id: ''
@@ -52,7 +55,34 @@ export function DadosRecebimento({ loggedUser, onSave }: DadosRecebimentoProps) 
     if (!loggedUser?.id) return;
     setSaving(true);
     try {
-      // Fetch existing user to preserve other parts of curriculo_json
+      // 1. Chamar a nossa nova rota para criar/atualizar no Pagar.me
+      const res = await fetch('/api/pagarme/recipients', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          usuario_id: loggedUser.id,
+          dados_bancarios: formData
+        })
+      });
+
+      const pagarmeData = await res.json();
+      
+      if (!res.ok) {
+        // Erro retornado pelo Pagar.me ou nossa API
+        let errorMsg = pagarmeData.error || 'Erro desconhecido';
+        if (pagarmeData.details?.errors) {
+          // Extrai o primeiro erro legível do Pagar.me
+          const firstKey = Object.keys(pagarmeData.details.errors)[0];
+          errorMsg = pagarmeData.details.errors[firstKey][0];
+        } else if (pagarmeData.details?.message) {
+          errorMsg = pagarmeData.details.message;
+        }
+        throw new Error(errorMsg);
+      }
+
+      const newRecipientId = pagarmeData.recipient_id;
+
+      // 2. Atualizar o curriculo_json do usuário com o recipientId
       const { data: userRow } = await supabase
         .from('usuarios')
         .select('curriculo_json')
@@ -60,9 +90,12 @@ export function DadosRecebimento({ loggedUser, onSave }: DadosRecebimentoProps) 
         .single();
 
       const currentCurriculo = userRow?.curriculo_json || {};
+      const newFormData = { ...formData, pagarme_recipient_id: newRecipientId || formData.pagarme_recipient_id };
+      setFormData(newFormData);
+      
       const newCurriculo = {
         ...currentCurriculo,
-        dados_recebimento: formData
+        dados_recebimento: newFormData
       };
 
       const { error } = await supabase
@@ -71,11 +104,11 @@ export function DadosRecebimento({ loggedUser, onSave }: DadosRecebimentoProps) 
         .eq('id', loggedUser.id);
 
       if (error) throw error;
-      alert("Dados de recebimento salvos com sucesso!");
+      alert("Dados de recebimento salvos com sucesso e integrados ao Pagar.me!");
       if (onSave) onSave();
     } catch (err: any) {
       console.error("Erro ao salvar dados de recebimento:", err);
-      alert("Erro ao salvar dados: " + err.message);
+      alert("Erro ao integrar com Pagar.me: " + err.message);
     } finally {
       setSaving(false);
     }
@@ -130,40 +163,74 @@ export function DadosRecebimento({ loggedUser, onSave }: DadosRecebimentoProps) 
             />
           </div>
 
+          {/* Tipo de Conta */}
+          <div className="space-y-2">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500">Tipo de Conta</label>
+            <select 
+              value={formData.tipo_conta}
+              onChange={e => setFormData({...formData, tipo_conta: e.target.value})}
+              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:bg-white focus:border-indigo-500 transition-all text-slate-800 cursor-pointer"
+            >
+              <option value="checking_account">Conta Corrente</option>
+              <option value="savings_account">Conta Poupança</option>
+            </select>
+          </div>
+
           {/* Banco, Agência, Conta */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500">Banco</label>
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+            <div className="space-y-2 md:col-span-4">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500">Banco (Código)</label>
               <input 
                 type="text"
                 required
-                value={formData.banco}
-                onChange={e => setFormData({...formData, banco: e.target.value})}
-                placeholder="Ex: Itaú, Nubank..."
+                value={formData.banco_codigo}
+                onChange={e => setFormData({...formData, banco_codigo: e.target.value})}
+                placeholder="Ex: 341 (Itaú), 237 (Bradesco), 260 (Nubank)..."
                 className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:bg-white focus:border-indigo-500 transition-all text-slate-800"
               />
             </div>
-            <div className="space-y-2">
+            
+            <div className="space-y-2 md:col-span-4">
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-500">Agência</label>
-              <input 
-                type="text"
-                required
-                value={formData.agencia}
-                onChange={e => setFormData({...formData, agencia: e.target.value})}
-                placeholder="Ex: 0001"
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:bg-white focus:border-indigo-500 transition-all text-slate-800"
-              />
+              <div className="flex gap-2">
+                <input 
+                  type="text"
+                  required
+                  value={formData.agencia}
+                  onChange={e => setFormData({...formData, agencia: e.target.value})}
+                  placeholder="Número"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:bg-white focus:border-indigo-500 transition-all text-slate-800"
+                />
+                <input 
+                  type="text"
+                  value={formData.agencia_dv}
+                  onChange={e => setFormData({...formData, agencia_dv: e.target.value})}
+                  placeholder="DV"
+                  className="w-16 px-3 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:bg-white focus:border-indigo-500 transition-all text-slate-800 text-center"
+                />
+              </div>
             </div>
-            <div className="space-y-2">
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500">Conta (c/ dígito)</label>
-              <input 
-                type="text"
-                required
-                value={formData.conta}
-                onChange={e => setFormData({...formData, conta: e.target.value})}
-                placeholder="Ex: 12345-6"
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:bg-white focus:border-indigo-500 transition-all text-slate-800"
-              />
+
+            <div className="space-y-2 md:col-span-4">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500">Conta</label>
+              <div className="flex gap-2">
+                <input 
+                  type="text"
+                  required
+                  value={formData.conta}
+                  onChange={e => setFormData({...formData, conta: e.target.value})}
+                  placeholder="Número"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:bg-white focus:border-indigo-500 transition-all text-slate-800"
+                />
+                <input 
+                  type="text"
+                  required
+                  value={formData.conta_dv}
+                  onChange={e => setFormData({...formData, conta_dv: e.target.value})}
+                  placeholder="DV"
+                  className="w-16 px-3 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:bg-white focus:border-indigo-500 transition-all text-slate-800 text-center"
+                />
+              </div>
             </div>
           </div>
 

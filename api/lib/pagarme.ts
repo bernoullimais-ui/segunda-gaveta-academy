@@ -152,3 +152,49 @@ export function buildSplitRules(
   return rules;
 }
 
+// ─── Recebedores (Recipients) / Split ─────────────────────────────────────────
+
+export async function createPagarmeRecipient(dadosBancarios: any) {
+  const isCompany = (dadosBancarios.documento || '').replace(/\D/g, '').length > 11;
+  const payload = {
+    name: dadosBancarios.nome_recebedor,
+    email: dadosBancarios.email || 'nao_informado@sistema.com',
+    document: dadosBancarios.documento,
+    type: isCompany ? 'company' : 'individual',
+    default_bank_account: {
+      holder_name: dadosBancarios.nome_recebedor,
+      holder_type: isCompany ? 'company' : 'individual',
+      holder_document: dadosBancarios.documento,
+      bank: dadosBancarios.banco_codigo,
+      branch_number: dadosBancarios.agencia,
+      branch_check_digit: dadosBancarios.agencia_dv || '0',
+      account_number: dadosBancarios.conta,
+      account_check_digit: dadosBancarios.conta_dv || '0',
+      type: dadosBancarios.tipo_conta
+    },
+    transfer_settings: {
+      transfer_enabled: true,
+      transfer_interval: 'Daily',
+      transfer_day: 0
+    }
+  };
+
+  return await pagarmeRequest('/recipients', payload, 'POST');
+}
+
+export async function updatePagarmeRecipientBankAccount(recipientId: string, dadosBancarios: any) {
+  const isCompany = (dadosBancarios.documento || '').replace(/\D/g, '').length > 11;
+  const payload = {
+    holder_name: dadosBancarios.nome_recebedor,
+    holder_type: isCompany ? 'company' : 'individual',
+    holder_document: dadosBancarios.documento,
+    bank: dadosBancarios.banco_codigo,
+    branch_number: dadosBancarios.agencia,
+    branch_check_digit: dadosBancarios.agencia_dv || '0',
+    account_number: dadosBancarios.conta,
+    account_check_digit: dadosBancarios.conta_dv || '0',
+    type: dadosBancarios.tipo_conta
+  };
+
+  return await pagarmeRequest(`/recipients/${recipientId}/default-bank-account`, payload, 'PATCH');
+}

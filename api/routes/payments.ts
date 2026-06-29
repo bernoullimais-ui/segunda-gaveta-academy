@@ -17,7 +17,7 @@
  */
 import { Router } from 'express';
 import { createClient } from '@supabase/supabase-js';
-import { pagarmeRequest, buildPagarmePhone, buildSplitRules, getPagarmePublicKey } from '../lib/pagarme.js';
+import { pagarmeRequest, buildPagarmePhone, buildSplitRules, getPagarmePublicKey, createPagarmeRecipient, updatePagarmeRecipientBankAccount } from '../lib/pagarme.js';
 import { validateCPF, validateAffiliate } from '../lib/validators.js';
 
 const router = Router();
@@ -713,6 +713,73 @@ router.post('/pagarme/create-subscription', async (req, res) => {
   } catch (error: any) {
     console.error('Create Subscription Error:', error);
     res.status(500).json({ error: error.message });
+  }
+});
+
+// ─── POST /api/pagarme/recipients ──────────────────────────────────────────────
+router.post('/pagarme/recipients', async (req, res) => {
+  const { usuario_id, dados_bancarios } = req.body;
+  
+  if (!usuario_id || !dados_bancarios) {
+    return res.status(400).json({ error: 'usuario_id e dados_bancarios são obrigatórios.' });
+  }
+
+  try {
+    // 1. Checar se já existe na base
+    const { data: existing, error: errFetch } = await supabase
+      .from('dados_bancarios_pagarme')
+      .select('pagarme_recipient_id')
+      .eq('usuario_id', usuario_id)
+      .single();
+
+    let recipientId = existing?.pagarme_recipient_id;
+
+    if (!recipientId) {
+      // 2. Se não existe, cria um novo no Pagar.me
+      const { ok, status, data } = await createPagarmeRecipient(dados_bancarios);
+      
+      if (!ok) {
+        console.error('Erro ao criar recebedor Pagar.me:', data);
+        return res.status(status).json({ error: 'Erro no Pagar.me', details: data });
+      }
+      
+      recipientId = data.id; // re_xxxxx
+    } else {
+      // 3. Se já existe, atualiza os dados bancários da conta padrão
+      const { ok, status, data } = await updatePagarmeRecipientBankAccount(recipientId, dados_bancarios);
+      
+      if (!ok) {
+        console.error('Erro ao atualizar recebedor Pagar.me:', data);
+        return res.status(status).json({ error: 'Erro no Pagar.me', details: data });
+      }
+    }
+
+    // 4. Salvar/Atualizar no Supabase
+    const { error: upsertErr } = await supabase
+      .from('dados_bancarios_pagarme')
+      .upsert({
+        usuario_id,
+        pagarme_recipient_id: recipientId,
+        documento: dados_bancarios.documento,
+        nome_recebedor: dados_bancarios.nome_recebedor,
+        banco_codigo: dados_bancarios.banco_codigo,
+        agencia: dados_bancarios.agencia,
+        agencia_dv: dados_bancarios.agencia_dv,
+        conta: dados_bancarios.conta,
+        conta_dv: dados_bancarios.conta_dv,
+        tipo_conta: dados_bancarios.tipo_conta,
+        atualizado_em: new Date().toISOString()
+      }, { onConflict: 'usuario_id' });
+
+    if (upsertErr) {
+      console.error('Erro ao salvar no Supabase:', upsertErr);
+      return res.status(500).json({ error: 'Erro ao salvar no banco de dados', details: upsertErr });
+    }
+
+    res.json({ success: true, recipient_id: recipientId });
+  } catch (err: any) {
+    console.error('Erro geral no recipients:', err);
+    res.status(500).json({ error: err.message });
   }
 });
 
