@@ -156,13 +156,14 @@ export function buildSplitRules(
 
 export async function createPagarmeRecipient(dadosBancarios: any) {
   const isCompany = (dadosBancarios.documento || '').replace(/\D/g, '').length > 11;
+  const nameStr = (dadosBancarios.nome_recebedor || '').substring(0, 30);
   const payload = {
-    name: dadosBancarios.nome_recebedor,
+    name: nameStr,
     email: dadosBancarios.email || 'nao_informado@sistema.com',
     document: dadosBancarios.documento,
     type: isCompany ? 'company' : 'individual',
     default_bank_account: {
-      holder_name: dadosBancarios.nome_recebedor,
+      holder_name: nameStr,
       holder_type: isCompany ? 'company' : 'individual',
       holder_document: dadosBancarios.documento,
       bank: dadosBancarios.banco_codigo,
@@ -184,8 +185,9 @@ export async function createPagarmeRecipient(dadosBancarios: any) {
 
 export async function updatePagarmeRecipientBankAccount(recipientId: string, dadosBancarios: any) {
   const isCompany = (dadosBancarios.documento || '').replace(/\D/g, '').length > 11;
+  const nameStr = (dadosBancarios.nome_recebedor || '').substring(0, 30);
   const payload = {
-    holder_name: dadosBancarios.nome_recebedor,
+    holder_name: nameStr,
     holder_type: isCompany ? 'company' : 'individual',
     holder_document: dadosBancarios.documento,
     bank: dadosBancarios.banco_codigo,
