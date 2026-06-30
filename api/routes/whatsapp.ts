@@ -169,7 +169,15 @@ router.post('/webhook', async (req: Request, res: Response) => {
     // Se for grupo, a Utalk pode mandar PhoneNumber como 5511999999999.
     // Nesse caso, usamos o Contact.Id ou GroupIdentifier para diferenciar.
     const isGroupContact = content.Contact?.ContactType === 'Group' || content.Contact?.ContactType === 'GroupMessage';
-    let foneNorm = fromPhone.replace(/\D/g, '');
+    
+    // Se for mensagem de saída, o fromPhone pode ser o do admin. Vamos priorizar o destino.
+    let targetPhone = fromPhone;
+    if (isOutgoing) {
+      const dest = content.toPhone || content.to || content.receiver?.phone || '';
+      if (dest) targetPhone = dest;
+    }
+
+    let foneNorm = targetPhone.replace(/\D/g, '');
     
     if (isGroupContact && content.Contact?.Id) {
       foneNorm = content.Contact.Id; // Ex: akPX6gNhnJL3LoOF (preserva as letras)
@@ -188,15 +196,16 @@ router.post('/webhook', async (req: Request, res: Response) => {
     let orgIdRoteada = conversa?.organizacao_id || null;
 
     if (!orgIdRoteada) {
-      const toPhone = (content.toPhone || content.to || '').replace(/\D/g, '');
+      const systemPhoneStr = isOutgoing ? fromPhone : (content.toPhone || content.to || '');
+      const systemPhone = systemPhoneStr.replace(/\D/g, '');
       const { data: configs } = await supabase
         .from('wa_config')
         .select('organizacao_id, palavras_chave_roteamento, utalk_from_phone');
 
       if (configs && configs.length > 0) {
         // 1. Tenta rotear pelo número de destino (se o cliente enviou mensagem para um número exclusivo de uma org)
-        if (toPhone) {
-          const toPhoneNorm = toPhone.startsWith('55') ? toPhone : `55${toPhone}`;
+        if (systemPhone) {
+          const toPhoneNorm = systemPhone.startsWith('55') ? systemPhone : `55${systemPhone}`;
           const configMatch = configs.find(c => {
             if (!c.utalk_from_phone) return false;
             const configFone = c.utalk_from_phone.replace(/\D/g, '');
