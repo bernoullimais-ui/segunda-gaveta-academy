@@ -19,6 +19,7 @@ import {
   resolveContatoInfo,
   getWaAIConfig,
   sendUtalkMessage,
+  sendUtalkReaction,
   getUtalkConfig,
 } from '../lib/waAI.js';
 
@@ -32,7 +33,7 @@ router.post('/webhook', async (req: Request, res: Response) => {
     console.log('[WA Webhook] Payload recebido:', JSON.stringify(body).slice(0, 1500));
 
     // O uTalk pode enviar o payload de duas formas (Webhook global vs API)
-    const content = body.Payload?.Content || body;
+    const content = body.Payload?.Content || body.Payload || body;
 
     // Extrai campos do payload do uTalk
     const fromPhone: string =
@@ -42,7 +43,20 @@ router.post('/webhook', async (req: Request, res: Response) => {
       content.from ||
       content.sender?.phone ||
       '';
-    const messageText: string =
+    const targetMessageId: string = 
+      content.Reaction?.MessageId ||
+      content.reactionMessageId ||
+      '';
+
+    const utalkMessageId: string =
+      content.id ||
+      content.MessageId ||
+      content.messageId ||
+      content.message?.id ||
+      content.LastMessage?.Id ||
+      '';
+
+    let messageText: string =
       content.Text ||
       content.LastMessage?.Content ||
       content.LastMessage?.text ||
@@ -52,6 +66,7 @@ router.post('/webhook', async (req: Request, res: Response) => {
       content.text ||
       content.body ||
       '';
+
     const contatoNome: string =
       content.Contact?.Name ||
       content.contact?.name ||
@@ -59,9 +74,21 @@ router.post('/webhook', async (req: Request, res: Response) => {
       content.pushName ||
       '';
 
-    // Ignora eventos que não sejam mensagens de texto recebidas
+    // Ignora eventos que não sejam mensagens recebidas
     const event: string = body.event || body.Type || '';
-    if (event && !event.includes('message') && !event.includes('conversa') && !event.includes('Message') && event !== '') {
+    const eventLower = event.toLowerCase();
+    const allowedEvents = ['message', 'conversa', 'chat', 'image', 'video', 'audio', 'document', 'file', 'reaction'];
+    
+    // DEBUG: Salva o payload cru na tabela para podermos ver no SQL
+    try {
+      const sb = getSupabase();
+      await sb.from('wa_mensagens').insert({
+        wa_conversa_id: '00000000-0000-0000-0000-000000000000', // não importa muito, é só pra ler via sql, mas pode falhar por fkey. Melhor logar na tabela wa_logs ou algo assim?
+        // se não houver tabela de log, vou usar uma query sem fkey ou só logar.
+      });
+    } catch(e) {}
+
+    if (event && !allowedEvents.some(e => eventLower.includes(e))) {
       console.log(`[WA Webhook] EARLY EXIT 1: Evento ignorado: ${event}`);
       return res.status(200).json({ received: true });
     }
@@ -71,6 +98,7 @@ router.post('/webhook', async (req: Request, res: Response) => {
       content.message?.fromMe === true || 
       content.direction === 'outgoing' || 
       content.IsFromMe === true ||
+      content['chat[dir]'] === 'o' ||
       (content.LastMessage?.Source && content.LastMessage.Source !== 'Contact');
 
     if (isOutgoing) {
@@ -78,10 +106,58 @@ router.post('/webhook', async (req: Request, res: Response) => {
       return res.status(200).json({ received: true });
     }
 
-    if (!fromPhone || !messageText) {
-      console.warn(`[WA Webhook] EARLY EXIT 3: Payload incompleto. fromPhone: "${fromPhone}", messageText: "${messageText}"`);
+    // -- Extração de Mídias e Reações
+    let midiaUrl: string =
+      content.Media?.Url || content.mediaUrl || content.MediaUrl || content.FileUrl || content.fileUrl || content.message?.mediaUrl || content['chat[file]'] || content['chat[media]'] || content.LastMessage?.File?.Url || content.File?.Url || '';
+    let midiaMimetype: string =
+      content.Media?.MimeType || content.mimetype || content.MimeType || content.message?.mimetype || content['chat[mimetype]'] || content.LastMessage?.File?.ContentType || content.File?.ContentType || '';
+    const reacaoEmoji: string =
+      content.Reaction?.Emoji || content.reaction || content.Reaction || content.message?.reaction || '';
+
+    // Verifica se existe um objeto File, mesmo sem URL (o uTalk às vezes manda Url null e Data "")
+    const hasFileObject = !!(content.Media || content.LastMessage?.File || content.File);
+
+    // Trata payload url-encoded onde chat[body] contém o link da mídia
+    const chatType = content['chat[type]'] || content.Type || content.type || eventLower;
+    if (['image', 'video', 'audio', 'document'].includes(chatType)) {
+      if (!midiaUrl && content['chat[body]'] && content['chat[body]'].startsWith('http')) {
+        midiaUrl = content['chat[body]'];
+        messageText = content['chat[caption]'] || ''; // Se tiver legenda
+      }
+    }
+
+    let tipoMensagem = 'texto';
+    if (reacaoEmoji) tipoMensagem = 'reacao';
+    else if (chatType === 'image' || midiaMimetype.includes('image') || midiaUrl.match(/\.(jpeg|jpg|gif|png|webp)$/i)) tipoMensagem = 'imagem';
+    else if (chatType === 'video' || midiaMimetype.includes('video') || midiaUrl.match(/\.(mp4|avi|mov)$/i)) tipoMensagem = 'video';
+    else if (chatType === 'audio' || midiaMimetype.includes('audio') || midiaUrl.match(/\.(mp3|ogg|wav)$/i)) tipoMensagem = 'audio';
+    else if (midiaUrl || hasFileObject) tipoMensagem = 'documento';
+
+    // Se a mensagem for de mídia, corrigimos o tipo baseando-se no mimetype
+    if (hasFileObject && midiaMimetype.includes('image')) tipoMensagem = 'imagem';
+    else if (hasFileObject && midiaMimetype.includes('video')) tipoMensagem = 'video';
+    else if (hasFileObject && midiaMimetype.includes('audio')) tipoMensagem = 'audio';
+
+    // Se tiver mídia ou reação, o messageText pode vir vazio, então permitimos passar
+    if (!fromPhone || (!messageText && !midiaUrl && !reacaoEmoji && !hasFileObject)) {
+      console.warn(`[WA Webhook] EARLY EXIT 3: Payload incompleto. fromPhone: "${fromPhone}", messageText: "${messageText}", mediaUrl: "${midiaUrl}", reaction: "${reacaoEmoji}", hasFileObject: ${hasFileObject}`);
       return res.status(200).json({ received: true });
     }
+
+    if (reacaoEmoji) {
+      console.log(`[WA Webhook] REACTION PAYLOAD DEBUG:`, JSON.stringify(content).slice(0, 2000));
+    }
+
+    if (!messageText) {
+      if (tipoMensagem === 'imagem') messageText = '[Imagem recebida]';
+      else if (tipoMensagem === 'audio') messageText = '[Áudio recebido]';
+      else if (tipoMensagem === 'video') messageText = '[Vídeo recebido]';
+      else if (tipoMensagem === 'documento') messageText = '[Documento recebido]';
+      else if (tipoMensagem === 'reacao') messageText = `[Reagiu com: ${reacaoEmoji}]`;
+    }
+
+    // DEBUG: Oculto (não concatenado no texto para não poluir a interface)
+    // console.log(`[WA Webhook] Payload bruto recebido de ${fromPhone}`);
 
     console.log(`[WA Webhook] Passou pelas validações iniciais. fromPhone: ${fromPhone}, messageText: ${messageText.slice(0, 50)}...`);
 
@@ -191,12 +267,60 @@ router.post('/webhook', async (req: Request, res: Response) => {
       }
     }
 
+    // Se for reação, tenta achar a mensagem original
+    let reacaoParaId = null;
+    if (tipoMensagem === 'reacao' && targetMessageId) {
+      const { data: msgOriginal } = await supabase
+        .from('wa_mensagens')
+        .select('id')
+        .eq('utalk_message_id', targetMessageId)
+        .maybeSingle();
+      if (msgOriginal) reacaoParaId = msgOriginal.id;
+    }
+
+    // -- Verifica se veio um arquivo em Base64 em vez de URL (ou se tem thumbnail disponível)
+    const midiaBase64 = content.LastMessage?.File?.Data || content.File?.Data || content.Data || content.LastMessage?.Thumbnail?.Data || content.Thumbnail?.Data || '';
+    if (midiaBase64 && !midiaUrl) {
+      try {
+        const buffer = Buffer.from(midiaBase64, 'base64');
+        const ext = midiaMimetype.split('/')[1] || 'bin';
+        const fileName = `${conversa.id}/${Date.now()}_media.${ext}`;
+        const { data: uploadData, error: uploadErr } = await supabase.storage
+          .from('whatsapp_midias')
+          .upload(fileName, buffer, {
+            contentType: midiaMimetype || 'application/octet-stream'
+          });
+        
+        if (uploadData && !uploadErr) {
+          midiaUrl = supabase.storage.from('whatsapp_midias').getPublicUrl(uploadData.path).data.publicUrl;
+          if (tipoMensagem === 'texto') {
+             if (midiaMimetype.includes('image')) tipoMensagem = 'imagem';
+             else if (midiaMimetype.includes('video')) tipoMensagem = 'video';
+             else if (midiaMimetype.includes('audio')) tipoMensagem = 'audio';
+             else tipoMensagem = 'documento';
+          }
+        } else {
+          console.error('[WA Webhook] Erro ao enviar midia base64 para storage:', uploadErr);
+        }
+      } catch (err) {
+        console.error('[WA Webhook] Erro ao decodificar base64:', err);
+      }
+    }
+
+    // Removido o corte do DEBUG PAYLOAD para podermos inspecionar o JSON completo no BD
+
     // ── Salva mensagem recebida no banco ────────────────────────────────────
     await supabase.from('wa_mensagens').insert([{
       conversa_id: conversa.id,
       direcao: 'entrada',
       conteudo: messageText,
       enviado_por: 'contato',
+      tipo_mensagem: tipoMensagem,
+      midia_url: midiaUrl || null,
+      midia_mimetype: midiaMimetype || null,
+      reacao_emoji: reacaoEmoji || null,
+      utalk_message_id: utalkMessageId || null,
+      reacao_para_id: reacaoParaId,
     }]);
 
     // Atualiza ultima_mensagem_em
@@ -249,13 +373,14 @@ router.post('/webhook', async (req: Request, res: Response) => {
     const contatoInfo = await resolveContatoInfo(foneNorm);
     const { resposta, transbordo } = await generateAIReply(historicoParsed, aiConfig, contatoInfo);
 
-    // ── Salva resposta da IA no banco ───────────────────────────────────────
-    await supabase.from('wa_mensagens').insert([{
+    // ── Salva resposta da IA no banco (primeiro sem utalk_message_id para rapidez) ───────────────────────────────────────
+    const { data: iaMsg } = await supabase.from('wa_mensagens').insert([{
       conversa_id: conversa.id,
       direcao: 'saida',
       conteudo: resposta,
       enviado_por: 'ia',
-    }]);
+      tipo_mensagem: 'texto',
+    }]).select('id').single();
 
     // ── Se detectou transbordo, muda status da conversa ─────────────────────
     if (transbordo) {
@@ -272,6 +397,9 @@ router.post('/webhook', async (req: Request, res: Response) => {
       const sent = await sendUtalkMessage(foneNorm, resposta, utalkConfig);
       if (!sent) {
         console.error(`[WA Webhook] Falha ao enviar resposta para ${foneNorm}`);
+      } else if (typeof sent === 'string' && iaMsg) {
+        // Atualiza a mensagem da IA com o ID retornado pelo uTalk
+        await supabase.from('wa_mensagens').update({ utalk_message_id: sent }).eq('id', iaMsg.id);
       }
     } else {
       console.warn('[WA Webhook] Sem configuração uTalk. Mensagem salva mas não enviada.');
@@ -289,10 +417,10 @@ router.post('/webhook', async (req: Request, res: Response) => {
 
 router.post('/send', async (req: Request, res: Response) => {
   try {
-    const { conversa_id, mensagem, atendente_id } = req.body;
+    const { conversa_id, mensagem, atendente_id, midia_url, midia_mimetype } = req.body;
 
-    if (!conversa_id || !mensagem) {
-      return res.status(400).json({ error: 'conversa_id e mensagem são obrigatórios.' });
+    if (!conversa_id || (!mensagem && !midia_url)) {
+      return res.status(400).json({ error: 'conversa_id e mensagem (ou mídia) são obrigatórios.' });
     }
 
     const supabase = getSupabase();
@@ -314,7 +442,26 @@ router.post('/send', async (req: Request, res: Response) => {
         nomeAtendente = usr.nome.trim();
       }
     }
-    const mensagemAssinada = `*[${nomeAtendente}]*\n\n${mensagem}`;
+    const mensagemAssinada = mensagem ? `*[${nomeAtendente}]*\n\n${mensagem}` : `*[${nomeAtendente}]* enviou um anexo`;
+
+    let tipoMensagem = 'texto';
+    if (midia_mimetype?.includes('image')) tipoMensagem = 'imagem';
+    else if (midia_mimetype?.includes('video')) tipoMensagem = 'video';
+    else if (midia_mimetype?.includes('audio')) tipoMensagem = 'audio';
+    else if (midia_url) tipoMensagem = 'documento';
+
+    // Envia pelo uTalk
+    let utalkMessageId = null;
+    const utalkConfig = await getUtalkConfig(conversa.organizacao_id || undefined);
+    if (utalkConfig) {
+      const result = await sendUtalkMessage(conversa.contato_telefone, mensagemAssinada, utalkConfig, midia_url, midia_mimetype);
+      if (!result) {
+        return res.status(500).json({ error: 'Falha ao enviar pelo WhatsApp.' });
+      }
+      if (typeof result === 'string') {
+        utalkMessageId = result;
+      }
+    }
 
     // Salva mensagem no banco
     const { error: msgErr } = await supabase.from('wa_mensagens').insert([{
@@ -322,6 +469,10 @@ router.post('/send', async (req: Request, res: Response) => {
       direcao: 'saida',
       conteudo: mensagemAssinada,
       enviado_por: 'humano',
+      tipo_mensagem: tipoMensagem,
+      midia_url: midia_url || null,
+      midia_mimetype: midia_mimetype || null,
+      utalk_message_id: utalkMessageId || null,
     }]);
 
     if (msgErr) {
@@ -334,23 +485,92 @@ router.post('/send', async (req: Request, res: Response) => {
       .update({ ultima_mensagem_em: new Date().toISOString() })
       .eq('id', conversa_id);
 
-    // Envia pelo uTalk
-    const utalkConfig = await getUtalkConfig(conversa.organizacao_id || undefined);
-    if (utalkConfig) {
-      const sent = await sendUtalkMessage(conversa.contato_telefone, mensagemAssinada, utalkConfig);
-      if (!sent) {
-        return res.status(500).json({ error: 'Mensagem salva mas falha ao enviar pelo WhatsApp.' });
-      }
-    }
-
-    return res.json({ success: true });
+    return res.json({ success: true, utalkMessageId });
   } catch (error: any) {
     console.error('[WA Send]', error?.message);
     return res.status(500).json({ error: error.message });
   }
 });
 
-// ─── 3. TAKEOVER — Atendente assume a conversa ───────────────────────────────
+// ─── 3. SEND REACTION — Atendente reage a uma mensagem pelo painel ─────────────
+
+router.post('/send-reaction', async (req: Request, res: Response) => {
+  try {
+    const { conversa_id, mensagem_id, emoji, atendente_id } = req.body;
+
+    if (!conversa_id || !mensagem_id || !emoji) {
+      return res.status(400).json({ error: 'conversa_id, mensagem_id e emoji são obrigatórios.' });
+    }
+
+    const supabase = getSupabase();
+
+    // 1. Busca a mensagem original
+    const { data: msgOriginal, error: msgErr } = await supabase
+      .from('wa_mensagens')
+      .select('utalk_message_id, conversa_id')
+      .eq('id', mensagem_id)
+      .single();
+
+    if (msgErr || !msgOriginal) {
+      return res.status(404).json({ error: 'Mensagem original não encontrada.' });
+    }
+
+    if (!msgOriginal.utalk_message_id) {
+      return res.status(400).json({ error: 'Mensagem original não possui ID do uTalk para ser reagida.' });
+    }
+
+    // 2. Busca a conversa para pegar a organização
+    const { data: conversa, error: convErr } = await supabase
+      .from('wa_conversas')
+      .select('organizacao_id')
+      .eq('id', conversa_id)
+      .single();
+
+    if (convErr || !conversa) {
+      return res.status(404).json({ error: 'Conversa não encontrada.' });
+    }
+
+    // 3. Busca config do uTalk
+    const utalkConfig = await getUtalkConfig(conversa.organizacao_id || undefined);
+    if (!utalkConfig) {
+      return res.status(500).json({ error: 'Configuração do uTalk não encontrada.' });
+    }
+
+    // 4. Envia a reação via API
+    const result = await sendUtalkReaction(utalkConfig, msgOriginal.utalk_message_id, emoji);
+    if (!result) {
+      return res.status(500).json({ error: 'Falha ao enviar reação pelo uTalk.' });
+    }
+
+    // 5. Salva a reação no banco
+    const { error: insertErr } = await supabase.from('wa_mensagens').insert([{
+      conversa_id,
+      direcao: 'saida',
+      conteudo: `[Reagiu com: ${emoji}]`,
+      enviado_por: 'humano',
+      tipo_mensagem: 'reacao',
+      reacao_emoji: emoji,
+      reacao_para_id: mensagem_id,
+    }]);
+
+    if (insertErr) {
+      return res.status(500).json({ error: 'Erro ao salvar reação no banco.' });
+    }
+
+    // Atualiza ultima_mensagem_em
+    await supabase
+      .from('wa_conversas')
+      .update({ ultima_mensagem_em: new Date().toISOString() })
+      .eq('id', conversa_id);
+
+    return res.json({ success: true });
+  } catch (error: any) {
+    console.error('[WA Send Reaction]', error?.message);
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+// ─── 4. TAKEOVER — Atendente assume a conversa ───────────────────────────────
 
 router.patch('/conversas/:id/takeover', async (req: Request, res: Response) => {
   try {

@@ -27,6 +27,13 @@ import {
   Settings,
   RefreshCw,
   BookOpen,
+  Paperclip,
+  X,
+  Download,
+  FileText,
+  Image as ImageIcon,
+  Video,
+  SmilePlus,
 } from 'lucide-react';
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
@@ -55,6 +62,12 @@ interface WaMensagem {
   conteudo: string;
   enviado_por: 'ia' | 'humano' | 'contato';
   criado_em: string;
+  tipo_mensagem?: 'texto' | 'imagem' | 'video' | 'audio' | 'documento' | 'reacao';
+  midia_url?: string | null;
+  midia_mimetype?: string | null;
+  reacao_emoji?: string | null;
+  utalk_message_id?: string | null;
+  reacao_para_id?: string | null;
 }
 
 interface AtendimentoIAProps {
@@ -94,7 +107,10 @@ export function AtendimentoIA({ loggedUser, loggedRole }: AtendimentoIAProps) {
   const [novaMensagem, setNovaMensagem] = useState('');
   const [filtroStatus, setFiltroStatus] = useState<string>('todas');
   const [isEnviando, setIsEnviando] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [anexo, setAnexo] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [reactionPopoverId, setReactionPopoverId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'chat' | 'metricas' | 'config'>('chat');
   const [metrics, setMetrics] = useState<any>(null);
   const [organizacoes, setOrganizacoes] = useState<any[]>([]);
@@ -208,7 +224,7 @@ export function AtendimentoIA({ loggedUser, loggedRole }: AtendimentoIAProps) {
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'wa_mensagens' }, (payload) => {
         const nova = payload.new as WaMensagem;
         if (conversaSelecionada?.id === nova.conversa_id) {
-          setMensagens(prev => [...prev, nova]);
+          setMensagens(prev => prev.some(m => m.id === nova.id) ? prev : [...prev, nova]);
           setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
         }
         if (nova.direcao === 'entrada') {
@@ -298,8 +314,40 @@ export function AtendimentoIA({ loggedUser, loggedRole }: AtendimentoIAProps) {
   };
 
   const enviarMensagem = async () => {
-    if (!novaMensagem.trim() || !conversaSelecionada || isEnviando) return;
+    if ((!novaMensagem.trim() && !anexo) || !conversaSelecionada || isEnviando || isUploading) return;
+    
     setIsEnviando(true);
+    let midia_url = '';
+    let midia_mimetype = '';
+
+    if (anexo) {
+      setIsUploading(true);
+      try {
+        const fileExt = anexo.name.split('.').pop();
+        const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
+        const filePath = `${conversaSelecionada.id}/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('whatsapp_midias')
+          .upload(filePath, anexo, { upsert: true });
+
+        if (uploadError) {
+          console.error('[Upload] Erro:', uploadError);
+          alert('Erro ao fazer upload do anexo.');
+          setIsEnviando(false);
+          setIsUploading(false);
+          return;
+        }
+
+        const { data } = supabase.storage.from('whatsapp_midias').getPublicUrl(filePath);
+        midia_url = data.publicUrl;
+        midia_mimetype = anexo.type;
+      } catch (err) {
+        console.error('[Upload] Falha:', err);
+      }
+      setIsUploading(false);
+    }
+
     try {
       const res = await fetch('/api/whatsapp/send', {
         method: 'POST',
@@ -308,13 +356,41 @@ export function AtendimentoIA({ loggedUser, loggedRole }: AtendimentoIAProps) {
           conversa_id: conversaSelecionada.id,
           mensagem: novaMensagem.trim(),
           atendente_id: loggedUser.id,
+          midia_url,
+          midia_mimetype,
         }),
       });
       if (res.ok) {
         setNovaMensagem('');
+        setAnexo(null);
       }
     } finally {
       setIsEnviando(false);
+    }
+  };
+
+  // ── Envia Reação ───────────────────────────────────────────────────────────
+  const enviarReacao = async (mensagemId: string, emoji: string) => {
+    if (!conversaSelecionada) return;
+    
+    try {
+      const res = await fetch('/api/whatsapp/send-reaction', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          conversa_id: conversaSelecionada.id,
+          mensagem_id: mensagemId,
+          emoji,
+          atendente_id: loggedUser.id,
+        }),
+      });
+      if (!res.ok) {
+        throw new Error('Falha ao enviar reação');
+      }
+    } catch (err) {
+      console.error('[AtendimentoIA] Erro ao enviar reação:', err);
+    } finally {
+      setReactionPopoverId(null);
     }
   };
 
@@ -512,81 +588,174 @@ export function AtendimentoIA({ loggedUser, loggedRole }: AtendimentoIAProps) {
                 </div>
 
                 {/* Mensagens */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50">
-                  {mensagens.map((msg, index) => {
-                    const isFirstOfGroup = index > 0 && mensagens[index - 1].conversa_id !== msg.conversa_id;
-                    const isEntrada = msg.direcao === 'entrada';
-                    const isSistema = msg.direcao === 'sistema';
+                <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 space-y-3 bg-slate-50">
+                  {(() => {
+                    const mensagensNormais = mensagens.filter(m => m.tipo_mensagem !== 'reacao' || !m.reacao_para_id);
+                    const reacoesPorMensagemId = mensagens.filter(m => m.tipo_mensagem === 'reacao').reduce((acc, r) => {
+                      if (r.reacao_para_id) {
+                        if (!acc[r.reacao_para_id]) acc[r.reacao_para_id] = [];
+                        acc[r.reacao_para_id].push(r);
+                      }
+                      return acc;
+                    }, {} as Record<string, WaMensagem[]>);
 
-                    if (isSistema) {
-                      return (
-                        <div key={msg.id} className="flex justify-center my-4">
-                          <div className="bg-amber-50 border border-amber-200 text-amber-800 text-xs px-4 py-2 rounded-lg max-w-[80%] text-center shadow-sm">
-                            <span className="font-bold block mb-1">🔒 Nota Interna de Transferência</span>
-                            {msg.conteudo}
-                            <span className="block text-[10px] text-amber-600/70 mt-1">{formatFullTime(msg.criado_em)}</span>
-                          </div>
-                        </div>
-                      );
-                    }
+                    return mensagensNormais.map((msg, index) => {
+                      const isFirstOfGroup = index > 0 && mensagensNormais[index - 1].conversa_id !== msg.conversa_id;
+                      const isEntrada = msg.direcao === 'entrada';
+                      const isSistema = msg.direcao === 'sistema';
 
-                    return (
-                      <React.Fragment key={msg.id}>
-                        {isFirstOfGroup && (
-                          <div className="flex items-center justify-center my-6 opacity-70">
-                            <div className="h-px bg-slate-300 flex-1"></div>
-                            <span className="px-3 text-[10px] uppercase font-bold text-slate-400">
-                              Conversa Encerrada
-                            </span>
-                            <div className="h-px bg-slate-300 flex-1"></div>
-                          </div>
-                        )}
-                        <div className={`flex ${isEntrada ? 'justify-start' : 'justify-end'}`}>
-                          <div className={`max-w-[72%] group`}>
-                            {!isEntrada && (
-                              <p className="text-[10px] text-slate-400 text-right mb-1 mr-1">
-                                {msg.enviado_por === 'ia' ? '🤖 IA' : '👤 Atendente'}
-                              </p>
-                            )}
-                            <div className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
-                              isEntrada
-                                ? 'bg-white border border-slate-200 text-slate-800 rounded-tl-sm'
-                                : msg.enviado_por === 'ia'
-                                ? 'bg-indigo-600 text-white rounded-tr-sm'
-                                : 'bg-violet-600 text-white rounded-tr-sm'
-                            }`}>
+                      if (isSistema) {
+                        return (
+                          <div key={msg.id} className="flex justify-center my-4">
+                            <div className="bg-amber-50 border border-amber-200 text-amber-800 text-xs px-4 py-2 rounded-lg max-w-[80%] text-center shadow-sm">
+                              <span className="font-bold block mb-1">🔒 Nota Interna de Transferência</span>
                               {msg.conteudo}
+                              <span className="block text-[10px] text-amber-600/70 mt-1">{formatFullTime(msg.criado_em)}</span>
                             </div>
-                            <p className={`text-[10px] text-slate-400 mt-1 ${isEntrada ? 'ml-1' : 'text-right mr-1'}`}>
-                              {formatFullTime(msg.criado_em)}
-                            </p>
                           </div>
-                        </div>
-                      </React.Fragment>
-                    );
-                  })}
+                        );
+                      }
+
+                      return (
+                        <React.Fragment key={msg.id}>
+                          {isFirstOfGroup && (
+                            <div className="flex items-center justify-center my-6 opacity-70">
+                              <div className="h-px bg-slate-300 flex-1"></div>
+                              <span className="px-3 text-[10px] uppercase font-bold text-slate-400">
+                                Conversa Encerrada
+                              </span>
+                              <div className="h-px bg-slate-300 flex-1"></div>
+                            </div>
+                          )}
+                          <div className={`flex ${isEntrada ? 'justify-start' : 'justify-end'}`}>
+                            <div className={`max-w-[72%] group relative`}>
+                              {!isEntrada && (
+                                <p className="text-[10px] text-slate-400 text-right mb-1 mr-1">
+                                  {msg.enviado_por === 'ia' ? '🤖 IA' : '👤 Atendente'}
+                                </p>
+                              )}
+                              <div className={`relative px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
+                                isEntrada
+                                  ? 'bg-white border border-slate-200 text-slate-800 rounded-tl-sm'
+                                  : msg.enviado_por === 'ia'
+                                  ? 'bg-indigo-600 text-white rounded-tr-sm'
+                                  : 'bg-violet-600 text-white rounded-tr-sm'
+                              }`}>
+                                {msg.tipo_mensagem === 'imagem' && msg.midia_url && (
+                                  <img src={msg.midia_url} alt="Anexo" className="max-w-full rounded-xl mb-2 object-cover max-h-60" />
+                                )}
+                                {msg.tipo_mensagem === 'video' && msg.midia_url && (
+                                  <video src={msg.midia_url} controls className="max-w-full rounded-xl mb-2 max-h-60" />
+                                )}
+                                {msg.tipo_mensagem === 'audio' && msg.midia_url && (
+                                  <audio src={msg.midia_url} controls className="max-w-full mb-2" />
+                                )}
+                                {msg.tipo_mensagem === 'documento' && msg.midia_url && (
+                                  <a href={msg.midia_url} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-3 py-2 bg-black/10 rounded-lg text-sm mb-2 hover:bg-black/20">
+                                    <FileText size={16} /> Ver Documento
+                                  </a>
+                                )}
+                                {msg.conteudo && <div className="whitespace-pre-wrap">{msg.conteudo}</div>}
+                                
+                                {reacoesPorMensagemId[msg.id] && (
+                                  <div className="absolute -bottom-2 -right-2 flex items-center gap-1 bg-white border border-slate-200 shadow-sm rounded-full px-1.5 py-0.5 z-10 text-xs">
+                                    {reacoesPorMensagemId[msg.id].map(r => (
+                                      <span key={r.id}>{r.reacao_emoji}</span>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                              
+                              {/* Botão de Reação e Popover */}
+                              {isEntrada && msg.id && (
+                                <div className={`absolute top-1/2 -translate-y-1/2 -right-10 z-20 transition-opacity ${reactionPopoverId === msg.id ? 'opacity-100' : 'opacity-40 group-hover:opacity-100'}`}>
+                                  <button
+                                    onClick={() => setReactionPopoverId(reactionPopoverId === msg.id ? null : msg.id)}
+                                    className="p-1.5 bg-white border border-slate-200 text-slate-400 hover:text-indigo-600 hover:border-indigo-200 rounded-full shadow-sm transition-colors cursor-pointer"
+                                    title="Reagir"
+                                  >
+                                    <SmilePlus size={16} />
+                                  </button>
+                                  
+                                  {reactionPopoverId === msg.id && (
+                                    <div className="absolute top-full mt-2 left-0 w-max bg-white border border-slate-200 shadow-lg rounded-xl p-2 flex gap-1 z-30">
+                                      {['👍', '❤️', '😂', '😮', '😢', '🙏', '👏🏻'].map(emoji => (
+                                        <button
+                                          key={emoji}
+                                          onClick={() => enviarReacao(msg.id, emoji)}
+                                          className="w-8 h-8 flex items-center justify-center hover:bg-slate-100 rounded-lg text-lg transition-colors"
+                                        >
+                                          {emoji}
+                                        </button>
+                                      ))}
+                                      <button 
+                                        onClick={() => setReactionPopoverId(null)}
+                                        className="w-8 h-8 flex items-center justify-center hover:bg-red-50 text-red-500 rounded-lg ml-1"
+                                      >
+                                        <X size={14} />
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                              
+                              <p className={`text-[10px] text-slate-400 mt-1 ${isEntrada ? 'ml-1' : 'text-right mr-1'}`}>
+                                {formatFullTime(msg.criado_em)}
+                              </p>
+                            </div>
+                          </div>
+                        </React.Fragment>
+                      );
+                    });
+                  })()}
                   <div ref={chatEndRef} />
                 </div>
 
                 {/* Input de resposta */}
                 <div className="p-4 border-t border-slate-100 bg-white">
                   {conversaSelecionada.status === 'em_atendimento' ? (
-                    <div className="flex gap-2">
-                      <textarea
-                        value={novaMensagem}
-                        onChange={e => setNovaMensagem(e.target.value)}
-                        onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviarMensagem(); } }}
-                        placeholder="Digite sua resposta... (Enter para enviar)"
-                        className="flex-1 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                        rows={2}
-                      />
-                      <button
-                        onClick={enviarMensagem}
-                        disabled={isEnviando || !novaMensagem.trim()}
-                        className="px-4 py-2 bg-indigo-600 text-white rounded-xl font-semibold flex items-center gap-2 hover:bg-indigo-700 disabled:opacity-50 transition-all"
-                      >
-                        {isEnviando ? <RefreshCw size={16} className="animate-spin" /> : <Send size={16} />}
-                      </button>
+                    <div className="flex flex-col">
+                      {anexo && (
+                        <div className="mb-2 flex items-center justify-between bg-indigo-50 border border-indigo-100 rounded-lg px-3 py-2 text-indigo-800 text-sm">
+                          <div className="flex items-center gap-2 truncate">
+                            <Paperclip size={14} />
+                            <span className="truncate max-w-xs">{anexo.name}</span>
+                          </div>
+                          <button onClick={() => setAnexo(null)} className="text-indigo-400 hover:text-indigo-600">
+                            <X size={14} />
+                          </button>
+                        </div>
+                      )}
+                      <div className="flex gap-2">
+                        <input
+                          type="file"
+                          id="fileUpload"
+                          className="hidden"
+                          onChange={e => e.target.files && setAnexo(e.target.files[0])}
+                        />
+                        <button
+                          onClick={() => document.getElementById('fileUpload')?.click()}
+                          className="p-3 bg-slate-50 border border-slate-200 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 hover:border-indigo-200 rounded-xl transition-all"
+                          title="Anexar arquivo"
+                        >
+                          <Paperclip size={18} />
+                        </button>
+                        <textarea
+                          value={novaMensagem}
+                          onChange={e => setNovaMensagem(e.target.value)}
+                          onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviarMensagem(); } }}
+                          placeholder="Digite sua resposta... (Enter para enviar)"
+                          className="flex-1 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                          rows={2}
+                        />
+                        <button
+                          onClick={enviarMensagem}
+                          disabled={isEnviando || isUploading || (!novaMensagem.trim() && !anexo)}
+                          className="px-4 py-2 bg-indigo-600 text-white rounded-xl font-semibold flex items-center gap-2 hover:bg-indigo-700 disabled:opacity-50 transition-all"
+                        >
+                          {(isEnviando || isUploading) ? <RefreshCw size={16} className="animate-spin" /> : <Send size={16} />}
+                        </button>
+                      </div>
                     </div>
                   ) : (
                     <div className={`text-center text-sm py-3 px-4 rounded-xl ${
