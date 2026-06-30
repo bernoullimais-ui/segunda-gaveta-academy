@@ -102,9 +102,9 @@ router.post('/webhook', async (req: Request, res: Response) => {
       content.direction === 'outgoing' || 
       content.IsFromMe === true ||
       content['chat[dir]'] === 'o' ||
-      (!isReaction && content.LastMessage?.Source && content.LastMessage.Source !== 'Contact');
+      content.LastMessage?.Source === 'User';
 
-    if (isOutgoing) {
+    if (!isReaction && isOutgoing) {
       console.log(`[WA Webhook] EARLY EXIT 2: Mensagem de saída ignorada.`);
       return res.status(200).json({ received: true });
     }
