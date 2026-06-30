@@ -34,6 +34,8 @@ import {
   Image as ImageIcon,
   Video,
   SmilePlus,
+  Mic,
+  Square,
 } from 'lucide-react';
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
@@ -118,6 +120,13 @@ export function AtendimentoIA({ loggedUser, loggedRole }: AtendimentoIAProps) {
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   const [pendingCount, setPendingCount] = useState(0);
+
+  // ── Estados para Gravação de Áudio ────────────────────────────────────────
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingTime, setRecordingTime] = useState(0);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const isSuperAdmin = loggedRole === 'super_admin';
   const orgId = loggedUser?.organizacao_id;
@@ -224,7 +233,52 @@ export function AtendimentoIA({ loggedUser, loggedRole }: AtendimentoIAProps) {
       .then(d => { if (d) setMetrics(d); });
   }, [activeTab, isSuperAdmin, orgId]);
 
-  // ── Ações da conversa ─────────────────────────────────────────────────────
+  // ── Lógica de Gravação de Áudio ───────────────────────────────────────────
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunksRef.current.push(e.data);
+      };
+
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        const audioFile = new File([audioBlob], `audio_${Date.now()}.webm`, { type: 'audio/webm' });
+        setAnexo(audioFile);
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+      setRecordingTime(0);
+      recordingIntervalRef.current = setInterval(() => {
+        setRecordingTime(prev => prev + 1);
+      }, 1000);
+    } catch (err) {
+      console.error('Erro ao acessar microfone:', err);
+      alert('Não foi possível acessar o microfone para gravação.');
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+      if (recordingIntervalRef.current) clearInterval(recordingIntervalRef.current);
+    }
+  };
+
+  const formatRecordingTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s < 10 ? '0' : ''}${s}`;
+  };
+
+  // ── Seleção de Configuração da IA ─────────────────────────────────────────────────────
   const [transferindo, setTransferindo] = useState(false);
   const [atendentesList, setAtendentesList] = useState<any[]>([]);
 
@@ -687,35 +741,67 @@ export function AtendimentoIA({ loggedUser, loggedRole }: AtendimentoIAProps) {
                           </button>
                         </div>
                       )}
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 items-center">
                         <input
                           type="file"
                           id="fileUpload"
                           className="hidden"
+                          accept="image/*,video/*,audio/*,.pdf,.doc,.docx"
                           onChange={e => e.target.files && setAnexo(e.target.files[0])}
                         />
                         <button
                           onClick={() => document.getElementById('fileUpload')?.click()}
-                          className="p-3 bg-slate-50 border border-slate-200 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 hover:border-indigo-200 rounded-xl transition-all"
+                          className="p-3 bg-slate-50 border border-slate-200 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 hover:border-indigo-200 rounded-xl transition-all flex-shrink-0"
                           title="Anexar arquivo"
                         >
                           <Paperclip size={18} />
                         </button>
-                        <textarea
-                          value={novaMensagem}
-                          onChange={e => setNovaMensagem(e.target.value)}
-                          onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviarMensagem(); } }}
-                          placeholder="Digite sua resposta... (Enter para enviar)"
-                          className="flex-1 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                          rows={2}
-                        />
-                        <button
-                          onClick={enviarMensagem}
-                          disabled={isEnviando || isUploading || (!novaMensagem.trim() && !anexo)}
-                          className="px-4 py-2 bg-indigo-600 text-white rounded-xl font-semibold flex items-center gap-2 hover:bg-indigo-700 disabled:opacity-50 transition-all"
-                        >
-                          {(isEnviando || isUploading) ? <RefreshCw size={16} className="animate-spin" /> : <Send size={16} />}
-                        </button>
+                        
+                        {isRecording ? (
+                          <div className="flex-1 px-4 py-3 bg-red-50 border border-red-200 rounded-xl flex items-center justify-between animate-pulse">
+                            <div className="flex items-center gap-2 text-red-600 font-medium text-sm">
+                              <div className="w-2.5 h-2.5 bg-red-600 rounded-full animate-ping" />
+                              Gravando áudio...
+                            </div>
+                            <span className="text-red-700 font-mono">{formatRecordingTime(recordingTime)}</span>
+                          </div>
+                        ) : (
+                          <textarea
+                            value={novaMensagem}
+                            onChange={e => setNovaMensagem(e.target.value)}
+                            onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviarMensagem(); } }}
+                            placeholder="Digite sua resposta... (Enter para enviar)"
+                            className="flex-1 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                            rows={2}
+                          />
+                        )}
+
+                        {isRecording ? (
+                          <button
+                            onClick={stopRecording}
+                            className="p-3 bg-red-100 border border-red-200 text-red-600 hover:bg-red-200 rounded-xl transition-all flex-shrink-0"
+                            title="Parar gravação"
+                          >
+                            <Square size={18} fill="currentColor" />
+                          </button>
+                        ) : novaMensagem.trim() || anexo ? (
+                          <button
+                            onClick={enviarMensagem}
+                            disabled={isEnviando || isUploading}
+                            className="px-4 py-3 bg-indigo-600 text-white rounded-xl font-semibold flex items-center gap-2 hover:bg-indigo-700 disabled:opacity-50 transition-all flex-shrink-0"
+                            title="Enviar Mensagem"
+                          >
+                            {(isEnviando || isUploading) ? <RefreshCw size={18} className="animate-spin" /> : <Send size={18} />}
+                          </button>
+                        ) : (
+                          <button
+                            onClick={startRecording}
+                            className="p-3 bg-slate-50 border border-slate-200 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 hover:border-indigo-200 rounded-xl transition-all flex-shrink-0"
+                            title="Gravar Áudio"
+                          >
+                            <Mic size={18} />
+                          </button>
+                        )}
                       </div>
                     </div>
                   ) : (

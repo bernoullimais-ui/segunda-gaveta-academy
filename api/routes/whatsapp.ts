@@ -121,7 +121,7 @@ router.post('/webhook', async (req: Request, res: Response) => {
 
     // Trata payload url-encoded onde chat[body] contém o link da mídia
     const chatType = content['chat[type]'] || content.Type || content.type || eventLower;
-    if (['image', 'video', 'audio', 'document'].includes(chatType)) {
+    if (['image', 'video', 'audio', 'document', 'ptt'].includes(chatType)) {
       if (!midiaUrl && content['chat[body]'] && content['chat[body]'].startsWith('http')) {
         midiaUrl = content['chat[body]'];
         messageText = content['chat[caption]'] || ''; // Se tiver legenda
@@ -132,7 +132,7 @@ router.post('/webhook', async (req: Request, res: Response) => {
     if (reacaoEmoji) tipoMensagem = 'reacao';
     else if (chatType === 'image' || midiaMimetype.includes('image') || midiaUrl.match(/\.(jpeg|jpg|gif|png|webp)$/i)) tipoMensagem = 'imagem';
     else if (chatType === 'video' || midiaMimetype.includes('video') || midiaUrl.match(/\.(mp4|avi|mov)$/i)) tipoMensagem = 'video';
-    else if (chatType === 'audio' || midiaMimetype.includes('audio') || midiaUrl.match(/\.(mp3|ogg|wav)$/i)) tipoMensagem = 'audio';
+    else if (chatType === 'audio' || chatType === 'ptt' || midiaMimetype.includes('audio') || midiaUrl.match(/\.(mp3|ogg|wav)$/i)) tipoMensagem = 'audio';
     else if (midiaUrl || hasFileObject) tipoMensagem = 'documento';
 
     // Se a mensagem for de mídia, corrigimos o tipo baseando-se no mimetype
