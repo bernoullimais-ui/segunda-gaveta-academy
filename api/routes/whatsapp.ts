@@ -94,12 +94,15 @@ router.post('/webhook', async (req: Request, res: Response) => {
     }
 
     // Ignora mensagens enviadas (só processa recebidas)
+    // Para reações, LastMessage.Source se refere à mensagem original (que pode ser do admin), então não podemos usar isso para bloquear reações.
+    const isReaction = ['reaction', 'reacao'].includes(eventLower) || !!content.Reaction?.Emoji || !!content.reaction;
+    
     const isOutgoing = 
       content.message?.fromMe === true || 
       content.direction === 'outgoing' || 
       content.IsFromMe === true ||
       content['chat[dir]'] === 'o' ||
-      (content.LastMessage?.Source && content.LastMessage.Source !== 'Contact');
+      (!isReaction && content.LastMessage?.Source && content.LastMessage.Source !== 'Contact');
 
     if (isOutgoing) {
       console.log(`[WA Webhook] EARLY EXIT 2: Mensagem de saída ignorada.`);
