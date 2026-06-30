@@ -16,7 +16,7 @@ import { Community } from './components/Community';
 import { HeaderWhatsAppAlert } from './components/HeaderWhatsAppAlert';
 import { CursosCandidato } from './components/CursosCandidato';
 import { DashboardCenso } from './components/DashboardCenso';
-import { DadosRecebimento } from './components/DadosRecebimento';
+
 import { AreaAfiliados } from './components/AreaAfiliados';
 import { Toast } from './components/Toast';
 
@@ -904,14 +904,7 @@ export default function App() {
                 active={currentView === 'perfil' && isAdmin} 
                 onClick={() => setCurrentView('perfil')} 
               />
-              {(loggedRole === 'especialista' || loggedRole === 'gestor' || loggedRole === 'super_admin') && (
-                <NavItem 
-                  icon={<DollarSign size={20} />} 
-                  label="Dados de Recebimento" 
-                  active={currentView === 'dados_recebimento'} 
-                  onClick={() => setCurrentView('dados_recebimento')} 
-                />
-              )}
+
               <NavItem 
                 icon={<Settings size={20} />} 
                 label="Configurações" 
@@ -1086,8 +1079,7 @@ function RenderContent({
           </div>
         </div>
       );
-    case 'dados_recebimento':
-      return <DadosRecebimento loggedUser={user} />;
+
     case 'afiliados':
       return (
         <AreaAfiliados 

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { Save, Loader2, Award, Palette, Image, Globe, Mail, Phone, MessageSquare, ShieldCheck, Ticket } from 'lucide-react';
+import { Save, Loader2, Award, Palette, Image, Globe, Mail, Phone, MessageSquare, ShieldCheck, Ticket, DollarSign } from 'lucide-react';
 import { CuponsAdmin } from './CuponsAdmin';
+import { DadosRecebimento } from './DadosRecebimento';
 
 interface ConfiguracaoAdminProps {
   loggedUser: any;
@@ -23,7 +24,7 @@ const PRESET_COLORS = [
 export function ConfiguracaoAdmin({ loggedUser, orgId, onOrgUpdate, showToast }: ConfiguracaoAdminProps) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<'visual' | 'contato' | 'integracao' | 'cupons'>('visual');
+  const [activeTab, setActiveTab] = useState<'visual' | 'contato' | 'integracao' | 'cupons' | 'recebimento'>('visual');
 
   // Form states
   const [nome, setNome] = useState('');
@@ -187,12 +188,29 @@ export function ConfiguracaoAdmin({ loggedUser, orgId, onOrgUpdate, showToast }:
           <Ticket size={18} />
           Cupons de Desconto
         </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('recebimento')}
+          className={`py-4 px-4 font-bold border-b-2 transition-all flex items-center gap-2 cursor-pointer ${
+            activeTab === 'recebimento'
+              ? 'text-slate-900 border-slate-900'
+              : 'text-slate-500 border-transparent hover:text-slate-800'
+          }`}
+          style={{ borderColor: activeTab === 'recebimento' ? corPrimaria : undefined, color: activeTab === 'recebimento' ? corPrimaria : undefined }}
+        >
+          <DollarSign size={18} />
+          Dados de Recebimento
+        </button>
       </div>
 
       {/* Content / Form */}
       {activeTab === 'cupons' ? (
         <div className="p-8">
           <CuponsAdmin orgId={orgId} corPrimaria={corPrimaria} showToast={showToast} />
+        </div>
+      ) : activeTab === 'recebimento' ? (
+        <div className="p-8">
+          <DadosRecebimento loggedUser={loggedUser} />
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="p-8 space-y-8">
