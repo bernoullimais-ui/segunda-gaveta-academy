@@ -111,7 +111,7 @@ export function HeaderWhatsAppAlert({ loggedUser, loggedRole, onNavigate }: Head
 
   return (
     <button
-      onClick={() => onNavigate('atendimento_ia')}
+      onClick={() => onNavigate({ tab: 'atendimento_ia' })}
       className="relative p-2 text-slate-600 hover:bg-slate-100 rounded-full transition-colors flex items-center justify-center"
       title="Atendimento IA (WhatsApp)"
     >

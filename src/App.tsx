@@ -172,6 +172,8 @@ export default function App() {
       setCurrentView('cursos');
     } else if (link.tab === 'dashboard') {
       setCurrentView('dashboard');
+    } else if (link.tab === 'atendimento_ia') {
+      setCurrentView('atendimento_ia');
     }
   };
 
