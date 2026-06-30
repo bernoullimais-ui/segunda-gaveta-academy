@@ -13,6 +13,7 @@ import { supabase } from './lib/supabase';
 import { LoginScreen } from './components/LoginScreen';
 import { PerfisAdmin } from './components/PerfisAdmin';
 import { Community } from './components/Community';
+import { HeaderWhatsAppAlert } from './components/HeaderWhatsAppAlert';
 import { CursosCandidato } from './components/CursosCandidato';
 import { DashboardCenso } from './components/DashboardCenso';
 import { DadosRecebimento } from './components/DadosRecebimento';
@@ -909,14 +910,6 @@ export default function App() {
                   onClick={() => setCurrentView('dados_recebimento')} 
                 />
               )}
-              {(loggedRole === 'gestor' || loggedRole === 'especialista' || loggedRole === 'super_admin') && (
-                <NavItem
-                  icon={<MessageCircle size={20} />}
-                  label="Atendimento IA"
-                  active={currentView === 'atendimento_ia'}
-                  onClick={() => setCurrentView('atendimento_ia' as ViewState)}
-                />
-              )}
               <NavItem 
                 icon={<Settings size={20} />} 
                 label="Configurações" 
@@ -953,6 +946,11 @@ export default function App() {
             {currentView === 'perfil' && isAdmin ? 'Gerir Usuários' : currentView.replace('_', ' ')}
           </h1>
           <div className="flex items-center gap-4">
+            <HeaderWhatsAppAlert 
+              loggedUser={loggedUser} 
+              loggedRole={loggedRole} 
+              onNavigate={handleNavigate} 
+            />
             <NotificationCenter loggedUser={loggedUser} onNavigate={handleNavigate} />
             <div className="text-right hidden sm:block">
               <p className="text-sm font-bold text-slate-800 leading-tight">{loggedUser.nome || loggedUser.email}</p>

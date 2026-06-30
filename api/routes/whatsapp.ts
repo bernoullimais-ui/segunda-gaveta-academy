@@ -79,13 +79,14 @@ router.post('/webhook', async (req: Request, res: Response) => {
     const eventLower = event.toLowerCase();
     const allowedEvents = ['message', 'conversa', 'chat', 'image', 'video', 'audio', 'document', 'file', 'reaction'];
     
-    // DEBUG: Salva o payload cru na tabela para podermos ver no SQL
+    // DEBUG: Salva o payload cru na tabela para podermos ver no SQL sem atraso da Vercel
     try {
       const sb = getSupabase();
       await sb.from('wa_mensagens').insert({
-        wa_conversa_id: '00000000-0000-0000-0000-000000000000', // não importa muito, é só pra ler via sql, mas pode falhar por fkey. Melhor logar na tabela wa_logs ou algo assim?
-        // se não houver tabela de log, vou usar uma query sem fkey ou só logar.
+        // UUID falso, vai falhar se tiver FK constraint?
+        // Ao invés de inserir na wa_mensagens que pode ter foreign key estrita, vou usar console.error que aparece melhor na vercel
       });
+      console.error('[DEBUG RAW PAYLOAD]', JSON.stringify(body));
     } catch(e) {}
 
     if (event && !allowedEvents.some(e => eventLower.includes(e))) {
@@ -102,7 +103,7 @@ router.post('/webhook', async (req: Request, res: Response) => {
       content.direction === 'outgoing' || 
       content.IsFromMe === true ||
       content['chat[dir]'] === 'o' ||
-      content.LastMessage?.Source === 'User';
+      (content.LastMessage?.Source && content.LastMessage.Source !== 'Contact');
 
     if (!isReaction && isOutgoing) {
       console.log(`[WA Webhook] EARLY EXIT 2: Mensagem de saída ignorada.`);
@@ -167,7 +168,15 @@ router.post('/webhook', async (req: Request, res: Response) => {
     const supabase = getSupabase();
 
     // ── Busca ou cria conversa ──────────────────────────────────────────────
-    const foneNorm = fromPhone.replace(/\D/g, '');
+    // Se for grupo, a Utalk pode mandar PhoneNumber como 5511999999999.
+    // Nesse caso, usamos o Contact.Id ou GroupIdentifier para diferenciar.
+    const isGroupContact = content.Contact?.ContactType === 'Group' || content.Contact?.ContactType === 'GroupMessage';
+    let foneNorm = fromPhone.replace(/\D/g, '');
+    
+    if (isGroupContact && content.Contact?.Id) {
+      foneNorm = content.Contact.Id; // Ex: akPX6gNhnJL3LoOF (preserva as letras)
+    }
+
     let { data: conversa } = await supabase
       .from('wa_conversas')
       .select('*')

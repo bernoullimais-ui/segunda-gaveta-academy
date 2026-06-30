@@ -116,8 +116,7 @@ export function AtendimentoIA({ loggedUser, loggedRole }: AtendimentoIAProps) {
   const [organizacoes, setOrganizacoes] = useState<any[]>([]);
   const [filtroOrg, setFiltroOrg] = useState<string>('todas');
   const chatEndRef = useRef<HTMLDivElement>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [notificacoesPermitidas, setNotificacoesPermitidas] = useState(false);
+
   const [pendingCount, setPendingCount] = useState(0);
 
   const isSuperAdmin = loggedRole === 'super_admin';
@@ -131,36 +130,6 @@ export function AtendimentoIA({ loggedUser, loggedRole }: AtendimentoIAProps) {
       });
     }
   }, [isSuperAdmin]);
-
-  // ── Solicita permissão de notificação push ────────────────────────────────
-  useEffect(() => {
-    if ('Notification' in window) {
-      if (Notification.permission === 'granted') {
-        setNotificacoesPermitidas(true);
-      } else if (Notification.permission !== 'denied') {
-        Notification.requestPermission().then(perm => {
-          setNotificacoesPermitidas(perm === 'granted');
-        });
-      }
-    }
-  }, []);
-
-  // ── Cria elemento de áudio para alerta ────────────────────────────────────
-  useEffect(() => {
-    audioRef.current = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAA' +
-      'EAAQAQAAAAAAAAABAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' +
-      'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
-  }, []);
-
-  const tocarSom = useCallback(() => {
-    try { audioRef.current?.play(); } catch (_) {}
-  }, []);
-
-  const enviarNotificacaoPush = useCallback((titulo: string, corpo: string) => {
-    if (notificacoesPermitidas && document.hidden) {
-      new Notification(titulo, { body: corpo, icon: '/favicon.ico' });
-    }
-  }, [notificacoesPermitidas]);
 
   // ── Carrega conversas ─────────────────────────────────────────────────────
   const carregarConversas = useCallback(async () => {
@@ -202,11 +171,6 @@ export function AtendimentoIA({ loggedUser, loggedRole }: AtendimentoIAProps) {
           const existe = prev.find(c => c.id === nova.id);
           if (!existe) {
             if (nova.status === 'aguardando_humano') {
-              tocarSom();
-              enviarNotificacaoPush(
-                '⚡ Nova conversa aguardando atendimento',
-                `${nova.contato_nome || nova.contato_telefone} precisa de ajuda`
-              );
               setPendingCount(p => p + 1);
             }
             return [nova, ...prev];
@@ -227,9 +191,6 @@ export function AtendimentoIA({ loggedUser, loggedRole }: AtendimentoIAProps) {
           setMensagens(prev => prev.some(m => m.id === nova.id) ? prev : [...prev, nova]);
           setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
         }
-        if (nova.direcao === 'entrada') {
-          tocarSom();
-        }
       })
       .subscribe();
 
@@ -237,7 +198,7 @@ export function AtendimentoIA({ loggedUser, loggedRole }: AtendimentoIAProps) {
       supabase.removeChannel(channelConversas);
       supabase.removeChannel(channelMensagens);
     };
-  }, [conversaSelecionada, tocarSom, enviarNotificacaoPush]);
+  }, [conversaSelecionada]);
 
   // ── Carrega mensagens da conversa selecionada ─────────────────────────────
   useEffect(() => {
