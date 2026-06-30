@@ -105,10 +105,8 @@ router.post('/webhook', async (req: Request, res: Response) => {
       content['chat[dir]'] === 'o' ||
       (content.LastMessage?.Source && content.LastMessage.Source !== 'Contact');
 
-    if (!isReaction && isOutgoing) {
-      console.log(`[WA Webhook] EARLY EXIT 2: Mensagem de saída ignorada.`);
-      return res.status(200).json({ received: true });
-    }
+    // Removido o EARLY EXIT das mensagens de saída para podermos sincronizar com o painel Atendimento IA.
+    // O controle se a IA deve responder será feito mais abaixo.
 
     // -- Extração de Mídias e Reações
     let midiaUrl: string =
@@ -322,11 +320,14 @@ router.post('/webhook', async (req: Request, res: Response) => {
     // Removido o corte do DEBUG PAYLOAD para podermos inspecionar o JSON completo no BD
 
     // ── Salva mensagem recebida no banco ────────────────────────────────────
+    const direcaoMsg = isOutgoing ? 'saida' : 'entrada';
+    const enviadoPorMsg = isOutgoing ? 'atendente' : 'contato';
+
     await supabase.from('wa_mensagens').insert([{
       conversa_id: conversa.id,
-      direcao: 'entrada',
+      direcao: direcaoMsg,
       conteudo: messageText,
-      enviado_por: 'contato',
+      enviado_por: enviadoPorMsg,
       tipo_mensagem: tipoMensagem,
       midia_url: midiaUrl || null,
       midia_mimetype: midiaMimetype || null,
@@ -340,6 +341,14 @@ router.post('/webhook', async (req: Request, res: Response) => {
       .from('wa_conversas')
       .update({ ultima_mensagem_em: new Date().toISOString() })
       .eq('id', conversa.id);
+
+    // Se for mensagem de saída (atendente no cel/utalk), passamos o status para humano e abortamos a IA
+    if (isOutgoing && !isReaction) {
+      if (conversa.status === 'ia_ativa' || conversa.status === 'aguardando_humano') {
+        await supabase.from('wa_conversas').update({ status: 'em_atendimento' }).eq('id', conversa.id);
+      }
+      return res.status(200).json({ received: true, info: 'Mensagem de saida sincronizada' });
+    }
 
     // ── Se conversa está com humano, não processa IA ─────────────────────────
     if (conversa.status === 'em_atendimento') {
