@@ -330,9 +330,9 @@ router.post('/webhook', async (req: Request, res: Response) => {
 
     // ── Salva mensagem recebida no banco ────────────────────────────────────
     const direcaoMsg = isOutgoing ? 'saida' : 'entrada';
-    const enviadoPorMsg = isOutgoing ? 'atendente' : 'contato';
+    const enviadoPorMsg = isOutgoing ? 'humano' : 'contato';
 
-    await supabase.from('wa_mensagens').insert([{
+    const { error: insertMsgErr } = await supabase.from('wa_mensagens').insert([{
       conversa_id: conversa.id,
       direcao: direcaoMsg,
       conteudo: messageText,
@@ -344,6 +344,10 @@ router.post('/webhook', async (req: Request, res: Response) => {
       utalk_message_id: utalkMessageId || null,
       reacao_para_id: reacaoParaId,
     }]);
+
+    if (insertMsgErr) {
+      console.error('[WA Webhook] Erro ao inserir mensagem no banco:', insertMsgErr.message);
+    }
 
     // Atualiza ultima_mensagem_em
     await supabase
