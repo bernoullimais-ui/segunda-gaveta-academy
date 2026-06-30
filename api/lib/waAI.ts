@@ -386,28 +386,58 @@ export async function getWaAIConfig(organizacaoId?: string): Promise<WaAIConfig>
 export async function sendUtalkMessage(
   telefone: string,
   mensagem: string,
-  utalkConfig: { token: string; fromPhone: string; organizationId: string }
-): Promise<boolean> {
+  utalkConfig: { token: string; fromPhone: string; organizationId: string },
+  midiaUrl?: string,
+  midiaMimetype?: string
+): Promise<string | boolean> {
   let cleanTo = telefone.replace(/\D/g, '');
   if (!cleanTo.startsWith('55')) cleanTo = `55${cleanTo}`;
 
   const cleanFrom = utalkConfig.fromPhone.replace(/\D/g, '');
 
   try {
-    const response = await fetch('https://app-utalk.umbler.com/api/v1/messages/simplified/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${utalkConfig.token}`,
-        token: utalkConfig.token,
-        'x-token': utalkConfig.token
-      },
-      body: JSON.stringify({
+    let requestBody: any;
+    const headers: any = {
+      Authorization: `Bearer ${utalkConfig.token}`,
+      token: utalkConfig.token,
+      'x-token': utalkConfig.token
+    };
+
+    if (midiaUrl) {
+      // Quando tem mídia, a API do uTalk exige multipart/form-data com o binário
+      const form = new FormData();
+      form.append('toPhone', cleanTo);
+      form.append('fromPhone', cleanFrom);
+      form.append('organizationId', utalkConfig.organizationId);
+      if (mensagem) form.append('message', mensagem);
+
+      // Baixa o arquivo do Supabase Storage
+      const fileRes = await fetch(midiaUrl);
+      if (fileRes.ok) {
+        const blob = await fileRes.blob();
+        const fileName = midiaUrl.split('/').pop()?.split('?')[0] || 'anexo';
+        form.append('file', blob, fileName);
+      } else {
+        console.warn('[WaAI] Não foi possível baixar a mídia do URL:', midiaUrl);
+      }
+
+      requestBody = form;
+      // Não setamos 'Content-Type' manualmente, o fetch/FormData resolvem o boundary
+    } else {
+      // Quando é só texto, manda JSON
+      headers['Content-Type'] = 'application/json';
+      requestBody = JSON.stringify({
         toPhone: cleanTo,
         fromPhone: cleanFrom,
         organizationId: utalkConfig.organizationId,
         message: mensagem
-      })
+      });
+    }
+
+    const response = await fetch('https://app-utalk.umbler.com/api/v1/messages/simplified/', {
+      method: 'POST',
+      headers,
+      body: requestBody
     });
 
     if (!response.ok) {
@@ -416,9 +446,49 @@ export async function sendUtalkMessage(
       return false;
     }
 
-    return true;
+    const data = await response.json().catch(() => ({}));
+    return data.id || data.MessageId || data.messageId || true;
   } catch (error: any) {
     console.error('[WaAI] Exceção ao enviar pelo uTalk:', error?.message);
+    return false;
+  }
+}
+
+// ─── Envia Reação pelo Umbler uTalk ────────────────────────────────────────
+export async function sendUtalkReaction(
+  utalkConfig: { token: string; organizationId: string },
+  messageId: string,
+  emoji: string | null
+): Promise<boolean> {
+  try {
+    const headers: any = {
+      Authorization: `Bearer ${utalkConfig.token}`,
+      token: utalkConfig.token,
+      'x-token': utalkConfig.token,
+      'Content-Type': 'application/json'
+    };
+
+    const requestBody = JSON.stringify({
+      organizationId: utalkConfig.organizationId,
+      messageId: messageId,
+      emoji: emoji
+    });
+
+    const response = await fetch('https://app-utalk.umbler.com/api/v1/messages/reactions/', {
+      method: 'POST',
+      headers,
+      body: requestBody
+    });
+
+    if (!response.ok) {
+      const err = await response.text();
+      console.error('[WaAI] Erro ao enviar reação uTalk:', response.status, err);
+      return false;
+    }
+
+    return true;
+  } catch (error: any) {
+    console.error('[WaAI] Exceção ao enviar reação pelo uTalk:', error?.message);
     return false;
   }
 }

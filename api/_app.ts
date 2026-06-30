@@ -55,6 +55,7 @@ app.get('/api/health', (_req, res) => {
 
 // Middleware de Open Graph para links amigáveis
 app.use(ogRouter);
+app.use('/api', ogRouter);
 
 app.get('/api/diag', (req, res) => {
   const secretToken = process.env.DIAG_SECRET_TOKEN;

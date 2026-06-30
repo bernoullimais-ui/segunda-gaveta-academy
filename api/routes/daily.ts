@@ -35,7 +35,7 @@ dailyRouter.post('/daily/create-room', async (req, res) => {
       return res.status(response.status).json({ error: 'Falha ao criar sala no Daily', details: errorData });
     }
 
-    const data = await response.json();
+    const data = await response.json() as any;
     return res.json({ url: data.url, name: data.name });
   } catch (error) {
     console.error('Erro ao criar sala Daily:', error);

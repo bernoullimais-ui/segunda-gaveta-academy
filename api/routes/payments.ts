@@ -223,6 +223,8 @@ router.post('/pagarme/create-order', async (req, res) => {
     }
 
     let orgName: string | null = null;
+    let orgId: string | null = null;
+    let itemConfig: any = null;
     
     if (targetType === 'curso' && targetId) {
       const { data: c } = await supabase.from('cursos').select('organizacao_id, configuracao_json, organizacoes(nome)').eq('id', targetId).maybeSingle();
