@@ -22,6 +22,33 @@ import { validateCPF, validateAffiliate } from '../lib/validators.js';
 
 const router = Router();
 
+// ─── Intent de Checkout (Captura antecipada de Carrinho Abandonado) ─────────
+router.post('/checkout-intent', async (req, res) => {
+  try {
+    const { name, email, phone, itemType, itemId, itemName, amount, checkoutUrl } = req.body;
+    
+    if (!name || !email || !itemId || !itemName) {
+      return res.status(400).json({ error: 'Faltam campos obrigatórios para registrar o intent.' });
+    }
+
+    await registerCheckout({
+      name,
+      email,
+      phone,
+      itemType,
+      itemId,
+      itemName,
+      amount: amount || 0,
+      checkoutUrl: checkoutUrl || ''
+    });
+
+    res.json({ success: true, message: 'Intent registrado com sucesso' });
+  } catch (err: any) {
+    console.error('Erro ao registrar checkout-intent:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ─── Supabase client ──────────────────────────────────────────────────────────
 let supabaseUrl = process.env.VITE_SUPABASE_URL || '';
 if (supabaseUrl) {

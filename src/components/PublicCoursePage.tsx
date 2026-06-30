@@ -926,6 +926,26 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
       if (isFree) {
         setEnrollStep('success');
       } else {
+        // Registra a intenção de checkout para automação de carrinho abandonado
+        try {
+          fetch('/api/payments/checkout-intent', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name: enrollData.nome,
+              email: enrollData.email,
+              phone: enrollData.telefone,
+              itemType: isTrilha ? 'trilha' : 'curso',
+              itemId: item.id,
+              itemName: item.nome,
+              amount: item.preco || 0,
+              checkoutUrl: window.location.href
+            })
+          });
+        } catch (e) {
+          console.error("Erro ao registrar intenção de checkout:", e);
+        }
+
         setEnrollStep('payment');
         setShowPaymentModal(true);
       }
