@@ -112,12 +112,17 @@ router.post('/webhook', async (req: Request, res: Response) => {
     let midiaUrl: string =
       content.Media?.Url || content.mediaUrl || content.MediaUrl || content.FileUrl || content.fileUrl || content.message?.mediaUrl || content['chat[file]'] || content['chat[media]'] || content.LastMessage?.File?.Url || content.File?.Url || '';
     let midiaMimetype: string =
-      content.Media?.MimeType || content.mimetype || content.MimeType || content.message?.mimetype || content['chat[mimetype]'] || content.LastMessage?.File?.ContentType || content.File?.ContentType || '';
+      content.Media?.MimeType || content.mimetype || content.MimeType || content.message?.mimetype || content['chat[mimetype]'] || content.LastMessage?.File?.ContentType || content.File?.ContentType || content.LastMessage?.Thumbnail?.ContentType || '';
     const reacaoEmoji: string =
       content.Reaction?.Emoji || content.reaction || content.Reaction || content.message?.reaction || '';
 
     // Verifica se existe um objeto File, mesmo sem URL (o uTalk às vezes manda Url null e Data "")
-    const hasFileObject = !!(content.Media || content.LastMessage?.File || content.File);
+    const hasFileObject = !!(content.Media || content.LastMessage?.File || content.File || content.LastMessage?.Thumbnail);
+
+    // Constrói URL previsível da Utalk se ausente (Workaround: uTalk envia webhook de áudio antes de subir pro S3)
+    if (!midiaUrl && content.LastMessage?.Thumbnail?.OriginalName && content.Organization?.Id && content.LastMessage?.Id) {
+      midiaUrl = `https://utalk-wamedia.s3.amazonaws.com/${content.Organization.Id}/${content.LastMessage.Id}/${content.LastMessage.Thumbnail.OriginalName}`;
+    }
 
     // Trata payload url-encoded onde chat[body] contém o link da mídia
     const chatType = content['chat[type]'] || content.Type || content.type || eventLower;
