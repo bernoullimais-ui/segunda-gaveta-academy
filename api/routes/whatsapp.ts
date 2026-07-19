@@ -110,18 +110,25 @@ router.post('/webhook', async (req: Request, res: Response) => {
 
     // -- Extração de Mídias e Reações
     let midiaUrl: string =
-      content.Media?.Url || content.mediaUrl || content.MediaUrl || content.FileUrl || content.fileUrl || content.message?.mediaUrl || content['chat[file]'] || content['chat[media]'] || content.LastMessage?.File?.Url || content.File?.Url || '';
+      content.file?.url || content.File?.Url || content.LastMessage?.file?.url || content.LastMessage?.File?.Url ||
+      content.Media?.Url || content.mediaUrl || content.MediaUrl || content.FileUrl || content.fileUrl || content.message?.mediaUrl || content['chat[file]'] || content['chat[media]'] || '';
+
     let midiaMimetype: string =
-      content.Media?.MimeType || content.mimetype || content.MimeType || content.message?.mimetype || content['chat[mimetype]'] || content.LastMessage?.File?.ContentType || content.File?.ContentType || content.LastMessage?.Thumbnail?.ContentType || '';
+      content.file?.contentType || content.File?.ContentType || content.LastMessage?.file?.contentType || content.LastMessage?.File?.ContentType ||
+      content.Media?.MimeType || content.mimetype || content.MimeType || content.message?.mimetype || content['chat[mimetype]'] || content.LastMessage?.Thumbnail?.ContentType || '';
+
     const reacaoEmoji: string =
       content.Reaction?.Emoji || content.reaction || content.Reaction || content.message?.reaction || '';
 
-    // Verifica se existe um objeto File, mesmo sem URL (o uTalk às vezes manda Url null e Data "")
-    const hasFileObject = !!(content.Media || content.LastMessage?.File || content.File || content.LastMessage?.Thumbnail);
+    // Verifica se existe um objeto File, mesmo sem URL
+    const hasFileObject = !!(content.file || content.File || content.Media || content.LastMessage?.File || content.LastMessage?.file || content.LastMessage?.Thumbnail);
 
-    // Constrói URL previsível da Utalk se ausente (Workaround: uTalk envia webhook de áudio antes de subir pro S3)
-    if (!midiaUrl && content.LastMessage?.Thumbnail?.OriginalName && content.Organization?.Id && content.LastMessage?.Id) {
-      midiaUrl = `https://utalk-wamedia.s3.amazonaws.com/${content.Organization.Id}/${content.LastMessage.Id}/${content.LastMessage.Thumbnail.OriginalName}`;
+    // Constrói URL previsível da Utalk se ausente
+    const originalName = content.file?.originalName || content.File?.OriginalName || content.LastMessage?.file?.originalName || content.LastMessage?.File?.OriginalName || content.LastMessage?.Thumbnail?.OriginalName || content.Thumbnail?.OriginalName || '';
+    const orgId = content.organizationId || content.Organization?.Id;
+
+    if (!midiaUrl && originalName && orgId && utalkMessageId) {
+      midiaUrl = `https://utalk-wamedia.s3.amazonaws.com/${orgId}/${utalkMessageId}/${originalName}`;
     }
 
     // Trata payload url-encoded onde chat[body] contém o link da mídia

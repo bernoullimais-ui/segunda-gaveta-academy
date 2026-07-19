@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase';
 import { Save, Loader2, Award, Palette, Image, Globe, Mail, Phone, MessageSquare, ShieldCheck, Ticket, DollarSign } from 'lucide-react';
 import { CuponsAdmin } from './CuponsAdmin';
 import { DadosRecebimento } from './DadosRecebimento';
+import { OrgWebsiteEditor } from './OrgWebsiteEditor';
 
 interface ConfiguracaoAdminProps {
   loggedUser: any;
@@ -24,7 +25,7 @@ const PRESET_COLORS = [
 export function ConfiguracaoAdmin({ loggedUser, orgId, onOrgUpdate, showToast }: ConfiguracaoAdminProps) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<'visual' | 'contato' | 'integracao' | 'cupons' | 'recebimento'>('visual');
+  const [activeTab, setActiveTab] = useState<'visual' | 'contato' | 'integracao' | 'cupons' | 'recebimento' | 'website'>('visual');
 
   // Form states
   const [nome, setNome] = useState('');
@@ -79,14 +80,25 @@ export function ConfiguracaoAdmin({ loggedUser, orgId, onOrgUpdate, showToast }:
     if (!orgId) return;
 
     setSaving(true);
-    const updatedConfigJson = {
-      suporte_email: suporteEmail,
-      suporte_telefone: suporteTelefone,
-      chat_ativo: chatAtivo,
-      validacao_publica: validacaoPublica
-    };
-
     try {
+      // Fetch latest org config_json first to merge and avoid overwriting other keys (like website_config)
+      const { data: orgData, error: orgError } = await supabase
+        .from('organizacoes')
+        .select('config_json')
+        .eq('id', orgId)
+        .single();
+
+      if (orgError) throw orgError;
+
+      const currentConfigJson = orgData?.config_json || {};
+      const updatedConfigJson = {
+        ...currentConfigJson,
+        suporte_email: suporteEmail,
+        suporte_telefone: suporteTelefone,
+        chat_ativo: chatAtivo,
+        validacao_publica: validacaoPublica
+      };
+
       const { data, error } = await supabase
         .from('organizacoes')
         .update({
@@ -201,6 +213,19 @@ export function ConfiguracaoAdmin({ loggedUser, orgId, onOrgUpdate, showToast }:
           <DollarSign size={18} />
           Dados de Recebimento
         </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('website')}
+          className={`py-4 px-4 font-bold border-b-2 transition-all flex items-center gap-2 cursor-pointer ${
+            activeTab === 'website'
+              ? 'text-slate-900 border-slate-900'
+              : 'text-slate-500 border-transparent hover:text-slate-800'
+          }`}
+          style={{ borderColor: activeTab === 'website' ? corPrimaria : undefined, color: activeTab === 'website' ? corPrimaria : undefined }}
+        >
+          <Globe size={18} />
+          Website
+        </button>
       </div>
 
       {/* Content / Form */}
@@ -211,6 +236,10 @@ export function ConfiguracaoAdmin({ loggedUser, orgId, onOrgUpdate, showToast }:
       ) : activeTab === 'recebimento' ? (
         <div className="p-8">
           <DadosRecebimento loggedUser={loggedUser} />
+        </div>
+      ) : activeTab === 'website' ? (
+        <div className="p-8">
+          <OrgWebsiteEditor orgId={orgId} corPrimaria={corPrimaria} showToast={showToast} />
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="p-8 space-y-8">

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import DailyIframe, { DailyCall } from '@daily-co/daily-js';
+import { Maximize2, Minimize2 } from 'lucide-react';
 
 interface DailyVideoRoomProps {
   roomUrl: string;
@@ -7,10 +8,30 @@ interface DailyVideoRoomProps {
 }
 
 export function DailyVideoRoom({ roomUrl, onLeave }: DailyVideoRoomProps) {
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const callFrameRef = useRef<DailyCall | null>(null);
   const [isIframeLoaded, setIsIframeLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      wrapperRef.current?.requestFullscreen().catch(err => {
+        console.error(`Error attempting to enable fullscreen: ${err.message}`);
+      });
+    } else {
+      document.exitFullscreen();
+    }
+  };
 
   useEffect(() => {
     if (!containerRef.current || !roomUrl) return;
@@ -79,7 +100,7 @@ export function DailyVideoRoom({ roomUrl, onLeave }: DailyVideoRoomProps) {
   }, [roomUrl, onLeave]);
 
   return (
-    <div className="w-full aspect-video md:h-[600px] bg-slate-900 rounded-2xl flex items-center justify-center relative overflow-hidden">
+    <div ref={wrapperRef} className="w-full aspect-video md:h-[600px] bg-slate-900 rounded-2xl flex items-center justify-center relative overflow-hidden group">
       {!isIframeLoaded && !error && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900 z-10">
           <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
@@ -105,6 +126,16 @@ export function DailyVideoRoom({ roomUrl, onLeave }: DailyVideoRoomProps) {
       )}
 
       <div ref={containerRef} className="w-full h-full" />
+      
+      {isIframeLoaded && !error && (
+        <button 
+          onClick={toggleFullscreen}
+          className="absolute top-4 right-4 z-50 p-2 bg-slate-800/80 hover:bg-slate-700 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-all backdrop-blur-sm"
+          title={isFullscreen ? "Sair da tela cheia" : "Tela cheia"}
+        >
+          {isFullscreen ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
+        </button>
+      )}
     </div>
   );
 }

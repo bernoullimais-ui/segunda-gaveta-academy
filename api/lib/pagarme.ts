@@ -89,6 +89,10 @@ export async function pagarmeRequest(
     ...(payload !== null ? { body: JSON.stringify(payload) } : {})
   });
   const data = await response.json();
+  if (!response.ok && data.errors) {
+    const details = Object.entries(data.errors).map(([k, v]) => `${k}: ${v}`).join(' | ');
+    data.message = `${data.message} Detalhes: ${details}`;
+  }
   return { ok: response.ok, status: response.status, data };
 }
 
@@ -125,6 +129,21 @@ export interface PagarmeSplitRule {
   charge_processing_fee: boolean;
 }
 
+let cachedDefaultRecipientId: string | null = null;
+export async function getDefaultRecipientId(): Promise<string | null> {
+  if (cachedDefaultRecipientId) return cachedDefaultRecipientId;
+  try {
+    const { ok, data } = await pagarmeRequest('/recipients/default', null, 'GET');
+    if (ok && data && data.id) {
+      cachedDefaultRecipientId = data.id;
+      return data.id;
+    }
+  } catch (err) {
+    console.error('Error fetching default recipient:', err);
+  }
+  return null;
+}
+
 /**
  * Builds Pagar.me native split_rules from our internal split config.
  * NOTE: recipient_id in Pagar.me Marketplace must be a registered recipient
@@ -135,18 +154,42 @@ export interface PagarmeSplitRule {
  */
 export function buildSplitRules(
   splits: { usuario_id: string; porcentagem: number; pagarme_recipient_id?: string }[],
-  mainRecipientId?: string
+  totalAmountCents: number,
+  mainRecipientId?: string | null
 ): PagarmeSplitRule[] {
   const rules: PagarmeSplitRule[] = [];
+  let totalSplitAmount = 0;
 
   for (const split of splits) {
     if (!split.pagarme_recipient_id) continue; // Skip if not yet a Pagar.me recipient
+    
+    const splitAmount = Math.round((totalAmountCents || 0) * (split.porcentagem / 100));
+    if (splitAmount <= 0) continue;
+
     rules.push({
       recipient_id: split.pagarme_recipient_id,
-      percentage: split.porcentagem,
-      liable: false,
-      charge_processing_fee: false
-    });
+      type: 'flat',
+      amount: splitAmount,
+      options: {
+        liable: false,
+        charge_processing_fee: false,
+        charge_remainder_fee: false
+      }
+    } as any);
+    totalSplitAmount += splitAmount;
+  }
+
+  if (mainRecipientId && totalAmountCents > totalSplitAmount) {
+    rules.push({
+      recipient_id: mainRecipientId,
+      type: 'flat',
+      amount: totalAmountCents - totalSplitAmount,
+      options: {
+        liable: true,
+        charge_processing_fee: true,
+        charge_remainder_fee: true
+      }
+    } as any);
   }
 
   return rules;

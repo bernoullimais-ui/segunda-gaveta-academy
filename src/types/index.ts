@@ -167,3 +167,83 @@ export interface ToastMessage {
   text: string;
   type: 'success' | 'error' | 'info';
 }
+
+// ─── Projeto de Conclusão ─────────────────────────────────────────────────────
+
+export type CampoTipo =
+  | 'texto_curto'
+  | 'texto_longo'
+  | 'numero'
+  | 'checkbox'
+  | 'tabela'
+  | 'data'
+  | 'selecao_unica'
+  | 'upload'
+  | 'calculado';
+
+export interface CampoConfig {
+  id: string;
+  tipo: CampoTipo;
+  label: string;
+  placeholder?: string;
+  obrigatorio?: boolean;
+  unidade?: string;         // para tipo 'numero' e 'calculado', ex: 'R$', '%'
+  opcoes?: string[];        // para 'checkbox' e 'selecao_unica'
+  colunas?: string[];       // para tipo 'tabela'
+  linhas?: number;          // para tipo 'tabela', qtd de linhas padrão
+  linhas_rotulos?: string[]; // para tipo 'tabela', rótulos pré-definidos da primeira coluna
+  formula?: string;         // para tipo 'calculado'
+}
+
+export interface ProjetoTemplate {
+  id: string;
+  curso_id: string;
+  organizacao_id?: string;
+  titulo: string;
+  descricao?: string;
+  bloqueio_estrito: boolean;
+  ativo: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export type GatilhoTipo = 'concluir_etapa' | 'assistir_70' | 'concluir_secao';
+
+export interface ProjetoMissao {
+  id: string;
+  template_id: string;
+  titulo: string;
+  descricao?: string;
+  campos_json: CampoConfig[];
+  gatilho_etapa_id?: string;   // ID da etapa no curriculo_json
+  gatilho_tipo: GatilhoTipo;
+  ordem: number;
+  created_at?: string;
+}
+
+export interface ProjetoDelegacao {
+  id: string;
+  template_id: string;
+  usuario_id: string;
+  created_at?: string;
+  usuarios?: Pick<Usuario, 'id' | 'nome' | 'email'>;
+}
+
+export type ProjetoStatus = 'rascunho' | 'submetido' | 'com_feedback';
+
+export interface ProjetoResposta {
+  id?: string;
+  missao_id: string;
+  usuario_id: string;
+  curso_id: string;
+  respostas_json: Record<string, any>;
+  feedback_geral?: string;
+  feedbacks_campos_json?: Record<string, string>;
+  feedback_publicado: boolean;
+  status: ProjetoStatus;
+  updated_at?: string;
+  created_at?: string;
+  // Joins opcionais
+  usuarios?: Pick<Usuario, 'id' | 'nome' | 'email'>;
+  projeto_conclusao_missoes?: Pick<ProjetoMissao, 'id' | 'titulo' | 'ordem'>;
+}

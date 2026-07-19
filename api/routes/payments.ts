@@ -17,7 +17,7 @@
  */
 import { Router } from 'express';
 import { createClient } from '@supabase/supabase-js';
-import { pagarmeRequest, buildPagarmePhone, buildSplitRules, getPagarmePublicKey, createPagarmeRecipient, updatePagarmeRecipientBankAccount } from '../lib/pagarme.js';
+import { pagarmeRequest, buildPagarmePhone, buildSplitRules, getPagarmePublicKey, createPagarmeRecipient, updatePagarmeRecipientBankAccount, getDefaultRecipientId } from '../lib/pagarme.js';
 import { validateCPF, validateAffiliate } from '../lib/validators.js';
 
 const router = Router();
@@ -319,23 +319,20 @@ router.post('/pagarme/create-order', async (req, res) => {
         type: 'individual',
         document: cpfResult.sanitized || '00000000000',
         document_type: 'CPF',
-        ...(phone && { phones: { mobile_phone: phone } })
+        ...(phone ? {
+          phones: {
+            mobile_phone: phone
+          }
+        } : {
+          phones: {
+            mobile_phone: { country_code: '55', area_code: '11', number: '999999999' }
+          }
+        })
       },
       payments: [{
-        payment_method: 'checkout',
-        checkout: {
-          expires_in: 1440, // 24h (increased from 120min)
-          billing_address_editable: true,
-          customer_editable: true,
-          // M8: boleto adicionado como método aceito
-          accepted_payment_methods: ['credit_card', 'pix', 'boleto'],
-          credit_card: {
-            statement_descriptor: statementDescriptor
-          },
-          pix: { expires_in: 3600 },
-          boleto: { due_at: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(), instructions: 'Pagar até o vencimento' },
-          success_url: metadata.success_url,
-          skip_checkout_success_page: false
+        payment_method: 'pix',
+        pix: {
+          expires_in: 3600
         }
       }],
       metadata: {
@@ -363,7 +360,8 @@ router.post('/pagarme/create-order', async (req, res) => {
           const recId = u?.curriculo_json?.dados_recebimento?.pagarme_recipient_id;
           return { ...s, pagarme_recipient_id: recId };
         });
-        const splitRules = buildSplitRules(enrichedSplits);
+        const defaultRecId = await getDefaultRecipientId();
+        const splitRules = buildSplitRules(enrichedSplits, pagarmeAmount, defaultRecId);
         if (splitRules.length > 0) {
           payload.payments[0].split = splitRules;
         }
@@ -377,16 +375,25 @@ router.post('/pagarme/create-order', async (req, res) => {
       return res.status(status).json({ message: order.message || 'Erro de validação', details: order });
     }
 
-    const checkoutUrl = order.checkouts?.[0]?.payment_url || req.headers.referer || 'https://segunda-gaveta-academy.vercel.app';
-    registerCheckout({
-      name: customer.name, email: customer.email, phone: customer.phone,
-      itemType: targetType || 'curso', itemId: targetId, itemName: items[0]?.description || 'Inscrição',
-      amount: pagarmeAmount / 100, checkoutUrl
-    }).catch(err => console.error('registerCheckout error:', err));
-
-    res.json({ order_id: order.id, checkout_url: order.checkouts?.[0]?.payment_url });
+    res.json({
+      order_id: order.id,
+      qr_code: order.charges?.[0]?.last_transaction?.qr_code,
+      qr_code_url: order.charges?.[0]?.last_transaction?.qr_code_url
+    });
   } catch (error: any) {
     console.error('Create Order Error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ─── GET /api/pagarme/order-status/:orderId ───────────────────────────────────
+router.get('/pagarme/order-status/:orderId', async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { ok, status, data } = await pagarmeRequest(`/orders/${orderId}`, null, 'GET');
+    if (!ok) return res.status(status).json(data);
+    res.json({ status: data.status });
+  } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
 });
@@ -545,7 +552,8 @@ router.post('/pagarme/create-cc-order', async (req, res) => {
           const recId = u?.curriculo_json?.dados_recebimento?.pagarme_recipient_id;
           return { ...s, pagarme_recipient_id: recId };
         });
-        const splitRules = buildSplitRules(enrichedSplits);
+        const defaultRecId = await getDefaultRecipientId();
+        const splitRules = buildSplitRules(enrichedSplits, pagarmeAmount, defaultRecId);
         if (splitRules.length > 0) {
           payload.payments[0].split = splitRules;
         }
@@ -721,7 +729,9 @@ router.post('/pagarme/create-subscription', async (req, res) => {
           const u = usersInfo.find((usr: any) => usr.id === s.usuario_id);
           return { ...s, pagarme_recipient_id: u?.curriculo_json?.dados_recebimento?.pagarme_recipient_id };
         });
-        const splitRules = buildSplitRules(enrichedSplits);
+        const totalAmount = req.body.custom_subscription?.amount || metadata?.amount || 0;
+        const defaultRecId = await getDefaultRecipientId();
+        const splitRules = buildSplitRules(enrichedSplits, totalAmount, defaultRecId);
         if (splitRules.length > 0) {
           payload.split = {
             enabled: true,

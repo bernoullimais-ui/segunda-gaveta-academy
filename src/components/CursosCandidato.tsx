@@ -9,6 +9,7 @@ import remarkGfm from 'remark-gfm';
 import ReactPlayer from 'react-player/youtube';
 import { motion, AnimatePresence } from 'motion/react';
 import { DailyVideoRoom } from './DailyVideoRoom';
+import { ProjetoAluno } from './ProjetoAluno';
 import { jsPDF } from 'jspdf';
 
 
@@ -108,6 +109,16 @@ export function CursosCandidato({
 
   // Current user state
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [nomeAluno, setNomeAluno] = useState<string>('');
+  const [projetoTab, setProjetoTab] = useState(false);
+  const [projetoToast, setProjetoToast] = useState<{text:string;type:string}|null>(null);
+  const projetoToastRef = useRef<ReturnType<typeof setTimeout>|null>(null);
+
+  const showProjetoToast = (text: string, type = 'info') => {
+    setProjetoToast({ text, type });
+    if (projetoToastRef.current) clearTimeout(projetoToastRef.current);
+    projetoToastRef.current = setTimeout(() => setProjetoToast(null), 3500);
+  };
   const [stats, setStats] = useState<{[key: string]: {participantes: number, concluintes: number}}>({});
   
   // Diário de Bordo
@@ -144,6 +155,12 @@ export function CursosCandidato({
         if (data?.user) {
           uId = data.user.id;
           setCurrentUserId(uId);
+          // Capturar nome do aluno para uso no Projeto
+          const metaNome = data.user.user_metadata?.nome || data.user.email?.split('@')[0] || '';
+          setNomeAluno(metaNome);
+          // Buscar nome completo no perfil
+          supabase.from('usuarios').select('nome').or(`auth_id.eq.${uId},email.eq.${data.user.email}`).limit(1).maybeSingle()
+            .then(({ data: perfil }) => { if (perfil?.nome) setNomeAluno(perfil.nome); });
         }
         
         // Find role if not provided
@@ -171,6 +188,26 @@ export function CursosCandidato({
       }
     }
   }, [initialCourseId, cursos]);
+
+  const [hasProjeto, setHasProjeto] = useState(false);
+
+  useEffect(() => {
+    if (!selectedCurso) return;
+    const checkProjeto = async () => {
+      try {
+        const { data } = await supabase
+          .from('projeto_conclusao_templates')
+          .select('id')
+          .eq('curso_id', selectedCurso.id)
+          .eq('ativo', true)
+          .maybeSingle();
+        setHasProjeto(!!data);
+      } catch (err) {
+        console.error('Erro ao checar projeto:', err);
+      }
+    };
+    checkProjeto();
+  }, [selectedCurso]);
 
   const getStepId = (etapa: any, sIdx: number, eIdx: number) => {
     return etapa.id || `step-${sIdx}-${eIdx}`;
@@ -608,15 +645,16 @@ export function CursosCandidato({
 
     if (userData?.user?.id) {
       try {
-        const { data: userProfile } = await supabase
+        const { data: userProfiles } = await supabase
           .from('usuarios')
           .select('nome, role')
-          .eq('id', userData.user.id)
-          .maybeSingle();
+          .or(`auth_id.eq.${userData.user.id},email.eq.${userData.user.email}`)
+          .limit(1);
+        const userProfile = userProfiles?.[0];
         
         if (userProfile && userProfile.nome) {
           const role = userProfile.role || userRole;
-          const isStaff = role === 'avaliador' || role === 'avaliador_convidado' || role === 'admin' || role === 'gestor' || role === 'coordenador';
+          const isStaff = role === 'avaliador' || role === 'avaliador_convidado' || role === 'admin' || role === 'gestor' || role === 'coordenador' || role === 'especialista' || role === 'design' || role === 'curador' || role === 'super_admin';
           
           if (isStaff) {
             userName = userProfile.nome;
@@ -627,7 +665,7 @@ export function CursosCandidato({
           // Extrair o primeiro nome do metadata se existir como fallback para não-staff
           if (userData?.user?.user_metadata?.nome) {
             const role = userRole;
-            const isStaff = role === 'avaliador' || role === 'avaliador_convidado' || role === 'admin' || role === 'gestor' || role === 'coordenador';
+            const isStaff = role === 'avaliador' || role === 'avaliador_convidado' || role === 'admin' || role === 'gestor' || role === 'coordenador' || role === 'especialista' || role === 'design' || role === 'curador' || role === 'super_admin';
             
             if (isStaff) {
                userName = userData.user.user_metadata.nome;
@@ -1704,6 +1742,7 @@ export function CursosCandidato({
                             key={eIdx}
                             onClick={() => {
                               setSelectedLesson({ ...etapa, _calculatedId: stepId, cursoNome: selectedCurso.nome, secaoNome: secao.nome, secaoIdx: sIdx, etapaIdx: eIdx });
+                              setProjetoTab(false);
                             }}
                             className={`w-full text-left px-5 py-4 flex gap-4 ${isSelected ? 'bg-blue-50 dark:bg-blue-900/30' : 'hover:bg-slate-50 dark:hover:bg-slate-800/30'}`}
                           >
@@ -1732,11 +1771,50 @@ export function CursosCandidato({
                 </div>
               );
             })}
+
+            {/* Botão: Meu Projeto */}
+            {hasProjeto && !previewCourseId && (
+              <button
+                onClick={() => { setProjetoTab(p => !p); setSelectedLesson(null); }}
+                className={`w-full px-5 py-4 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 border-t border-slate-200 dark:border-slate-800 text-sm font-semibold transition-colors ${
+                  projetoTab ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400'
+                }`}
+              >
+                <span className="text-base">📋</span>
+                Meu Projeto
+              </button>
+            )}
           </div>
         </div>
 
         {/* Content Area */}
-        <div className={`flex-1 bg-white dark:bg-slate-900 flex flex-col relative h-[calc(100vh-64px)] overflow-hidden ${!selectedLesson ? 'hidden md:flex' : 'flex'}`}>
+        <div className={`flex-1 bg-white dark:bg-slate-900 flex flex-col relative h-[calc(100vh-64px)] overflow-hidden ${(!selectedLesson && !projetoTab) ? 'hidden md:flex' : 'flex'}`}>
+          {/* Aba: Meu Projeto */}
+          {projetoTab && currentUserId && (
+            <div className="flex-1 overflow-hidden relative">
+              {/* Toast de notificação */}
+              {projetoToast && (
+                <div className={`absolute top-4 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-xl shadow-lg text-sm font-semibold flex items-center gap-2 transition-all ${
+                  projetoToast.type === 'success' ? 'bg-green-600 text-white' :
+                  projetoToast.type === 'error'   ? 'bg-red-600 text-white' :
+                  'bg-slate-800 text-white'
+                }`}>
+                  {projetoToast.text}
+                </div>
+              )}
+              <ProjetoAluno
+                cursoId={selectedCurso.id}
+                userId={currentUserId}
+                nomeAluno={nomeAluno || ''}
+                nomeCurso={selectedCurso.nome || ''}
+                completedSteps={completedSteps}
+                curriculo={curriculo}
+                showToast={(text, type) => showProjetoToast(text, type)}
+              />
+            </div>
+          )}
+
+          {!projetoTab && (
           <div className="flex-1 overflow-y-auto">
             {selectedLesson ? (
               <div>
@@ -2320,11 +2398,13 @@ export function CursosCandidato({
             )}
           </div>
 
+          )} {/* end !projetoTab */}
+
           {/* Bottom Bar */}
           {selectedLesson && (
             <div className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 flex flex-col sm:flex-row justify-between items-center gap-4 sticky bottom-0 z-10">
               <button 
-                disabled={userRole !== 'avaliador' && ((selectedLesson.tipo === 'video' && videoSettings?.assistirObrigatorio && !videoWatched) || (selectedLesson.tipo === 'ao_vivo' && !completedSteps.includes(selectedLesson._calculatedId)))}
+                disabled={userRole !== 'avaliador' && (selectedLesson.tipo === 'video' && videoSettings?.assistirObrigatorio && !videoWatched)}
                 onClick={() => {
                    if (!completedSteps.includes(selectedLesson._calculatedId)) {
                       toggleStepComplete(selectedLesson._calculatedId);
@@ -2334,7 +2414,7 @@ export function CursosCandidato({
                    }
                 }}
                 className={`flex items-center gap-2 font-medium text-sm transition-colors ${
-                  userRole !== 'avaliador' && ((selectedLesson.tipo === 'video' && videoSettings?.assistirObrigatorio && !videoWatched) || (selectedLesson.tipo === 'ao_vivo' && !completedSteps.includes(selectedLesson._calculatedId)))
+                  userRole !== 'avaliador' && (selectedLesson.tipo === 'video' && videoSettings?.assistirObrigatorio && !videoWatched)
                   ? 'text-slate-400 dark:text-slate-500 cursor-not-allowed'
                   : 'text-blue-600 dark:text-blue-400 hover:underline'
                 }`}
@@ -2347,7 +2427,7 @@ export function CursosCandidato({
               </button>
               
               <button 
-                disabled={userRole !== 'avaliador' && ((selectedLesson.tipo === 'video' && videoSettings?.assistirObrigatorio && !videoWatched) || (selectedLesson.tipo === 'ao_vivo' && !completedSteps.includes(selectedLesson._calculatedId)))}
+                disabled={userRole !== 'avaliador' && (selectedLesson.tipo === 'video' && videoSettings?.assistirObrigatorio && !videoWatched)}
                 onClick={() => {
                    if (!completedSteps.includes(selectedLesson._calculatedId)) {
                       toggleStepComplete(selectedLesson._calculatedId);
@@ -2360,7 +2440,7 @@ export function CursosCandidato({
                    }
                 }}
                 className={`w-full sm:w-auto px-8 py-2.5 rounded-lg font-medium flex justify-center items-center gap-2 transition-colors ${
-                  userRole !== 'avaliador' && ((selectedLesson.tipo === 'video' && videoSettings?.assistirObrigatorio && !videoWatched) || (selectedLesson.tipo === 'ao_vivo' && !completedSteps.includes(selectedLesson._calculatedId)))
+                  userRole !== 'avaliador' && (selectedLesson.tipo === 'video' && videoSettings?.assistirObrigatorio && !videoWatched)
                   ? 'bg-slate-300 dark:bg-slate-700 text-slate-500 dark:text-slate-400 cursor-not-allowed'
                   : 'bg-blue-600 dark:bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-500 text-white'
                 }`}

@@ -10,9 +10,10 @@ interface LoginScreenProps {
   loginError: string;
   isLoading?: boolean;
   activeOrg?: any;
+  onBackToPresentation?: () => void;
 }
 
-export function LoginScreen({ onLogin, onCheckZempo, onFirstAccess, onOnboarding, onForgotPassword, loginError, isLoading, activeOrg }: LoginScreenProps) {
+export function LoginScreen({ onLogin, onCheckZempo, onFirstAccess, onOnboarding, onForgotPassword, loginError, isLoading, activeOrg, onBackToPresentation }: LoginScreenProps) {
   const [mode, setMode] = useState<'login' | 'check_code' | 'complete_signup' | 'onboarding' | 'forgot_password'>('login');
   
   // Login state
@@ -89,6 +90,15 @@ export function LoginScreen({ onLogin, onCheckZempo, onFirstAccess, onOnboarding
 
           {mode === 'login' && (
             <>
+              {onBackToPresentation && (
+                <button 
+                  type="button"
+                  onClick={onBackToPresentation}
+                  className="flex items-center text-xs font-bold text-slate-500 hover:text-slate-800 mb-6 transition-colors self-start cursor-pointer"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5 mr-1" /> Voltar ao site
+                </button>
+              )}
               <div className="mb-6 lg:mb-8 text-center lg:text-left">
                 <h2 className="text-xl lg:text-2xl font-bold text-slate-900 mb-1">
                   Bem-vindo de volta

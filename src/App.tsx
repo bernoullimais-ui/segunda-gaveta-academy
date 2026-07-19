@@ -34,6 +34,7 @@ import { SpecialistOnboarding } from './components/SpecialistOnboarding';
 import { ParticiparInvite } from './components/ParticiparInvite';
 import { ResetPasswordScreen } from './components/ResetPasswordScreen';
 import { InstitutionalPage } from './components/InstitutionalPage';
+import { OrgInstitutionalPage } from './components/OrgInstitutionalPage';
 import { PaymentSuccessPage } from './components/PaymentSuccessPage';
 import { 
   User, 
@@ -126,10 +127,27 @@ export default function App() {
   const [isResetPasswordRoute, setIsResetPasswordRoute] = useState(false);
   const [isRootRoute, setIsRootRoute] = useState(false);
   const [isGestaoRoute, setIsGestaoRoute] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
+  const [isLoginRoute, setIsLoginRoute] = useState(false);
   const [inviteConfig, setInviteConfig] = useState<any>(null);
   const [resumeOnboarding, setResumeOnboarding] = useState<any>(null);
   const [isPaymentSuccessRoute, setIsPaymentSuccessRoute] = useState(false);
   const [paymentSuccessParams, setPaymentSuccessParams] = useState<{ participantId: string; type?: string; subStatus?: string } | null>(null);
+
+  const [impersonatedUser, setImpersonatedUser] = useState<any>(null);
+  const [isLoadingOrg, setIsLoadingOrg] = useState(true);
+  
+  useEffect(() => {
+    const savedImp = localStorage.getItem('impersonatedUser');
+    if (savedImp) {
+      try {
+        setImpersonatedUser(JSON.parse(savedImp));
+      } catch(e) {}
+    }
+  }, []);
+
+  const activeUser = impersonatedUser || loggedUser;
+  const activeRole = impersonatedUser?.role || loggedRole;
 
   const checkOnboardingStatus = async (userId: string, role: string) => {
     if (role === 'gestor' || role === 'especialista') {
@@ -182,6 +200,7 @@ export default function App() {
     const path = window.location.pathname;
     
     if (path === '/') setIsRootRoute(true);
+    if (path === '/login') setIsLoginRoute(true);
     if (path.startsWith('/gestao')) setIsGestaoRoute(true);
 
     const courseMatch = path.match(/^\/public\/curso\/([a-zA-Z0-9-]+)/);
@@ -247,6 +266,17 @@ export default function App() {
     }
   }, []);
 
+  // Listen to browser back/forward buttons (popstate) to keep routing state in sync
+  useEffect(() => {
+    const handlePopState = () => {
+      const path = window.location.pathname;
+      setIsLoginRoute(path === '/login');
+      setIsRootRoute(path === '/');
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
   // Check if the invite slug is valid
   useEffect(() => {
     if (!publicInviteSlug) return;
@@ -303,9 +333,13 @@ export default function App() {
 
   // Fetch organization by slug for dynamic branding
   useEffect(() => {
-    if (!projectSlug) return;
+    if (!projectSlug) {
+      setIsLoadingOrg(false);
+      return;
+    }
     async function fetchOrg() {
       try {
+        setIsLoadingOrg(true);
         const { data, error } = await supabase
           .from('organizacoes')
           .select('*')
@@ -319,6 +353,8 @@ export default function App() {
         }
       } catch (err) {
         console.error('Failed to load organization:', err);
+      } finally {
+        setIsLoadingOrg(false);
       }
     }
     fetchOrg();
@@ -743,6 +779,32 @@ export default function App() {
       </div>;
     }
 
+    if (projectSlug && isLoadingOrg) {
+      return (
+        <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+           <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      );
+    }
+
+    // Subdomain routing with presentation page if configured
+    const hasWebsite = activeOrg?.config_json?.website_config && Object.keys(activeOrg.config_json.website_config).length > 0;
+    
+    if (projectSlug && hasWebsite && !isLoginRoute) {
+      return (
+        <>
+          <OrgInstitutionalPage 
+            activeOrg={activeOrg} 
+            onAccessPanel={() => {
+              window.history.pushState({}, '', '/login');
+              setIsLoginRoute(true);
+            }} 
+          />
+          <Toast message={toastMessage} onClose={() => setToastMessage(null)} />
+        </>
+      );
+    }
+
     return (
       <>
         {supabaseReady === false && (
@@ -782,6 +844,11 @@ export default function App() {
           loginError=""
           isLoading={isLoading}
           activeOrg={activeOrg}
+          onBackToPresentation={projectSlug && hasWebsite ? () => {
+            window.history.pushState({}, '', '/');
+            setShowLogin(false);
+            setIsLoginRoute(false);
+          } : undefined}
         />
         <Toast message={toastMessage} onClose={() => setToastMessage(null)} />
       </>
@@ -811,13 +878,16 @@ export default function App() {
     );
   }
 
-  const isAdmin = loggedRole === 'gestor' || loggedRole === 'super_admin' || loggedRole === 'curador' || loggedRole === 'design' || loggedRole === 'especialista';
+  const isAdmin = activeRole === 'gestor' || activeRole === 'super_admin' || activeRole === 'curador' || activeRole === 'design' || activeRole === 'especialista';
 
   const handleLogout = async () => {
     setLoggedUser(null);
     setLoggedRole(null);
     localStorage.removeItem('segunda_gaveta_session');
     setCurrentView('dashboard');
+    setShowLogin(false);
+    setIsLoginRoute(false);
+    window.history.pushState({}, '', '/');
     try {
       await supabase.auth.signOut();
     } catch (e) {
@@ -837,17 +907,41 @@ export default function App() {
 
   if (!isAdmin) {
     return (
-      <>
-        <AreaAluno loggedUser={loggedUser} userRole={loggedRole!} globalOrgId={activeOrg?.id} onLogout={handleLogout} />
-        <Toast message={toastMessage} onClose={() => setToastMessage(null)} />
-      </>
+      <div className="flex flex-col min-h-screen">
+        {impersonatedUser && (
+          <div className="bg-amber-100 text-amber-900 px-4 py-2 text-center text-sm font-bold flex justify-center items-center gap-4 z-[9999] relative shadow-md shrink-0 border-b border-amber-200">
+            <span>Acessando como: {impersonatedUser.nome || impersonatedUser.email}</span>
+            <button 
+              onClick={() => { localStorage.removeItem('impersonatedUser'); window.location.reload(); }}
+              className="bg-amber-200 hover:bg-amber-300 px-3 py-1 rounded-full text-xs transition-colors shadow-sm"
+            >
+              Voltar ao acesso original
+            </button>
+          </div>
+        )}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <AreaAluno loggedUser={activeUser} userRole={activeRole!} globalOrgId={activeOrg?.id} onLogout={handleLogout} />
+          <Toast message={toastMessage} onClose={() => setToastMessage(null)} />
+        </div>
+      </div>
     );
   }
 
-
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row">
-      {/* Sidebar */}
+    <div className="flex flex-col min-h-screen">
+      {impersonatedUser && (
+        <div className="bg-amber-100 text-amber-900 px-4 py-2 text-center text-sm font-bold flex justify-center items-center gap-4 z-[9999] relative shadow-md shrink-0 border-b border-amber-200">
+          <span>Acessando como: {impersonatedUser.nome || impersonatedUser.email}</span>
+          <button 
+            onClick={() => { localStorage.removeItem('impersonatedUser'); window.location.reload(); }}
+            className="bg-amber-200 hover:bg-amber-300 px-3 py-1 rounded-full text-xs transition-colors shadow-sm"
+          >
+            Voltar ao acesso original
+          </button>
+        </div>
+      )}
+      <div className="flex-1 bg-slate-50 flex flex-col md:flex-row overflow-hidden">
+        {/* Sidebar */}
       <aside className="w-full md:w-64 bg-white border-b md:border-b-0 md:border-r border-slate-200 flex-shrink-0 flex flex-col">
         <div className="p-6 flex items-center gap-3">
           {loggedUser?.organizacoes?.logo_url ? (
@@ -865,7 +959,7 @@ export default function App() {
             </div>
           )}
           <div className="font-bold text-slate-800 text-lg leading-tight">
-            {loggedUser?.organizacoes?.nome || 'Segunda Gaveta Academy'}
+            {activeUser?.organizacoes?.nome || 'Segunda Gaveta Academy'}
           </div>
         </div>
 
@@ -911,7 +1005,7 @@ export default function App() {
                 active={currentView === 'configuracao'} 
                 onClick={() => setCurrentView('configuracao')} 
               />
-              {loggedRole === 'super_admin' && (
+              {activeRole === 'super_admin' && (
                 <NavItem 
                   icon={<ShieldAlert size={20} />} 
                   label="Super Admin" 
@@ -948,8 +1042,8 @@ export default function App() {
             />
             <NotificationCenter loggedUser={loggedUser} onNavigate={handleNavigate} />
             <div className="text-right hidden sm:block">
-              <p className="text-sm font-bold text-slate-800 leading-tight">{loggedUser.nome || loggedUser.email}</p>
-              <p className="text-xs text-slate-500 capitalize leading-tight">{loggedRole}</p>
+              <p className="text-sm font-bold text-slate-800 leading-tight">{activeUser.nome || activeUser.email}</p>
+              <p className="text-xs text-slate-500 capitalize leading-tight">{activeRole}</p>
             </div>
             <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-600">
               <User size={24} />
@@ -970,8 +1064,8 @@ export default function App() {
                 <React.Suspense fallback={<AdminLoadingFallback />}>
                   <RenderContent 
                     view={currentView} 
-                    user={loggedUser} 
-                    role={loggedRole}
+                    user={activeUser} 
+                    role={activeRole}
                     globalOrgId={activeOrg?.id}
                     showToast={showToast}
                     onOrgUpdate={handleOrgUpdate}
@@ -992,6 +1086,7 @@ export default function App() {
           </footer>
         </div>
       </main>
+      </div>
 
       {/* Toast Notification */}
       <Toast message={toastMessage} onClose={() => setToastMessage(null)} />
@@ -1043,8 +1138,11 @@ function RenderContent({
   switch (view) {
     case 'dashboard':
       return <DashboardCenso loggedUser={user} orgId={user?.organizacao_id} />;
-    case 'cursos':
-      return isAdmin ? <CursosAdmin loggedUser={user} orgId={user.organizacao_id} /> : <CursosCandidato userRole={role} globalOrgId={globalOrgId} />;
+    case 'cursos': {
+      const isGlobalAdmin = role === 'super_admin' || role === 'design' || role === 'curador';
+      const adminOrgId = isGlobalAdmin ? null : user.organizacao_id;
+      return isAdmin ? <CursosAdmin loggedUser={user} orgId={adminOrgId} /> : <CursosCandidato userRole={role} globalOrgId={globalOrgId} />;
+    }
     case 'comunidade':
       return (
         <Community 

@@ -100,6 +100,37 @@ function formatFullTime(iso: string) {
   return new Date(iso).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
 }
 
+function Linkify({ text, isEntrada }: { text: string; isEntrada: boolean }) {
+  if (!text) return null;
+  const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+)/g;
+  const parts = text.split(urlRegex);
+  return (
+    <div className="whitespace-pre-wrap break-words">
+      {parts.map((part, i) => {
+        if (part.match(urlRegex)) {
+          const cleanPart = part.replace(/[.,;!?]+$/, '');
+          const punctuation = part.substring(cleanPart.length);
+          const href = cleanPart.startsWith('http') ? cleanPart : `https://${cleanPart}`;
+          return (
+            <React.Fragment key={i}>
+              <a
+                href={href}
+                target="_blank"
+                rel="noreferrer"
+                className={`underline ${isEntrada ? 'text-indigo-600 hover:text-indigo-800' : 'text-indigo-100 hover:text-white'}`}
+              >
+                {cleanPart}
+              </a>
+              {punctuation}
+            </React.Fragment>
+          );
+        }
+        return part;
+      })}
+    </div>
+  );
+}
+
 // ─── Componente Principal ─────────────────────────────────────────────────────
 
 export function AtendimentoIA({ loggedUser, loggedRole }: AtendimentoIAProps) {
@@ -660,7 +691,12 @@ export function AtendimentoIA({ loggedUser, loggedRole }: AtendimentoIAProps) {
                                   <img src={msg.midia_url} alt="Anexo" className="max-w-full rounded-xl mb-2 object-cover max-h-60" />
                                 )}
                                 {msg.tipo_mensagem === 'video' && msg.midia_url && (
-                                  <video src={msg.midia_url} controls className="max-w-full rounded-xl mb-2 max-h-60" />
+                                  <div className="flex flex-col gap-1 mb-2">
+                                    <video src={msg.midia_url} controls playsInline preload="metadata" className="max-w-full rounded-xl max-h-60 bg-black/5" />
+                                    <a href={msg.midia_url} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-3 py-1.5 bg-black/5 text-slate-700 rounded-lg text-xs w-fit hover:bg-black/10 transition-colors">
+                                      <Download size={14} /> Baixar Vídeo
+                                    </a>
+                                  </div>
                                 )}
                                 {msg.tipo_mensagem === 'audio' && msg.midia_url && (
                                   <audio src={msg.midia_url} controls className="max-w-full mb-2" />
@@ -670,7 +706,7 @@ export function AtendimentoIA({ loggedUser, loggedRole }: AtendimentoIAProps) {
                                     <FileText size={16} /> Ver Documento
                                   </a>
                                 )}
-                                {msg.conteudo && <div className="whitespace-pre-wrap">{msg.conteudo}</div>}
+                                {msg.conteudo && <Linkify text={msg.conteudo} isEntrada={isEntrada} />}
                                 
                                 {reacoesPorMensagemId[msg.id] && (
                                   <div className="absolute -bottom-2 -right-2 flex items-center gap-1 bg-white border border-slate-200 shadow-sm rounded-full px-1.5 py-0.5 z-10 text-xs">

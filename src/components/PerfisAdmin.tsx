@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { Search, User, Mail, Shield, UserPlus, Trash2, Edit2, Filter, ChevronRight, MoreHorizontal, Users, Link, Save, Copy, Plus, X, FileText, Clipboard } from 'lucide-react';
+import { Search, User, Mail, Shield, UserPlus, Trash2, Edit2, Filter, ChevronRight, MoreHorizontal, Users, Link, Save, Copy, Plus, X, FileText, Clipboard, LogIn } from 'lucide-react';
 
 interface PerfisAdminProps {
   loggedUser?: any;
@@ -493,6 +493,16 @@ export function PerfisAdmin({ loggedUser, loggedRole }: PerfisAdminProps) {
                             title="Editar"
                           >
                             <Edit2 size={16} />
+                          </button>
+                          <button 
+                            onClick={() => {
+                              localStorage.setItem('impersonatedUser', JSON.stringify(user));
+                              window.location.reload();
+                            }}
+                            className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all" 
+                            title="Acessar como usuário"
+                          >
+                            <LogIn size={16} />
                           </button>
                           <button 
                             onClick={() => handleDelete(user.id, user.nome)}

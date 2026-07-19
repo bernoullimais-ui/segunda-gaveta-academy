@@ -12,6 +12,7 @@ import { FinanceiroAdmin } from './FinanceiroAdmin';
 import { ActionModal } from './ActionModal';
 import { getFormattedVideoUrl } from '../lib/videoUtils';
 import { TrafegoAdmin } from './TrafegoAdmin';
+import { ProjetoAdmin } from './ProjetoAdmin';
 
 // getFormattedVideoUrl migrado para src/lib/videoUtils.ts
 // A função é re-exportada aqui para compatibilidade com código interno ainda não migrado
@@ -100,11 +101,12 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
 
     if (userData?.user?.id) {
       try {
-        const { data: userProfile } = await supabase
+        const { data: userProfiles } = await supabase
           .from('usuarios')
           .select('nome, role')
-          .eq('id', userData.user.id)
-          .maybeSingle();
+          .or(`auth_id.eq.${userData.user.id},email.eq.${userData.user.email}`)
+          .limit(1);
+        const userProfile = userProfiles?.[0];
         
         if (userProfile && userProfile.nome) {
           userName = userProfile.nome + ' (Professor)';
@@ -155,7 +157,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
     em_breve: false
   });
 
-  const [activeTab, setActiveTab] = useState<'visao_geral' | 'conteudo' | 'participantes' | 'configuracoes' | 'engajamento' | 'acessar_curso' | 'landing_page' | 'split' | 'financeiro' | 'planos' | 'trafego'>('visao_geral');
+  const [activeTab, setActiveTab] = useState<'visao_geral' | 'conteudo' | 'participantes' | 'configuracoes' | 'engajamento' | 'acessar_curso' | 'landing_page' | 'split' | 'financeiro' | 'planos' | 'trafego' | 'projeto_final'>('visao_geral');
   const [orgUsers, setOrgUsers] = useState<any[]>([]);
   const [courseSplits, setCourseSplits] = useState<{ usuario_id: string, porcentagem: number }[]>([]);
   const [pagarmeMarketplaceEnabled, setPagarmeMarketplaceEnabled] = useState(false);
@@ -1479,8 +1481,9 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
         <div className="bg-white border-b border-slate-100 px-8 flex gap-8 shrink-0 overflow-x-auto scrollbar-hide">
           {(
             [
-              'visao_geral', 'conteudo', 'participantes', 'engajamento', 'landing_page', 'planos', 'split', 'financeiro',
-              ...(loggedUser?.role === 'super_admin' ? ['trafego' as const] : [])
+              'visao_geral', ...(!editingTrilha ? ['acessar_curso' as const] : []), 'conteudo', 'participantes', 'engajamento', 'landing_page', 'planos', 'split', 'financeiro',
+              ...(loggedUser?.role === 'super_admin' ? ['trafego' as const] : []),
+              ...(!editingTrilha ? ['projeto_final' as const] : [])
             ]
           ).map(tab => (
             <button 
@@ -1493,6 +1496,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
               }`}
             >
               {tab === 'visao_geral' ? 'Visão Geral' : 
+               tab === 'acessar_curso' ? 'Visão do Aluno' :
                tab === 'conteudo' ? (editingTrilha ? 'Cursos Inclusos' : 'Currículo') : 
                tab === 'participantes' ? (editingTrilha ? 'Alunos' : 'Participantes') : 
                tab === 'engajamento' ? 'Certificado' : 
@@ -1500,7 +1504,8 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                tab === 'planos' ? 'Assinaturas' :
                tab === 'split' ? 'Coprodução / Split' :
                tab === 'financeiro' ? 'Financeiro' : 
-               tab === 'trafego' ? 'Tráfego' : 'Configurações'}
+               tab === 'trafego' ? 'Tráfego' :
+               tab === 'projeto_final' ? '📋 Projeto Final' : 'Configurações'}
               {activeTab === tab && (
                 <motion.div 
                   layoutId="activeTabIndicatorCurso"
@@ -4337,6 +4342,17 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col" style={{ height: 'calc(100vh - 200px)' }}>
             <CursosCandidato previewCourseId={createdCourseId || undefined} isGestor={true} />
           </div>
+        )}
+
+        {activeTab === 'projeto_final' && createdCourseId && (
+          <ProjetoAdmin
+            cursoId={createdCourseId}
+            orgId={orgId}
+            nomeCurso={activeCurso?.nome || ''}
+            curriculo={activeCurso?.curriculo_json || []}
+            loggedUser={loggedUser}
+            showToast={showToast}
+          />
         )}
 
         {activeTab === 'engajamento' && (

@@ -50,7 +50,7 @@ export function PaymentModal({ isOpen, onClose, item, customer, participantId, o
   const [cpf, setCpf] = useState(customer.cpf || '');
   const [phone, setPhone] = useState(customer.phone || '');
 
-  const [paymentMethod, setPaymentMethod] = useState<'pix' | 'credit_card' | 'boleto'>('pix');
+  const [paymentMethod, setPaymentMethod] = useState<'pix' | 'credit_card'>('pix');
   const [card, setCard] = useState({ number: '', holder_name: '', exp_month: '', exp_year: '', cvv: '' });
   // M1: installment state
   const [installments, setInstallments] = useState(1);
@@ -62,6 +62,30 @@ export function PaymentModal({ isOpen, onClose, item, customer, participantId, o
   const [couponError, setCouponError] = useState<string | null>(null);
   const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
   const [discountApplied, setDiscountApplied] = useState(0);
+
+  // PIX Transparent State
+  const [pixData, setPixData] = useState<{qr_code: string, qr_code_url: string, order_id: string} | null>(null);
+
+  React.useEffect(() => {
+    let intervalId: any;
+    if (pixData?.order_id) {
+      intervalId = setInterval(async () => {
+        try {
+          const res = await fetch(`/api/pagarme/order-status/${pixData.order_id}`);
+          const data = await res.json();
+          if (data.status === 'paid') {
+            clearInterval(intervalId);
+            window.location.href = `${window.location.origin}/pagamento-sucesso?id=${participantId}&type=${item.type}`;
+          }
+        } catch (e) {
+          console.error('Polling error', e);
+        }
+      }, 5000);
+    }
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [pixData, participantId, item.type]);
 
   React.useEffect(() => {
     if (isOpen) {
@@ -184,8 +208,8 @@ export function PaymentModal({ isOpen, onClose, item, customer, participantId, o
             card: {
               number: card.number.replace(/\s/g, ''),
               holder_name: card.holder_name,
-              exp_month: card.exp_month,
-              exp_year: card.exp_year.length === 2 ? `20${card.exp_year}` : card.exp_year,
+              exp_month: parseInt(card.exp_month, 10),
+              exp_year: parseInt(card.exp_year.length === 2 ? `20${card.exp_year}` : card.exp_year, 10),
               cvv: card.cvv
             }
           })
@@ -298,7 +322,11 @@ export function PaymentModal({ isOpen, onClose, item, customer, participantId, o
           });
           const data = await response.json();
           if (!response.ok) throw new Error(data.message || 'Erro ao processar pagamento');
-          window.location.href = data.checkout_url;
+          if (paymentMethod === 'pix' && data.qr_code) {
+             setPixData({ qr_code: data.qr_code, qr_code_url: data.qr_code_url, order_id: data.order_id });
+          } else {
+             window.location.href = data.checkout_url || `${window.location.origin}/pagamento-sucesso?id=${participantId}`;
+          }
         }
       }
     } catch (err: any) {
@@ -370,193 +398,223 @@ export function PaymentModal({ isOpen, onClose, item, customer, participantId, o
               <span className="text-slate-900 font-bold">{customer.name}</span>
             </div>
           </div>
+          {pixData ? (
+            <div className="flex flex-col items-center justify-center p-6 bg-slate-50 rounded-xl border border-slate-200">
+              <h4 className="font-bold text-lg text-slate-800 mb-2">Quase lá! Escaneie o QR Code</h4>
+              <p className="text-sm text-slate-600 text-center mb-6">Abra o app do seu banco e escaneie o código abaixo para finalizar sua inscrição.</p>
+              
+              {pixData.qr_code_url && (
+                <div className="bg-white p-2 rounded-xl shadow-sm border border-slate-200 mb-6">
+                  <img src={pixData.qr_code_url} alt="QR Code PIX" className="w-48 h-48" />
+                </div>
+              )}
+              
+              <div className="w-full">
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1 block">Ou copie o código PIX</label>
+                <div className="flex gap-2">
+                  <input 
+                    readOnly 
+                    value={pixData.qr_code} 
+                    className="flex-1 px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs font-mono text-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
+                  />
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(pixData.qr_code);
+                      alert('Código PIX copiado!');
+                    }}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors shrink-0"
+                  >
+                    Copiar
+                  </button>
+                </div>
+              </div>
+              <div className="mt-6 flex items-center justify-center gap-2 text-sm font-medium text-amber-600 bg-amber-50 px-4 py-2 rounded-full">
+                <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></div>
+                Aguardando pagamento...
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-5">
+              {/* Payment method selector */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Forma de Pagamento</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {(['pix', 'credit_card'] as const).map(method => (
+                    <button
+                      key={method}
+                      onClick={() => { setPaymentMethod(method); setInstallments(1); }}
+                      className={`py-2.5 rounded-xl border-2 text-xs font-bold transition-all ${
+                        paymentMethod === method
+                          ? 'border-indigo-600 bg-indigo-50 text-indigo-700'
+                          : 'border-slate-200 text-slate-600 hover:border-slate-300'
+                      }`}
+                    >
+                      {method === 'pix' ? '⚡ PIX' : '💳 Cartão'}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
-          {/* Payment method selector */}
-          <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Forma de Pagamento</label>
-            <div className="grid grid-cols-3 gap-2">
-              {(['pix', 'credit_card', 'boleto'] as const).map(method => (
-                <button
-                  key={method}
-                  onClick={() => { setPaymentMethod(method); setInstallments(1); }}
-                  className={`py-2.5 rounded-xl border-2 text-xs font-bold transition-all ${
-                    paymentMethod === method
-                      ? 'border-indigo-600 bg-indigo-50 text-indigo-700'
-                      : 'border-slate-200 text-slate-600 hover:border-slate-300'
+              {/* Coupon Code */}
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">Cupom de Desconto</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Digite seu cupom"
+                    value={couponInput}
+                    onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                    disabled={isValidatingCoupon || isCouponApplied}
+                    className="flex-1 px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold uppercase tracking-wider focus:ring-1 focus:ring-indigo-500 outline-none disabled:opacity-50 text-slate-900 placeholder:text-slate-400"
+                  />
+                  {isCouponApplied ? (
+                    <button type="button" onClick={handleRemoveCoupon}
+                      className="px-3 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-xs font-bold transition-all">
+                      Remover
+                    </button>
+                  ) : (
+                    <button type="button" onClick={handleApplyCoupon}
+                      disabled={isValidatingCoupon || !couponInput.trim()}
+                      className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition-all disabled:opacity-50">
+                      {isValidatingCoupon ? 'Validando...' : 'Aplicar'}
+                    </button>
+                  )}
+                </div>
+                {couponError && <p className="text-xs text-red-500 font-semibold">{couponError}</p>}
+                {isCouponApplied && (
+                  <p className="text-xs text-green-600 font-semibold flex items-center gap-1">
+                    <CheckCircle className="w-3 h-3" /> Cupom "{appliedCouponCode}" aplicado!
+                  </p>
+                )}
+              </div>
+
+              {/* CPF */}
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-1">
+                  CPF do Pagador *
+                  {cpf.replace(/\D/g, '').length === 11 && (
+                    <span className={`ml-2 text-xs font-semibold ${cpfIsValid ? 'text-green-600' : 'text-red-500'}`}>
+                      {cpfIsValid ? '✓ válido' : '✗ inválido'}
+                    </span>
+                  )}
+                </label>
+                <input
+                  type="text"
+                  placeholder="000.000.000-00"
+                  className={`w-full p-3 bg-white border-2 rounded-xl outline-none transition-colors text-slate-900 placeholder:text-slate-400 ${
+                    cpf.replace(/\D/g, '').length === 11
+                      ? cpfIsValid ? 'border-green-400 focus:border-green-500' : 'border-red-400 focus:border-red-500'
+                      : 'border-slate-200 focus:border-indigo-500'
                   }`}
-                >
-                  {method === 'pix' ? '⚡ PIX' : method === 'credit_card' ? '💳 Cartão' : '📄 Boleto'}
-                </button>
-              ))}
-            </div>
-            {paymentMethod === 'boleto' && (
-              <p className="text-xs text-amber-600 bg-amber-50 rounded-lg p-2 mt-2">
-                ⚠️ O boleto vence em <strong>3 dias úteis</strong>. Seu acesso será liberado após a confirmação do pagamento.
-              </p>
-            )}
-          </div>
-
-          {/* Coupon Code */}
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">Cupom de Desconto</label>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                placeholder="Digite seu cupom"
-                value={couponInput}
-                onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
-                disabled={isValidatingCoupon || isCouponApplied}
-                className="flex-1 px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold uppercase tracking-wider focus:ring-1 focus:ring-indigo-500 outline-none disabled:opacity-50 text-slate-900 placeholder:text-slate-400"
-              />
-              {isCouponApplied ? (
-                <button type="button" onClick={handleRemoveCoupon}
-                  className="px-3 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-xs font-bold transition-all">
-                  Remover
-                </button>
-              ) : (
-                <button type="button" onClick={handleApplyCoupon}
-                  disabled={isValidatingCoupon || !couponInput.trim()}
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition-all disabled:opacity-50">
-                  {isValidatingCoupon ? 'Validando...' : 'Aplicar'}
-                </button>
-              )}
-            </div>
-            {couponError && <p className="text-xs text-red-500 font-semibold">{couponError}</p>}
-            {isCouponApplied && (
-              <p className="text-xs text-green-600 font-semibold flex items-center gap-1">
-                <CheckCircle className="w-3 h-3" /> Cupom "{appliedCouponCode}" aplicado!
-              </p>
-            )}
-          </div>
-
-          {/* CPF */}
-          <div>
-            <label className="block text-sm font-bold text-slate-700 mb-1">
-              CPF do Pagador *
-              {cpf.replace(/\D/g, '').length === 11 && (
-                <span className={`ml-2 text-xs font-semibold ${cpfIsValid ? 'text-green-600' : 'text-red-500'}`}>
-                  {cpfIsValid ? '✓ válido' : '✗ inválido'}
-                </span>
-              )}
-            </label>
-            <input
-              type="text"
-              placeholder="000.000.000-00"
-              className={`w-full p-3 bg-white border-2 rounded-xl outline-none transition-colors text-slate-900 placeholder:text-slate-400 ${
-                cpf.replace(/\D/g, '').length === 11
-                  ? cpfIsValid ? 'border-green-400 focus:border-green-500' : 'border-red-400 focus:border-red-500'
-                  : 'border-slate-200 focus:border-indigo-500'
-              }`}
-              value={cpf}
-              onChange={(e) => setCpf(formatCPF(e.target.value))}
-              maxLength={14}
-            />
-          </div>
-
-          {/* Phone (required for credit card) */}
-          {paymentMethod === 'credit_card' && (
-            <div>
-              <label className="block text-sm font-bold text-slate-700 mb-1">Telefone *</label>
-              <input
-                type="tel"
-                placeholder="(11) 99999-9999"
-                className="w-full p-3 bg-white border-2 border-slate-200 rounded-xl focus:border-indigo-500 outline-none text-slate-900 placeholder:text-slate-400"
-                value={phone}
-                onChange={(e) => setPhone(formatPhone(e.target.value))}
-                maxLength={15}
-              />
-            </div>
-          )}
-
-          {/* Credit card fields */}
-          {paymentMethod === 'credit_card' && (
-            <div className="space-y-3">
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">Dados do Cartão</label>
-              <input
-                placeholder="Número do Cartão"
-                className="w-full p-3 border border-slate-200 rounded-lg text-sm focus:ring-1 focus:ring-indigo-500 outline-none text-slate-900 placeholder:text-slate-400"
-                onChange={e => setCard({ ...card, number: e.target.value })}
-              />
-              <input
-                placeholder="Nome no Cartão"
-                className="w-full p-3 border border-slate-200 rounded-lg text-sm focus:ring-1 focus:ring-indigo-500 outline-none text-slate-900 placeholder:text-slate-400"
-                onChange={e => setCard({ ...card, holder_name: e.target.value })}
-              />
-              <div className="flex gap-2">
-                <input
-                  placeholder="MM"
-                  maxLength={2}
-                  className="w-full p-3 border border-slate-200 rounded-lg text-sm focus:ring-1 focus:ring-indigo-500 outline-none text-slate-900 placeholder:text-slate-400"
-                  onChange={e => setCard({ ...card, exp_month: e.target.value })}
-                />
-                <input
-                  placeholder="AA"
-                  maxLength={4}
-                  className="w-full p-3 border border-slate-200 rounded-lg text-sm focus:ring-1 focus:ring-indigo-500 outline-none text-slate-900 placeholder:text-slate-400"
-                  onChange={e => setCard({ ...card, exp_year: e.target.value })}
-                />
-                <input
-                  placeholder="CVV"
-                  maxLength={4}
-                  className="w-full p-3 border border-slate-200 rounded-lg text-sm focus:ring-1 focus:ring-indigo-500 outline-none text-slate-900 placeholder:text-slate-400"
-                  onChange={e => setCard({ ...card, cvv: e.target.value })}
+                  value={cpf}
+                  onChange={(e) => setCpf(formatCPF(e.target.value))}
+                  maxLength={14}
                 />
               </div>
 
-              {/* M1: Installment selector */}
-              {finalAmount >= 10 && item.paymentModel !== 'recorrente' && item.paymentModel !== 'parcelado' && !planId && (
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Parcelamento</label>
-                  <select
-                    value={installments}
-                    onChange={e => setInstallments(Number(e.target.value))}
-                    className="w-full p-3 border border-slate-200 rounded-lg text-sm focus:ring-1 focus:ring-indigo-500 outline-none bg-white"
-                  >
-                    {INSTALLMENT_OPTIONS
-                      .filter(n => n === 1 || (finalAmount / n) >= 5)
-                      .map(n => (
-                        <option key={n} value={n}>
-                          {n}x de {formatBRL(finalAmount / n)}{n === 1 ? ' (à vista)' : ' sem juros*'}
-                        </option>
-                      ))}
-                  </select>
-                  <p className="text-xs text-slate-400 mt-1">* Parcelamento sem juros condicionado à aprovação.</p>
+              {/* Phone (required for all Pagar.me native orders) */}
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-1">Telefone *</label>
+                <input
+                  type="tel"
+                  placeholder="(11) 99999-9999"
+                  className="w-full p-3 bg-white border-2 border-slate-200 rounded-xl focus:border-indigo-500 outline-none text-slate-900 placeholder:text-slate-400"
+                  value={phone}
+                  onChange={(e) => setPhone(formatPhone(e.target.value))}
+                  maxLength={15}
+                />
+              </div>
+
+              {/* Credit card fields */}
+              {paymentMethod === 'credit_card' && (
+                <div className="space-y-3">
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">Dados do Cartão</label>
+                  <input
+                    placeholder="Número do Cartão"
+                    className="w-full p-3 border border-slate-200 rounded-lg text-sm focus:ring-1 focus:ring-indigo-500 outline-none text-slate-900 placeholder:text-slate-400"
+                    onChange={e => setCard({ ...card, number: e.target.value })}
+                  />
+                  <input
+                    placeholder="Nome no Cartão"
+                    className="w-full p-3 border border-slate-200 rounded-lg text-sm focus:ring-1 focus:ring-indigo-500 outline-none text-slate-900 placeholder:text-slate-400"
+                    onChange={e => setCard({ ...card, holder_name: e.target.value })}
+                  />
+                  <div className="flex gap-2">
+                    <input
+                      placeholder="MM"
+                      maxLength={2}
+                      className="w-full p-3 border border-slate-200 rounded-lg text-sm focus:ring-1 focus:ring-indigo-500 outline-none text-slate-900 placeholder:text-slate-400"
+                      onChange={e => setCard({ ...card, exp_month: e.target.value })}
+                    />
+                    <input
+                      placeholder="AA"
+                      maxLength={4}
+                      className="w-full p-3 border border-slate-200 rounded-lg text-sm focus:ring-1 focus:ring-indigo-500 outline-none text-slate-900 placeholder:text-slate-400"
+                      onChange={e => setCard({ ...card, exp_year: e.target.value })}
+                    />
+                    <input
+                      placeholder="CVV"
+                      maxLength={4}
+                      className="w-full p-3 border border-slate-200 rounded-lg text-sm focus:ring-1 focus:ring-indigo-500 outline-none text-slate-900 placeholder:text-slate-400"
+                      onChange={e => setCard({ ...card, cvv: e.target.value })}
+                    />
+                  </div>
+
+                  {/* M1: Installment selector */}
+                  {finalAmount >= 10 && item.paymentModel !== 'recorrente' && item.paymentModel !== 'parcelado' && !planId && (
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Parcelamento</label>
+                      <select
+                        value={installments}
+                        onChange={e => setInstallments(Number(e.target.value))}
+                        className="w-full p-3 border border-slate-200 rounded-lg text-sm focus:ring-1 focus:ring-indigo-500 outline-none bg-white"
+                      >
+                        {INSTALLMENT_OPTIONS
+                          .filter(n => n === 1 || (finalAmount / n) >= 5)
+                          .map(n => (
+                            <option key={n} value={n}>
+                              {n}x de {formatBRL(finalAmount / n)}{n === 1 ? ' (à vista)' : ' sem juros*'}
+                            </option>
+                          ))}
+                      </select>
+                      <p className="text-xs text-slate-400 mt-1">* Parcelamento sem juros condicionado à aprovação.</p>
+                    </div>
+                  )}
                 </div>
               )}
+              
+              {error && (
+                <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg text-xs overflow-auto max-h-28">
+                  <p className="font-bold mb-1">Não foi possível processar o pagamento:</p>
+                  {error}
+                </div>
+              )}
+
+              <button
+                onClick={handlePayment}
+                disabled={isLoading}
+                className="w-full py-4 bg-emerald-600 text-white rounded-xl font-bold text-lg shadow-lg hover:bg-emerald-700 transition-all flex items-center justify-center gap-3 disabled:opacity-70 active:scale-[0.98]"
+              >
+                {isLoading ? (
+                  <Loader2 className="w-6 h-6 animate-spin" />
+                ) : (
+                  <>
+                    <ExternalLink className="w-5 h-5" />
+                    {paymentMethod === 'credit_card'
+                      ? `Pagar ${installments > 1 ? `${installments}x de ${formatBRL(installmentValue)}` : formatBRL(finalAmount)}`
+                      : `Pagar via PIX — ${formatBRL(finalAmount)}`
+                    }
+                  </>
+                )}
+              </button>
+
+              <p className="text-center text-xs text-slate-400 flex items-center justify-center gap-1">
+                <ShieldCheck className="w-3 h-3" />
+                Ambiente de pagamento seguro via Pagar.me
+              </p>
             </div>
           )}
-
-          {error && (
-            <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg text-xs overflow-auto max-h-28">
-              <p className="font-bold mb-1">Não foi possível processar o pagamento:</p>
-              {error}
-            </div>
-          )}
-
-          <button
-            onClick={handlePayment}
-            disabled={isLoading}
-            className="w-full py-4 bg-emerald-600 text-white rounded-xl font-bold text-lg shadow-lg hover:bg-emerald-700 transition-all flex items-center justify-center gap-3 disabled:opacity-70 active:scale-[0.98]"
-          >
-            {isLoading ? (
-              <Loader2 className="w-6 h-6 animate-spin" />
-            ) : (
-              <>
-                <ExternalLink className="w-5 h-5" />
-                {paymentMethod === 'credit_card'
-                  ? `Pagar ${installments > 1 ? `${installments}x de ${formatBRL(installmentValue)}` : formatBRL(finalAmount)}`
-                  : paymentMethod === 'boleto'
-                    ? `Gerar Boleto de ${formatBRL(finalAmount)}`
-                    : `Pagar via PIX — ${formatBRL(finalAmount)}`
-                }
-              </>
-            )}
-          </button>
-
-          <p className="text-center text-xs text-slate-400 flex items-center justify-center gap-1">
-            <ShieldCheck className="w-3 h-3" />
-            Ambiente de pagamento seguro via Pagar.me
-          </p>
         </div>
       </div>
     </div>
