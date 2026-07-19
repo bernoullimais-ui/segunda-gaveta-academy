@@ -37,6 +37,29 @@ export function evaluateFormula(formulaStr: string, valuesMap: Record<string, an
       }
       return sum;
     },
+    MÉDIA: (...args: any[]) => {
+      let sum = 0;
+      let count = 0;
+      const flat = args.flat(Infinity);
+      for (const val of flat) {
+        sum += (Number(val) || 0);
+        count++;
+      }
+      return count > 0 ? sum / count : 0;
+    },
+    ARRED: (val: number, casas: number = 0) => {
+      const p = Math.pow(10, casas);
+      return Math.round((Number(val) || 0) * p) / p;
+    },
+    TETO: (val: number) => Math.ceil(Number(val) || 0),
+    PISO: (val: number) => Math.floor(Number(val) || 0),
+    ABS: (val: number) => Math.abs(Number(val) || 0),
+    SEERRO: (val: any, fallback: any) => {
+      if (val === undefined || val === null || isNaN(Number(val)) || !isFinite(Number(val))) {
+        return fallback;
+      }
+      return val;
+    },
     ...varMap
   };
 

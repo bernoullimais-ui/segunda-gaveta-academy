@@ -119,32 +119,55 @@ function CampoEditorModal({
               <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1 block">Fórmula</label>
               <textarea className={`${inp} resize-y font-mono text-xs`} rows={3} value={formulaText} onChange={e=>setFormulaText(e.target.value)} placeholder="Ex: =SE([ID]>0; [ID]*2; 0)" />
             </div>
-            <div>
-              <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1 block">Campos Disponíveis (Clique para inserir)</label>
-              <div className="max-h-40 overflow-y-auto border border-slate-200 rounded-lg p-2 bg-slate-50 flex flex-col gap-1">
-                {missoes.map(m => (m.campos_json || []).map(c => {
-                  if (c.tipo === 'tabela') {
-                    return (c.colunas || []).map((col, idx) => (
-                      <React.Fragment key={`${c.id}-${idx}`}>
-                        <button type="button" onClick={() => setFormulaText(f => f + `[${c.id}:${idx}]`)} className="text-left text-xs text-blue-600 hover:bg-blue-100 p-1.5 rounded transition-colors break-words">
-                          <span className="font-semibold text-slate-600">{m.titulo}</span> &gt; {c.label} <span className="text-slate-400">({col}{c.linhas_rotulos?.length ? ' - Soma de todas' : ''})</span>
-                        </button>
-                        {(c.linhas_rotulos || []).map((rotulo: string, lineIdx: number) => (
-                          <button type="button" key={`${c.id}-${idx}-${lineIdx}`} onClick={() => setFormulaText(f => f + `[${c.id}:${idx}:${lineIdx}]`)} className="text-left text-xs text-blue-600 hover:bg-blue-100 p-1.5 rounded transition-colors break-words pl-4 border-l-2 border-blue-200 ml-1">
-                            ↳ <span className="font-semibold text-slate-600">{col}</span> <span className="text-slate-400">({rotulo})</span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide mb-1 block">Funções</label>
+                <div className="h-40 overflow-y-auto border border-slate-200 rounded-lg p-1.5 bg-slate-50 flex flex-col gap-1">
+                  {[
+                    { f: 'SE(condição; v; f)', v: 'SE( ; ; )' },
+                    { f: 'SOMA(v1; v2)', v: 'SOMA( ; )' },
+                    { f: 'MÉDIA(v1; v2)', v: 'MÉDIA( ; )' },
+                    { f: 'MÁXIMO(v1; v2)', v: 'MÁXIMO( ; )' },
+                    { f: 'MÍNIMO(v1; v2)', v: 'MÍNIMO( ; )' },
+                    { f: 'ARRED(v; casas)', v: 'ARRED( ; 0)' },
+                    { f: 'TETO(v)', v: 'TETO( )' },
+                    { f: 'PISO(v)', v: 'PISO( )' },
+                    { f: 'ABS(v)', v: 'ABS( )' },
+                    { f: 'SEERRO(v; fallback)', v: 'SEERRO( ; 0)' },
+                  ].map(func => (
+                    <button type="button" key={func.f} onClick={() => setFormulaText(f => (f ? f + func.v : '=' + func.v))} className="text-left text-[11px] text-emerald-700 hover:bg-emerald-100 p-1.5 rounded transition-colors break-words font-mono font-semibold">
+                      {func.f}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide mb-1 block">Variáveis (Campos)</label>
+                <div className="h-40 overflow-y-auto border border-slate-200 rounded-lg p-1.5 bg-slate-50 flex flex-col gap-1">
+                  {missoes.map(m => (m.campos_json || []).map(c => {
+                    if (c.tipo === 'tabela') {
+                      return (c.colunas || []).map((col, idx) => (
+                        <React.Fragment key={`${c.id}-${idx}`}>
+                          <button type="button" onClick={() => setFormulaText(f => f + `[${c.id}:${idx}]`)} className="text-left text-[11px] text-blue-600 hover:bg-blue-100 p-1.5 rounded transition-colors break-words">
+                            <span className="font-semibold text-slate-600 truncate block">{m.titulo}</span> <span className="text-slate-400">({col}{c.linhas_rotulos?.length ? ' - Soma de todas' : ''})</span>
                           </button>
-                        ))}
-                      </React.Fragment>
-                    ));
-                  } else if (['numero', 'calculado'].includes(c.tipo) && c.id !== form.id) {
-                    return (
-                      <button type="button" key={c.id} onClick={() => setFormulaText(f => f + `[${c.id}]`)} className="text-left text-xs text-blue-600 hover:bg-blue-100 p-1.5 rounded transition-colors break-words">
-                        <span className="font-semibold text-slate-600">{m.titulo}</span> &gt; {c.label}
-                      </button>
-                    );
-                  }
-                  return null;
-                }))}
+                          {(c.linhas_rotulos || []).map((rotulo: string, lineIdx: number) => (
+                            <button type="button" key={`${c.id}-${idx}-${lineIdx}`} onClick={() => setFormulaText(f => f + `[${c.id}:${idx}:${lineIdx}]`)} className="text-left text-[11px] text-blue-600 hover:bg-blue-100 p-1.5 rounded transition-colors break-words pl-3 border-l-2 border-blue-200 ml-1">
+                              ↳ <span className="text-slate-400">({rotulo})</span>
+                            </button>
+                          ))}
+                        </React.Fragment>
+                      ));
+                    } else if (['numero', 'calculado'].includes(c.tipo) && c.id !== form.id) {
+                      return (
+                        <button type="button" key={c.id} onClick={() => setFormulaText(f => f + `[${c.id}]`)} className="text-left text-[11px] text-blue-600 hover:bg-blue-100 p-1.5 rounded transition-colors break-words">
+                          <span className="font-semibold text-slate-600 truncate block">{m.titulo}</span> {c.label}
+                        </button>
+                      );
+                    }
+                    return null;
+                  }))}
+                </div>
               </div>
             </div>
           </>
