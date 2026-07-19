@@ -314,9 +314,9 @@ export function ProjetoAluno({
   }
 
   return (
-    <div className="flex h-full gap-0 overflow-hidden">
+    <div className="flex h-full gap-0 overflow-hidden w-full relative">
       {/* ── Sidebar — lista de missões ─────────────────────────────────────── */}
-      <div className="w-64 shrink-0 border-r border-slate-200 bg-white flex flex-col">
+      <div className={`w-full md:w-64 shrink-0 border-r border-slate-200 bg-white flex-col ${selectedMissaoIdx !== null ? 'hidden md:flex' : 'flex'}`}>
         {/* Header sidebar */}
         <div className="p-4 border-b border-slate-100">
           <div className="flex items-center gap-2 mb-3">
@@ -393,7 +393,7 @@ export function ProjetoAluno({
       </div>
 
       {/* ── Main — formulário da missão ────────────────────────────────────── */}
-      <div className="flex-1 overflow-y-auto bg-slate-50/30">
+      <div className={`flex-1 overflow-y-auto bg-slate-50/30 w-full ${selectedMissao === null ? 'hidden md:block' : 'block'}`}>
         <AnimatePresence mode="wait">
           {selectedMissao === null ? (
             <motion.div
@@ -426,8 +426,13 @@ export function ProjetoAluno({
             <motion.div
               key={selectedMissao.id}
               initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
-              className="max-w-2xl mx-auto p-6 space-y-6"
+              className="max-w-2xl mx-auto p-4 md:p-6 space-y-5 md:space-y-6"
             >
+              {/* Botão de voltar (apenas mobile) */}
+              <button onClick={() => setSelectedMissaoIdx(null)} className="md:hidden flex items-center text-blue-600 font-semibold text-sm -mb-2">
+                <ChevronLeft className="w-4 h-4 mr-1" /> Voltar às missões
+              </button>
+
               {/* Header da missão */}
               <div>
                 <div className="flex items-center gap-2 mb-1">
