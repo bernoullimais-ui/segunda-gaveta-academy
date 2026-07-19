@@ -83,13 +83,13 @@ export function CampoRenderer({
         return (
           <div className="flex items-center gap-2 relative">
             {campo.unidade && campo.unidade !== '%' && (
-              <span className="px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg text-sm font-semibold text-slate-600 shrink-0">
+              <span className={`px-3 py-2 border rounded-lg text-sm font-semibold shrink-0 ${campo.tipo === 'calculado' ? 'bg-indigo-50/50 border-indigo-200 text-indigo-700' : 'bg-slate-100 border-slate-200 text-slate-600'}`}>
                 {campo.unidade}
               </span>
             )}
             <input
               type="number"
-              className={`${baseInput} ${campo.tipo === 'calculado' ? 'bg-slate-50 cursor-not-allowed font-medium text-slate-700 shadow-inner' : ''}`}
+              className={`${baseInput} ${campo.tipo === 'calculado' ? 'bg-indigo-50/30 border-indigo-200 cursor-not-allowed font-bold text-indigo-900 shadow-inner focus:border-indigo-200 focus:ring-0' : ''}`}
               placeholder={campo.tipo === 'calculado' ? 'Automático' : (campo.placeholder || '0')}
               value={value ?? ''}
               onChange={e => {
@@ -99,7 +99,7 @@ export function CampoRenderer({
               readOnly={campo.tipo === 'calculado'}
             />
             {campo.unidade === '%' && (
-              <span className="px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg text-sm font-semibold text-slate-600 shrink-0">
+              <span className={`px-3 py-2 border rounded-lg text-sm font-semibold shrink-0 ${campo.tipo === 'calculado' ? 'bg-indigo-50/50 border-indigo-200 text-indigo-700' : 'bg-slate-100 border-slate-200 text-slate-600'}`}>
                 %
               </span>
             )}
