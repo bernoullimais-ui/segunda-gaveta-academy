@@ -177,7 +177,7 @@ export function ProjetoAdmin({ cursoId, orgId, nomeCurso, curriculo=[], loggedUs
   const [feedbackCamposDraft, setFeedbackCamposDraft] = useState<Record<string,Record<string,string>>>({});
   const [feedbackPublicadoDraft, setFeedbackPublicadoDraft] = useState<Record<string,boolean>>({});
   const [isSavingFeedback, setIsSavingFeedback] = useState<string|null>(null);
-  const [expandedMissao, setExpandedMissao] = useState<string|null>(null);
+  const [expandedMissoes, setExpandedMissoes] = useState<string[]>([]);
   const [editingCampo, setEditingCampo] = useState<{missaoId:string;campo:Partial<CampoConfig>|null}|null>(null);
   const [searchAluno, setSearchAluno] = useState('');
   const [delegacaoSearch, setDelegacaoSearch] = useState('');
@@ -240,7 +240,7 @@ export function ProjetoAdmin({ cursoId, orgId, nomeCurso, curriculo=[], loggedUs
     const ordem=missoes.length;
     const {data,error} = await supabase.from('projeto_conclusao_missoes').insert({template_id:template.id,titulo:`Missão ${ordem+1}`,campos_json:[],ordem,gatilho_tipo:'concluir_etapa'}).select().single();
     if(error){showToast('Erro ao criar missão','error');return;}
-    setMissoes(prev=>[...prev,data as ProjetoMissao]); setExpandedMissao(data.id);
+    setMissoes(prev=>[...prev,data as ProjetoMissao]); setExpandedMissoes(prev=>[...prev,data.id]);
   };
 
   const salvarMissao = async(missao:ProjetoMissao)=>{
@@ -425,7 +425,7 @@ export function ProjetoAdmin({ cursoId, orgId, nomeCurso, curriculo=[], loggedUs
                         {(dp,ds)=>(
                           <div ref={dp.innerRef} {...dp.draggableProps} className={`border rounded-xl overflow-hidden transition-shadow ${ds.isDragging?'border-blue-300 shadow-xl shadow-blue-100/60 bg-white':'border-slate-200 bg-white'}`}>
                             {/* Header */}
-                            <div className="flex items-center gap-3 p-4 cursor-pointer hover:bg-slate-50 transition-colors" onClick={()=>setExpandedMissao(expandedMissao===missao.id?null:missao.id)}>
+                            <div className="flex items-center gap-3 p-4 cursor-pointer hover:bg-slate-50 transition-colors" onClick={()=>setExpandedMissoes(prev=>prev.includes(missao.id)?prev.filter(id=>id!==missao.id):[...prev,missao.id])}>
                               <div {...dp.dragHandleProps} onClick={e=>e.stopPropagation()} className="cursor-grab active:cursor-grabbing p-1 -ml-1 rounded hover:bg-slate-100 transition-colors shrink-0" title="Arrastar para reordenar">
                                 <GripVertical className="w-4 h-4 text-slate-300" />
                               </div>
@@ -438,12 +438,12 @@ export function ProjetoAdmin({ cursoId, orgId, nomeCurso, curriculo=[], loggedUs
                               </div>
                               <div className="flex items-center gap-1 shrink-0">
                                 <button onClick={e=>{e.stopPropagation();excluirMissao(missao.id);}} className="p-1.5 text-slate-300 hover:text-red-500 transition-colors rounded"><Trash2 className="w-4 h-4" /></button>
-                                {expandedMissao===missao.id?<ChevronUp className="w-4 h-4 text-slate-400" />:<ChevronDown className="w-4 h-4 text-slate-400" />}
+                                {expandedMissoes.includes(missao.id)?<ChevronUp className="w-4 h-4 text-slate-400" />:<ChevronDown className="w-4 h-4 text-slate-400" />}
                               </div>
                             </div>
                             {/* Body */}
                             <AnimatePresence>
-                              {expandedMissao===missao.id&&(
+                              {expandedMissoes.includes(missao.id)&&(
                                 <motion.div initial={{height:0,opacity:0}} animate={{height:'auto',opacity:1}} exit={{height:0,opacity:0}} transition={{duration:0.2}} className="overflow-hidden">
                                   <div className="p-4 pt-0 border-t border-slate-100 space-y-4 bg-slate-50/50">
                                     <div>
