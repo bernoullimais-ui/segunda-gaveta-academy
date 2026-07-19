@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   ClipboardList, Plus, Trash2, ChevronDown, ChevronUp, Settings, Users,
   CheckCircle2, Clock, FileText, Lock, Send, MessageSquare, Download,
@@ -66,7 +66,37 @@ function CampoEditorModal({
   const [colunasText, setColunasText] = useState((campo?.colunas || []).join('\n'));
   const [rotulosText, setRotulosText] = useState((campo?.linhas_rotulos || []).join('\n'));
   const [formulaText, setFormulaText] = useState(campo?.formula || '');
+  const formulaTextareaRef = useRef<HTMLTextAreaElement>(null);
   const inp = 'w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500';
+
+  const insertIntoFormula = (textToInsert: string) => {
+    const el = formulaTextareaRef.current;
+    if (el) {
+      const start = el.selectionStart;
+      const end = el.selectionEnd;
+      const current = formulaText;
+      
+      let prefix = '';
+      if (textToInsert.startsWith('=')) {
+        // Se estiver inserindo uma função que começa com '=' e já tem '=', remove o '='
+        if (current.trim().startsWith('=')) {
+          textToInsert = textToInsert.substring(1);
+        } else if (start === 0) {
+          // Se for o começo de tudo, mantém '='
+        }
+      }
+      
+      const newValue = current.substring(0, start) + textToInsert + current.substring(end);
+      setFormulaText(newValue);
+      
+      setTimeout(() => {
+        el.focus();
+        el.setSelectionRange(start + textToInsert.length, start + textToInsert.length);
+      }, 0);
+    } else {
+      setFormulaText(f => f ? f + textToInsert : (textToInsert.startsWith('=') ? textToInsert : '=' + textToInsert));
+    }
+  };
   const handleSave = () => {
     if (!form.label?.trim()) return;
     const c: CampoConfig = {
@@ -117,7 +147,7 @@ function CampoEditorModal({
           <>
             <div>
               <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1 block">Fórmula</label>
-              <textarea className={`${inp} resize-y font-mono text-xs`} rows={3} value={formulaText} onChange={e=>setFormulaText(e.target.value)} placeholder="Ex: =SE([ID]>0; [ID]*2; 0)" />
+              <textarea ref={formulaTextareaRef} className={`${inp} resize-y font-mono text-xs`} rows={3} value={formulaText} onChange={e=>setFormulaText(e.target.value)} placeholder="Ex: =SE([ID]>0; [ID]*2; 0)" />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
@@ -135,7 +165,7 @@ function CampoEditorModal({
                     { f: 'ABS(v)', v: 'ABS( )' },
                     { f: 'SEERRO(v; fallback)', v: 'SEERRO( ; 0)' },
                   ].map(func => (
-                    <button type="button" key={func.f} onClick={() => setFormulaText(f => (f ? f + func.v : '=' + func.v))} className="text-left text-[11px] text-emerald-700 hover:bg-emerald-100 p-1.5 rounded transition-colors break-words font-mono font-semibold">
+                    <button type="button" key={func.f} onClick={() => insertIntoFormula(func.v)} className="text-left text-[11px] text-emerald-700 hover:bg-emerald-100 p-1.5 rounded transition-colors break-words font-mono font-semibold">
                       {func.f}
                     </button>
                   ))}
@@ -152,11 +182,11 @@ function CampoEditorModal({
                         
                         return (
                           <React.Fragment key={`${c.id}-${idx}`}>
-                            <button type="button" onClick={() => setFormulaText(f => f + `[${c.id}:${idx}]`)} className="text-left text-[11px] text-blue-600 hover:bg-blue-100 p-1.5 rounded transition-colors break-words">
+                            <button type="button" onClick={() => insertIntoFormula(`[${c.id}:${idx}]`)} className="text-left text-[11px] text-blue-600 hover:bg-blue-100 p-1.5 rounded transition-colors break-words">
                               <span className="font-semibold text-slate-600 truncate block">{m.titulo}</span> <span className="text-slate-400">({col}{c.linhas_rotulos?.length ? ' - Soma de todas' : ''})</span>
                             </button>
                             {(c.linhas_rotulos || []).map((rotulo: string, lineIdx: number) => (
-                              <button type="button" key={`${c.id}-${idx}-${lineIdx}`} onClick={() => setFormulaText(f => f + `[${c.id}:${idx}:${lineIdx}]`)} className="text-left text-[11px] text-blue-600 hover:bg-blue-100 p-1.5 rounded transition-colors break-words pl-3 border-l-2 border-blue-200 ml-1">
+                              <button type="button" key={`${c.id}-${idx}-${lineIdx}`} onClick={() => insertIntoFormula(`[${c.id}:${idx}:${lineIdx}]`)} className="text-left text-[11px] text-blue-600 hover:bg-blue-100 p-1.5 rounded transition-colors break-words pl-3 border-l-2 border-blue-200 ml-1">
                                 ↳ <span className="text-slate-400">({rotulo})</span>
                               </button>
                             ))}
@@ -165,7 +195,7 @@ function CampoEditorModal({
                       });
                     } else if (['numero', 'calculado'].includes(c.tipo) && c.id !== form.id) {
                       return (
-                        <button type="button" key={c.id} onClick={() => setFormulaText(f => f + `[${c.id}]`)} className="text-left text-[11px] text-blue-600 hover:bg-blue-100 p-1.5 rounded transition-colors break-words">
+                        <button type="button" key={c.id} onClick={() => insertIntoFormula(`[${c.id}]`)} className="text-left text-[11px] text-blue-600 hover:bg-blue-100 p-1.5 rounded transition-colors break-words">
                           <span className="font-semibold text-slate-600 truncate block">{m.titulo}</span> {c.label}
                         </button>
                       );
