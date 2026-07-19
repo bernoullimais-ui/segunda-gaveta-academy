@@ -125,9 +125,16 @@ function CampoEditorModal({
                 {missoes.map(m => (m.campos_json || []).map(c => {
                   if (c.tipo === 'tabela') {
                     return (c.colunas || []).map((col, idx) => (
-                      <button type="button" key={`${c.id}-${idx}`} onClick={() => setFormulaText(f => f + `[${c.id}:${idx}]`)} className="text-left text-xs text-blue-600 hover:bg-blue-100 p-1.5 rounded transition-colors break-words">
-                        <span className="font-semibold text-slate-600">{m.titulo}</span> &gt; {c.label} <span className="text-slate-400">({col})</span>
-                      </button>
+                      <React.Fragment key={`${c.id}-${idx}`}>
+                        <button type="button" onClick={() => setFormulaText(f => f + `[${c.id}:${idx}]`)} className="text-left text-xs text-blue-600 hover:bg-blue-100 p-1.5 rounded transition-colors break-words">
+                          <span className="font-semibold text-slate-600">{m.titulo}</span> &gt; {c.label} <span className="text-slate-400">({col}{c.linhas_rotulos?.length ? ' - Soma de todas' : ''})</span>
+                        </button>
+                        {(c.linhas_rotulos || []).map((rotulo: string, lineIdx: number) => (
+                          <button type="button" key={`${c.id}-${idx}-${lineIdx}`} onClick={() => setFormulaText(f => f + `[${c.id}:${idx}:${lineIdx}]`)} className="text-left text-xs text-blue-600 hover:bg-blue-100 p-1.5 rounded transition-colors break-words pl-4 border-l-2 border-blue-200 ml-1">
+                            ↳ <span className="font-semibold text-slate-600">{col}</span> <span className="text-slate-400">({rotulo})</span>
+                          </button>
+                        ))}
+                      </React.Fragment>
                     ));
                   } else if (['numero', 'calculado'].includes(c.tipo) && c.id !== form.id) {
                     return (

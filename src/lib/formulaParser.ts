@@ -78,11 +78,15 @@ export function buildGlobalValuesMap(
     (m.campos_json || []).forEach((c: any) => {
       if (c.tipo !== 'calculado') {
         if (c.tipo === 'tabela' && Array.isArray(respostas[c.id])) {
-          // Extrair colunas para permitir [id:0], [id:1]
+          // Extrair colunas para permitir [id:0], [id:1] e também [id:0:0] para linha específica
           const tableData: any[][] = respostas[c.id];
           const numCols = c.colunas?.length || 0;
           for (let colIdx = 0; colIdx < numCols; colIdx++) {
-            map[`${c.id}:${colIdx}`] = tableData.map(row => row[colIdx]);
+            const colData = tableData.map(row => row[colIdx]);
+            map[`${c.id}:${colIdx}`] = colData;
+            for (let rowIdx = 0; rowIdx < tableData.length; rowIdx++) {
+              map[`${c.id}:${colIdx}:${rowIdx}`] = colData[rowIdx];
+            }
           }
         } else {
           map[c.id] = respostas[c.id];
