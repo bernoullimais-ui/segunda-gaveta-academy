@@ -89,7 +89,7 @@ export function CampoRenderer({
             )}
             <input
               type="number"
-              className={`${baseInput} ${campo.tipo === 'calculado' ? 'bg-indigo-50/30 border-indigo-200 cursor-not-allowed font-bold text-indigo-900 shadow-inner focus:border-indigo-200 focus:ring-0' : ''}`}
+              className={`${baseInput} ${campo.tipo === 'calculado' ? '!bg-indigo-50/40 !border-indigo-200 cursor-not-allowed font-bold !text-indigo-900 shadow-inner focus:!border-indigo-200 focus:ring-0' : ''}`}
               placeholder={campo.tipo === 'calculado' ? 'Automático' : (campo.placeholder || '0')}
               value={value ?? ''}
               onChange={e => {
