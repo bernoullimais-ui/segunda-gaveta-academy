@@ -83,7 +83,8 @@ export function evaluateFormula(formulaStr: string, valuesMap: Record<string, an
     if (isNaN(result) || !isFinite(result)) {
       return 0; // Fallback seguro para erros matemáticos (ex: divisão por zero)
     }
-    return Number(result);
+    // Arredondar para no máximo 2 casas decimais
+    return Math.round(Number(result) * 100) / 100;
   } catch (err) {
     console.error('Formula evaluation error:', err);
     return 0;
