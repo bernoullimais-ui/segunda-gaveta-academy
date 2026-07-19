@@ -146,18 +146,23 @@ function CampoEditorModal({
                 <div className="h-40 overflow-y-auto border border-slate-200 rounded-lg p-1.5 bg-slate-50 flex flex-col gap-1">
                   {missoes.map(m => (m.campos_json || []).map(c => {
                     if (c.tipo === 'tabela') {
-                      return (c.colunas || []).map((col, idx) => (
-                        <React.Fragment key={`${c.id}-${idx}`}>
-                          <button type="button" onClick={() => setFormulaText(f => f + `[${c.id}:${idx}]`)} className="text-left text-[11px] text-blue-600 hover:bg-blue-100 p-1.5 rounded transition-colors break-words">
-                            <span className="font-semibold text-slate-600 truncate block">{m.titulo}</span> <span className="text-slate-400">({col}{c.linhas_rotulos?.length ? ' - Soma de todas' : ''})</span>
-                          </button>
-                          {(c.linhas_rotulos || []).map((rotulo: string, lineIdx: number) => (
-                            <button type="button" key={`${c.id}-${idx}-${lineIdx}`} onClick={() => setFormulaText(f => f + `[${c.id}:${idx}:${lineIdx}]`)} className="text-left text-[11px] text-blue-600 hover:bg-blue-100 p-1.5 rounded transition-colors break-words pl-3 border-l-2 border-blue-200 ml-1">
-                              ↳ <span className="text-slate-400">({rotulo})</span>
+                      return (c.colunas || []).map((col, idx) => {
+                        // Se a coluna for a primeira (0) e a tabela tiver linhas_rotulos, ela é apenas texto, então pulamos
+                        if (idx === 0 && c.linhas_rotulos?.length) return null;
+                        
+                        return (
+                          <React.Fragment key={`${c.id}-${idx}`}>
+                            <button type="button" onClick={() => setFormulaText(f => f + `[${c.id}:${idx}]`)} className="text-left text-[11px] text-blue-600 hover:bg-blue-100 p-1.5 rounded transition-colors break-words">
+                              <span className="font-semibold text-slate-600 truncate block">{m.titulo}</span> <span className="text-slate-400">({col}{c.linhas_rotulos?.length ? ' - Soma de todas' : ''})</span>
                             </button>
-                          ))}
-                        </React.Fragment>
-                      ));
+                            {(c.linhas_rotulos || []).map((rotulo: string, lineIdx: number) => (
+                              <button type="button" key={`${c.id}-${idx}-${lineIdx}`} onClick={() => setFormulaText(f => f + `[${c.id}:${idx}:${lineIdx}]`)} className="text-left text-[11px] text-blue-600 hover:bg-blue-100 p-1.5 rounded transition-colors break-words pl-3 border-l-2 border-blue-200 ml-1">
+                                ↳ <span className="text-slate-400">({rotulo})</span>
+                              </button>
+                            ))}
+                          </React.Fragment>
+                        );
+                      });
                     } else if (['numero', 'calculado'].includes(c.tipo) && c.id !== form.id) {
                       return (
                         <button type="button" key={c.id} onClick={() => setFormulaText(f => f + `[${c.id}]`)} className="text-left text-[11px] text-blue-600 hover:bg-blue-100 p-1.5 rounded transition-colors break-words">

@@ -18,6 +18,12 @@ export function evaluateFormula(formulaStr: string, valuesMap: Record<string, an
     let val = valuesMap[fieldName];
     if (val === undefined || val === null || val === '') {
       val = 0;
+    } else if (typeof val === 'string') {
+      // Tentar converter formato BR "1.234,56" para "1234.56"
+      const numStr = val.replace(/\./g, '').replace(',', '.');
+      if (!isNaN(Number(numStr)) && numStr.trim() !== '') {
+        val = Number(numStr);
+      }
     }
     const varName = `_v${varCounter++}`;
     varMap[varName] = val;
