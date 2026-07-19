@@ -311,13 +311,38 @@ export function ProjetoAdmin({ cursoId, orgId, nomeCurso, curriculo=[], loggedUs
       setMissoes(withOrdem);
       await Promise.all(withOrdem.map(m=>supabase.from('projeto_conclusao_missoes').update({ordem:m.ordem}).eq('id',m.id)));
     } else if(type==='CAMPO'){
-      const missaoId=destination.droppableId.replace('campos-','');
-      const missao=missoes.find(m=>m.id===missaoId); if(!missao)return;
-      const reordered=Array.from(missao.campos_json);
-      const [removed]=reordered.splice(source.index,1);
-      reordered.splice(destination.index,0,removed);
-      const updated={...missao,campos_json:reordered};
-      updateMissaoLocal(missaoId,{campos_json:reordered}); await salvarMissao(updated);
+      const sourceMissaoId = source.droppableId.replace('campos-','');
+      const destMissaoId = destination.droppableId.replace('campos-','');
+      
+      const sourceMissao = missoes.find(m => m.id === sourceMissaoId);
+      const destMissao = missoes.find(m => m.id === destMissaoId);
+      if (!sourceMissao || !destMissao) return;
+
+      if (sourceMissaoId === destMissaoId) {
+        // Reordering within the same mission
+        const reordered = Array.from(sourceMissao.campos_json);
+        const [removed] = reordered.splice(source.index, 1);
+        reordered.splice(destination.index, 0, removed);
+        
+        const updated = { ...sourceMissao, campos_json: reordered };
+        updateMissaoLocal(sourceMissaoId, { campos_json: reordered }); 
+        await salvarMissao(updated);
+      } else {
+        // Moving from one mission to another
+        const sourceCampos = Array.from(sourceMissao.campos_json);
+        const destCampos = Array.from(destMissao.campos_json);
+        
+        const [removed] = sourceCampos.splice(source.index, 1);
+        destCampos.splice(destination.index, 0, removed);
+        
+        updateMissaoLocal(sourceMissaoId, { campos_json: sourceCampos });
+        updateMissaoLocal(destMissaoId, { campos_json: destCampos });
+        
+        await Promise.all([
+          salvarMissao({ ...sourceMissao, campos_json: sourceCampos }),
+          salvarMissao({ ...destMissao, campos_json: destCampos })
+        ]);
+      }
     }
   },[missoes]);
 
