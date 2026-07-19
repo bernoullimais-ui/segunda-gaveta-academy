@@ -1655,7 +1655,7 @@ export function CursosCandidato({
     return (
       <div className={isGestor ? 'h-full w-full flex overflow-hidden bg-white dark:bg-slate-900' : '-mx-4 md:-mx-8 -my-6 bg-white dark:bg-slate-900 min-h-[calc(100vh-64px)] flex overflow-hidden relative'}>
         {/* Sidebar */}
-        <div className={`w-full md:w-80 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex-shrink-0 flex flex-col transition-all duration-300 ${selectedLesson ? 'hidden md:flex' : 'flex'}`}>
+        <div className={`w-full md:w-80 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex-shrink-0 flex flex-col transition-all duration-300 ${(selectedLesson || projetoTab) ? 'hidden md:flex' : 'flex'}`}>
           <div className="p-4 border-b border-slate-200 dark:border-slate-800">
             {!previewCourseId && (
               <button 
@@ -1810,6 +1810,7 @@ export function CursosCandidato({
                 completedSteps={completedSteps}
                 curriculo={curriculo}
                 showToast={(text, type) => showProjetoToast(text, type)}
+                onClose={() => setProjetoTab(false)}
               />
             </div>
           )}

@@ -37,6 +37,7 @@ interface ProjetoAlunoProps {
   watchedPercent?: Record<string, number>; // { etapaId: percent }
   curriculo: any[];                // curriculo_json do curso
   showToast: (text: string, type?: 'success' | 'error' | 'info') => void;
+  onClose?: () => void;
 }
 
 // ─── Main Component ───────────────────────────────────────────────────────────
@@ -50,6 +51,7 @@ export function ProjetoAluno({
   watchedPercent = {},
   curriculo,
   showToast,
+  onClose,
 }: ProjetoAlunoProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [template, setTemplate] = useState<ProjetoTemplate | null>(null);
@@ -320,7 +322,12 @@ export function ProjetoAluno({
         {/* Header sidebar */}
         <div className="p-4 border-b border-slate-100">
           <div className="flex items-center gap-2 mb-3">
-            <ClipboardList className="w-4 h-4 text-blue-600 shrink-0" />
+            {onClose && (
+              <button onClick={onClose} className="md:hidden p-1.5 -ml-1.5 text-slate-500 hover:text-slate-800 rounded">
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+            )}
+            <ClipboardList className="w-4 h-4 text-blue-600 shrink-0 hidden md:block" />
             <h3 className="font-bold text-slate-900 text-sm truncate">{template.titulo}</h3>
           </div>
           {template.descricao && (
