@@ -122,7 +122,7 @@ function CampoEditorModal({
             <div>
               <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1 block">Campos Disponíveis (Clique para inserir)</label>
               <div className="max-h-40 overflow-y-auto border border-slate-200 rounded-lg p-2 bg-slate-50 flex flex-col gap-1">
-                {missoes.map(m => m.campos_json.map(c => {
+                {missoes.map(m => (m.campos_json || []).map(c => {
                   if (c.tipo === 'tabela') {
                     return (c.colunas || []).map((col, idx) => (
                       <button type="button" key={`${c.id}-${idx}`} onClick={() => setFormulaText(f => f + `[${c.id}:${idx}]`)} className="text-left text-xs text-blue-600 hover:bg-blue-100 p-1.5 rounded transition-colors break-words">
@@ -615,7 +615,7 @@ export function ProjetoAdmin({ cursoId, orgId, nomeCurso, curriculo=[], loggedUs
         </div>
       )}
 
-      {editingCampo&&(<CampoEditorModal campo={editingCampo.campo} onSave={c=>handleSaveCampo(editingCampo.missaoId,c)} onClose={()=>setEditingCampo(null)} />)}
+      {editingCampo&&(<CampoEditorModal campo={editingCampo.campo} onSave={c=>handleSaveCampo(editingCampo.missaoId,c)} onClose={()=>setEditingCampo(null)} missoes={missoes} />)}
     </div>
   );
 }
