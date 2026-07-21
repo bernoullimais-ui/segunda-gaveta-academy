@@ -145,7 +145,13 @@ router.get(['/', '/login'], async (req, res, next) => {
         
         let specialistName = config.specialist_name?.trim() || org.nome;
         let specialistBio = config.specialist_bio?.trim() || 'Acesse nossa plataforma para conhecer nossos cursos e treinamentos.';
-        let imageUrl = config.specialist_foto_url?.trim() || org.logo_url || '';
+        let imageUrl = '';
+        if (config.hero_images && config.hero_images.length > 0 && config.hero_images[0].trim()) {
+          imageUrl = config.hero_images[0].trim();
+        }
+        if (!imageUrl) {
+          imageUrl = config.specialist_foto_url?.trim() || org.logo_url || '';
+        }
         
         // Se a foto do especialista estiver vazia, busca do primeiro curso publicado como fallback
         if (!imageUrl && org.id) {
@@ -168,7 +174,6 @@ router.get(['/', '/login'], async (req, res, next) => {
         const title = specialistName.replace(/"/g, '&quot;');
         const description = specialistBio.substring(0, 200).replace(/"/g, '&quot;');
         const absoluteUrl = `${protocol}://${host}${req.originalUrl || req.url}`;
-        const imageType = imageUrl.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg';
 
         const ogTags = `<title>${title}</title>
         <meta name="description" content="${description}" />
@@ -179,10 +184,7 @@ router.get(['/', '/login'], async (req, res, next) => {
         <meta property="og:site_name" content="${org.nome}" />
         ${imageUrl ? `
         <meta property="og:image" content="${imageUrl}" />
-        <meta property="og:image:secure_url" content="${imageUrl}" />
-        <meta property="og:image:type" content="${imageType}" />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />` : ''}
+        <meta property="og:image:secure_url" content="${imageUrl}" />` : ''}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="${title}" />
         <meta name="twitter:description" content="${description}" />
