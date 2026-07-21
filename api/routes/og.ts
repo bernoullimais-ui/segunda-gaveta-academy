@@ -15,12 +15,19 @@ router.get(['/public/curso/:slug', '/public/trilha/:slug'], async (req, res) => 
     const supabase = getSupabase();
     const table = isTrilha ? 'trilhas' : 'cursos';
     
-    const selectFields = isTrilha ? 'nome, descricao, thumbnail_url' : 'nome, descricao, thumbnail_url';
+    const selectFields = isTrilha ? 'id, nome, descricao, thumbnail_url' : 'id, nome, descricao, thumbnail_url';
     const { data: curso, error: cursoErr } = await supabase
       .from(table)
       .select(selectFields)
       .eq(idColumn, slug)
       .single();
+
+    let landingPage: any = null;
+    if (curso) {
+      const lpColumn = isTrilha ? 'trilha_id' : 'curso_id';
+      const { data: lp } = await supabase.from('landing_pages').select('hero_video_url, about, hero_title, hero_subtitle').eq(lpColumn, curso.id).maybeSingle();
+      if (lp) landingPage = lp;
+    }
 
     const debugError = cursoErr ? JSON.stringify(cursoErr) : 'none';
 
@@ -44,9 +51,13 @@ router.get(['/public/curso/:slug', '/public/trilha/:slug'], async (req, res) => 
     }
 
     if (curso) {
-      const imageUrl = curso.thumbnail_url || '';
-      const title = curso.nome?.replace(/"/g, '&quot;') || 'Curso Online';
-      const description = curso.descricao?.substring(0, 150)?.replace(/"/g, '&quot;') || 'Acesse a página de vendas para mais detalhes.';
+      let imageUrl = curso.thumbnail_url || '';
+      if (!imageUrl && landingPage?.hero_video_url && !landingPage.hero_video_url.includes('youtube') && !landingPage.hero_video_url.includes('vimeo')) {
+        imageUrl = landingPage.hero_video_url;
+      }
+      const title = landingPage?.hero_title || curso.nome?.replace(/"/g, '&quot;') || 'Curso Online';
+      const rawDesc = landingPage?.hero_subtitle || landingPage?.about || curso.descricao || 'Acesse a página de vendas para mais detalhes.';
+      const description = rawDesc.substring(0, 150).replace(/"/g, '&quot;');
       
       const absoluteUrl = `${protocol}://${host}${req.originalUrl || req.url}`;
       const imageType = imageUrl.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg';
