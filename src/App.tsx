@@ -868,11 +868,29 @@ export default function App() {
     );
   }
 
+  const hasWebsite = activeOrg?.config_json?.website_config && Object.keys(activeOrg.config_json.website_config).length > 0;
+
   // Se o usuário está logado mas acessou a raiz do domínio principal, exibe o site institucional
   if (!projectSlug && isRootRoute) {
     return (
       <>
         <InstitutionalPage />
+        <Toast message={toastMessage} onClose={() => setToastMessage(null)} />
+      </>
+    );
+  }
+
+  // Se o usuário está logado mas acessou a raiz do subdomínio, exibe o site institucional do especialista (se configurado)
+  if (projectSlug && hasWebsite && isRootRoute) {
+    return (
+      <>
+        <OrgInstitutionalPage 
+          activeOrg={activeOrg} 
+          onAccessPanel={() => {
+            window.history.pushState({}, '', '/dashboard');
+            setIsRootRoute(false);
+          }} 
+        />
         <Toast message={toastMessage} onClose={() => setToastMessage(null)} />
       </>
     );
