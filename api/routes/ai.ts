@@ -268,8 +268,8 @@ Responda em formato JSON com a seguinte estrutura:
 router.post('/generate-copy', async (req, res) => {
   try {
     const { courseName, description, targetAudience, benefits, framework } = req.body;
-    if (!courseName || !description) {
-      return res.status(400).json({ error: 'Nome do curso e descrição são obrigatórios.' });
+    if (!courseName) {
+      return res.status(400).json({ error: 'Nome do curso é obrigatório.' });
     }
     if (!requireGeminiKey(res)) return;
 
