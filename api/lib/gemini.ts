@@ -35,7 +35,7 @@ export async function generateContentWithRetry(config: {
   config?: any;
 }): Promise<any> {
   const ai = getAIClient();
-  const modelsToTry = ['gemini-2.5-flash', 'gemini-2.5-flash-lite'];
+  const modelsToTry = ['gemini-3.6-flash', 'gemini-3.5-flash-lite'];
   let lastError: any = null;
 
   for (const model of modelsToTry) {
