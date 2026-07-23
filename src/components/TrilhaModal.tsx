@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { X, Plus, Save, Eye } from 'lucide-react';
+import { X, Plus, Save, Eye, Image as ImageIcon } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 export function TrilhaModal({ isOpen, onClose, fetchTrilhas, editingTrilha, orgId }: { isOpen: boolean, onClose: () => void, fetchTrilhas: () => void, editingTrilha?: any, orgId?: string }) {
@@ -421,14 +421,44 @@ export function TrilhaModal({ isOpen, onClose, fetchTrilhas, editingTrilha, orgI
                 </div>
                 <div className="grid grid-cols-1 gap-6">
                   <div>
-                    <label className="text-[10px] uppercase font-bold text-slate-400 tracking-widest block mb-2">Título de Impacto</label>
-                    <input 
-                      type="text" 
-                      value={lpData.hero_title}
-                      onChange={(e) => setLpData({...lpData, hero_title: e.target.value})}
-                      className="w-full px-4 py-3 border border-slate-200 rounded-xl text-slate-800 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                      placeholder="Ex: Formação Mestre do Judô"
-                    />
+                    <label className="text-[10px] uppercase font-bold text-slate-400 tracking-widest block mb-2">Título de Impacto (Texto ou Imagem)</label>
+                    <div className="flex gap-2">
+                      <input 
+                        type="text" 
+                        value={lpData.hero_title || ''}
+                        onChange={(e) => setLpData({...lpData, hero_title: e.target.value})}
+                        className="flex-1 w-full px-4 py-3 border border-slate-200 rounded-xl text-slate-800 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                        placeholder="Ex: Formação Mestre do Judô"
+                      />
+                      <label className="flex shrink-0 items-center justify-center px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-100 transition-colors" title="Fazer upload de imagem">
+                        <ImageIcon className="w-5 h-5 text-slate-600" />
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          className="hidden" 
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            const reader = new FileReader();
+                            reader.onload = (event) => {
+                              setLpData({...lpData, hero_title: event.target?.result as string});
+                            };
+                            reader.readAsDataURL(file);
+                          }}
+                        />
+                      </label>
+                    </div>
+                    {lpData.hero_title && (lpData.hero_title.startsWith('data:image') || lpData.hero_title.startsWith('http')) && !lpData.hero_title.includes(' ') && (
+                      <div className="mt-4 p-4 border border-slate-200 rounded-xl bg-slate-50 relative inline-block">
+                        <img src={lpData.hero_title} alt="Título" className="h-16 object-contain" />
+                        <button 
+                          onClick={() => setLpData({...lpData, hero_title: ''})}
+                          className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 shadow-sm"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    )}
                   </div>
                   <div>
                     <label className="text-[10px] uppercase font-bold text-slate-400 tracking-widest block mb-2">Subtítulo Persuasivo</label>

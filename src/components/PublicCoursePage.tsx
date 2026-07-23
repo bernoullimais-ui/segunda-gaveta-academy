@@ -1235,9 +1235,13 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                   <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Inscrições Abertas</span>
                 </div>
 
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight">
-                  {lp.hero_title || item.nome}
-                </h1>
+                {(lp.hero_title && (lp.hero_title.startsWith('data:image') || lp.hero_title.startsWith('http')) && !lp.hero_title.includes(' ')) ? (
+                  <img src={lp.hero_title} alt={item.nome || "Título"} className="h-20 md:h-24 lg:h-28 object-contain w-auto mb-4" />
+                ) : (
+                  <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight">
+                    {lp.hero_title || item.nome}
+                  </h1>
+                )}
                 
                 <p className="text-xl text-slate-300 leading-relaxed max-w-xl">
                   {lp.hero_subtitle || item.descricao}
@@ -1797,9 +1801,13 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-bold border border-primary/20">
                 <Award className="w-4 h-4" /> Certificação Inclusa
               </div>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 leading-[1.15] tracking-tight drop-shadow-sm">
-                {lp.hero_title || item.nome}
-              </h1>
+              {(lp.hero_title && (lp.hero_title.startsWith('data:image') || lp.hero_title.startsWith('http')) && !lp.hero_title.includes(' ')) ? (
+                <img src={lp.hero_title} alt={item.nome || "Título"} className="h-20 md:h-24 lg:h-28 object-contain w-auto mb-4" />
+              ) : (
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 leading-[1.15] tracking-tight drop-shadow-sm">
+                  {lp.hero_title || item.nome}
+                </h1>
+              )}
               <p className="text-xl text-slate-700 leading-relaxed max-w-xl font-medium drop-shadow-sm">
                 {lp.hero_subtitle || item.descricao}
               </p>

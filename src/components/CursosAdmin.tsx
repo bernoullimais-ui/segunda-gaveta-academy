@@ -3621,14 +3621,44 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                   </div>
                   <div className="p-6 space-y-6">
                     <div>
-                      <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wider text-xs">Título de Impacto</label>
-                      <input 
-                        type="text" 
-                        value={lpData.hero_title}
-                        onChange={(e) => setLpData({...lpData, hero_title: e.target.value})}
-                        className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all font-medium text-lg"
-                        placeholder="Ex: Domine a arte do design em 30 dias"
-                      />
+                      <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wider text-xs">Título de Impacto (Texto ou Imagem)</label>
+                      <div className="flex gap-2">
+                        <input 
+                          type="text" 
+                          value={lpData.hero_title || ''}
+                          onChange={(e) => setLpData({...lpData, hero_title: e.target.value})}
+                          className="flex-1 w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all font-medium text-lg"
+                          placeholder="Ex: Domine a arte do design em 30 dias"
+                        />
+                        <label className="flex shrink-0 items-center justify-center px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-100 transition-colors" title="Fazer upload de imagem">
+                          <ImageIcon className="w-5 h-5 text-slate-600" />
+                          <input 
+                            type="file" 
+                            accept="image/*" 
+                            className="hidden" 
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (!file) return;
+                              const reader = new FileReader();
+                              reader.onload = (event) => {
+                                setLpData({...lpData, hero_title: event.target?.result as string});
+                              };
+                              reader.readAsDataURL(file);
+                            }}
+                          />
+                        </label>
+                      </div>
+                      {lpData.hero_title && (lpData.hero_title.startsWith('data:image') || lpData.hero_title.startsWith('http')) && !lpData.hero_title.includes(' ') && (
+                        <div className="mt-4 p-4 border border-slate-200 rounded-xl bg-slate-50 relative inline-block">
+                          <img src={lpData.hero_title} alt="Título" className="h-16 object-contain" />
+                          <button 
+                            onClick={() => setLpData({...lpData, hero_title: ''})}
+                            className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 shadow-sm"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      )}
                     </div>
                     <div>
                       <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wider text-xs">Subtítulo ou Chamada (CTA)</label>
