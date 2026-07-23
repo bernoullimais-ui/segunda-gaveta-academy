@@ -1236,7 +1236,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                 </div>
 
                 {(lp.hero_title && (lp.hero_title.startsWith('data:image') || lp.hero_title.startsWith('http')) && !lp.hero_title.includes(' ')) ? (
-                  <img src={lp.hero_title} alt={item.nome || "Título"} className="h-20 md:h-24 lg:h-28 object-contain w-auto mb-4" />
+                  <img src={lp.hero_title} alt={item.nome || "Título"} className="object-contain w-auto mb-4 max-w-full" style={{ height: lp.hero_title_image_height ? `${lp.hero_title_image_height}px` : '120px' }} />
                 ) : (
                   <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight">
                     {lp.hero_title || item.nome}
@@ -1802,7 +1802,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                 <Award className="w-4 h-4" /> Certificação Inclusa
               </div>
               {(lp.hero_title && (lp.hero_title.startsWith('data:image') || lp.hero_title.startsWith('http')) && !lp.hero_title.includes(' ')) ? (
-                <img src={lp.hero_title} alt={item.nome || "Título"} className="h-20 md:h-24 lg:h-28 object-contain w-auto mb-4" />
+                <img src={lp.hero_title} alt={item.nome || "Título"} className="object-contain w-auto mb-4 max-w-full" style={{ height: lp.hero_title_image_height ? `${lp.hero_title_image_height}px` : '120px' }} />
               ) : (
                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 leading-[1.15] tracking-tight drop-shadow-sm">
                   {lp.hero_title || item.nome}

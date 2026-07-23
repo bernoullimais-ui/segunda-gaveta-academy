@@ -450,9 +450,26 @@ export function TrilhaModal({ isOpen, onClose, fetchTrilhas, editingTrilha, orgI
                     </div>
                     {lpData.hero_title && (lpData.hero_title.startsWith('data:image') || lpData.hero_title.startsWith('http')) && !lpData.hero_title.includes(' ') && (
                       <div className="mt-4 p-4 border border-slate-200 rounded-xl bg-slate-50 relative inline-block">
-                        <img src={lpData.hero_title} alt="Título" className="h-16 object-contain" />
+                        <div className="mb-4 overflow-hidden border border-slate-200/50 rounded-lg bg-slate-100 p-2 flex items-center justify-center min-w-[200px]">
+                          <img src={lpData.hero_title} alt="Título" className="object-contain" style={{ height: lpData.hero_title_image_height ? `${lpData.hero_title_image_height}px` : '80px', maxHeight: '250px' }} />
+                        </div>
+                        <div className="w-full min-w-[250px]">
+                          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 flex justify-between">
+                            <span>Tamanho da Imagem</span>
+                            <span>{lpData.hero_title_image_height || 80}px</span>
+                          </label>
+                          <input 
+                            type="range" 
+                            min="40" 
+                            max="400" 
+                            step="5" 
+                            value={lpData.hero_title_image_height || 80} 
+                            onChange={(e) => setLpData({...lpData, hero_title_image_height: parseInt(e.target.value)})} 
+                            className="w-full accent-blue-500" 
+                          />
+                        </div>
                         <button 
-                          onClick={() => setLpData({...lpData, hero_title: ''})}
+                          onClick={() => setLpData({...lpData, hero_title: '', hero_title_image_height: undefined})}
                           className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 shadow-sm"
                         >
                           <X className="w-4 h-4" />
