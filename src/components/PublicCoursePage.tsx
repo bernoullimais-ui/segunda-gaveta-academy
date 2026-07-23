@@ -1183,8 +1183,8 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
           {/* Background Elements */}
           <div className="absolute top-10 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[120px] animate-pulse pointer-events-none"></div>
           
-          {/* Full Bleed Image/Video for Desktop (Right Side) */}
-          <div className="hidden lg:block absolute top-0 right-0 w-[50vw] h-full bg-slate-950 overflow-hidden">
+          {/* Full Bleed Image/Video (Background) */}
+          <div className="absolute inset-0 w-full h-full bg-slate-950 overflow-hidden">
             {lp.hero_video_url ? (
               (lp.hero_video_url.includes('youtube.com') || lp.hero_video_url.includes('youtu.be') || lp.hero_video_url.includes('vimeo.com')) ? (
                 <div className="absolute inset-[-20%] w-[140%] h-[140%] pointer-events-auto">
@@ -1218,18 +1218,18 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
               <img 
                 src={item.capa_url || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070'} 
                 alt="Capa"
-                className="w-full h-full object-cover grayscale-[0.2]"
+                className="w-full h-full object-cover"
               />
             )}
-            {/* Gradient Mask to blend with the dark background */}
-            <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-900/40 to-transparent w-full"></div>
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent h-full"></div>
           </div>
 
           <div className="max-w-7xl mx-auto px-6 relative z-10 w-full">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-              {/* Text Content */}
-              <div className="space-y-10 animate-in fade-in slide-in-from-left-12 duration-1000 max-w-xl">
+              {/* Empty space on the left to allow the background image to shine */}
+              <div className="hidden lg:block"></div>
+
+              {/* Text Content (Right Side) */}
+              <div className="space-y-10 animate-in fade-in slide-in-from-right-12 duration-1000 max-w-xl lg:ml-auto">
                 <div className="inline-flex items-center gap-3 px-4 py-1.5 bg-slate-800 border border-slate-700 rounded-full">
                   <div className="w-2 h-2 bg-emerald-500 rounded-full animate-ping"></div>
                   <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Inscrições Abertas</span>
@@ -1751,8 +1751,8 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
         <div className="absolute top-0 right-0 -translate-y-1/4 translate-x-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
         <div className="absolute bottom-0 left-0 translate-y-1/4 -translate-x-1/4 w-96 h-96 bg-indigo-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
         
-        {/* Full Bleed Image/Video for Desktop (Right Side) */}
-        <div className="hidden lg:block absolute top-0 right-0 w-[50vw] h-full bg-slate-100 overflow-hidden">
+        {/* Full Bleed Image/Video (Background) */}
+        <div className="absolute inset-0 w-full h-full bg-slate-100 overflow-hidden">
           {lp.hero_video_url ? (
             (lp.hero_video_url.includes('youtube.com') || lp.hero_video_url.includes('youtu.be') || lp.hero_video_url.includes('vimeo.com')) ? (
               <div className="absolute inset-[-20%] w-[140%] h-[140%] pointer-events-auto">
@@ -1789,15 +1789,15 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
               className="w-full h-full object-cover"
             />
           )}
-          {/* Gradient Mask to blend with the light background */}
-          <div className="absolute inset-0 bg-gradient-to-r from-white via-white/70 to-transparent w-full"></div>
-          <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent h-full"></div>
         </div>
 
         <div className="max-w-7xl mx-auto px-6 relative z-10 w-full">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            {/* Text Content */}
-            <div className="space-y-8 animate-in fade-in slide-in-from-left-8 duration-700 max-w-xl">
+            {/* Empty space on the left to allow the background image to shine */}
+            <div className="hidden lg:block"></div>
+
+            {/* Text Content (Right Side) */}
+            <div className="space-y-8 animate-in fade-in slide-in-from-right-8 duration-700 max-w-xl lg:ml-auto">
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-bold border border-primary/20">
                 <Award className="w-4 h-4" /> Certificação Inclusa
               </div>
