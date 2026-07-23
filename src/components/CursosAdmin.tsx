@@ -3660,10 +3660,10 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                             </label>
                             <input 
                               type="range" 
-                              min="40" 
-                              max="400" 
-                              step="5" 
-                              value={lpData.hero_title_image_height || 80} 
+                              min="100" 
+                              max="1000" 
+                              step="10" 
+                              value={lpData.hero_title_image_height || 100} 
                               onChange={(e) => setLpData({...lpData, hero_title_image_height: parseInt(e.target.value)})} 
                               className="w-full accent-blue-500" 
                             />
