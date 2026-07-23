@@ -1178,17 +1178,85 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
           </div>
         )}
 
-        {/* Dark Hero Section - Modern arranged layout */}
-        <section ref={heroRef} className="relative pt-32 pb-20 md:pt-48 md:pb-40 overflow-hidden bg-slate-900 text-left">
-          <div className="absolute top-0 left-0 w-full h-full">
-            <div className="absolute top-10 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[120px] animate-pulse"></div>
-            <div className="absolute bottom-10 right-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-[120px] animate-pulse"></div>
-          </div>
+        {/* Dark Hero Section - Modern lateral full-bleed layout */}
+        <section ref={heroRef} className="relative min-h-[90vh] flex items-center pt-32 pb-20 md:pt-40 md:pb-32 overflow-hidden bg-slate-900 text-left">
+          {/* Background Elements */}
+          <div className="absolute top-10 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[120px] animate-pulse pointer-events-none"></div>
           
-          <div className="max-w-7xl mx-auto px-6 relative z-10">
+          {/* Full Bleed Image/Video for Desktop (Right Side) */}
+          <div className="hidden lg:block absolute top-0 right-0 w-[50vw] h-full bg-slate-950 overflow-hidden">
+            {lp.hero_video_url ? (
+              (lp.hero_video_url.includes('youtube.com') || lp.hero_video_url.includes('youtu.be') || lp.hero_video_url.includes('vimeo.com')) ? (
+                <div className="absolute inset-[-20%] w-[140%] h-[140%] pointer-events-auto">
+                  <ReactPlayer 
+                    url={lp.hero_video_url} 
+                    width="100%" 
+                    height="100%" 
+                    style={{ position: 'absolute', top: 0, left: 0 }}
+                    playing={true}
+                    controls={false}
+                    light={item.thumbnail_url || item.capa_url || true}
+                    playIcon={
+                      <div className="absolute inset-0 cursor-pointer flex items-center justify-center z-10 group">
+                        <div className="absolute inset-0 bg-slate-900/40 group-hover:bg-slate-900/20 transition-colors" />
+                        <div className="relative z-20 w-24 h-24 bg-primary rounded-full flex items-center justify-center text-white shadow-2xl scale-110 group-hover:scale-125 transition-transform duration-500">
+                          <Play className="w-10 h-10 fill-current" />
+                        </div>
+                      </div>
+                    }
+                    config={{
+                      youtube: {
+                        playerVars: { modestbranding: 1, rel: 0, iv_load_policy: 3, showinfo: 0, cc_load_policy: 0, controls: 0, fs: 0 }
+                      }
+                    }}
+                  />
+                </div>
+              ) : (
+                <img src={lp.hero_video_url} alt="Apresentação" className="w-full h-full object-cover" />
+              )
+            ) : (
+              <img 
+                src={item.capa_url || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070'} 
+                alt="Capa"
+                className="w-full h-full object-cover grayscale-[0.2]"
+              />
+            )}
+            {/* Gradient Mask to blend with the dark background */}
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-900/40 to-transparent w-full"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent h-full"></div>
+          </div>
+
+          <div className="max-w-7xl mx-auto px-6 relative z-10 w-full">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-              {/* Image/Video First in Dark Layout */}
-              <div className="relative order-2 lg:order-1 animate-in fade-in zoom-in-95 duration-1000">
+              {/* Text Content */}
+              <div className="space-y-10 animate-in fade-in slide-in-from-left-12 duration-1000 max-w-xl">
+                <div className="inline-flex items-center gap-3 px-4 py-1.5 bg-slate-800 border border-slate-700 rounded-full">
+                  <div className="w-2 h-2 bg-emerald-500 rounded-full animate-ping"></div>
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Inscrições Abertas</span>
+                </div>
+
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight">
+                  {lp.hero_title || item.nome}
+                </h1>
+                
+                <p className="text-xl text-slate-300 leading-relaxed max-w-xl">
+                  {lp.hero_subtitle || item.descricao}
+                </p>
+
+                <CountdownTimer timeLeft={timeLeft} title={lp.countdown_title} layout={layout} />
+
+                <div className="flex flex-col sm:flex-row items-center gap-8 pt-4">
+                  <button 
+                    onClick={handleEnrollClick}
+                    className="w-full sm:w-auto px-12 py-6 bg-primary text-white rounded-3xl font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(37,99,235,0.3)] flex items-center justify-center gap-3"
+                  >
+                    {lp.cta_text || 'COMPRAR AGORA'} <ArrowRight className="w-6 h-6" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Mobile Only Image/Video */}
+              <div className="lg:hidden relative animate-in fade-in zoom-in-95 duration-1000 mt-8">
                 <div className="aspect-video bg-slate-950 rounded-[40px] overflow-hidden shadow-[0_0_80px_rgba(0,0,0,0.5)] border border-slate-800 p-2">
                   <div className="w-full h-full rounded-[32px] overflow-hidden">
                     {lp.hero_video_url ? (
@@ -1211,15 +1279,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                             }
                             config={{
                               youtube: {
-                                playerVars: {
-                                  modestbranding: 1,
-                                  rel: 0,
-                                  iv_load_policy: 3,
-                                  showinfo: 0,
-                                  cc_load_policy: 0,
-                                  controls: 0,
-                                  fs: 0,
-                                }
+                                playerVars: { modestbranding: 1, rel: 0, iv_load_policy: 3, showinfo: 0, cc_load_policy: 0, controls: 0, fs: 0 }
                               }
                             }}
                           />
@@ -1231,39 +1291,13 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                       <img 
                         src={item.capa_url || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070'} 
                         alt="Capa"
-                        className="w-full h-full object-cover grayscale-[0.2] hover:grayscale-0 transition-all"
+                        className="w-full h-full object-cover"
                       />
                     )}
                   </div>
                 </div>
-
               </div>
 
-              <div className="space-y-10 order-1 lg:order-2 animate-in fade-in slide-in-from-right-12 duration-1000 text-left">
-                <div className="inline-flex items-center gap-3 px-4 py-1.5 bg-slate-800 border border-slate-700 rounded-full">
-                  <div className="w-2 h-2 bg-emerald-500 rounded-full animate-ping"></div>
-                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Inscrições Abertas</span>
-                </div>
-
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight">
-                  {lp.hero_title || item.nome}
-                </h1>
-                
-                <p className="text-xl text-slate-400 leading-relaxed max-w-xl">
-                  {lp.hero_subtitle || item.descricao}
-                </p>
-
-                <CountdownTimer timeLeft={timeLeft} title={lp.countdown_title} layout={layout} />
-
-                <div className="flex flex-col sm:flex-row items-center gap-8 pt-4">
-                  <button 
-                    onClick={handleEnrollClick}
-                    className="w-full sm:w-auto px-12 py-6 bg-primary text-white rounded-3xl font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(37,99,235,0.3)] flex items-center justify-center gap-3"
-                  >
-                    {lp.cta_text || 'COMPRAR AGORA'} <ArrowRight className="w-6 h-6" />
-                  </button>
-                </div>
-              </div>
             </div>
           </div>
         </section>
@@ -1708,21 +1742,65 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
               </div>
             )}
 
-            {/* Hero Section */}
-            <section ref={heroRef} className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden">
-        <div className="absolute top-0 right-0 -translate-y-1/4 translate-x-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl opacity-50"></div>
-        <div className="absolute bottom-0 left-0 translate-y-1/4 -translate-x-1/4 w-96 h-96 bg-indigo-50 rounded-full blur-3xl opacity-50"></div>
+            {/* Hero Section - Light Lateral Full Bleed Layout */}
+            <section ref={heroRef} className="relative min-h-[90vh] flex items-center pt-32 pb-20 md:pt-40 md:pb-32 overflow-hidden bg-white">
+        <div className="absolute top-0 right-0 -translate-y-1/4 translate-x-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 translate-y-1/4 -translate-x-1/4 w-96 h-96 bg-indigo-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
         
-        <div className="max-w-7xl mx-auto px-6 relative z-10">
+        {/* Full Bleed Image/Video for Desktop (Right Side) */}
+        <div className="hidden lg:block absolute top-0 right-0 w-[50vw] h-full bg-slate-100 overflow-hidden">
+          {lp.hero_video_url ? (
+            (lp.hero_video_url.includes('youtube.com') || lp.hero_video_url.includes('youtu.be') || lp.hero_video_url.includes('vimeo.com')) ? (
+              <div className="absolute inset-[-20%] w-[140%] h-[140%] pointer-events-auto">
+                <ReactPlayer 
+                  url={lp.hero_video_url} 
+                  width="100%" 
+                  height="100%" 
+                  style={{ position: 'absolute', top: 0, left: 0 }}
+                  playing={true}
+                  controls={false}
+                  light={item.thumbnail_url || item.capa_url || true}
+                  playIcon={
+                    <div className="absolute inset-0 cursor-pointer flex items-center justify-center z-10 group">
+                      <div className="absolute inset-0 bg-slate-900/40 group-hover:bg-slate-900/20 transition-colors" />
+                      <div className="relative z-20 w-24 h-24 bg-primary rounded-full flex items-center justify-center text-white shadow-2xl scale-110 group-hover:scale-125 transition-transform duration-500">
+                        <Play className="w-10 h-10 fill-current" />
+                      </div>
+                    </div>
+                  }
+                  config={{
+                    youtube: {
+                      playerVars: { modestbranding: 1, rel: 0, iv_load_policy: 3, showinfo: 0, cc_load_policy: 0, controls: 0, fs: 0 }
+                    }
+                  }}
+                />
+              </div>
+            ) : (
+              <img src={lp.hero_video_url} alt="Apresentação" className="w-full h-full object-cover" />
+            )
+          ) : (
+            <img 
+              src={item.capa_url || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070'} 
+              alt="Capa"
+              className="w-full h-full object-cover"
+            />
+          )}
+          {/* Gradient Mask to blend with the light background */}
+          <div className="absolute inset-0 bg-gradient-to-r from-white via-white/70 to-transparent w-full"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent h-full"></div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-6 relative z-10 w-full">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div className="space-y-8 animate-in fade-in slide-in-from-left-8 duration-700">
+            {/* Text Content */}
+            <div className="space-y-8 animate-in fade-in slide-in-from-left-8 duration-700 max-w-xl">
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-bold border border-primary/20">
                 <Award className="w-4 h-4" /> Certificação Inclusa
               </div>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 leading-[1.15] tracking-tight">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 leading-[1.15] tracking-tight drop-shadow-sm">
                 {lp.hero_title || item.nome}
               </h1>
-              <p className="text-xl text-slate-600 leading-relaxed max-w-xl">
+              <p className="text-xl text-slate-700 leading-relaxed max-w-xl font-medium drop-shadow-sm">
                 {lp.hero_subtitle || item.descricao}
               </p>
               
@@ -1737,10 +1815,10 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                 </button>
                 {/* #4 Real participant count */}
                 {(participantCount !== null ? participantCount : 0) > 0 && (
-                  <div className="flex items-center gap-2 text-slate-500 font-medium">
+                  <div className="flex items-center gap-2 text-slate-600 font-bold bg-white/50 px-3 py-1.5 rounded-full backdrop-blur-md">
                     <div className="flex -space-x-2">
                       {[1,2,3,4].map(i => (
-                        <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-slate-200"></div>
+                        <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-slate-200 shadow-sm"></div>
                       ))}
                     </div>
                     <span className="text-sm">+{participantCount} aluno{participantCount !== 1 ? 's' : ''} inscrito{participantCount !== 1 ? 's' : ''}</span>
@@ -1749,7 +1827,8 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
               </div>
             </div>
 
-            <div className="relative animate-in fade-in slide-in-from-right-8 duration-700 delay-200">
+            {/* Mobile Only Image/Video */}
+            <div className="lg:hidden relative animate-in fade-in zoom-in-95 duration-1000 mt-8">
               <div className="aspect-video bg-slate-900 rounded-3xl overflow-hidden shadow-2xl border border-slate-800 relative group">
                 {lp.hero_video_url ? (
                   (lp.hero_video_url.includes('youtube.com') || lp.hero_video_url.includes('youtu.be') || lp.hero_video_url.includes('vimeo.com')) ? (
@@ -1791,12 +1870,12 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                   <img 
                     src={item.capa_url || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070'} 
                     alt="Capa"
-                    className="w-full h-full object-cover opacity-80"
+                    className="w-full h-full object-cover opacity-90"
                   />
                 )}
               </div>
-
             </div>
+
           </div>
         </div>
       </section>
