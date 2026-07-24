@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Settings, Users, BarChart2, BookOpen, Clock, Lock, PlayCircle, Plus, Eye, Share2, Download, Search, Filter, MoreHorizontal, MessageSquare, Award, CheckCircle, ChevronLeft, Calendar, FileText, Gift, DollarSign, Loader2, Image as ImageIcon, Minus, Code, Video as VideoIcon, ShoppingBag, User, CalendarCheck, List, Paperclip, Volume2, Pencil, Trash2, Check, X, Table, Bold, Italic, Underline, ListOrdered, GripVertical, AlertTriangle, Database, Upload, LayoutDashboard, Sparkles, AlertCircle, Info, Link as LinkIcon, BrainCircuit } from 'lucide-react';
+import { Settings, Users, BarChart2, BookOpen, Clock, Lock, PlayCircle, Plus, Eye, Share2, Download, Search, Filter, MoreHorizontal, MessageSquare, Award, CheckCircle, ChevronLeft, Calendar, FileText, Gift, DollarSign, Loader2, Image as ImageIcon, Minus, Code, Video as VideoIcon, ShoppingBag, User, CalendarCheck, List, Paperclip, Volume2, Pencil, Trash2, Check, X, Table, Bold, Italic, Underline, ListOrdered, GripVertical, AlertTriangle, Database, Upload, LayoutDashboard, Sparkles, AlertCircle, Info, Link as LinkIcon, BrainCircuit, Type } from 'lucide-react';
 import { motion, AnimatePresence, Reorder } from 'motion/react';
 import { MarketingLinksModal } from './MarketingLinksModal';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
@@ -3636,6 +3636,63 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                         </span>
                       </div>
                     </div>
+                  </div>
+                </div>
+
+                {/* Typography section */}
+                <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                  <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex items-center gap-2">
+                    <Type className="w-5 h-5 text-blue-600" />
+                    <h4 className="font-bold text-slate-800">Tipografia (Textos e Botões)</h4>
+                  </div>
+                  <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {[
+                      { id: 'title', label: 'Títulos' },
+                      { id: 'subtitle', label: 'Subtítulos' },
+                      { id: 'text', label: 'Textos' },
+                      { id: 'button', label: 'Botões (Com Fundo)' },
+                      { id: 'link', label: 'Links (Sem Fundo)' }
+                    ].map((type) => (
+                      <div key={type.id} className="space-y-3 p-4 border border-slate-100 rounded-xl bg-slate-50/30">
+                        <label className="block text-sm font-bold text-slate-700 uppercase tracking-wider text-xs">{type.label}</label>
+                        <div className="flex flex-col gap-3">
+                          <div className="flex items-center gap-3">
+                            <input 
+                              type="color"
+                              value={lpData[`font_${type.id}_color`] || '#000000'}
+                              onChange={(e) => setLpData({...lpData, [`font_${type.id}_color`]: e.target.value})}
+                              className="w-10 h-10 p-1 bg-white border border-slate-200 rounded cursor-pointer shrink-0"
+                            />
+                            <div className="flex-1 flex flex-col">
+                              <span className="text-xs text-slate-500 font-medium mb-1">Cor</span>
+                              <input 
+                                type="text"
+                                value={lpData[`font_${type.id}_color`] || ''}
+                                onChange={(e) => setLpData({...lpData, [`font_${type.id}_color`]: e.target.value})}
+                                placeholder="Ex: #000000 ou Padrão"
+                                className="w-full px-3 py-1.5 text-sm border border-slate-200 rounded-lg outline-none focus:ring-1 focus:ring-blue-500"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <span className="text-xs text-slate-500 font-medium mb-1 block">Peso da Fonte</span>
+                            <select
+                              value={lpData[`font_${type.id}_weight`] || ''}
+                              onChange={(e) => setLpData({...lpData, [`font_${type.id}_weight`]: e.target.value})}
+                              className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                            >
+                              <option value="">Padrão</option>
+                              <option value="400">Normal</option>
+                              <option value="500">Média (Medium)</option>
+                              <option value="600">Seminegrito (Semibold)</option>
+                              <option value="700">Negrito (Bold)</option>
+                              <option value="800">Extranegrito (Extrabold)</option>
+                              <option value="900">Preta (Black)</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
 

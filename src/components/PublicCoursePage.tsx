@@ -211,10 +211,10 @@ const EnrollmentModal = ({
           {enrollStep === 'data' && (
             <div className="space-y-6">
               <div className="text-center space-y-2">
-                <h2 className="text-3xl font-bold text-slate-900">
+                <h2 className="text-3xl font-bold text-slate-900 typo-title">
                   {isFree ? 'Inscrição Gratuita' : 'Área de Inscrição'}
                 </h2>
-                <p className="text-slate-500">
+                <p className="text-slate-700 typo-text">
                   {isFree ? 'Preencha seus dados para começar agora mesmo.' : 'Complete seus dados para prosseguir para o pagamento.'}
                 </p>
               </div>
@@ -287,8 +287,8 @@ const EnrollmentModal = ({
                 <CheckCircle className="w-10 h-10" />
               </div>
               <div className="space-y-4">
-                <h2 className="text-3xl font-bold text-slate-900">Inscrição Confirmada!</h2>
-                <p className="text-slate-600 leading-relaxed">
+                <h2 className="text-3xl font-bold text-slate-900 typo-title">Inscrição Confirmada!</h2>
+                <p className="text-slate-700 leading-relaxed typo-text">
                   Parabéns! Você já pode acessar todo o conteúdo do {isTrilha ? 'curso' : 'programa'} <strong>{itemName}</strong> agora mesmo.
                 </p>
               </div>
@@ -598,7 +598,7 @@ class ModalErrorBoundary extends React.Component<{children: React.ReactNode}, {h
   constructor(props: any) { super(props); this.state = { hasError: false, error: null }; }
   static getDerivedStateFromError(error: any) { return { hasError: true, error }; }
   render() { 
-    if (this.state.hasError) return <div className="fixed inset-0 z-[200] bg-white p-10 overflow-auto"><h1 className="text-red-500 font-bold text-2xl">Erro de Renderização no Modal</h1><pre className="text-sm bg-slate-100 p-4 mt-4">{String(this.state.error?.stack || this.state.error)}</pre></div>; 
+    if (this.state.hasError) return <div className="fixed inset-0 z-[200] bg-white p-10 overflow-auto"><h1 className="text-red-500 font-bold text-2xl typo-title">Erro de Renderização no Modal</h1><pre className="text-sm bg-slate-100 p-4 mt-4">{String(this.state.error?.stack || this.state.error)}</pre></div>; 
     return this.props.children; 
   }
 }
@@ -1104,7 +1104,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
     return (
       <div className="min-h-screen bg-white flex flex-col items-center justify-center gap-4">
         <Loader2 className="w-10 h-10 text-primary animate-spin" />
-        <p className="text-slate-500 font-medium">Preparando sua experiência...</p>
+        <p className="text-slate-700 font-medium typo-text">Preparando sua experiência...</p>
       </div>
     );
   }
@@ -1115,8 +1115,8 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
         <div className="w-20 h-20 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
           <X className="w-10 h-10" />
         </div>
-        <h2 className="text-2xl font-bold text-slate-800">Ops! Algo deu errado.</h2>
-        <p className="text-slate-500 max-w-md">{error || 'Não foi possível encontrar este conteúdo público.'}</p>
+        <h2 className="text-2xl font-bold text-slate-800 typo-title">Ops! Algo deu errado.</h2>
+        <p className="text-slate-700 max-w-md typo-text">{error || 'Não foi possível encontrar este conteúdo público.'}</p>
         <button onClick={() => window.location.reload()} className="px-6 py-2 bg-primary text-white rounded-full font-bold">Tentar novamente</button>
       </div>
     );
@@ -1127,8 +1127,8 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
         <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 max-w-md text-center">
-          <h1 className="text-2xl font-bold text-slate-900 mb-2">Página em manutenção</h1>
-          <p className="text-slate-600 mb-6">Esta página de vendas está temporariamente desativada pelo instrutor.</p>
+          <h1 className="text-2xl font-bold text-slate-900 mb-2 typo-title">Página em manutenção</h1>
+          <p className="text-slate-700 mb-6 typo-text">Esta página de vendas está temporariamente desativada pelo instrutor.</p>
           <a href="/" className="inline-block px-8 py-3 bg-blue-600 text-white rounded-full font-bold hover:bg-blue-700 transition-all">
             Voltar
           </a>
@@ -1171,6 +1171,19 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
           .selection\:bg-primary\/30 ::selection { background-color: rgba(var(--primary-rgb), 0.3); }
           .selection\:text-white *::selection { color: white; }
           .selection\:text-white ::selection { color: white; }
+
+          /* Typography overrides */
+          ${lp.font_title_color ? `.typo-title { color: ${lp.font_title_color} !important; }` : ''}
+          ${lp.font_title_weight ? `.typo-title { font-weight: ${lp.font_title_weight} !important; }` : ''}
+          ${lp.font_subtitle_color ? `.typo-subtitle { color: ${lp.font_subtitle_color} !important; }` : ''}
+          ${lp.font_subtitle_weight ? `.typo-subtitle { font-weight: ${lp.font_subtitle_weight} !important; }` : ''}
+          ${lp.font_text_color ? `.typo-text { color: ${lp.font_text_color} !important; }` : ''}
+          ${lp.font_text_weight ? `.typo-text { font-weight: ${lp.font_text_weight} !important; }` : ''}
+          ${lp.font_button_color ? `.typo-btn { color: ${lp.font_button_color} !important; }` : ''}
+          ${lp.font_button_weight ? `.typo-btn { font-weight: ${lp.font_button_weight} !important; }` : ''}
+          ${lp.font_link_color ? `.typo-link { color: ${lp.font_link_color} !important; }` : ''}
+          ${lp.font_link_weight ? `.typo-link { font-weight: ${lp.font_link_weight} !important; }` : ''}
+
         ` }} />
         
         <Nav
@@ -1274,13 +1287,13 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                   {(lp.hero_title && (lp.hero_title.startsWith('data:image') || lp.hero_title.startsWith('http')) && !lp.hero_title.includes(' ')) ? (
                     <img src={lp.hero_title} alt={item.nome || "Título"} className="object-contain w-auto mb-4 max-w-full" style={{ height: lp.hero_title_image_height ? `${lp.hero_title_image_height}px` : '120px' }} />
                   ) : (
-                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight">
+                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight typo-title">
                       {lp.hero_title || item.nome}
                     </h1>
                   )}
                 </div>
                 
-                <p className="text-xl text-slate-300 leading-relaxed max-w-xl" style={{ transform: `translate(${lp.hero_subtitle_offset_x || 0}px, ${lp.hero_subtitle_offset_y || 0}px)` }}>
+                <p className="text-xl text-slate-700 leading-relaxed max-w-xl typo-subtitle" style={{ transform: `translate(${lp.hero_subtitle_offset_x || 0}px, ${lp.hero_subtitle_offset_y || 0}px)` }}>
                   {lp.hero_subtitle || item.descricao}
                 </p>
 
@@ -1385,7 +1398,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
           <div className="max-w-4xl mx-auto px-6 text-center">
             <div className="w-16 h-1 bg-primary rounded-full mx-auto mb-8"></div>
             {/* #7 Configurable about_title */}
-            <h2 className="text-4xl md:text-5xl font-bold text-white leading-tight mb-8">{lp.about_title || 'Prepare-se para uma experiência de aprendizado sem precedentes.'}</h2>
+            <h2 className="text-4xl md:text-5xl font-bold text-white leading-tight mb-8 typo-title">{lp.about_title || 'Prepare-se para uma experiência de aprendizado sem precedentes.'}</h2>
             <div className="text-lg text-slate-400 leading-relaxed text-left">
               <div className="prose prose-invert max-w-none text-slate-400">
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
@@ -1469,8 +1482,8 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                 <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 rounded-full text-xs font-black uppercase tracking-widest text-emerald-400 border border-emerald-500/20">
                   Oportunidade Única
                 </div>
-                <h2 className="text-4xl md:text-5xl font-bold">Bônus Exclusivos Para Você</h2>
-                <p className="text-slate-400 text-lg">Inscreva-se hoje e leve gratuitamente estes materiais complementares.</p>
+                <h2 className="text-4xl md:text-5xl font-bold typo-title">Bônus Exclusivos Para Você</h2>
+                <p className="text-slate-700 text-lg typo-text">Inscreva-se hoje e leve gratuitamente estes materiais complementares.</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -1479,7 +1492,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                      <div className="w-14 h-14 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                        <Gift className="w-7 h-7 text-emerald-400" />
                      </div>
-                     <h4 className="text-xl font-bold mb-3">{bonus.title}</h4>
+                     <h4 className="text-xl font-bold mb-3 typo-title">{bonus.title}</h4>
                      {bonus.value && (
                        <div className="mb-3 flex items-center gap-2">
                          <span className="text-emerald-400 text-xs font-bold uppercase tracking-wider">Valor:</span>
@@ -1487,7 +1500,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                          <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 text-[10px] font-black px-2 py-0.5 rounded-full uppercase">Grátis</span>
                        </div>
                      )}
-                     <p className="text-slate-400 leading-relaxed">{bonus.description}</p>
+                     <p className="text-slate-700 leading-relaxed typo-text">{bonus.description}</p>
                   </div>
                 ))}
               </div>
@@ -1510,10 +1523,10 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                  <div className="max-w-xl text-center lg:text-left space-y-8">
                     <div className="text-left">
                        <span className="text-primary font-bold text-sm tracking-widest uppercase block mb-3">Seu instrutor</span>
-                       <h2 className="text-4xl md:text-5xl font-bold text-white">{lp.instructor?.name || 'Mestre do Conteúdo'}</h2>
+                       <h2 className="text-4xl md:text-5xl font-bold text-white typo-title">{lp.instructor?.name || 'Mestre do Conteúdo'}</h2>
                        <p className="text-lg text-slate-500 font-medium mt-1">{lp.instructor?.role || 'Especialista e Mentor'}</p>
                     </div>
-                    <p className="text-xl text-slate-400 italic font-light leading-relaxed text-left">
+                    <p className="text-xl text-slate-700 italic font-light leading-relaxed text-left typo-subtitle">
                       "{lp.instructor?.bio || 'Comprometido em guiar alunos na jornada de transformação profissional através de métodos validados no mercado.'}"
                     </p>
                  </div>
@@ -1526,7 +1539,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
         {lp.faq?.length > 0 && (
           <section className="py-32 bg-slate-900" style={getSectionStyle('faq')}>
              <div className="max-w-4xl mx-auto px-6">
-                <h2 className="text-4xl font-bold text-white text-center mb-20 tracking-tight">Perguntas Frequentes</h2>
+                <h2 className="text-4xl font-bold text-white text-center mb-20 tracking-tight typo-title">Perguntas Frequentes</h2>
                 <div className="space-y-4">
                    {lp.faq.map((f: any, idx: number) => {
                      const isFaqExpanded = !!openFaqs[idx];
@@ -1540,7 +1553,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                            onClick={() => toggleFaq(idx)}
                            className="p-8 flex items-center justify-between gap-4 cursor-pointer select-none"
                          >
-                           <h4 className="text-xl font-bold text-white">{f.question}</h4>
+                           <h4 className="text-xl font-bold text-white typo-title">{f.question}</h4>
                            {isFaqExpanded ? (
                              <ChevronDown className="w-6 h-6 text-primary shrink-0" />
                            ) : (
@@ -1558,7 +1571,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                                transition={{ duration: 0.2 }}
                                className="border-t border-slate-700/30 bg-slate-850/20 px-8 pb-8 pt-4"
                              >
-                               <p className="text-slate-350 leading-relaxed text-lg">{f.answer}</p>
+                               <p className="text-slate-700 leading-relaxed text-lg typo-text">{f.answer}</p>
                              </motion.div>
                            )}
                          </AnimatePresence>
@@ -1574,8 +1587,8 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
       {!isTrilha && (
         <section id="curriculo" className="py-32 bg-slate-950 border-y border-slate-900" style={getSectionStyle('curriculum')}>
           <div className="max-w-3xl mx-auto px-6 text-center mb-20">
-            <h2 className="text-4xl font-bold text-white mb-4">Grade Curricular</h2>
-            <p className="text-slate-400 text-lg">Confira os módulos que preparamos para acelerar seu aprendizado.</p>
+            <h2 className="text-4xl font-bold text-white mb-4 typo-title">Grade Curricular</h2>
+            <p className="text-slate-700 text-lg typo-text">Confira os módulos que preparamos para acelerar seu aprendizado.</p>
           </div>
           
           <div className="max-w-4xl mx-auto px-6 space-y-4">
@@ -1592,8 +1605,8 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                       {idx + 1}
                     </div>
                     <div className="flex-1">
-                      <h4 className="font-bold text-white text-xl">{modulo.nome}</h4>
-                      <p className="text-sm text-slate-500 mt-1">{modulo.etapas?.length || 0} lições de alto impacto</p>
+                      <h4 className="font-bold text-white text-xl typo-title">{modulo.nome}</h4>
+                      <p className="text-sm text-slate-700 mt-1 typo-text">{modulo.etapas?.length || 0} lições de alto impacto</p>
                     </div>
                     {isExpanded ? (
                       <ChevronDown className="w-6 h-6 text-slate-400" />
@@ -1653,8 +1666,8 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
            </div>
 
            <div className="max-w-4xl mx-auto px-6 text-center relative z-10 space-y-12">
-              <h2 className="text-5xl md:text-7xl font-bold text-white tracking-tighter leading-tight">Escolha o seu futuro hoje.</h2>
-              <p className="text-xl text-slate-400 max-w-2xl mx-auto">Não deixe para depois a oportunidade de se tornar um especialista com quem realmente entende do assunto.</p>
+              <h2 className="text-5xl md:text-7xl font-bold text-white tracking-tighter leading-tight typo-title">Escolha o seu futuro hoje.</h2>
+              <p className="text-xl text-slate-700 max-w-2xl mx-auto typo-subtitle">Não deixe para depois a oportunidade de se tornar um especialista com quem realmente entende do assunto.</p>
               
               <div className="flex flex-col items-center gap-10">
                 <button 
@@ -1847,13 +1860,13 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                 {(lp.hero_title && (lp.hero_title.startsWith('data:image') || lp.hero_title.startsWith('http')) && !lp.hero_title.includes(' ')) ? (
                   <img src={lp.hero_title} alt={item.nome || "Título"} className="object-contain w-auto mb-4 max-w-full" style={{ height: lp.hero_title_image_height ? `${lp.hero_title_image_height}px` : '120px' }} />
                 ) : (
-                  <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 leading-[1.15] tracking-tight drop-shadow-sm">
+                  <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 leading-[1.15] tracking-tight drop-shadow-sm typo-title">
                     {lp.hero_title || item.nome}
                   </h1>
                 )}
               </div>
 
-              <p className="text-xl text-slate-700 leading-relaxed max-w-xl font-medium drop-shadow-sm" style={{ transform: `translate(${lp.hero_subtitle_offset_x || 0}px, ${lp.hero_subtitle_offset_y || 0}px)` }}>
+              <p className="text-xl text-slate-700 leading-relaxed max-w-xl font-medium drop-shadow-sm typo-subtitle" style={{ transform: `translate(${lp.hero_subtitle_offset_x || 0}px, ${lp.hero_subtitle_offset_y || 0}px)` }}>
                 {lp.hero_subtitle || item.descricao}
               </p>
               
@@ -1951,7 +1964,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             ]).map((stat, i) => (
               <div key={i} className="flex flex-col items-center text-center gap-2 group min-w-[120px]">
                 <stat.icon className="w-8 h-8 text-primary mb-1 group-hover:scale-110 transition-transform" />
-                <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">{stat.label}</span>
+                <span className="text-sm font-bold text-slate-700 uppercase tracking-widest typo-link">{stat.label}</span>
                 <span className="text-lg font-bold text-slate-900 capitalize">{stat.value}</span>
               </div>
             ))}
@@ -1974,7 +1987,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
       <section id="sobre" className="py-24 bg-white" style={getSectionStyle('about')}>
         <div className="max-w-4xl mx-auto px-6 text-center">
           {/* #7 Configurable about_title */}
-          <h2 className="text-4xl font-bold text-slate-900 mb-6">{lp.about_title || 'Tudo o que você precisa em um só lugar.'}</h2>
+          <h2 className="text-4xl font-bold text-slate-900 mb-6 typo-title">{lp.about_title || 'Tudo o que você precisa em um só lugar.'}</h2>
           <div className="h-1.5 w-20 bg-primary rounded-full mx-auto mb-10"></div>
           <div className="text-lg text-slate-600 leading-relaxed text-left">
             <div className="prose max-w-none text-slate-600">
@@ -2059,7 +2072,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-800 rounded-full text-xs font-black uppercase tracking-widest text-emerald-300 border border-emerald-700">
                 Oportunidade Única
               </div>
-              <h2 className="text-4xl md:text-5xl font-bold">Bônus Exclusivos Para Você</h2>
+              <h2 className="text-4xl md:text-5xl font-bold typo-title">Bônus Exclusivos Para Você</h2>
               <p className="text-emerald-200/70 text-lg">Inscreva-se hoje e leve gratuitamente estes materiais complementares.</p>
             </div>
 
@@ -2069,7 +2082,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                    <div className="w-14 h-14 bg-emerald-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                      <Gift className="w-7 h-7 text-white" />
                    </div>
-                   <h4 className="text-xl font-bold mb-3">{bonus.title}</h4>
+                   <h4 className="text-xl font-bold mb-3 typo-title">{bonus.title}</h4>
                    {/* #6 Bonus value field */}
                    {bonus.value && (
                      <div className="mb-3 flex items-center gap-2">
@@ -2101,8 +2114,8 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             <div className="space-y-6 text-center md:text-left">
               <div>
                 <span className="text-primary font-bold text-sm uppercase tracking-widest mb-2 block">Conheça seu mentor</span>
-                <h2 className="text-4xl font-bold text-slate-900">{lp.instructor?.name || 'Professor Especialista'}</h2>
-                <p className="text-slate-500 font-medium">{lp.instructor?.role || 'Instrutor e Mentor'}</p>
+                <h2 className="text-4xl font-bold text-slate-900 typo-title">{lp.instructor?.name || 'Professor Especialista'}</h2>
+                <p className="text-slate-700 font-medium typo-text">{lp.instructor?.role || 'Instrutor e Mentor'}</p>
               </div>
               <p className="text-lg text-slate-600 leading-relaxed italic">
                 "{lp.instructor?.bio || 'Dedicado a transformar vidas através da educação prática e compartilhamento de experiências reais de mercado.'}"
@@ -2136,8 +2149,8 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
         <section className="py-24 bg-white border-y border-slate-100" style={getSectionStyle('curriculum')}>
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center mb-16 space-y-4">
-              <h2 className="text-4xl font-bold text-slate-900">{lp.courses_title || 'Cursos inclusos nesta trilha'}</h2>
-              <p className="text-slate-600 text-lg max-w-2xl mx-auto">
+              <h2 className="text-4xl font-bold text-slate-900 typo-title">{lp.courses_title || 'Cursos inclusos nesta trilha'}</h2>
+              <p className="text-slate-700 text-lg max-w-2xl mx-auto typo-text">
                 {lp.courses_description || 'Confira os programas que fazem parte desta jornada completa.'}
               </p>
             </div>
@@ -2149,8 +2162,8 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                     <img src={c.capa_url} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   </div>
                   <div className="p-8 flex flex-col justify-center">
-                    <h4 className="text-xl font-bold text-slate-900 mb-2">{c.nome}</h4>
-                    <p className="text-slate-500 text-sm line-clamp-3 mb-4">{c.descricao}</p>
+                    <h4 className="text-xl font-bold text-slate-900 mb-2 typo-title">{c.nome}</h4>
+                    <p className="text-slate-700 text-sm line-clamp-3 mb-4 typo-text">{c.descricao}</p>
                     <div className="flex items-center gap-4 text-xs font-bold text-primary uppercase">
                        <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {c.carga_horaria}h</span>
                        <span className="flex items-center gap-1"><BookOpen className="w-3 h-3" /> {c.curriculo_json?.length || 0} módulos</span>
@@ -2167,8 +2180,8 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
       {!isTrilha && (
         <section className="py-24 bg-white" style={getSectionStyle('curriculum')}>
           <div className="max-w-3xl mx-auto px-6 text-center mb-16">
-            <h2 className="text-4xl font-bold text-slate-900 mb-4">Grade Curricular</h2>
-            <p className="text-slate-600 text-lg">Confira os módulos que preparamos para acelerar seu aprendizado.</p>
+            <h2 className="text-4xl font-bold text-slate-900 mb-4 typo-title">Grade Curricular</h2>
+            <p className="text-slate-700 text-lg typo-text">Confira os módulos que preparamos para acelerar seu aprendizado.</p>
           </div>
           
           <div className="max-w-4xl mx-auto px-6 space-y-4">
@@ -2185,8 +2198,8 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                       {idx + 1}
                     </div>
                     <div className="flex-1">
-                      <h4 className="font-bold text-slate-900 text-lg">{modulo.nome}</h4>
-                      <p className="text-sm text-slate-500">{modulo.etapas?.length || 0} lições interativas</p>
+                      <h4 className="font-bold text-slate-900 text-lg typo-title">{modulo.nome}</h4>
+                      <p className="text-sm text-slate-700 typo-text">{modulo.etapas?.length || 0} lições interativas</p>
                     </div>
                     {isExpanded ? (
                       <ChevronDown className="w-5 h-5 text-slate-500" />
@@ -2241,7 +2254,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
       {lp.faq?.length > 0 && (
         <section className="py-24 bg-slate-50" style={getSectionStyle('faq')}>
           <div className="max-w-3xl mx-auto px-6">
-            <h2 className="text-4xl font-bold text-slate-900 text-center mb-16">Dúvidas Frequentes</h2>
+            <h2 className="text-4xl font-bold text-slate-900 text-center mb-16 typo-title">Dúvidas Frequentes</h2>
             <div className="space-y-4">
               {lp.faq.map((item: any, idx: number) => {
                 const isFaqExpanded = !!openFaqs[idx];
@@ -2255,7 +2268,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                       onClick={() => toggleFaq(idx)}
                       className="p-8 flex items-center justify-between gap-4 cursor-pointer select-none"
                     >
-                      <h4 className="font-bold text-slate-900 text-xl group-hover:text-primary transition-colors">{item.question}</h4>
+                      <h4 className="font-bold text-slate-900 text-xl group-hover:text-primary transition-colors typo-title">{item.question}</h4>
                       {isFaqExpanded ? (
                         <ChevronDown className="w-6 h-6 text-primary shrink-0" />
                       ) : (
@@ -2273,7 +2286,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                           transition={{ duration: 0.2 }}
                           className="border-t border-slate-100 bg-slate-50/30 px-8 pb-8 pt-4"
                         >
-                          <p className="text-slate-600 leading-relaxed text-lg">{item.answer}</p>
+                          <p className="text-slate-700 leading-relaxed text-lg typo-text">{item.answer}</p>
                         </motion.div>
                       )}
                     </AnimatePresence>
@@ -2294,8 +2307,8 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-[600px] h-[600px] bg-primary rounded-full blur-[140px] opacity-20"></div>
                <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-[400px] h-[400px] bg-indigo-50 rounded-full blur-[100px] opacity-10"></div>
                <div className="relative z-10 max-w-2xl mx-auto space-y-10">
-                  <h2 className="text-5xl md:text-7xl font-bold leading-tight tracking-tighter">Não perca mais tempo. <br/> Comece agora.</h2>
-                  <p className="text-xl text-slate-400 font-medium">Junte-se a centenas de outros alunos e leve seu conhecimento para o próximo nível com suporte total.</p>
+                  <h2 className="text-5xl md:text-7xl font-bold leading-tight tracking-tighter typo-title">Não perca mais tempo. <br/> Comece agora.</h2>
+                  <p className="text-xl text-slate-700 font-medium typo-subtitle">Junte-se a centenas de outros alunos e leve seu conhecimento para o próximo nível com suporte total.</p>
                   <div className="flex flex-col items-center gap-8">
                     <button 
                       onClick={handleEnrollClick}
@@ -2304,11 +2317,11 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                       {lp.cta_text || 'Matricule-se Agora'}
                     </button>
                     <div className="flex flex-col md:flex-row items-center gap-6">
-                      <p className="text-sm text-slate-400 flex items-center gap-2 font-bold uppercase tracking-widest">
+                      <p className="text-sm text-slate-700 flex items-center gap-2 font-bold uppercase tracking-widest typo-text">
                          <CheckCircle className="w-5 h-5 text-emerald-400" /> Garantia de {lp.guarantee_days || 7} dias
                       </p>
                       <div className="hidden md:block w-px h-4 bg-slate-700"></div>
-                      <p className="text-sm text-slate-400 flex items-center gap-2 font-bold uppercase tracking-widest">
+                      <p className="text-sm text-slate-700 flex items-center gap-2 font-bold uppercase tracking-widest typo-text">
                          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div> Pago em ambiente seguro
                       </p>
                     </div>
