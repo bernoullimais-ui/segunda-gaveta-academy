@@ -1260,10 +1260,6 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             }`}>
               {/* Text Content */}
               <div className="space-y-10 animate-in fade-in slide-in-from-bottom-12 duration-1000 flex flex-col w-full" style={{ alignItems: lp.hero_align_h === 'center' ? 'center' : lp.hero_align_h === 'right' ? 'flex-end' : 'flex-start' }}>
-                <div className="inline-flex items-center gap-3 px-4 py-1.5 bg-slate-800 border border-slate-700 rounded-full">
-                  <div className="w-2 h-2 bg-emerald-500 rounded-full animate-ping"></div>
-                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Inscrições Abertas</span>
-                </div>
 
                 <div style={{ transform: `translate(${lp.hero_title_offset_x || 0}px, ${lp.hero_title_offset_y || 0}px)` }}>
                   {(lp.hero_title && (lp.hero_title.startsWith('data:image') || lp.hero_title.startsWith('http')) && !lp.hero_title.includes(' ')) ? (
