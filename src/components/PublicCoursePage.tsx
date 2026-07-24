@@ -649,8 +649,13 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
     bonuses: [],
     faq: [],
     guarantee_days: 7,
-    instructor: { name: item?.professor_nome || '', bio: '', avatar_url: item?.professor_foto_url || '', role: 'Instrutor(a)' },
-    ...(lpRaw || {})
+    ...(lpRaw || {}),
+    instructor: { 
+      name: lpRaw?.instructor?.name || item?.professor_nome || item?.instrutores?.[0]?.nome || item?.instrutores?.[0]?.usuarios?.nome || '', 
+      bio: lpRaw?.instructor?.bio || item?.professor_bio || item?.instrutores?.[0]?.mini_bio || '', 
+      avatar_url: lpRaw?.instructor?.avatar_url || item?.professor_foto_url || item?.instrutores?.[0]?.foto_url || item?.instrutores?.[0]?.usuarios?.avatar_url || '', 
+      role: lpRaw?.instructor?.role || 'Instrutor(a)' 
+    }
   };
 
   const getSectionStyle = (sectionKey: string, defaultStyle: React.CSSProperties = {}) => {
