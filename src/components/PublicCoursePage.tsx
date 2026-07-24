@@ -273,7 +273,7 @@ const EnrollmentModal = ({
               <button
                 disabled={isProcessing || !enrollData.nome.trim() || !enrollData.email || !!emailError}
                 onClick={handleSubmit}
-                className="w-full py-5 bg-primary text-white rounded-2xl font-bold text-lg hover:opacity-90 shadow-xl shadow-primary/20 active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="typo-btn w-full py-5 bg-primary text-white rounded-2xl font-bold text-lg hover:opacity-90 shadow-xl shadow-primary/20 active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isProcessing ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
                 {isFree ? 'Confirmar Inscrição' : 'Ir para o Pagamento'} <ArrowRight className="w-5 h-5" />
@@ -1123,7 +1123,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
         </div>
         <h2 className="text-2xl font-bold text-slate-800 typo-title">Ops! Algo deu errado.</h2>
         <p className="text-slate-700 max-w-md typo-text">{error || 'Não foi possível encontrar este conteúdo público.'}</p>
-        <button onClick={() => window.location.reload()} className="px-6 py-2 bg-primary text-white rounded-full font-bold">Tentar novamente</button>
+        <button onClick={() => window.location.reload()} className="typo-btn px-6 py-2 bg-primary text-white rounded-full font-bold">Tentar novamente</button>
       </div>
     );
   }
@@ -1224,7 +1224,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             </div>
             <button
               onClick={handleEnrollClick}
-              className="flex-1 max-w-[200px] py-3 bg-primary text-white rounded-2xl font-black text-sm hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-primary/30"
+              className="typo-btn flex-1 max-w-[200px] py-3 bg-primary text-white rounded-2xl font-black text-sm hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-primary/30"
             >
               {lp.cta_text || 'GARANTIR VAGA'}
             </button>
@@ -1309,7 +1309,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                   <div className="flex flex-col items-center gap-2 w-full sm:w-auto">
                     <button 
                       onClick={handleEnrollClick}
-                      className="w-full sm:w-auto px-12 py-6 bg-primary text-white rounded-3xl font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(var(--primary-rgb),0.3)] flex items-center justify-center gap-3"
+                      className="typo-btn w-full sm:w-auto px-12 py-6 bg-primary text-white rounded-3xl font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(var(--primary-rgb),0.3)] flex items-center justify-center gap-3"
                     >
                       {lp.cta_text || 'COMPRAR AGORA'} <ArrowRight className="w-6 h-6" />
                     </button>
@@ -1398,7 +1398,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
               {renderPriceBlock(true)}
               <button 
                 onClick={handleEnrollClick}
-                className="w-full sm:w-auto px-12 py-5 bg-primary text-white rounded-3xl font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(var(--primary-rgb),0.3)] flex items-center justify-center gap-3"
+                className="typo-btn w-full sm:w-auto px-12 py-5 bg-primary text-white rounded-3xl font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(var(--primary-rgb),0.3)] flex items-center justify-center gap-3"
               >
                 {lp.cta_text || 'COMPRAR AGORA'} <ArrowRight className="w-6 h-6" />
               </button>
@@ -1479,7 +1479,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             )}
             <button 
               onClick={handleEnrollClick}
-              className="w-full sm:w-auto px-12 py-5 bg-primary text-white rounded-3xl font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(var(--primary-rgb),0.3)] flex items-center justify-center gap-3"
+              className="typo-btn w-full sm:w-auto px-12 py-5 bg-primary text-white rounded-3xl font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(var(--primary-rgb),0.3)] flex items-center justify-center gap-3"
             >
               {lp.cta_text || 'COMPRAR AGORA'} <ArrowRight className="w-6 h-6" />
             </button>
@@ -1801,7 +1801,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                 </div>
                 <button
                   onClick={handleEnrollClick}
-                  className="flex-1 max-w-[200px] py-3 bg-primary text-white rounded-2xl font-black text-sm hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-primary/20"
+                  className="typo-btn flex-1 max-w-[200px] py-3 bg-primary text-white rounded-2xl font-black text-sm hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-primary/20"
                 >
                   {lp.cta_text || 'GARANTIR VAGA'}
                 </button>
@@ -1889,7 +1889,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                 <div className="flex flex-col items-center gap-2 w-full sm:w-auto">
                   <button
                     onClick={handleEnrollClick}
-                    className="w-full sm:w-auto px-10 py-5 bg-primary text-white rounded-2xl font-bold text-lg hover:opacity-90 shadow-xl shadow-primary/20 active:scale-95 transition-all flex items-center justify-center gap-3"
+                    className="typo-btn w-full sm:w-auto px-10 py-5 bg-primary text-white rounded-2xl font-bold text-lg hover:opacity-90 shadow-xl shadow-primary/20 active:scale-95 transition-all flex items-center justify-center gap-3"
                   >
                     {lp.cta_text || 'Quero Garantir Minha Vaga'} <ArrowRight className="w-5 h-5" />
                   </button>
@@ -1995,7 +1995,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             {renderPriceBlock(false)}
             <button 
               onClick={handleEnrollClick}
-              className="w-full sm:w-auto px-12 py-5 bg-primary text-white rounded-3xl font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(var(--primary-rgb),0.2)] flex items-center justify-center gap-3"
+              className="typo-btn w-full sm:w-auto px-12 py-5 bg-primary text-white rounded-3xl font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(var(--primary-rgb),0.2)] flex items-center justify-center gap-3"
             >
               {lp.cta_text || 'COMPRAR AGORA'} <ArrowRight className="w-6 h-6" />
             </button>
@@ -2076,7 +2076,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
           )}
           <button 
             onClick={handleEnrollClick}
-            className="w-full sm:w-auto px-12 py-5 bg-primary text-white rounded-3xl font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(var(--primary-rgb),0.3)] flex items-center justify-center gap-3"
+            className="typo-btn w-full sm:w-auto px-12 py-5 bg-primary text-white rounded-3xl font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(var(--primary-rgb),0.3)] flex items-center justify-center gap-3"
           >
             {lp.cta_text || 'COMPRAR AGORA'} <ArrowRight className="w-6 h-6" />
           </button>
@@ -2332,7 +2332,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                   <div className="flex flex-col items-center gap-8">
                     <button 
                       onClick={handleEnrollClick}
-                      className="w-full sm:w-auto px-16 py-7 bg-primary text-white rounded-3xl font-black text-2xl hover:opacity-90 shadow-2xl shadow-primary/40 active:scale-95 transition-all"
+                      className="typo-btn w-full sm:w-auto px-16 py-7 bg-primary text-white rounded-3xl font-black text-2xl hover:opacity-90 shadow-2xl shadow-primary/40 active:scale-95 transition-all"
                     >
                       {lp.cta_text || 'Matricule-se Agora'}
                     </button>
