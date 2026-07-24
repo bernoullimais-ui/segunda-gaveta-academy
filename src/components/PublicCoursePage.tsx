@@ -96,7 +96,6 @@ const Nav = ({ layout, item, lp, onEnrollClick }: NavProps) => {
         <div className="flex items-center gap-3 sm:gap-6">
           <div className="hidden lg:flex items-center gap-8">
             <a href="#sobre" className={`typo-link font-bold text-sm hover:text-primary transition-colors ${layout === 'escuro' ? 'text-slate-400' : 'text-slate-500'}`}>Sobre</a>
-            <a href="#curriculo" className={`typo-link font-bold text-sm hover:text-primary transition-colors ${layout === 'escuro' ? 'text-slate-400' : 'text-slate-500'}`}>Conteúdo</a>
             <a href="#instrutor" className={`typo-link font-bold text-sm hover:text-primary transition-colors ${layout === 'escuro' ? 'text-slate-400' : 'text-slate-500'}`}>Instrutor</a>
           </div>
           {/* #9 Smart redirect: if logged in go to dashboard, else to login */}
@@ -1301,12 +1300,19 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                 <CountdownTimer timeLeft={timeLeft} title={lp.countdown_title} layout={layout} />
 
                 <div className="flex flex-col sm:flex-row items-center gap-8 pt-4 w-full" style={{ transform: `translate(${lp.hero_cta_offset_x || 0}px, ${lp.hero_cta_offset_y || 0}px)`, justifyContent: lp.hero_align_h === 'center' ? 'center' : lp.hero_align_h === 'right' ? 'flex-end' : 'flex-start' }}>
-                  <button 
-                    onClick={handleEnrollClick}
-                    className="w-full sm:w-auto px-12 py-6 bg-primary text-white rounded-3xl font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(var(--primary-rgb),0.3)] flex items-center justify-center gap-3"
-                  >
-                    {lp.cta_text || 'COMPRAR AGORA'} <ArrowRight className="w-6 h-6" />
-                  </button>
+                  <div className="flex flex-col items-center gap-2 w-full sm:w-auto">
+                    <button 
+                      onClick={handleEnrollClick}
+                      className="w-full sm:w-auto px-12 py-6 bg-primary text-white rounded-3xl font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(var(--primary-rgb),0.3)] flex items-center justify-center gap-3"
+                    >
+                      {lp.cta_text || 'COMPRAR AGORA'} <ArrowRight className="w-6 h-6" />
+                    </button>
+                    {lp.instructor?.name && (
+                      <span className={`text-sm ${layout === 'escuro' ? 'text-slate-400' : 'text-slate-500'} typo-text`}>
+                        By {lp.instructor.name}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -1874,12 +1880,19 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
               <CountdownTimer timeLeft={timeLeft} title={lp.countdown_title} layout={layout} />
               
               <div className="flex flex-col sm:flex-row items-center gap-4 pt-4 w-full" style={{ transform: `translate(${lp.hero_cta_offset_x || 0}px, ${lp.hero_cta_offset_y || 0}px)`, justifyContent: lp.hero_align_h === 'center' ? 'center' : lp.hero_align_h === 'right' ? 'flex-end' : 'flex-start' }}>
-                <button
-                  onClick={handleEnrollClick}
-                  className="w-full sm:w-auto px-10 py-5 bg-primary text-white rounded-2xl font-bold text-lg hover:opacity-90 shadow-xl shadow-primary/20 active:scale-95 transition-all flex items-center justify-center gap-3"
-                >
-                  {lp.cta_text || 'Quero Garantir Minha Vaga'} <ArrowRight className="w-5 h-5" />
-                </button>
+                <div className="flex flex-col items-center gap-2 w-full sm:w-auto">
+                  <button
+                    onClick={handleEnrollClick}
+                    className="w-full sm:w-auto px-10 py-5 bg-primary text-white rounded-2xl font-bold text-lg hover:opacity-90 shadow-xl shadow-primary/20 active:scale-95 transition-all flex items-center justify-center gap-3"
+                  >
+                    {lp.cta_text || 'Quero Garantir Minha Vaga'} <ArrowRight className="w-5 h-5" />
+                  </button>
+                  {lp.instructor?.name && (
+                    <span className={`text-sm ${layout === 'escuro' ? 'text-slate-400' : 'text-slate-500'} typo-text`}>
+                      By {lp.instructor.name}
+                    </span>
+                  )}
+                </div>
                 {/* Real participant count */}
                 {(participantCount !== null ? participantCount : 0) > 0 && (
                   <div className="flex items-center gap-2 text-slate-600 font-bold bg-white/50 px-3 py-1.5 rounded-full backdrop-blur-md">
