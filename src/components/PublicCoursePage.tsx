@@ -1309,9 +1309,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                   </div>
                 </div>
               </div>
-
             </div>
-          </div>
         </section>
 
         {/* Modern Dark Info Bar */}
@@ -1901,9 +1899,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                 )}
               </div>
             </div>
-
           </div>
-        </div>
       </section>
 
       {/* Info bar */}
