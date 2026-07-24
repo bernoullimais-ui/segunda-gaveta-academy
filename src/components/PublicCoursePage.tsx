@@ -1227,13 +1227,13 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                   />
                 </div>
               ) : (
-                <img src={lp.hero_video_url} alt="Apresentação" className="w-full h-full object-cover" />
+                <img src={lp.hero_video_url} alt="Apresentação" className="w-full h-full object-contain object-center" />
               )
             ) : (
               <img 
                 src={item.capa_url || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070'} 
                 alt="Capa"
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain object-center"
               />
             )}
           </div>
@@ -1312,13 +1312,13 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                           />
                         </div>
                       ) : (
-                        <img src={lp.hero_video_url} alt="Apresentação" className="w-full h-full object-cover" />
+                        <img src={lp.hero_video_url} alt="Apresentação" className="w-full h-full object-contain" />
                       )
                     ) : (
                       <img 
                         src={item.capa_url || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070'} 
                         alt="Capa"
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-contain"
                       />
                     )}
                   </div>
@@ -1801,13 +1801,13 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                 />
               </div>
             ) : (
-              <img src={lp.hero_video_url} alt="Apresentação" className="w-full h-full object-cover" />
+              <img src={lp.hero_video_url} alt="Apresentação" className="w-full h-full object-contain object-center" />
             )
           ) : (
             <img 
               src={item.capa_url || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070'} 
               alt="Capa"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain object-center"
             />
           )}
         </div>
@@ -1903,13 +1903,13 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                       />
                     </div>
                   ) : (
-                    <img src={lp.hero_video_url} alt="Apresentação" className="w-full h-full object-cover" />
+                    <img src={lp.hero_video_url} alt="Apresentação" className="w-full h-full object-contain object-center" />
                   )
                 ) : (
                   <img 
                     src={item.capa_url || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070'} 
                     alt="Capa"
-                    className="w-full h-full object-cover opacity-90"
+                    className="w-full h-full object-contain object-center opacity-90"
                   />
                 )}
               </div>
