@@ -443,6 +443,16 @@ export function TrilhaModal({ isOpen, onClose, fetchTrilhas, editingTrilha, orgI
                       {lpData.nav_logo_height || 40}px
                     </span>
                   </div>
+                  
+                  <label className="text-[10px] uppercase font-bold text-slate-400 tracking-widest block mt-6 mb-2">Cor de Fundo do Menu (ao rolar a página)</label>
+                  <input 
+                    type="text"
+                    value={lpData.nav_bg_color || ''}
+                    onChange={(e) => setLpData({...lpData, nav_bg_color: e.target.value})}
+                    placeholder="Ex: #1a202c ou rgba(0,0,0,0.9)"
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                  />
+                  <p className="text-xs text-slate-500 mt-1">Se vazio, usará a cor padrão do layout atual.</p>
                 </div>
               </div>
 

@@ -65,11 +65,14 @@ const Nav = ({ layout, item, lp, onEnrollClick }: NavProps) => {
   }, [item]);
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-      isScrolled 
-        ? `backdrop-blur-md border-b ${layout === 'escuro' ? 'bg-slate-900/90 border-slate-800' : 'bg-white/90 border-slate-200'}`
-        : 'bg-transparent border-transparent'
-    }`}>
+    <nav 
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        isScrolled 
+          ? `backdrop-blur-md border-b ${layout === 'escuro' ? 'bg-slate-900/90 border-slate-800' : 'bg-white/90 border-slate-200'}`
+          : 'bg-transparent border-transparent'
+      }`}
+      style={{ backgroundColor: isScrolled && lp.nav_bg_color ? lp.nav_bg_color : undefined }}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
         <div className="flex items-center gap-3 shrink-0">
           {(lp.logo_url || item.organizacoes?.logo_url) ? (
