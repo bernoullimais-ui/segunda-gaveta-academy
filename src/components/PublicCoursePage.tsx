@@ -1223,33 +1223,40 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             )}
           </div>
 
-          <div className="max-w-7xl mx-auto px-6 relative z-10 w-full">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-              {/* Empty space on the left to allow the background image to shine */}
-              <div className="hidden lg:block"></div>
-
-              {/* Text Content (Right Side) */}
-              <div className="space-y-10 animate-in fade-in slide-in-from-right-12 duration-1000 max-w-xl lg:ml-auto">
+          <div className="max-w-7xl mx-auto px-6 relative z-10 w-full min-h-[90vh] flex flex-col py-32">
+            <div className={`w-full max-w-xl flex flex-col ${
+              lp.hero_align_h === 'center' ? 'mx-auto text-center items-center' :
+              lp.hero_align_h === 'right' ? 'ml-auto text-right items-end' :
+              lp.hero_align_h === 'left' ? 'mr-auto text-left items-start' : 'lg:ml-auto text-left items-start' // Default to right for previous behavior
+            } ${
+              lp.hero_align_v === 'top' ? 'mb-auto' :
+              lp.hero_align_v === 'bottom' ? 'mt-auto' :
+              'my-auto'
+            }`}>
+              {/* Text Content */}
+              <div className="space-y-10 animate-in fade-in slide-in-from-bottom-12 duration-1000 flex flex-col w-full" style={{ alignItems: lp.hero_align_h === 'center' ? 'center' : lp.hero_align_h === 'right' ? 'flex-end' : 'flex-start' }}>
                 <div className="inline-flex items-center gap-3 px-4 py-1.5 bg-slate-800 border border-slate-700 rounded-full">
                   <div className="w-2 h-2 bg-emerald-500 rounded-full animate-ping"></div>
                   <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Inscrições Abertas</span>
                 </div>
 
-                {(lp.hero_title && (lp.hero_title.startsWith('data:image') || lp.hero_title.startsWith('http')) && !lp.hero_title.includes(' ')) ? (
-                  <img src={lp.hero_title} alt={item.nome || "Título"} className="object-contain w-auto mb-4 max-w-full" style={{ height: lp.hero_title_image_height ? `${lp.hero_title_image_height}px` : '120px' }} />
-                ) : (
-                  <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight">
-                    {lp.hero_title || item.nome}
-                  </h1>
-                )}
+                <div style={{ transform: `translate(${lp.hero_title_offset_x || 0}px, ${lp.hero_title_offset_y || 0}px)` }}>
+                  {(lp.hero_title && (lp.hero_title.startsWith('data:image') || lp.hero_title.startsWith('http')) && !lp.hero_title.includes(' ')) ? (
+                    <img src={lp.hero_title} alt={item.nome || "Título"} className="object-contain w-auto mb-4 max-w-full" style={{ height: lp.hero_title_image_height ? `${lp.hero_title_image_height}px` : '120px' }} />
+                  ) : (
+                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight">
+                      {lp.hero_title || item.nome}
+                    </h1>
+                  )}
+                </div>
                 
-                <p className="text-xl text-slate-300 leading-relaxed max-w-xl">
+                <p className="text-xl text-slate-300 leading-relaxed max-w-xl" style={{ transform: `translate(${lp.hero_subtitle_offset_x || 0}px, ${lp.hero_subtitle_offset_y || 0}px)` }}>
                   {lp.hero_subtitle || item.descricao}
                 </p>
 
                 <CountdownTimer timeLeft={timeLeft} title={lp.countdown_title} layout={layout} />
 
-                <div className="flex flex-col sm:flex-row items-center gap-8 pt-4">
+                <div className="flex flex-col sm:flex-row items-center gap-8 pt-4 w-full" style={{ transform: `translate(${lp.hero_cta_offset_x || 0}px, ${lp.hero_cta_offset_y || 0}px)`, justifyContent: lp.hero_align_h === 'center' ? 'center' : lp.hero_align_h === 'right' ? 'flex-end' : 'flex-start' }}>
                   <button 
                     onClick={handleEnrollClick}
                     className="w-full sm:w-auto px-12 py-6 bg-primary text-white rounded-3xl font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(37,99,235,0.3)] flex items-center justify-center gap-3"
@@ -1258,6 +1265,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                   </button>
                 </div>
               </div>
+            </div>
 
               {/* Mobile Only Image/Video */}
               <div className="lg:hidden relative animate-in fade-in zoom-in-95 duration-1000 mt-8">
@@ -1791,37 +1799,46 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
           )}
         </div>
 
-        <div className="max-w-7xl mx-auto px-6 relative z-10 w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            {/* Empty space on the left to allow the background image to shine */}
-            <div className="hidden lg:block"></div>
-
-            {/* Text Content (Right Side) */}
-            <div className="space-y-8 animate-in fade-in slide-in-from-right-8 duration-700 max-w-xl lg:ml-auto">
+        <div className="max-w-7xl mx-auto px-6 relative z-10 w-full min-h-[90vh] flex flex-col py-32">
+          <div className={`w-full max-w-xl flex flex-col ${
+            lp.hero_align_h === 'center' ? 'mx-auto text-center items-center' :
+            lp.hero_align_h === 'right' ? 'ml-auto text-right items-end' :
+            lp.hero_align_h === 'left' ? 'mr-auto text-left items-start' : 'lg:ml-auto text-left items-start' // Default to right for previous behavior
+          } ${
+            lp.hero_align_v === 'top' ? 'mb-auto' :
+            lp.hero_align_v === 'bottom' ? 'mt-auto' :
+            'my-auto'
+          }`}>
+            {/* Text Content */}
+            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700 flex flex-col w-full" style={{ alignItems: lp.hero_align_h === 'center' ? 'center' : lp.hero_align_h === 'right' ? 'flex-end' : 'flex-start' }}>
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-bold border border-primary/20">
                 <Award className="w-4 h-4" /> Certificação Inclusa
               </div>
-              {(lp.hero_title && (lp.hero_title.startsWith('data:image') || lp.hero_title.startsWith('http')) && !lp.hero_title.includes(' ')) ? (
-                <img src={lp.hero_title} alt={item.nome || "Título"} className="object-contain w-auto mb-4 max-w-full" style={{ height: lp.hero_title_image_height ? `${lp.hero_title_image_height}px` : '120px' }} />
-              ) : (
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 leading-[1.15] tracking-tight drop-shadow-sm">
-                  {lp.hero_title || item.nome}
-                </h1>
-              )}
-              <p className="text-xl text-slate-700 leading-relaxed max-w-xl font-medium drop-shadow-sm">
+              
+              <div style={{ transform: `translate(${lp.hero_title_offset_x || 0}px, ${lp.hero_title_offset_y || 0}px)` }}>
+                {(lp.hero_title && (lp.hero_title.startsWith('data:image') || lp.hero_title.startsWith('http')) && !lp.hero_title.includes(' ')) ? (
+                  <img src={lp.hero_title} alt={item.nome || "Título"} className="object-contain w-auto mb-4 max-w-full" style={{ height: lp.hero_title_image_height ? `${lp.hero_title_image_height}px` : '120px' }} />
+                ) : (
+                  <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 leading-[1.15] tracking-tight drop-shadow-sm">
+                    {lp.hero_title || item.nome}
+                  </h1>
+                )}
+              </div>
+
+              <p className="text-xl text-slate-700 leading-relaxed max-w-xl font-medium drop-shadow-sm" style={{ transform: `translate(${lp.hero_subtitle_offset_x || 0}px, ${lp.hero_subtitle_offset_y || 0}px)` }}>
                 {lp.hero_subtitle || item.descricao}
               </p>
               
               <CountdownTimer timeLeft={timeLeft} title={lp.countdown_title} layout={layout} />
               
-              <div className="flex flex-col sm:flex-row items-center gap-4 pt-4">
+              <div className="flex flex-col sm:flex-row items-center gap-4 pt-4 w-full" style={{ transform: `translate(${lp.hero_cta_offset_x || 0}px, ${lp.hero_cta_offset_y || 0}px)`, justifyContent: lp.hero_align_h === 'center' ? 'center' : lp.hero_align_h === 'right' ? 'flex-end' : 'flex-start' }}>
                 <button
                   onClick={handleEnrollClick}
                   className="w-full sm:w-auto px-10 py-5 bg-primary text-white rounded-2xl font-bold text-lg hover:opacity-90 shadow-xl shadow-primary/20 active:scale-95 transition-all flex items-center justify-center gap-3"
                 >
                   {lp.cta_text || 'Quero Garantir Minha Vaga'} <ArrowRight className="w-5 h-5" />
                 </button>
-                {/* #4 Real participant count */}
+                {/* Real participant count */}
                 {(participantCount !== null ? participantCount : 0) > 0 && (
                   <div className="flex items-center gap-2 text-slate-600 font-bold bg-white/50 px-3 py-1.5 rounded-full backdrop-blur-md">
                     <div className="flex -space-x-2">
@@ -1834,6 +1851,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                 )}
               </div>
             </div>
+          </div>
 
             {/* Mobile Only Image/Video */}
             <div className="lg:hidden relative animate-in fade-in zoom-in-95 duration-1000 mt-8">

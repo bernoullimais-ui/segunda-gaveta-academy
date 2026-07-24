@@ -486,6 +486,82 @@ export function TrilhaModal({ isOpen, onClose, fetchTrilhas, editingTrilha, orgI
                       placeholder="Uma frase curta que resuma o benefício principal..."
                     />
                   </div>
+
+                  {/* Advanced Positioning */}
+                  <div className="pt-6 border-t border-slate-100">
+                    <label className="text-[10px] uppercase font-bold text-slate-400 tracking-widest block mb-4">Posicionamento Avançado (Hero)</label>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                      <div>
+                        <label className="block text-[10px] font-bold text-slate-500 mb-2 uppercase">Alinhamento Vertical</label>
+                        <select 
+                          value={lpData.hero_align_v || 'center'}
+                          onChange={(e) => setLpData({...lpData, hero_align_v: e.target.value})}
+                          className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white text-sm"
+                        >
+                          <option value="top">Topo</option>
+                          <option value="center">Centro</option>
+                          <option value="bottom">Rodapé</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-slate-500 mb-2 uppercase">Alinhamento Horizontal</label>
+                        <select 
+                          value={lpData.hero_align_h || 'left'}
+                          onChange={(e) => setLpData({...lpData, hero_align_h: e.target.value})}
+                          className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white text-sm"
+                        >
+                          <option value="left">Esquerda</option>
+                          <option value="center">Centro</option>
+                          <option value="right">Direita</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                        <label className="block text-[10px] font-bold text-slate-600 mb-3 uppercase">Deslocamento do Título (X e Y)</label>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <span className="text-[10px] text-slate-400 block mb-1">Horizontal (X): {lpData.hero_title_offset_x || 0}px</span>
+                            <input type="range" min="-500" max="500" step="10" value={lpData.hero_title_offset_x || 0} onChange={(e) => setLpData({...lpData, hero_title_offset_x: parseInt(e.target.value)})} className="w-full accent-blue-500" />
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-400 block mb-1">Vertical (Y): {lpData.hero_title_offset_y || 0}px</span>
+                            <input type="range" min="-500" max="500" step="10" value={lpData.hero_title_offset_y || 0} onChange={(e) => setLpData({...lpData, hero_title_offset_y: parseInt(e.target.value)})} className="w-full accent-blue-500" />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                        <label className="block text-[10px] font-bold text-slate-600 mb-3 uppercase">Deslocamento do Subtítulo (X e Y)</label>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <span className="text-[10px] text-slate-400 block mb-1">Horizontal (X): {lpData.hero_subtitle_offset_x || 0}px</span>
+                            <input type="range" min="-500" max="500" step="10" value={lpData.hero_subtitle_offset_x || 0} onChange={(e) => setLpData({...lpData, hero_subtitle_offset_x: parseInt(e.target.value)})} className="w-full accent-blue-500" />
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-400 block mb-1">Vertical (Y): {lpData.hero_subtitle_offset_y || 0}px</span>
+                            <input type="range" min="-500" max="500" step="10" value={lpData.hero_subtitle_offset_y || 0} onChange={(e) => setLpData({...lpData, hero_subtitle_offset_y: parseInt(e.target.value)})} className="w-full accent-blue-500" />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                        <label className="block text-[10px] font-bold text-slate-600 mb-3 uppercase">Deslocamento do Botão (X e Y)</label>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <span className="text-[10px] text-slate-400 block mb-1">Horizontal (X): {lpData.hero_cta_offset_x || 0}px</span>
+                            <input type="range" min="-500" max="500" step="10" value={lpData.hero_cta_offset_x || 0} onChange={(e) => setLpData({...lpData, hero_cta_offset_x: parseInt(e.target.value)})} className="w-full accent-blue-500" />
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-400 block mb-1">Vertical (Y): {lpData.hero_cta_offset_y || 0}px</span>
+                            <input type="range" min="-500" max="500" step="10" value={lpData.hero_cta_offset_y || 0} onChange={(e) => setLpData({...lpData, hero_cta_offset_y: parseInt(e.target.value)})} className="w-full accent-blue-500" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
