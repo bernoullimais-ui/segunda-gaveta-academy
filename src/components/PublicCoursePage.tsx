@@ -666,6 +666,12 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
   };
 
   useEffect(() => {
+    if (item?.nome) {
+      document.title = item.nome;
+    }
+  }, [item?.nome]);
+
+  useEffect(() => {
     if (!lp.countdown_enabled || !lp.countdown_end_date) {
       setTimeLeft(null);
       return;
