@@ -3613,6 +3613,32 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                   </div>
                 </div>
 
+                {/* Navbar section */}
+                <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                  <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex items-center gap-2">
+                    <h4 className="font-bold text-slate-800">Barra de Navegação (Topo)</h4>
+                  </div>
+                  <div className="p-6 space-y-6">
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wider text-xs">Tamanho da Logo (px)</label>
+                      <div className="flex items-center gap-4">
+                        <input 
+                          type="range" 
+                          min="20" 
+                          max="200" 
+                          step="5"
+                          value={lpData.nav_logo_height || 40} 
+                          onChange={(e) => setLpData({...lpData, nav_logo_height: parseInt(e.target.value)})} 
+                          className="flex-1 accent-blue-600"
+                        />
+                        <span className="font-bold text-slate-600 w-16 text-right">
+                          {lpData.nav_logo_height || 40}px
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Hero section */}
                 <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                   <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex items-center gap-2">

@@ -73,15 +73,24 @@ const Nav = ({ layout, item, lp, onEnrollClick }: NavProps) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
         <div className="flex items-center gap-3 shrink-0">
           {item.organizacoes?.logo_url ? (
-            <img src={item.organizacoes.logo_url} alt="Logo" className="w-10 h-10 object-contain rounded-xl shrink-0" />
+            <img 
+              src={item.organizacoes.logo_url} 
+              alt="Logo" 
+              className="object-contain shrink-0" 
+              style={{ height: lp.nav_logo_height ? `${lp.nav_logo_height}px` : '40px' }}
+            />
           ) : (
-            <div className="w-10 h-10 shrink-0 bg-primary rounded-xl flex items-center justify-center text-white font-bold text-lg tracking-tighter uppercase">
+            <div 
+              className="shrink-0 bg-primary rounded-xl flex items-center justify-center text-white font-bold tracking-tighter uppercase"
+              style={{ 
+                width: lp.nav_logo_height ? `${lp.nav_logo_height}px` : '40px',
+                height: lp.nav_logo_height ? `${lp.nav_logo_height}px` : '40px',
+                fontSize: lp.nav_logo_height ? `${Math.max(16, lp.nav_logo_height / 2)}px` : '18px'
+              }}
+            >
               {item.organizacoes?.nome?.[0] || 'S'}
             </div>
           )}
-          <span className={`font-black text-xl tracking-tight hidden md:block ${layout === 'escuro' ? 'text-white' : 'text-slate-900'}`}>
-            {item.organizacoes?.nome || 'Academia Digital'}
-          </span>
         </div>
 
         <div className="flex items-center gap-3 sm:gap-6">
@@ -1280,7 +1289,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                 <div className="flex flex-col sm:flex-row items-center gap-8 pt-4 w-full" style={{ transform: `translate(${lp.hero_cta_offset_x || 0}px, ${lp.hero_cta_offset_y || 0}px)`, justifyContent: lp.hero_align_h === 'center' ? 'center' : lp.hero_align_h === 'right' ? 'flex-end' : 'flex-start' }}>
                   <button 
                     onClick={handleEnrollClick}
-                    className="w-full sm:w-auto px-12 py-6 bg-primary text-white rounded-3xl font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(37,99,235,0.3)] flex items-center justify-center gap-3"
+                    className="w-full sm:w-auto px-12 py-6 bg-primary text-white rounded-3xl font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(var(--primary-rgb),0.3)] flex items-center justify-center gap-3"
                   >
                     {lp.cta_text || 'COMPRAR AGORA'} <ArrowRight className="w-6 h-6" />
                   </button>
@@ -1363,7 +1372,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
               {renderPriceBlock(true)}
               <button 
                 onClick={handleEnrollClick}
-                className="w-full sm:w-auto px-12 py-5 bg-primary text-white rounded-3xl font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(37,99,235,0.3)] flex items-center justify-center gap-3"
+                className="w-full sm:w-auto px-12 py-5 bg-primary text-white rounded-3xl font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(var(--primary-rgb),0.3)] flex items-center justify-center gap-3"
               >
                 {lp.cta_text || 'COMPRAR AGORA'} <ArrowRight className="w-6 h-6" />
               </button>
@@ -1444,7 +1453,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             )}
             <button 
               onClick={handleEnrollClick}
-              className="w-full sm:w-auto px-12 py-5 bg-primary text-white rounded-3xl font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(37,99,235,0.3)] flex items-center justify-center gap-3"
+              className="w-full sm:w-auto px-12 py-5 bg-primary text-white rounded-3xl font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(var(--primary-rgb),0.3)] flex items-center justify-center gap-3"
             >
               {lp.cta_text || 'COMPRAR AGORA'} <ArrowRight className="w-6 h-6" />
             </button>
@@ -1953,7 +1962,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             {renderPriceBlock(false)}
             <button 
               onClick={handleEnrollClick}
-              className="w-full sm:w-auto px-12 py-5 bg-primary text-white rounded-3xl font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(37,99,235,0.2)] flex items-center justify-center gap-3"
+              className="w-full sm:w-auto px-12 py-5 bg-primary text-white rounded-3xl font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(var(--primary-rgb),0.2)] flex items-center justify-center gap-3"
             >
               {lp.cta_text || 'COMPRAR AGORA'} <ArrowRight className="w-6 h-6" />
             </button>
@@ -2034,7 +2043,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
           )}
           <button 
             onClick={handleEnrollClick}
-            className="w-full sm:w-auto px-12 py-5 bg-primary text-white rounded-3xl font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(37,99,235,0.3)] flex items-center justify-center gap-3"
+            className="w-full sm:w-auto px-12 py-5 bg-primary text-white rounded-3xl font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(var(--primary-rgb),0.3)] flex items-center justify-center gap-3"
           >
             {lp.cta_text || 'COMPRAR AGORA'} <ArrowRight className="w-6 h-6" />
           </button>

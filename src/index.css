@@ -4,6 +4,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   --color-indigo-50: var(--brand-color-50, #f5f3ff);
   --color-indigo-100: var(--brand-color-100, #ede9fe);
   --color-indigo-200: var(--brand-color-200, #ddd6fe);

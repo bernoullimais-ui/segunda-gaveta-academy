@@ -413,6 +413,30 @@ export function TrilhaModal({ isOpen, onClose, fetchTrilhas, editingTrilha, orgI
                 </div>
               </div>
 
+              {/* Navbar section */}
+              <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                <div className="flex items-center gap-2 text-slate-800 border-b border-slate-100 pb-4 mb-2">
+                  <h4 className="font-bold text-lg">Barra de Navegação (Topo)</h4>
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase font-bold text-slate-400 tracking-widest block mb-2">Tamanho da Logo (px)</label>
+                  <div className="flex items-center gap-4">
+                    <input 
+                      type="range" 
+                      min="20" 
+                      max="200" 
+                      step="5"
+                      value={lpData.nav_logo_height || 40} 
+                      onChange={(e) => setLpData({...lpData, nav_logo_height: parseInt(e.target.value)})} 
+                      className="flex-1 accent-blue-600"
+                    />
+                    <span className="font-bold text-slate-600 w-16 text-right">
+                      {lpData.nav_logo_height || 40}px
+                    </span>
+                  </div>
+                </div>
+              </div>
+
               {/* Seção Hero */}
               <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
                 <div className="flex items-center gap-2 text-slate-800 border-b border-slate-100 pb-4 mb-2">
