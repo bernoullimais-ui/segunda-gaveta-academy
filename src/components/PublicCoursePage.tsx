@@ -46,6 +46,8 @@ interface NavProps {
 const Nav = ({ layout, item, lp, onEnrollClick }: NavProps) => {
   const [loggedIn, setLoggedIn] = React.useState(false);
   const [orgSlug, setOrgSlug] = React.useState('');
+  const [isScrolled, setIsScrolled] = React.useState(false);
+
   React.useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       if (data.session?.user) {
@@ -54,11 +56,19 @@ const Nav = ({ layout, item, lp, onEnrollClick }: NavProps) => {
         setOrgSlug(item?.organizacoes?.slug || '');
       }
     });
+
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, [item]);
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 backdrop-blur-md border-b transition-all ${
-      layout === 'escuro' ? 'bg-slate-900/80 border-slate-800' : 'bg-white/80 border-slate-100'
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      isScrolled 
+        ? `backdrop-blur-md border-b ${layout === 'escuro' ? 'bg-slate-900/90 border-slate-800' : 'bg-white/90 border-slate-200'}`
+        : 'bg-transparent border-transparent'
     }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
         <div className="flex items-center gap-3 shrink-0">
@@ -1227,13 +1237,13 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                   />
                 </div>
               ) : (
-                <img src={lp.hero_video_url} alt="Apresentação" className="w-full h-full object-contain object-center" />
+                <img src={lp.hero_video_url} alt="Apresentação" className="w-full h-full object-contain object-top" />
               )
             ) : (
               <img 
                 src={item.capa_url || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070'} 
                 alt="Capa"
-                className="w-full h-full object-contain object-center"
+                className="w-full h-full object-contain object-top"
               />
             )}
           </div>
@@ -1801,13 +1811,13 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                 />
               </div>
             ) : (
-              <img src={lp.hero_video_url} alt="Apresentação" className="w-full h-full object-contain object-center" />
+              <img src={lp.hero_video_url} alt="Apresentação" className="w-full h-full object-contain object-top" />
             )
           ) : (
             <img 
               src={item.capa_url || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070'} 
               alt="Capa"
-              className="w-full h-full object-contain object-center"
+              className="w-full h-full object-contain object-top"
             />
           )}
         </div>
@@ -1903,13 +1913,13 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                       />
                     </div>
                   ) : (
-                    <img src={lp.hero_video_url} alt="Apresentação" className="w-full h-full object-contain object-center" />
+                    <img src={lp.hero_video_url} alt="Apresentação" className="w-full h-full object-contain object-top" />
                   )
                 ) : (
                   <img 
                     src={item.capa_url || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070'} 
                     alt="Capa"
-                    className="w-full h-full object-contain object-center opacity-90"
+                    className="w-full h-full object-contain object-top opacity-90"
                   />
                 )}
               </div>
