@@ -129,15 +129,12 @@ const Footer = ({ layout, item, lp = {} }: FooterProps) => (
       <div className="flex flex-col items-center md:items-start gap-4">
         <div className="flex items-center gap-3">
           {(lp.logo_url || item.organizacoes?.logo_url) ? (
-            <img src={lp.logo_url || item.organizacoes?.logo_url} alt="Logo" className="w-10 h-10 object-contain rounded-xl" />
+            <img src={lp.logo_url || item.organizacoes?.logo_url} alt="Logo" className="h-16 w-auto max-w-[240px] object-contain" />
           ) : (
-            <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white font-bold text-lg tracking-tighter uppercase">
+            <div className="w-16 h-16 bg-slate-900 rounded-2xl flex items-center justify-center text-white font-bold text-2xl tracking-tighter uppercase">
               {item.organizacoes?.nome?.[0] || 'S'}
             </div>
           )}
-          <span className={`font-black text-xl ${layout === 'escuro' ? 'text-white' : 'text-slate-900'}`}>
-            {item.organizacoes?.nome || 'Segunda Gaveta'}
-          </span>
         </div>
         <p className="text-sm max-w-xs text-center md:text-left">Excelência em educação digital e desenvolvimento profissional.</p>
       </div>
