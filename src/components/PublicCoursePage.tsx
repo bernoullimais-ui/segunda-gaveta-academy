@@ -497,7 +497,7 @@ const CountdownTimer = ({ timeLeft, title, layout }: { timeLeft: { hours: number
   );
 };
 
-const TargetAudienceSection = ({ targetAudience, layout }: { targetAudience: string, layout: string }) => {
+const TargetAudienceSection = ({ targetAudience, layout, style }: { targetAudience: string, layout: string, style?: React.CSSProperties }) => {
   if (!targetAudience) return null;
 
   const items = targetAudience
@@ -510,7 +510,7 @@ const TargetAudienceSection = ({ targetAudience, layout }: { targetAudience: str
   return (
     <section className={`py-24 border-b ${
       layout === 'escuro' ? 'bg-slate-950/60 border-slate-900' : 'bg-slate-50 border-slate-100'
-    }`}>
+    }`} style={style}>
       <div className="max-w-7xl mx-auto px-6 text-center">
         <div className="max-w-2xl mx-auto space-y-4 mb-16">
           <span className="text-primary font-bold text-xs uppercase tracking-widest block">Público-Alvo</span>
@@ -632,6 +632,21 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
     guarantee_days: 7,
     instructor: { name: item?.professor_nome || '', bio: '', avatar_url: item?.professor_foto_url || '', role: 'Instrutor(a)' },
     ...(lpRaw || {})
+  };
+
+  const getSectionStyle = (sectionKey: string, defaultStyle: React.CSSProperties = {}) => {
+    const bgColor = lp[`section_${sectionKey}_bg_color`];
+    const bgImage = lp[`section_${sectionKey}_bg_image`];
+    
+    let style: React.CSSProperties = { ...defaultStyle };
+    if (bgColor) style.backgroundColor = bgColor;
+    if (bgImage) {
+      style.backgroundImage = `url(${bgImage})`;
+      style.backgroundSize = 'cover';
+      style.backgroundPosition = 'center';
+      style.backgroundBlendMode = bgColor ? 'overlay' : 'normal';
+    }
+    return style;
   };
 
   useEffect(() => {
@@ -1313,7 +1328,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
         </section>
 
         {/* Modern Dark Info Bar */}
-        <section className="bg-slate-950/50 border-y border-slate-800 py-16">
+        <section className="bg-slate-950/50 border-y border-slate-800 py-16" style={getSectionStyle('info')}>
           <div className="max-w-7xl mx-auto px-6 flex flex-col items-center gap-12">
             <div className="flex flex-wrap justify-center gap-8 md:gap-16 w-full">
               {/* #3 Conditional stats based on real data */}
@@ -1351,7 +1366,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
         </section>
 
         {/* About Section - Dark */}
-        <section id="sobre" className="py-32 bg-slate-900 border-b border-slate-800">
+        <section id="sobre" className="py-32 bg-slate-900 border-b border-slate-800" style={getSectionStyle('about')}>
           <div className="max-w-4xl mx-auto px-6 text-center">
             <div className="w-16 h-1 bg-primary rounded-full mx-auto mb-8"></div>
             {/* #7 Configurable about_title */}
@@ -1368,7 +1383,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
 
         {/* Benefits & Testimonials Section - Dark */}
         {(lp.benefits?.length > 0 || lp.testimonials?.length > 0) && (
-          <section id="vantagens-depoimentos" className="py-32 bg-slate-900/50 border-b border-slate-800">
+          <section id="vantagens-depoimentos" className="py-32 bg-slate-900/50 border-b border-slate-800" style={getSectionStyle('features')}>
             <div className="max-w-7xl mx-auto px-6">
               <div className={`grid grid-cols-1 ${(lp.benefits?.length > 0 && lp.testimonials?.length > 0) ? 'lg:grid-cols-2 gap-16' : 'gap-16'}`}>
                 
@@ -1408,12 +1423,12 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
           </section>
         )}
 
-        <TargetAudienceSection targetAudience={lp.target_audience} layout={layout} />
+        <TargetAudienceSection targetAudience={lp.target_audience} layout={layout} style={getSectionStyle('audience')} />
 
         {/* Additional CTA below Target Audience Section */}
         <section className={`py-16 border-b ${
           layout === 'escuro' ? 'bg-slate-950/40 border-slate-900' : 'bg-slate-50 border-slate-100'
-        }`}>
+        }`} style={getSectionStyle('cta')}>
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-center gap-12 md:gap-16">
             {!isFree ? renderPriceBlock(layout === 'escuro') : (
               <div className="text-left">
@@ -1432,7 +1447,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
 
         {/* Bonus Section - Dark */}
         {lp.bonuses?.length > 0 && (
-          <section className="py-32 bg-emerald-950/40 text-white overflow-hidden relative border-t border-slate-800">
+          <section className="py-32 bg-emerald-950/40 text-white overflow-hidden relative border-t border-slate-800" style={getSectionStyle('features')}>
             <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2"></div>
             <div className="max-w-7xl mx-auto px-6 relative z-10">
               <div className="text-center mb-16 space-y-4">
@@ -1466,7 +1481,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
         )}
 
         {/* Instructor - Dark */}
-        <section id="instrutor" className="py-32 bg-slate-950">
+        <section id="instrutor" className="py-32 bg-slate-950" style={getSectionStyle('instructor')}>
            <div className="max-w-7xl mx-auto px-6">
               <div className="flex flex-col lg:flex-row gap-20 items-center justify-center">
                  <div className="w-64 h-64 md:w-80 md:h-80 relative shrink-0">
@@ -1494,7 +1509,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
 
         {/* FAQ - Dark */}
         {lp.faq?.length > 0 && (
-          <section className="py-32 bg-slate-900">
+          <section className="py-32 bg-slate-900" style={getSectionStyle('faq')}>
              <div className="max-w-4xl mx-auto px-6">
                 <h2 className="text-4xl font-bold text-white text-center mb-20 tracking-tight">Perguntas Frequentes</h2>
                 <div className="space-y-4">
@@ -1542,7 +1557,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
 
       {/* Curriculum Preview / Only for Courses */}
       {!isTrilha && (
-        <section id="curriculo" className="py-32 bg-slate-950 border-y border-slate-900">
+        <section id="curriculo" className="py-32 bg-slate-950 border-y border-slate-900" style={getSectionStyle('curriculum')}>
           <div className="max-w-3xl mx-auto px-6 text-center mb-20">
             <h2 className="text-4xl font-bold text-white mb-4">Grade Curricular</h2>
             <p className="text-slate-400 text-lg">Confira os módulos que preparamos para acelerar seu aprendizado.</p>
@@ -1617,7 +1632,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
         <TrustAndGuarantee layout={layout} guaranteeDays={lp.guarantee_days || 7} />
 
         {/* Final CTA - Space style */}
-        <section className="py-40 bg-slate-900 relative overflow-hidden">
+        <section className="py-40 bg-slate-900 relative overflow-hidden" style={getSectionStyle('pricing')}>
            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full">
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-primary/20 rounded-full blur-[180px]"></div>
            </div>
@@ -1903,7 +1918,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
       </section>
 
       {/* Info bar */}
-      <section className="bg-slate-50 border-y border-slate-100">
+      <section className="bg-slate-50 border-y border-slate-100" style={getSectionStyle('info')}>
         <div className="max-w-7xl mx-auto px-6 py-12 flex flex-col items-center gap-8">
           {/* #3 Conditional stats based on real data */}
           <div className="flex flex-wrap justify-center gap-8 md:gap-16 w-full">
@@ -1941,7 +1956,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
       </section>
 
       {/* About Section */}
-      <section id="sobre" className="py-24 bg-white">
+      <section id="sobre" className="py-24 bg-white" style={getSectionStyle('about')}>
         <div className="max-w-4xl mx-auto px-6 text-center">
           {/* #7 Configurable about_title */}
           <h2 className="text-4xl font-bold text-slate-900 mb-6">{lp.about_title || 'Tudo o que você precisa em um só lugar.'}</h2>
@@ -1958,7 +1973,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
 
       {/* Benefits & Testimonials Section */}
       {(lp.benefits?.length > 0 || lp.testimonials?.length > 0) && (
-        <section id="vantagens-depoimentos-light" className="py-24 bg-slate-50 border-y border-slate-100">
+        <section id="vantagens-depoimentos-light" className="py-24 bg-slate-50 border-y border-slate-100" style={getSectionStyle('features')}>
           <div className="max-w-7xl mx-auto px-6">
             <div className={`grid grid-cols-1 ${(lp.benefits?.length > 0 && lp.testimonials?.length > 0) ? 'lg:grid-cols-2 gap-16' : 'gap-16'}`}>
               
@@ -2022,7 +2037,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
 
       {/* Bonus Section */}
       {lp.bonuses?.length > 0 && (
-        <section className="py-24 bg-emerald-900 text-white overflow-hidden relative">
+        <section className="py-24 bg-emerald-900 text-white overflow-hidden relative" style={getSectionStyle('features')}>
           <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
           <div className="max-w-7xl mx-auto px-6 relative z-10">
             <div className="text-center mb-16 space-y-4">
@@ -2057,7 +2072,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
       )}
 
       {/* Instructor Section */}
-      <section id="instrutor" className="py-24 bg-white">
+      <section id="instrutor" className="py-24 bg-white" style={getSectionStyle('instructor')}>
         <div className="max-w-5xl mx-auto px-6">
           <div className="bg-slate-50 rounded-[40px] p-8 md:p-16 flex flex-col md:flex-row gap-12 items-center">
             <div className="w-48 h-48 md:w-64 md:h-64 rounded-[32px] overflow-hidden rotate-3 shadow-2xl relative group shrink-0">
@@ -2103,7 +2118,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
 
       {/* Track Courses Detail */}
       {isTrilha && cursosTrilha.length > 0 && (
-        <section className="py-24 bg-white border-y border-slate-100">
+        <section className="py-24 bg-white border-y border-slate-100" style={getSectionStyle('curriculum')}>
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center mb-16 space-y-4">
               <h2 className="text-4xl font-bold text-slate-900">{lp.courses_title || 'Cursos inclusos nesta trilha'}</h2>
@@ -2135,7 +2150,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
 
       {/* Curriculum Preview / Only for Courses */}
       {!isTrilha && (
-        <section className="py-24 bg-white">
+        <section className="py-24 bg-white" style={getSectionStyle('curriculum')}>
           <div className="max-w-3xl mx-auto px-6 text-center mb-16">
             <h2 className="text-4xl font-bold text-slate-900 mb-4">Grade Curricular</h2>
             <p className="text-slate-600 text-lg">Confira os módulos que preparamos para acelerar seu aprendizado.</p>
@@ -2209,7 +2224,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
 
       {/* FAQ */}
       {lp.faq?.length > 0 && (
-        <section className="py-24 bg-slate-50">
+        <section className="py-24 bg-slate-50" style={getSectionStyle('faq')}>
           <div className="max-w-3xl mx-auto px-6">
             <h2 className="text-4xl font-bold text-slate-900 text-center mb-16">Dúvidas Frequentes</h2>
             <div className="space-y-4">
@@ -2258,7 +2273,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
       <TrustAndGuarantee layout={layout} guaranteeDays={lp.guarantee_days || 7} />
 
       {/* Final CTA */}
-      <section className="py-24 bg-white">
+      <section className="py-24 bg-white" style={getSectionStyle('pricing')}>
          <div className="max-w-7xl mx-auto px-6">
             <div className="bg-slate-900 rounded-[60px] p-12 md:p-24 text-center text-white relative overflow-hidden shadow-[0_40px_100px_rgba(0,0,0,0.2)]">
                <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-[600px] h-[600px] bg-primary rounded-full blur-[140px] opacity-20"></div>

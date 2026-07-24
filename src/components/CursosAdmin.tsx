@@ -4306,6 +4306,66 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                   </div>
                 </div>
 
+                {/* Section Backgrounds */}
+                <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm space-y-8 mt-8">
+                  <div>
+                    <h3 className="font-bold text-xl text-slate-900 flex items-center gap-2">
+                      <ImageIcon className="w-6 h-6 text-indigo-500" />
+                      Cores e Fundos das Seções
+                    </h3>
+                    <p className="text-sm text-slate-500 mt-1">
+                      Configure imagens e cores de fundo para cada bloco da sua página. As imagens ficarão por cima da cor de fundo (se houver). Recomendamos imagens sutis para não prejudicar a leitura.
+                    </p>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {[
+                      { key: 'info', label: 'Faixa de Informações Rápidas' },
+                      { key: 'about', label: 'Seção "Sobre o Curso"' },
+                      { key: 'features', label: 'Seção "Vantagens / Diferenciais"' },
+                      { key: 'audience', label: 'Seção "Para Quem É"' },
+                      { key: 'instructor', label: 'Seção "Sobre o Instrutor"' },
+                      { key: 'curriculum', label: 'Seção "Módulos do Curso"' },
+                      { key: 'faq', label: 'Seção "Perguntas Frequentes"' },
+                      { key: 'pricing', label: 'Seção "Oferta Final"' }
+                    ].map((section) => (
+                      <div key={section.key} className="p-5 border border-slate-100 rounded-xl bg-slate-50 space-y-4">
+                        <h4 className="font-bold text-slate-700 text-sm border-b border-slate-200 pb-2 mb-4">{section.label}</h4>
+                        
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-500 mb-2 uppercase">Cor de Fundo</label>
+                          <div className="flex gap-2">
+                            <input 
+                              type="color" 
+                              value={(lpData as any)[`section_${section.key}_bg_color`] || '#ffffff'}
+                              onChange={(e) => setLpData({...lpData, [`section_${section.key}_bg_color`]: e.target.value})}
+                              className="w-10 h-10 border-0 p-0 overflow-hidden cursor-pointer rounded-lg bg-transparent"
+                            />
+                            <input 
+                              type="text" 
+                              value={(lpData as any)[`section_${section.key}_bg_color`] || ''}
+                              onChange={(e) => setLpData({...lpData, [`section_${section.key}_bg_color`]: e.target.value})}
+                              placeholder="ex: #ffffff"
+                              className="flex-1 px-4 py-2 border border-slate-200 rounded-lg text-sm font-mono focus:ring-2 focus:ring-blue-500 outline-none bg-white"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-500 mb-2 uppercase">Imagem de Fundo (URL)</label>
+                          <input 
+                            type="text" 
+                            value={(lpData as any)[`section_${section.key}_bg_image`] || ''}
+                            onChange={(e) => setLpData({...lpData, [`section_${section.key}_bg_image`]: e.target.value})}
+                            placeholder="https://..."
+                            className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
                 {/* Marketing Hint */}
                 <div className="bg-gradient-to-br from-blue-600 to-indigo-700 p-6 rounded-2xl text-white shadow-lg overflow-hidden relative">
                    <div className="absolute -right-4 -bottom-4 opacity-10 rotate-12">
