@@ -713,10 +713,10 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
   // #1 Open Graph meta tags
   useEffect(() => {
     if (!item) return;
-    const title = lp.hero_title || item.nome || 'Curso Online';
+    const title = item.nome || lp.hero_title || 'Curso Online';
     const description = lp.hero_subtitle || item.descricao || '';
     const image = item.thumbnail_url || item.capa_url || '';
-    document.title = title;
+    document.title = item.nome || 'Curso Online';
     const setMeta = (property: string, content: string) => {
       let el = document.querySelector(`meta[property='${property}']`) as HTMLMetaElement | null;
       if (!el) { el = document.createElement('meta'); el.setAttribute('property', property); document.head.appendChild(el); }
