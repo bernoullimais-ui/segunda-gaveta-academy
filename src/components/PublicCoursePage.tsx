@@ -72,9 +72,9 @@ const Nav = ({ layout, item, lp, onEnrollClick }: NavProps) => {
     }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
         <div className="flex items-center gap-3 shrink-0">
-          {item.organizacoes?.logo_url ? (
+          {(lp.logo_url || item.organizacoes?.logo_url) ? (
             <img 
-              src={item.organizacoes.logo_url} 
+              src={lp.logo_url || item.organizacoes?.logo_url} 
               alt="Logo" 
               className="object-contain shrink-0" 
               style={{ height: lp.nav_logo_height ? `${lp.nav_logo_height}px` : '40px' }}
@@ -119,17 +119,18 @@ const Nav = ({ layout, item, lp, onEnrollClick }: NavProps) => {
 };
 
 interface FooterProps {
-  layout: string;
+  layout: 'escuro' | 'claro';
   item: any;
+  lp?: any;
 }
 
-const Footer = ({ layout, item }: FooterProps) => (
+const Footer = ({ layout, item, lp = {} }: FooterProps) => (
   <footer className={`py-16 border-t ${layout === 'escuro' ? 'bg-slate-950 border-slate-900 text-slate-400' : 'bg-white border-slate-100 text-slate-400'}`}>
     <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-10">
       <div className="flex flex-col items-center md:items-start gap-4">
         <div className="flex items-center gap-3">
-          {item.organizacoes?.logo_url ? (
-            <img src={item.organizacoes.logo_url} alt="Logo" className="w-10 h-10 object-contain rounded-xl" />
+          {(lp.logo_url || item.organizacoes?.logo_url) ? (
+            <img src={lp.logo_url || item.organizacoes?.logo_url} alt="Logo" className="w-10 h-10 object-contain rounded-xl" />
           ) : (
             <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white font-bold text-lg tracking-tighter uppercase">
               {item.organizacoes?.nome?.[0] || 'S'}
@@ -1684,7 +1685,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
            </div>
         </section>
 
-        <Footer layout={layout} item={item} />
+        <Footer layout={layout} item={item} lp={lp} />
         
         {/* Modals */}
         <ModalErrorBoundary>
@@ -2331,7 +2332,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
          </div>
       </section>
 
-      <Footer layout={layout} item={item} />
+      <Footer layout={layout} item={item} lp={lp} />
       <ModalErrorBoundary>
         <EnrollmentModal 
           isOpen={showEnrollModal}

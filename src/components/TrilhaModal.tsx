@@ -419,6 +419,15 @@ export function TrilhaModal({ isOpen, onClose, fetchTrilhas, editingTrilha, orgI
                   <h4 className="font-bold text-lg">Barra de Navegação (Topo)</h4>
                 </div>
                 <div>
+                  <label className="text-[10px] uppercase font-bold text-slate-400 tracking-widest block mb-2">URL da Logo (Opcional)</label>
+                  <input 
+                    type="url"
+                    value={lpData.logo_url || ''}
+                    onChange={(e) => setLpData({...lpData, logo_url: e.target.value})}
+                    placeholder="Ex: https://meusite.com/logo.png"
+                    className="w-full px-4 py-3 mb-6 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                  />
+                  <p className="text-xs text-slate-500 mt-1 mb-4">Se vazio, usará a logo da organização.</p>
                   <label className="text-[10px] uppercase font-bold text-slate-400 tracking-widest block mb-2">Tamanho da Logo (px)</label>
                   <div className="flex items-center gap-4">
                     <input 

@@ -235,8 +235,28 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
     testimonials: [{ name: '', role: '', text: '', photo_url: '' }],
     bonuses: [{ title: '', description: '' }],
     guarantee_days: 7,
-    cta_text: 'Matricule-se Agora'
+    cta_text: 'Matricule-se Agora',
+    section_order: ['hero', 'about', 'features', 'instructor', 'curriculum', 'faq', 'pricing']
   });
+
+  const sectionLabels: Record<string, string> = {
+    hero: 'Seção Principal (Hero)',
+    about: 'Sobre o Especialista/Curso',
+    features: 'Vantagens / Depoimentos',
+    instructor: 'Instrutor Detalhado',
+    curriculum: 'Currículo (Conteúdo)',
+    faq: 'Perguntas Frequentes (FAQ)',
+    pricing: 'Preços (Checkout)'
+  };
+
+  const onSectionDragEnd = (result: DropResult) => {
+    if (!result.destination) return;
+    const currentOrder = lpData.section_order || ['hero', 'about', 'features', 'instructor', 'curriculum', 'faq', 'pricing'];
+    const newOrder = Array.from(currentOrder);
+    const [reorderedItem] = newOrder.splice(result.source.index, 1);
+    newOrder.splice(result.destination.index, 0, reorderedItem);
+    setLpData({ ...lpData, section_order: newOrder });
+  };
 
   const fetchCourseStats = async (cursoId: string) => {
     try {
@@ -3620,6 +3640,17 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                   </div>
                   <div className="p-6 space-y-6">
                     <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wider text-xs">URL da Logo (Opcional)</label>
+                      <input 
+                        type="url"
+                        value={lpData.logo_url || ''}
+                        onChange={(e) => setLpData({...lpData, logo_url: e.target.value})}
+                        placeholder="Ex: https://meusite.com/logo.png"
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                      />
+                      <p className="text-xs text-slate-500 mt-1">Se vazio, usará a logo da organização.</p>
+                    </div>
+                    <div>
                       <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wider text-xs">Tamanho da Logo (px)</label>
                       <div className="flex items-center gap-4">
                         <input 
@@ -3693,6 +3724,44 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                         </div>
                       </div>
                     ))}
+                  </div>
+                </div>
+
+                {/* Section Order */}
+                <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                  <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex items-center gap-2">
+                    <ListOrdered className="w-5 h-5 text-blue-600" />
+                    <h4 className="font-bold text-slate-800">Ordem das Seções</h4>
+                  </div>
+                  <div className="p-6">
+                    <p className="text-sm text-slate-600 mb-4">Arraste as seções para definir a ordem em que aparecerão na página.</p>
+                    <DragDropContext onDragEnd={onSectionDragEnd}>
+                      <Droppable droppableId="sections">
+                        {(provided) => (
+                          <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-3">
+                            {(lpData.section_order || ['hero', 'about', 'features', 'instructor', 'curriculum', 'faq', 'pricing']).map((sectionKey: string, index: number) => (
+                              <Draggable key={sectionKey} draggableId={sectionKey} index={index}>
+                                {(provided, snapshot) => (
+                                  <div
+                                    ref={provided.innerRef}
+                                    {...provided.draggableProps}
+                                    className={`flex items-center gap-3 p-3 bg-white border rounded-xl transition-all ${snapshot.isDragging ? 'border-blue-500 shadow-lg scale-[1.02]' : 'border-slate-200 hover:border-slate-300'}`}
+                                  >
+                                    <div {...provided.dragHandleProps} className="text-slate-400 hover:text-slate-600 cursor-grab active:cursor-grabbing p-1">
+                                      <GripVertical className="w-5 h-5" />
+                                    </div>
+                                    <div className="flex-1 font-bold text-sm text-slate-700">
+                                      {sectionLabels[sectionKey] || sectionKey}
+                                    </div>
+                                  </div>
+                                )}
+                              </Draggable>
+                            ))}
+                            {provided.placeholder}
+                          </div>
+                        )}
+                      </Droppable>
+                    </DragDropContext>
                   </div>
                 </div>
 
