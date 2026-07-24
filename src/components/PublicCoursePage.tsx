@@ -95,20 +95,20 @@ const Nav = ({ layout, item, lp, onEnrollClick }: NavProps) => {
 
         <div className="flex items-center gap-3 sm:gap-6">
           <div className="hidden lg:flex items-center gap-8">
-            <a href="#sobre" className={`font-bold text-sm hover:text-primary transition-colors ${layout === 'escuro' ? 'text-slate-400' : 'text-slate-500'}`}>Sobre</a>
-            <a href="#curriculo" className={`font-bold text-sm hover:text-primary transition-colors ${layout === 'escuro' ? 'text-slate-400' : 'text-slate-500'}`}>Conteúdo</a>
-            <a href="#instrutor" className={`font-bold text-sm hover:text-primary transition-colors ${layout === 'escuro' ? 'text-slate-400' : 'text-slate-500'}`}>Instrutor</a>
+            <a href="#sobre" className={`typo-link font-bold text-sm hover:text-primary transition-colors ${layout === 'escuro' ? 'text-slate-400' : 'text-slate-500'}`}>Sobre</a>
+            <a href="#curriculo" className={`typo-link font-bold text-sm hover:text-primary transition-colors ${layout === 'escuro' ? 'text-slate-400' : 'text-slate-500'}`}>Conteúdo</a>
+            <a href="#instrutor" className={`typo-link font-bold text-sm hover:text-primary transition-colors ${layout === 'escuro' ? 'text-slate-400' : 'text-slate-500'}`}>Instrutor</a>
           </div>
           {/* #9 Smart redirect: if logged in go to dashboard, else to login */}
           <a
             href={loggedIn && orgSlug ? `/projeto/${orgSlug}` : '/login'}
-            className={`font-bold text-sm sm:text-base transition-all shrink-0 ${layout === 'escuro' ? 'text-white hover:text-primary' : 'text-slate-900 hover:text-primary'}`}
+            className={`typo-link font-bold text-sm sm:text-base transition-all shrink-0 ${layout === 'escuro' ? 'text-white hover:text-primary' : 'text-slate-900 hover:text-primary'}`}
           >
             {loggedIn ? 'Minha Área' : 'Entrar'}
           </a>
           <button
             onClick={onEnrollClick}
-            className="px-4 sm:px-6 py-2 sm:py-2.5 bg-primary text-white rounded-full font-bold text-sm hover:opacity-90 shadow-lg shadow-primary/20 active:scale-95 transition-all whitespace-nowrap"
+            className="typo-btn px-4 sm:px-6 py-2 sm:py-2.5 bg-primary text-white rounded-full font-bold text-sm hover:opacity-90 shadow-lg shadow-primary/20 active:scale-95 transition-all whitespace-nowrap"
           >
             {lp.cta_text || 'Inscrever-se'}
           </button>
