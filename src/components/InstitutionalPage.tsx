@@ -103,7 +103,7 @@ export const InstitutionalPage: React.FC = () => {
       const { data: cursosData } = await supabase
         .from('cursos')
         .select('id, nome, slug, thumbnail_url, organizacao_id, professor_nome, organizacoes(nome, slug)')
-        .eq('status', 'publicado')
+        .ilike('status', 'publicado')
         .order('created_at', { ascending: false });
         
       if (cursosData) {
