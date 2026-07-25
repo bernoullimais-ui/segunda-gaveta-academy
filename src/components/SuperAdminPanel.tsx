@@ -29,13 +29,31 @@ import { CursosAdmin } from './CursosAdmin';
 import { Community } from './Community';
 import { CuponsAdmin } from './CuponsAdmin';
 import { WebsiteEditor } from './WebsiteEditor';
+import { ConfiguracaoAdmin } from './ConfiguracaoAdmin';
 
-export function SuperAdminPanel({ loggedUser }: { loggedUser: any }) {
-  const [organizacoes, setOrganizacoes] = useState<any[]>([]);
-  const [usuarios, setUsuarios] = useState<any[]>([]);
+interface Organization {
+  id: string;
+  nome: string;
+  slug: string;
+  created_at: string;
+  config_json?: any;
+}
+
+interface User {
+  id: string;
+  nome: string | null;
+  email: string;
+  role: string;
+  organizacao_id: string | null;
+}
+
+export function SuperAdminPanel({ loggedUser, showToast }: { loggedUser: any, showToast: (t: string, type: 'success'|'error'|'info') => void }) {
+  const [organizacoes, setOrganizacoes] = useState<Organization[]>([]);
+  const [usuarios, setUsuarios] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState<'organizacoes' | 'cursos' | 'comunidade' | 'atividades' | 'super_admins' | 'cupons' | 'trafego' | 'website'>('organizacoes');
+  const [activeTab, setActiveTab] = useState<'organizacoes' | 'cursos' | 'comunidade' | 'atividades' | 'super_admins' | 'cupons' | 'trafego' | 'website' | 'config'>('organizacoes');
+  const [orgModalTab, setOrgModalTab] = useState<'dados_basicos' | 'config_gerais'>('dados_basicos');
   
   // Traffic Analytics States
   const [trafficData, setTrafficData] = useState<any[]>([]);
@@ -1060,7 +1078,42 @@ export function SuperAdminPanel({ loggedUser }: { loggedUser: any }) {
               </button>
             </div>
             
-            <div className="p-6 space-y-6">
+            {/* Modal Tabs */}
+            <div className="flex border-b border-slate-200 bg-slate-50 px-6">
+              <button
+                type="button"
+                onClick={() => setOrgModalTab('dados_basicos')}
+                className={`py-3 px-4 font-bold border-b-2 transition-all cursor-pointer ${
+                  orgModalTab === 'dados_basicos' ? 'text-red-600 border-red-600' : 'text-slate-500 border-transparent hover:text-slate-800'
+                }`}
+              >
+                Dados Básicos
+              </button>
+              <button
+                type="button"
+                onClick={() => setOrgModalTab('config_gerais')}
+                className={`py-3 px-4 font-bold border-b-2 transition-all cursor-pointer ${
+                  orgModalTab === 'config_gerais' ? 'text-red-600 border-red-600' : 'text-slate-500 border-transparent hover:text-slate-800'
+                }`}
+              >
+                Configurações Gerais
+              </button>
+            </div>
+
+            {orgModalTab === 'config_gerais' ? (
+              <div className="p-0 bg-slate-50 max-h-[70vh] overflow-y-auto">
+                <ConfiguracaoAdmin 
+                  orgId={selectedOrg.id} 
+                  loggedUser={loggedUser} 
+                  showToast={showToast} 
+                  isModal={true}
+                  onOrgUpdate={(updated) => {
+                    setOrganizacoes(prev => prev.map(o => o.id === updated.id ? {...o, ...updated} : o));
+                  }}
+                />
+              </div>
+            ) : (
+            <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-2">Nome da Organização</label>
                 <input
@@ -1123,7 +1176,9 @@ export function SuperAdminPanel({ loggedUser }: { loggedUser: any }) {
                 </div>
               </div>
             </div>
+            )}
             
+            {orgModalTab === 'dados_basicos' && (
             <div className="p-6 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
               <button
                 onClick={() => setSelectedOrg(null)}
@@ -1144,6 +1199,7 @@ export function SuperAdminPanel({ loggedUser }: { loggedUser: any }) {
                 Salvar Alterações
               </button>
             </div>
+            )}
           </div>
         </div>
       )}

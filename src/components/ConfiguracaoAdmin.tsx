@@ -10,6 +10,7 @@ interface ConfiguracaoAdminProps {
   orgId: string;
   onOrgUpdate: (updatedOrg: any) => void;
   showToast: (text: string, type: 'success' | 'error' | 'info') => void;
+  isModal?: boolean;
 }
 
 const PRESET_COLORS = [
@@ -22,7 +23,7 @@ const PRESET_COLORS = [
   { name: 'Vermelho Coral', value: '#f43f5e' },
 ];
 
-export function ConfiguracaoAdmin({ loggedUser, orgId, onOrgUpdate, showToast }: ConfiguracaoAdminProps) {
+export function ConfiguracaoAdmin({ loggedUser, orgId, onOrgUpdate, showToast, isModal = false }: ConfiguracaoAdminProps) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<'visual' | 'contato' | 'integracao' | 'cupons' | 'recebimento' | 'website'>('visual');
@@ -134,17 +135,19 @@ export function ConfiguracaoAdmin({ loggedUser, orgId, onOrgUpdate, showToast }:
   }
 
   return (
-    <div className="max-w-4xl bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+    <div className={isModal ? "w-full" : "max-w-4xl bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden"}>
       {/* Banner */}
-      <div className="p-8 text-white relative flex flex-col justify-end min-h-[160px] overflow-hidden" style={{ backgroundColor: corPrimaria }}>
-        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white scale-150 pointer-events-none"></div>
-        <div className="relative z-10">
-          <h2 className="text-3xl font-black tracking-tight mb-2">Configurações Gerais</h2>
-          <p className="text-white/80 font-medium max-w-xl">
-            Personalize a identidade visual, canais de suporte e integrações da sua academia digital.
-          </p>
+      {!isModal && (
+        <div className="p-8 text-white relative flex flex-col justify-end min-h-[160px] overflow-hidden" style={{ backgroundColor: corPrimaria }}>
+          <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white scale-150 pointer-events-none"></div>
+          <div className="relative z-10">
+            <h2 className="text-3xl font-black tracking-tight mb-2">Configurações Gerais</h2>
+            <p className="text-white/80 font-medium max-w-xl">
+              Personalize a identidade visual, canais de suporte e integrações da sua academia digital.
+            </p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Tabs */}
       <div className="flex border-b border-slate-200 bg-slate-50 px-6 relative z-10">

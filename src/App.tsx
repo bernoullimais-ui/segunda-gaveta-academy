@@ -1208,7 +1208,7 @@ function RenderContent({
     case 'atendimento_ia':
       return <AtendimentoIA loggedUser={user} loggedRole={role} />;
     case 'super_admin':
-      return <SuperAdminPanel loggedUser={user} />;
+      return <SuperAdminPanel loggedUser={user} showToast={showToast} />;
     default:
       return (
         <div className="flex flex-col items-center justify-center h-64 text-slate-400">
