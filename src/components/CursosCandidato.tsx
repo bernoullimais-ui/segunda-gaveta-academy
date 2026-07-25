@@ -1358,7 +1358,7 @@ export function CursosCandidato({
             coursesToDisplay.map((curso: any) => (
               <div key={curso.id} className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-6">
                 <div className="w-full md:w-64 flex flex-col gap-3 shrink-0">
-                  <div className="w-full aspect-video bg-slate-100 rounded-lg flex items-center justify-center font-bold text-xl text-slate-800 border border-slate-200 bg-cover bg-center" style={{ backgroundImage: curso.thumbnail_url ? `url("${curso.thumbnail_url}")` : undefined }}>
+                  <div className="w-full aspect-[9/16] max-w-[240px] mx-auto bg-slate-100 rounded-xl flex items-center justify-center font-bold text-xl text-slate-800 border border-slate-200 bg-cover bg-center shadow-md overflow-hidden" style={{ backgroundImage: curso.thumbnail_url ? `url("${curso.thumbnail_url}")` : undefined }}>
                     {!curso.thumbnail_url && curso.nome}
                   </div>
                 <div className="flex flex-col gap-2 w-full items-center">
@@ -1476,7 +1476,7 @@ export function CursosCandidato({
                 {trilhas.map((trilha) => (
                     <div key={trilha.id} className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-6">
                         <div className="w-full md:w-64 flex flex-col gap-3 shrink-0">
-                          <div className="w-full h-40 bg-slate-100 rounded-lg flex items-center justify-center font-bold text-xl text-slate-800 border border-slate-200 bg-cover bg-center" style={{ backgroundImage: trilha.capa_url ? `url("${trilha.capa_url}")` : undefined }}>
+                          <div className="w-full aspect-[9/16] max-w-[240px] mx-auto bg-slate-100 rounded-xl flex items-center justify-center font-bold text-xl text-slate-800 border border-slate-200 bg-cover bg-center shadow-md overflow-hidden" style={{ backgroundImage: trilha.capa_url ? `url("${trilha.capa_url}")` : undefined }}>
                             {!trilha.capa_url && trilha.nome}
                           </div>
                         <div className="flex flex-col gap-2 w-full items-center">
@@ -2318,7 +2318,7 @@ export function CursosCandidato({
                 </button>
 
                 <div className="flex flex-col gap-8 mb-10">
-                  <div className="w-full aspect-video bg-slate-100 rounded-2xl border border-slate-200 bg-cover bg-center shadow-lg overflow-hidden flex items-center justify-center" style={{ backgroundImage: selectedCurso.thumbnail_url ? `url("${selectedCurso.thumbnail_url}")` : undefined }}>
+                  <div className="w-full max-w-sm mx-auto aspect-[9/16] bg-slate-100 rounded-3xl border border-slate-200 bg-cover bg-center shadow-2xl overflow-hidden flex items-center justify-center" style={{ backgroundImage: selectedCurso.thumbnail_url ? `url("${selectedCurso.thumbnail_url}")` : undefined }}>
                     {!selectedCurso.thumbnail_url && (
                        <div className="text-4xl font-bold text-slate-300 uppercase tracking-widest">{selectedCurso.nome}</div>
                     )}
