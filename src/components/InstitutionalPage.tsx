@@ -55,6 +55,7 @@ const iconMap: Record<string, React.ReactNode> = {
 export const InstitutionalPage: React.FC = () => {
   const [config, setConfig] = useState<WebsiteConfig>(DEFAULT_CONFIG);
   const [especialistas, setEspecialistas] = useState<any[]>([]);
+  const [cursosGlobais, setCursosGlobais] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -96,6 +97,17 @@ export const InstitutionalPage: React.FC = () => {
       
       if (orgsData) {
         setEspecialistas(orgsData);
+      }
+
+      // Fetch Public Courses
+      const { data: cursosData } = await supabase
+        .from('cursos')
+        .select('id, nome, slug, thumbnail_url, organizacao_id, professor_nome, organizacoes(nome, slug)')
+        .eq('status', 'publicado')
+        .order('created_at', { ascending: false });
+        
+      if (cursosData) {
+        setCursosGlobais(cursosData);
       }
     } catch (err) {
       console.error('Error fetching institutional data:', err);
@@ -145,6 +157,7 @@ export const InstitutionalPage: React.FC = () => {
           </div>
           <nav className="hidden md:flex gap-8">
             <a href="#servicos" className="text-sm font-bold text-slate-600 hover:text-indigo-600 transition-colors">Serviços</a>
+            <a href="#cursos" className="text-sm font-bold text-slate-600 hover:text-indigo-600 transition-colors">Acervo de Cursos</a>
             <a href="#especialistas" className="text-sm font-bold text-slate-600 hover:text-indigo-600 transition-colors">Especialistas</a>
             <a href="#contato" className="text-sm font-bold text-slate-600 hover:text-indigo-600 transition-colors">Contato</a>
           </nav>
@@ -220,6 +233,45 @@ export const InstitutionalPage: React.FC = () => {
           </div>
         </div>
       </section>
+
+      {/* Acervo de Cursos */}
+      {cursosGlobais.length > 0 && (
+        <section id="cursos" className="py-24 bg-slate-50 relative border-t border-slate-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">Acervo de Cursos</h2>
+              <p className="text-slate-500 mt-4 text-lg">Descubra os melhores conteúdos dos nossos especialistas parceiros.</p>
+              <div className="w-24 h-1.5 bg-indigo-600 mx-auto mt-6 rounded-full"></div>
+            </div>
+            
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+              {cursosGlobais.map(curso => (
+                <a 
+                  key={curso.id}
+                  href={`/public/curso/${curso.slug}`}
+                  className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-xl transition-all hover:-translate-y-2 flex flex-col group overflow-hidden"
+                >
+                  <div 
+                    className="w-full aspect-[9/16] bg-slate-100 flex items-center justify-center bg-cover bg-center overflow-hidden relative"
+                    style={{ backgroundImage: curso.thumbnail_url ? `url("${curso.thumbnail_url}")` : undefined }}
+                  >
+                    {!curso.thumbnail_url && (
+                      <span className="text-slate-400 font-bold text-center px-4">{curso.nome}</span>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                  <div className="p-4 flex flex-col flex-1 justify-between">
+                    <div>
+                      <h3 className="font-bold text-slate-800 text-sm line-clamp-2 mb-1 group-hover:text-indigo-600 transition-colors">{curso.nome}</h3>
+                      <p className="text-xs text-slate-500 line-clamp-1">{curso.professor_nome || curso.organizacoes?.nome || 'Especialista'}</p>
+                    </div>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Especialistas */}
       {especialistas.length > 0 && (
