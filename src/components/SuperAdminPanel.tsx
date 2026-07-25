@@ -1064,7 +1064,7 @@ export function SuperAdminPanel({ loggedUser, showToast }: { loggedUser: any, sh
       {/* Modal de Edição de Organização */}
       {selectedOrg && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden animate-in fade-in zoom-in-95">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl overflow-hidden animate-in fade-in zoom-in-95">
             <div className="flex justify-between items-center p-6 border-b border-slate-100">
               <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
                 <Building2 className="w-6 h-6 text-red-600" />
