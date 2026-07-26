@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { Save, Loader2, Award, Palette, Image, Globe, Mail, Phone, MessageSquare, ShieldCheck, Ticket, DollarSign } from 'lucide-react';
+import { Save, Loader2, Award, Palette, Image, Globe, Mail, Phone, MessageSquare, ShieldCheck, Ticket, DollarSign, FileText } from 'lucide-react';
 import { CuponsAdmin } from './CuponsAdmin';
 import { DadosRecebimento } from './DadosRecebimento';
 import { OrgWebsiteEditor } from './OrgWebsiteEditor';
+import { DadosFiscais } from './DadosFiscais';
 
 interface ConfiguracaoAdminProps {
   loggedUser: any;
@@ -26,7 +27,7 @@ const PRESET_COLORS = [
 export function ConfiguracaoAdmin({ loggedUser, orgId, onOrgUpdate, showToast, isModal = false }: ConfiguracaoAdminProps) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<'visual' | 'contato' | 'integracao' | 'cupons' | 'recebimento' | 'website'>('visual');
+  const [activeTab, setActiveTab] = useState<'visual' | 'contato' | 'integracao' | 'cupons' | 'recebimento' | 'fiscal' | 'website'>('visual');
 
   // Form states
   const [nome, setNome] = useState('');
@@ -135,7 +136,7 @@ export function ConfiguracaoAdmin({ loggedUser, orgId, onOrgUpdate, showToast, i
   }
 
   return (
-    <div className={isModal ? "w-full" : "max-w-4xl bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden"}>
+    <div className={isModal ? "w-full" : "max-w-[1440px] bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden"}>
       {/* Banner */}
       {!isModal && (
         <div className="p-8 text-white relative flex flex-col justify-end min-h-[160px] overflow-hidden" style={{ backgroundColor: corPrimaria }}>
@@ -150,11 +151,11 @@ export function ConfiguracaoAdmin({ loggedUser, orgId, onOrgUpdate, showToast, i
       )}
 
       {/* Tabs */}
-      <div className="flex border-b border-slate-200 bg-slate-50 px-6 relative z-10">
+      <div className="flex overflow-x-auto [&::-webkit-scrollbar]:hidden border-b border-slate-200 bg-slate-50 px-6 relative z-10" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
         <button
           type="button"
           onClick={() => setActiveTab('visual')}
-          className={`py-4 px-4 font-bold border-b-2 transition-all flex items-center gap-2 cursor-pointer ${
+          className={`py-4 px-4 font-bold border-b-2 transition-all flex items-center shrink-0 whitespace-nowrap gap-2 cursor-pointer ${
             activeTab === 'visual'
               ? 'text-slate-900 border-slate-900'
               : 'text-slate-500 border-transparent hover:text-slate-800'
@@ -167,7 +168,7 @@ export function ConfiguracaoAdmin({ loggedUser, orgId, onOrgUpdate, showToast, i
         <button
           type="button"
           onClick={() => setActiveTab('contato')}
-          className={`py-4 px-4 font-bold border-b-2 transition-all flex items-center gap-2 cursor-pointer ${
+          className={`py-4 px-4 font-bold border-b-2 transition-all flex items-center shrink-0 whitespace-nowrap gap-2 cursor-pointer ${
             activeTab === 'contato'
               ? 'text-slate-900 border-slate-900'
               : 'text-slate-500 border-transparent hover:text-slate-800'
@@ -175,12 +176,12 @@ export function ConfiguracaoAdmin({ loggedUser, orgId, onOrgUpdate, showToast, i
           style={{ borderColor: activeTab === 'contato' ? corPrimaria : undefined, color: activeTab === 'contato' ? corPrimaria : undefined }}
         >
           <Mail size={18} />
-          Suporte & Contato
+          Contatos
         </button>
         <button
           type="button"
           onClick={() => setActiveTab('integracao')}
-          className={`py-4 px-4 font-bold border-b-2 transition-all flex items-center gap-2 cursor-pointer ${
+          className={`py-4 px-4 font-bold border-b-2 transition-all flex items-center shrink-0 whitespace-nowrap gap-2 cursor-pointer ${
             activeTab === 'integracao'
               ? 'text-slate-900 border-slate-900'
               : 'text-slate-500 border-transparent hover:text-slate-800'
@@ -188,12 +189,12 @@ export function ConfiguracaoAdmin({ loggedUser, orgId, onOrgUpdate, showToast, i
           style={{ borderColor: activeTab === 'integracao' ? corPrimaria : undefined, color: activeTab === 'integracao' ? corPrimaria : undefined }}
         >
           <Globe size={18} />
-          Recursos & Validação
+          Recursos
         </button>
         <button
           type="button"
           onClick={() => setActiveTab('cupons')}
-          className={`py-4 px-4 font-bold border-b-2 transition-all flex items-center gap-2 cursor-pointer ${
+          className={`py-4 px-4 font-bold border-b-2 transition-all flex items-center shrink-0 whitespace-nowrap gap-2 cursor-pointer ${
             activeTab === 'cupons'
               ? 'text-slate-900 border-slate-900'
               : 'text-slate-500 border-transparent hover:text-slate-800'
@@ -201,12 +202,12 @@ export function ConfiguracaoAdmin({ loggedUser, orgId, onOrgUpdate, showToast, i
           style={{ borderColor: activeTab === 'cupons' ? corPrimaria : undefined, color: activeTab === 'cupons' ? corPrimaria : undefined }}
         >
           <Ticket size={18} />
-          Cupons de Desconto
+          Cupons
         </button>
         <button
           type="button"
           onClick={() => setActiveTab('recebimento')}
-          className={`py-4 px-4 font-bold border-b-2 transition-all flex items-center gap-2 cursor-pointer ${
+          className={`py-4 px-4 font-bold border-b-2 transition-all flex items-center shrink-0 whitespace-nowrap gap-2 cursor-pointer ${
             activeTab === 'recebimento'
               ? 'text-slate-900 border-slate-900'
               : 'text-slate-500 border-transparent hover:text-slate-800'
@@ -215,6 +216,19 @@ export function ConfiguracaoAdmin({ loggedUser, orgId, onOrgUpdate, showToast, i
         >
           <DollarSign size={18} />
           Dados de Recebimento
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('fiscal')}
+          className={`py-4 px-4 font-bold border-b-2 transition-all flex items-center shrink-0 whitespace-nowrap gap-2 cursor-pointer ${
+            activeTab === 'fiscal'
+              ? 'text-slate-900 border-slate-900'
+              : 'text-slate-500 border-transparent hover:text-slate-800'
+          }`}
+          style={{ borderColor: activeTab === 'fiscal' ? corPrimaria : undefined, color: activeTab === 'fiscal' ? corPrimaria : undefined }}
+        >
+          <FileText size={18} />
+          Notas Fiscais
         </button>
         <button
           type="button"
@@ -239,6 +253,14 @@ export function ConfiguracaoAdmin({ loggedUser, orgId, onOrgUpdate, showToast, i
       ) : activeTab === 'recebimento' ? (
         <div className="p-8">
           <DadosRecebimento loggedUser={loggedUser} />
+        </div>
+      ) : activeTab === 'fiscal' ? (
+        <div className="p-8">
+          <DadosFiscais
+            loggedUser={loggedUser}
+            isAdmin={isModal || loggedUser?.role === 'super_admin'}
+            showToast={showToast}
+          />
         </div>
       ) : activeTab === 'website' ? (
         <div className="p-8">

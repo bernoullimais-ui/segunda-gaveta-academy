@@ -875,7 +875,6 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
     setIsProcessing(true);
     try {
       // 1. Verificar se usuário já existe ou criar novo
-      // Simplificado: Usar RPC ou lógica de inserção direta se configurado
       const { data: existingUser } = await supabase
         .from('usuarios')
         .select('id')
@@ -898,22 +897,21 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
           }
         });
 
-        // Se o erro for que o usuário já existe, tentar pegar o ID dele se possível (via signIn ou similar)
-        // Mas o mais provável é que o perfil na tabela 'usuarios' esteja faltando
         if (authErr) {
           if (authErr.message.includes('already registered')) {
-             // Tentar ver se conseguimos o ID de outra forma ou pedir login
-             // Por agora, vamos assumir que se chegou aqui e não está na 'usuarios', vamos tentar cadastrá-lo
-             // Nota: signUp em usuário existente no Supabase pode retornar sucesso mas sem user.id em algumas configs
-             if (!authData.user?.id) {
-                throw new Error("Este e-mail já está cadastrado. Por favor, faça login primeiro.");
-             }
+            // Usuário existe no Auth mas não na tabela usuarios — tudo bem, o upsert abaixo vai criar o perfil
+            // Tentamos continuar com o ID retornado (pode vir em authData.user mesmo em re-signups)
+            if (!authData?.user?.id) {
+              // Última tentativa: signIn silencioso para recuperar o ID
+              // Como não temos senha, peço para o usuário tentar pelo painel
+              throw new Error("Seu e-mail já possui uma conta. Acesse o painel para fazer login e continuar a compra.");
+            }
           } else {
             throw authErr;
           }
         }
-        
-        userId = authData.user?.id;
+
+        userId = authData?.user?.id;
       }
 
       if (userId) {
@@ -935,7 +933,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
         throw new Error("Falha ao identificar ou criar conta de usuário.");
       }
 
-      // 1.1 Verificar se já está inscrito
+      // 1.1 Verificar se já tem participação (inscrito ou pendente)
       const table = isTrilha ? 'trilha_participantes' : 'curso_participantes';
       const idField = isTrilha ? 'trilha_id' : 'curso_id';
 
@@ -946,22 +944,42 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
         .eq('usuario_id', userId)
         .maybeSingle();
 
-      if (existingParticipation && existingParticipation.status === 'inscrito') {
-         setParticipantId(existingParticipation.id);
-         setEnrollStep('success');
-         setIsProcessing(false);
-         return;
+      if (existingParticipation) {
+        if (existingParticipation.status === 'inscrito') {
+          // Já está plenamente inscrito — sucesso direto
+          setParticipantId(existingParticipation.id);
+          setEnrollStep('success');
+          setIsProcessing(false);
+          return;
+        }
+        // status === 'pendente': pagamento anterior não concluído — permitir nova tentativa
+        setParticipantId(existingParticipation.id);
+        if (isFree) {
+          // Atualizar para inscrito (caso gratuito ficou pendente por algum motivo)
+          await supabase.from(table).update({ status: 'inscrito' }).eq('id', existingParticipation.id);
+          setEnrollStep('success');
+          setIsProcessing(false);
+          return;
+        }
+        // Para pago: vai direto para o pagamento sem recriar o registro
+        setEnrollStep('payment');
+        setShowPaymentModal(true);
+        setIsProcessing(false);
+        return;
       }
 
-      // 2. Criar registro de participante como 'pendente' ou 'inscrito'
+      // 2. Criar registro de participante pela primeira vez
       const { data: participant, error: partErr } = await supabase
         .from(table)
-        .upsert({
-          [idField]: item.id,
-          usuario_id: userId,
-          status: isFree ? 'inscrito' : 'pendente',
-          progresso: 0
-        })
+        .upsert(
+          {
+            [idField]: item.id,
+            usuario_id: userId,
+            status: isFree ? 'inscrito' : 'pendente',
+            progresso: 0
+          },
+          { onConflict: `${idField},usuario_id`, ignoreDuplicates: false }
+        )
         .select()
         .single();
 
