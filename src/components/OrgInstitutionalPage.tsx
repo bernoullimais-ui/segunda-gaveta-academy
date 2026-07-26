@@ -234,7 +234,7 @@ export function OrgInstitutionalPage({ activeOrg, onAccessPanel }: OrgInstitutio
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {cursos.map(curso => (
                 <div key={curso.id} className="bg-slate-50 border border-slate-200 rounded-2xl overflow-hidden hover:shadow-lg transition-all flex flex-col h-full group">
-                  <div className="relative aspect-[9/16] max-h-80 bg-slate-200 overflow-hidden">
+                  <div className="relative aspect-[9/16] bg-slate-200 overflow-hidden">
                     {curso.thumbnail_url ? (
                       <img 
                         src={curso.thumbnail_url} 
