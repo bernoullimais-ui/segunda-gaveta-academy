@@ -235,24 +235,29 @@ function MissoesPreview({ template, missoes, cursoId, loggedUser, showToast }: {
   const [expanded, setExpanded] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const userId = loggedUser?.id;
+  const userId = loggedUser?.id || loggedUser?.auth_id;
 
   useEffect(() => {
     if (!template?.id || !userId) { setIsLoading(false); return; }
     async function load() {
       setIsLoading(true);
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('projeto_conclusao_respostas')
         .select('*')
         .eq('curso_id', cursoId)
         .eq('usuario_id', userId);
+
+      if (error) console.error('Erro ao carregar respostas de teste:', error);
+
       const map: Record<string, ProjetoResposta | null> = {};
       missoes.forEach(m => { map[m.id] = null; });
       (data || []).forEach((r: ProjetoResposta) => { if (r.missao_id) map[r.missao_id] = r; });
       setRespostas(map);
+
       const draftMap: Record<string, Record<string, any>> = {};
       (data || []).forEach((r: ProjetoResposta) => { if (r.missao_id) draftMap[r.missao_id] = r.respostas_json || {}; });
       setDrafts(draftMap);
+
       setIsLoading(false);
     }
     load();
@@ -280,7 +285,10 @@ function MissoesPreview({ template, missoes, cursoId, loggedUser, showToast }: {
   };
 
   const handleSave = async (missao: ProjetoMissao, submit: boolean) => {
-    if (!userId || !template?.id) return;
+    if (!userId || !template?.id) {
+      showToast('Usuário não identificado para salvar.', 'error');
+      return;
+    }
     setSaving(missao.id);
     try {
       const respJson = { ...(drafts[missao.id] || {}) };
@@ -289,30 +297,32 @@ function MissoesPreview({ template, missoes, cursoId, loggedUser, showToast }: {
           respJson[c.id] = globalValuesMap[c.id];
         }
       });
-      const existing = respostas[missao.id];
       const status = submit ? 'submetido' : 'rascunho';
 
-      if (existing?.id) {
-        await supabase.from('projeto_conclusao_respostas').update({
-          respostas_json: respJson,
-          status,
-          updated_at: new Date().toISOString()
-        }).eq('id', existing.id);
-        setRespostas(prev => ({ ...prev, [missao.id]: { ...existing, respostas_json: respJson, status } }));
-      } else {
-        const { data } = await supabase.from('projeto_conclusao_respostas').insert({
+      const { data, error } = await supabase
+        .from('projeto_conclusao_respostas')
+        .upsert({
           template_id: template.id,
           missao_id: missao.id,
           curso_id: cursoId,
           usuario_id: userId,
           respostas_json: respJson,
           status,
-        }).select().single();
-        if (data) setRespostas(prev => ({ ...prev, [missao.id]: data }));
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'missao_id,usuario_id' })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      if (data) {
+        setRespostas(prev => ({ ...prev, [missao.id]: data }));
+        setDrafts(prev => ({ ...prev, [missao.id]: data.respostas_json || {} }));
       }
-      showToast(submit ? 'Missão submetida!' : 'Rascunho salvo!', 'success');
+      showToast(submit ? 'Missão submetida!' : 'Rascunho salvo com sucesso!', 'success');
     } catch (e: any) {
-      showToast('Erro ao salvar: ' + e.message, 'error');
+      console.error('Erro ao salvar resposta:', e);
+      showToast('Erro ao salvar: ' + (e.message || 'Falha na conexão'), 'error');
     } finally {
       setSaving(null);
     }
