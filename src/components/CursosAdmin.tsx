@@ -1474,8 +1474,8 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
   const precoText = activeCurso?.preco === 'gratuito' ? 'Gratuito' : `Pago`;
 
   return (
-    <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-[1000] flex items-center justify-center p-0 md:p-8 overflow-hidden">
-      <div className="relative bg-white w-full max-w-7xl h-full md:h-[90vh] md:rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-300">
+    <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-[1000] flex items-center justify-center p-0 md:p-4 lg:p-6 overflow-hidden">
+      <div className="relative bg-white w-full max-w-[96vw] xl:max-w-[1550px] 2xl:max-w-[1680px] h-full md:h-[92vh] md:rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-300">
         <div className="bg-white border-b border-slate-100 sticky top-0 z-[110] px-8 py-5 flex items-center justify-between">
           <div className="flex items-center gap-4">
              <button onClick={() => { setView('list'); setEditingTrilha(null); }} className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-400">
@@ -1509,10 +1509,8 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
             <button 
               key={tab} 
               onClick={() => setActiveTab(tab as any)}
-              className={`py-4 font-bold text-sm tracking-tight transition-all relative whitespace-nowrap ${
-                activeTab === tab 
-                ? 'text-blue-600' 
-                : 'text-slate-500 hover:text-slate-800'
+              className={`py-4 text-sm font-bold transition-colors whitespace-nowrap relative shrink-0 ${
+                activeTab === tab ? 'text-blue-600' : 'text-slate-500 hover:text-slate-800'
               }`}
             >
               {tab === 'visao_geral' ? 'Visão Geral' : 
@@ -1536,8 +1534,8 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
           ))}
         </div>
 
-        <div className="flex-1 overflow-y-auto bg-slate-50/50 p-8">
-          <div className="max-w-5xl mx-auto">
+        <div className="flex-1 overflow-y-auto bg-slate-50/50 p-6 md:p-8">
+          <div className="max-w-[1500px] mx-auto w-full">
         {activeTab === 'financeiro' && (
           <FinanceiroAdmin orgId={orgId} />
         )}
