@@ -1884,21 +1884,6 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
           )}
         </div>
 
-        <div className="max-w-7xl mx-auto px-6 relative z-10 w-full min-h-[90vh] flex flex-col py-32">
-          <div className={`w-full max-w-xl flex flex-col ${
-            lp.hero_align_h === 'center' ? 'mx-auto text-center items-center' :
-            lp.hero_align_h === 'right' ? 'ml-auto text-right items-end' :
-            lp.hero_align_h === 'left' ? 'mr-auto text-left items-start' : 'lg:ml-auto text-left items-start' // Default to right for previous behavior
-          } ${
-            lp.hero_align_v === 'top' ? 'mb-auto' :
-            lp.hero_align_v === 'bottom' ? 'mt-auto' :
-            'my-auto'
-          }`}>
-            {/* Text Content */}
-            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700 flex flex-col w-full" style={{ alignItems: lp.hero_align_h === 'center' ? 'center' : lp.hero_align_h === 'right' ? 'flex-end' : 'flex-start' }}>
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-bold border border-primary/20">
-                <Award className="w-4 h-4" /> Certificação Inclusa
-              </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 w-full min-h-0 lg:min-h-[90vh] flex flex-col py-16 lg:py-32">
             <div className={`w-full max-w-xl flex flex-col ${
               lp.hero_align_h === 'center' ? 'mx-auto text-center items-center' :
