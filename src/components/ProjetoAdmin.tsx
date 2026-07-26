@@ -347,7 +347,7 @@ function MissoesPreview({ template, missoes, cursoId, loggedUser, showToast }: {
                     key={campo.id}
                     campo={campo}
                     value={drafts[missao.id]?.[campo.id]}
-                    onChange={(val: any) => setDrafts(prev => ({ ...prev, [missao.id]: { ...(prev[missao.id] || {}), [campo.id]: val } }))}
+                    onChange={(campoId: string, val: any) => setDrafts(prev => ({ ...prev, [missao.id]: { ...(prev[missao.id] || {}), [campoId]: val } }))}
                     readOnly={status === 'submetido' || status === 'com_feedback'}
                   />
                 ))}
