@@ -255,7 +255,7 @@ function MissoesPreview({ template, missoes, cursoId, loggedUser, showToast }: {
       setIsLoading(false);
     }
     load();
-  }, [template?.id, userId, cursoId, missoes]);
+  }, [template?.id, userId, cursoId, missoes.map(m => m.id).join(',')]);
 
   const isAdmin = ['gestor', 'especialista', 'super_admin', 'curador', 'design'].includes(loggedUser?.role);
 
