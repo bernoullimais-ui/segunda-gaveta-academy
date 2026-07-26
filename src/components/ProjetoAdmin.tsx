@@ -302,7 +302,6 @@ function MissoesPreview({ template, missoes, cursoId, loggedUser, showToast }: {
       const { data, error } = await supabase
         .from('projeto_conclusao_respostas')
         .upsert({
-          template_id: template.id,
           missao_id: missao.id,
           curso_id: cursoId,
           usuario_id: userId,
