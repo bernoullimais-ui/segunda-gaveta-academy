@@ -10,6 +10,7 @@ import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea
 import { supabase } from '../lib/supabase';
 import { CampoRenderer } from './CampoRenderer';
 import { exportarProjetoPDF } from '../lib/projetoUtils';
+import { buildGlobalValuesMap } from '../lib/formulaParser';
 import type {
   ProjetoTemplate, ProjetoMissao, ProjetoResposta, ProjetoDelegacao,
   CampoConfig, CampoTipo
@@ -257,6 +258,16 @@ function MissoesPreview({ template, missoes, cursoId, loggedUser, showToast }: {
     load();
   }, [template?.id, userId, cursoId, missoes.map(m => m.id).join(',')]);
 
+  const globalValuesMap = React.useMemo(() => {
+    const respostasMapMerged: Record<string, any> = {};
+    missoes.forEach(m => {
+      respostasMapMerged[m.id] = {
+        respostas_json: drafts[m.id] || respostas[m.id]?.respostas_json || {}
+      };
+    });
+    return buildGlobalValuesMap(missoes, respostasMapMerged);
+  }, [missoes, respostas, drafts]);
+
   const isAdmin = ['gestor', 'especialista', 'super_admin', 'curador', 'design'].includes(loggedUser?.role);
 
   const isUnlocked = (idx: number): boolean => {
@@ -272,7 +283,12 @@ function MissoesPreview({ template, missoes, cursoId, loggedUser, showToast }: {
     if (!userId || !template?.id) return;
     setSaving(missao.id);
     try {
-      const respJson = drafts[missao.id] || {};
+      const respJson = { ...(drafts[missao.id] || {}) };
+      (missao.campos_json || []).forEach(c => {
+        if (c.tipo === 'calculado') {
+          respJson[c.id] = globalValuesMap[c.id];
+        }
+      });
       const existing = respostas[missao.id];
       const status = submit ? 'submetido' : 'rascunho';
 
@@ -346,7 +362,7 @@ function MissoesPreview({ template, missoes, cursoId, loggedUser, showToast }: {
                   <CampoRenderer
                     key={campo.id}
                     campo={campo}
-                    value={drafts[missao.id]?.[campo.id]}
+                    value={campo.tipo === 'calculado' ? globalValuesMap[campo.id] : drafts[missao.id]?.[campo.id]}
                     onChange={(campoId: string, val: any) => setDrafts(prev => ({ ...prev, [missao.id]: { ...(prev[missao.id] || {}), [campoId]: val } }))}
                     readOnly={status === 'submetido' || status === 'com_feedback'}
                   />
