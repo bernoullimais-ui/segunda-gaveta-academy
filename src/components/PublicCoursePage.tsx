@@ -1326,7 +1326,51 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
               {/* Text Content */}
               <div className="space-y-6 lg:space-y-10 animate-in fade-in slide-in-from-bottom-12 duration-1000 flex flex-col w-full" style={{ alignItems: !isMobileScreen ? (lp.hero_align_h === 'center' ? 'center' : lp.hero_align_h === 'right' ? 'flex-end' : 'flex-start') : 'flex-start' }}>
 
-                <div className="hero-no-mobile-transform" style={{ transform: (lp.hero_title_offset_x || lp.hero_title_offset_y) ? `translate(${lp.hero_title_offset_x || 0}px, ${lp.hero_title_offset_y || 0}px)` : undefined }}>
+                {/* 1. Mobile Banner Image/Video (Order 1 on mobile) */}
+                <div className="order-1 lg:hidden relative animate-in fade-in zoom-in-95 duration-1000 my-2 w-full">
+                  <div className="bg-slate-950/80 rounded-3xl overflow-hidden shadow-2xl border border-slate-800 p-1.5 max-w-md mx-auto">
+                    <div className="w-full rounded-2xl overflow-hidden">
+                      {lp.hero_video_url ? (
+                        (lp.hero_video_url.includes('youtube.com') || lp.hero_video_url.includes('youtu.be') || lp.hero_video_url.includes('vimeo.com')) ? (
+                          <div className="w-full aspect-video relative group">
+                            <ReactPlayer 
+                              url={lp.hero_video_url} 
+                              width="100%" 
+                              height="100%" 
+                              playing={true}
+                              controls={false}
+                              light={item.thumbnail_url || item.capa_url || true}
+                              playIcon={
+                                <div className="absolute inset-0 cursor-pointer flex items-center justify-center z-10 group">
+                                  <div className="absolute inset-0 bg-slate-900/40 group-hover:bg-slate-900/20 transition-colors" />
+                                  <div className="relative z-20 w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white shadow-2xl scale-110 group-hover:scale-125 transition-transform duration-500">
+                                    <Play className="w-8 h-8 fill-current" />
+                                  </div>
+                                </div>
+                              }
+                              config={{
+                                youtube: {
+                                  playerVars: { modestbranding: 1, rel: 0, iv_load_policy: 3, showinfo: 0, cc_load_policy: 0, controls: 0, fs: 0 }
+                                }
+                              }}
+                            />
+                          </div>
+                        ) : (
+                          <img src={lp.hero_video_url} alt="Apresentação" className="w-full h-auto max-h-[320px] object-cover rounded-2xl" />
+                        )
+                      ) : (
+                        <img 
+                          src={item.capa_url || item.thumbnail_url || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070'} 
+                          alt="Capa"
+                          className="w-full h-auto max-h-[360px] object-cover rounded-2xl"
+                        />
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. Título (Order 2 on mobile) */}
+                <div className="order-2 lg:order-none hero-no-mobile-transform" style={{ transform: (lp.hero_title_offset_x || lp.hero_title_offset_y) ? `translate(${lp.hero_title_offset_x || 0}px, ${lp.hero_title_offset_y || 0}px)` : undefined }}>
                   {(lp.hero_title && (lp.hero_title.startsWith('data:image') || lp.hero_title.startsWith('http')) && !lp.hero_title.includes(' ')) ? (
                     <img src={lp.hero_title} alt={item.nome || "Título"} className="object-contain w-auto mb-4 max-w-full" style={{ height: lp.hero_title_image_height ? `${lp.hero_title_image_height}px` : '120px' }} />
                   ) : (
@@ -1336,13 +1380,8 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                   )}
                 </div>
                 
-                <p className="text-base sm:text-xl text-slate-200 lg:text-slate-700 leading-relaxed max-w-xl typo-subtitle hero-no-mobile-transform" style={{ transform: (lp.hero_subtitle_offset_x || lp.hero_subtitle_offset_y) ? `translate(${lp.hero_subtitle_offset_x || 0}px, ${lp.hero_subtitle_offset_y || 0}px)` : undefined }}>
-                  {lp.hero_subtitle || item.descricao}
-                </p>
-
-                <CountdownTimer timeLeft={timeLeft} title={lp.countdown_title} layout={layout} />
-
-                <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8 pt-2 sm:pt-4 w-full hero-no-mobile-transform" style={{ transform: (lp.hero_cta_offset_x || lp.hero_cta_offset_y) ? `translate(${lp.hero_cta_offset_x || 0}px, ${lp.hero_cta_offset_y || 0}px)` : undefined, justifyContent: !isMobileScreen ? (lp.hero_align_h === 'center' ? 'center' : lp.hero_align_h === 'right' ? 'flex-end' : 'flex-start') : 'flex-start' }}>
+                {/* 3. Botão de Ação / CTA (Order 3 on mobile - logo abaixo do título) */}
+                <div className="order-3 lg:order-none flex flex-col sm:flex-row items-center gap-4 sm:gap-8 pt-2 sm:pt-4 w-full hero-no-mobile-transform" style={{ transform: (lp.hero_cta_offset_x || lp.hero_cta_offset_y) ? `translate(${lp.hero_cta_offset_x || 0}px, ${lp.hero_cta_offset_y || 0}px)` : undefined, justifyContent: !isMobileScreen ? (lp.hero_align_h === 'center' ? 'center' : lp.hero_align_h === 'right' ? 'flex-end' : 'flex-start') : 'flex-start' }}>
                   <div className="flex flex-col items-center gap-2 w-full sm:w-auto">
                     <button 
                       onClick={handleEnrollClick}
@@ -1357,52 +1396,20 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                     )}
                   </div>
                 </div>
-              </div>
-            </div>
 
-              {/* Mobile Only Image/Video */}
-              <div className="lg:hidden relative animate-in fade-in zoom-in-95 duration-1000 mt-8">
-                <div className="aspect-video bg-slate-950 rounded-[40px] overflow-hidden shadow-[0_0_80px_rgba(0,0,0,0.5)] border border-slate-800 p-2">
-                  <div className="w-full h-full rounded-[32px] overflow-hidden">
-                    {lp.hero_video_url ? (
-                      (lp.hero_video_url.includes('youtube.com') || lp.hero_video_url.includes('youtu.be') || lp.hero_video_url.includes('vimeo.com')) ? (
-                        <div className="w-full h-full relative group">
-                          <ReactPlayer 
-                            url={lp.hero_video_url} 
-                            width="100%" 
-                            height="100%" 
-                            playing={true}
-                            controls={false}
-                            light={item.thumbnail_url || item.capa_url || true}
-                            playIcon={
-                              <div className="absolute inset-0 cursor-pointer flex items-center justify-center z-10 group">
-                                <div className="absolute inset-0 bg-slate-900/40 group-hover:bg-slate-900/20 transition-colors" />
-                                <div className="relative z-20 w-24 h-24 bg-primary rounded-full flex items-center justify-center text-white shadow-2xl scale-110 group-hover:scale-125 transition-transform duration-500">
-                                  <Play className="w-10 h-10 fill-current" />
-                                </div>
-                              </div>
-                            }
-                            config={{
-                              youtube: {
-                                playerVars: { modestbranding: 1, rel: 0, iv_load_policy: 3, showinfo: 0, cc_load_policy: 0, controls: 0, fs: 0 }
-                              }
-                            }}
-                          />
-                        </div>
-                      ) : (
-                        <img src={lp.hero_video_url} alt="Apresentação" className="w-full h-full object-contain" />
-                      )
-                    ) : (
-                      <img 
-                        src={item.capa_url || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070'} 
-                        alt="Capa"
-                        className="w-full h-full object-contain"
-                      />
-                    )}
-                  </div>
+                {/* 4. Subtítulo (Order 4 on mobile) */}
+                <p className="order-4 lg:order-none text-base sm:text-xl text-slate-200 lg:text-slate-700 leading-relaxed max-w-xl typo-subtitle hero-no-mobile-transform" style={{ transform: (lp.hero_subtitle_offset_x || lp.hero_subtitle_offset_y) ? `translate(${lp.hero_subtitle_offset_x || 0}px, ${lp.hero_subtitle_offset_y || 0}px)` : undefined }}>
+                  {lp.hero_subtitle || item.descricao}
+                </p>
+
+                {/* 5. CountdownTimer (Order 5 on mobile) */}
+                <div className="order-5 lg:order-none w-full">
+                  <CountdownTimer timeLeft={timeLeft} title={lp.countdown_title} layout={layout} />
                 </div>
+
               </div>
             </div>
+          </div>
         </section>
 
         {/* Modern Dark Info Bar */}
@@ -1908,11 +1915,52 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             }`}>
               {/* Text Content */}
               <div className="space-y-6 lg:space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700 flex flex-col w-full" style={{ alignItems: !isMobileScreen ? (lp.hero_align_h === 'center' ? 'center' : lp.hero_align_h === 'right' ? 'flex-end' : 'flex-start') : 'flex-start' }}>
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-bold border border-primary/20">
-                  <Award className="w-4 h-4" /> Certificação Inclusa
+
+                {/* 1. Mobile Banner Image/Video (Order 1 on mobile) */}
+                <div className="order-1 lg:hidden relative animate-in fade-in zoom-in-95 duration-1000 my-2 w-full">
+                  <div className="bg-white/80 rounded-3xl overflow-hidden shadow-2xl border border-slate-200 p-1.5 max-w-md mx-auto">
+                    <div className="w-full rounded-2xl overflow-hidden">
+                      {lp.hero_video_url ? (
+                        (lp.hero_video_url.includes('youtube.com') || lp.hero_video_url.includes('youtu.be') || lp.hero_video_url.includes('vimeo.com')) ? (
+                          <div className="w-full aspect-video relative group">
+                            <ReactPlayer 
+                              url={lp.hero_video_url} 
+                              width="100%" 
+                              height="100%" 
+                              playing={true}
+                              controls={false}
+                              light={item.thumbnail_url || item.capa_url || true}
+                              playIcon={
+                                <div className="absolute inset-0 cursor-pointer flex items-center justify-center z-10 group">
+                                  <div className="absolute inset-0 bg-slate-900/40 group-hover:bg-slate-900/20 transition-colors" />
+                                  <div className="relative z-20 w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white shadow-2xl scale-110 group-hover:scale-125 transition-transform duration-500">
+                                    <Play className="w-8 h-8 fill-current" />
+                                  </div>
+                                </div>
+                              }
+                              config={{
+                                youtube: {
+                                  playerVars: { modestbranding: 1, rel: 0, iv_load_policy: 3, showinfo: 0, cc_load_policy: 0, controls: 0, fs: 0 }
+                                }
+                              }}
+                            />
+                          </div>
+                        ) : (
+                          <img src={lp.hero_video_url} alt="Apresentação" className="w-full h-auto max-h-[320px] object-cover rounded-2xl" />
+                        )
+                      ) : (
+                        <img 
+                          src={item.capa_url || item.thumbnail_url || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070'} 
+                          alt="Capa"
+                          className="w-full h-auto max-h-[360px] object-cover rounded-2xl"
+                        />
+                      )}
+                    </div>
+                  </div>
                 </div>
-                
-                <div className="hero-no-mobile-transform" style={{ transform: (lp.hero_title_offset_x || lp.hero_title_offset_y) ? `translate(${lp.hero_title_offset_x || 0}px, ${lp.hero_title_offset_y || 0}px)` : undefined }}>
+
+                {/* 2. Título (Order 2 on mobile) */}
+                <div className="order-2 lg:order-none hero-no-mobile-transform" style={{ transform: (lp.hero_title_offset_x || lp.hero_title_offset_y) ? `translate(${lp.hero_title_offset_x || 0}px, ${lp.hero_title_offset_y || 0}px)` : undefined }}>
                   {(lp.hero_title && (lp.hero_title.startsWith('data:image') || lp.hero_title.startsWith('http')) && !lp.hero_title.includes(' ')) ? (
                     <img src={lp.hero_title} alt={item.nome || "Título"} className="object-contain w-auto mb-4 max-w-full" style={{ height: lp.hero_title_image_height ? `${lp.hero_title_image_height}px` : '120px' }} />
                   ) : (
@@ -1922,13 +1970,8 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                   )}
                 </div>
 
-                <p className="text-base sm:text-xl text-slate-700 leading-relaxed max-w-xl font-medium drop-shadow-sm typo-subtitle hero-no-mobile-transform" style={{ transform: (lp.hero_subtitle_offset_x || lp.hero_subtitle_offset_y) ? `translate(${lp.hero_subtitle_offset_x || 0}px, ${lp.hero_subtitle_offset_y || 0}px)` : undefined }}>
-                  {lp.hero_subtitle || item.descricao}
-                </p>
-                
-                <CountdownTimer timeLeft={timeLeft} title={lp.countdown_title} layout={layout} />
-                
-                <div className="flex flex-col sm:flex-row items-center gap-4 pt-4 w-full hero-no-mobile-transform" style={{ transform: (lp.hero_cta_offset_x || lp.hero_cta_offset_y) ? `translate(${lp.hero_cta_offset_x || 0}px, ${lp.hero_cta_offset_y || 0}px)` : undefined, justifyContent: !isMobileScreen ? (lp.hero_align_h === 'center' ? 'center' : lp.hero_align_h === 'right' ? 'flex-end' : 'flex-start') : 'flex-start' }}>
+                {/* 3. Botão de Ação / CTA (Order 3 on mobile - logo abaixo do título) */}
+                <div className="order-3 lg:order-none flex flex-col sm:flex-row items-center gap-4 pt-2 sm:pt-4 w-full hero-no-mobile-transform" style={{ transform: (lp.hero_cta_offset_x || lp.hero_cta_offset_y) ? `translate(${lp.hero_cta_offset_x || 0}px, ${lp.hero_cta_offset_y || 0}px)` : undefined, justifyContent: !isMobileScreen ? (lp.hero_align_h === 'center' ? 'center' : lp.hero_align_h === 'right' ? 'flex-end' : 'flex-start') : 'flex-start' }}>
                   <div className="flex flex-col items-center gap-2 w-full sm:w-auto">
                     <button
                       onClick={handleEnrollClick}
@@ -1954,59 +1997,20 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                     </div>
                   )}
                 </div>
-              </div>
-            </div>
 
-            {/* Mobile Only Image/Video */}
-            <div className="lg:hidden relative animate-in fade-in zoom-in-95 duration-1000 mt-8">
-              <div className="aspect-video bg-slate-900 rounded-3xl overflow-hidden shadow-2xl border border-slate-800 relative group">
-                {lp.hero_video_url ? (
-                  (lp.hero_video_url.includes('youtube.com') || lp.hero_video_url.includes('youtu.be') || lp.hero_video_url.includes('vimeo.com')) ? (
-                    <div className="w-full h-full relative">
-                      <ReactPlayer 
-                        url={lp.hero_video_url} 
-                        width="100%" 
-                        height="100%" 
-                        playing={true}
-                        controls={false}
-                        light={item.thumbnail_url || item.capa_url || true}
-                        playIcon={
-                          <div className="absolute inset-0 cursor-pointer flex items-center justify-center z-10 group">
-                            <div className="absolute inset-0 bg-slate-900/40 group-hover:bg-slate-900/20 transition-colors" />
-                            <div className="relative z-20 w-24 h-24 bg-primary rounded-full flex items-center justify-center text-white shadow-2xl scale-110 group-hover:scale-125 transition-transform duration-500">
-                              <Play className="w-10 h-10 fill-current" />
-                            </div>
-                          </div>
-                        }
-                        config={{
-                          youtube: {
-                            playerVars: {
-                              modestbranding: 1,
-                              rel: 0,
-                              iv_load_policy: 3,
-                              showinfo: 0,
-                              cc_load_policy: 0,
-                              controls: 0,
-                              fs: 0,
-                            }
-                          }
-                        }}
-                      />
-                    </div>
-                  ) : (
-                    <img src={lp.hero_video_url} alt="Apresentação" className="w-full h-full object-cover" />
-                  )
-                ) : (
-                  <img 
-                    src={item.capa_url || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070'} 
-                    alt="Capa"
-                    className="w-full h-full object-cover opacity-90"
-                  />
-                )}
+                {/* 4. Subtítulo (Order 4 on mobile) */}
+                <p className="order-4 lg:order-none text-base sm:text-xl text-slate-700 leading-relaxed max-w-xl font-medium drop-shadow-sm typo-subtitle hero-no-mobile-transform" style={{ transform: (lp.hero_subtitle_offset_x || lp.hero_subtitle_offset_y) ? `translate(${lp.hero_subtitle_offset_x || 0}px, ${lp.hero_subtitle_offset_y || 0}px)` : undefined }}>
+                  {lp.hero_subtitle || item.descricao}
+                </p>
+                
+                {/* 5. CountdownTimer (Order 5 on mobile) */}
+                <div className="order-5 lg:order-none w-full">
+                  <CountdownTimer timeLeft={timeLeft} title={lp.countdown_title} layout={layout} />
+                </div>
               </div>
             </div>
           </div>
-      </section>
+        </section>
 
       {/* Info bar */}
       <section className="bg-slate-50 border-y border-slate-100" style={getSectionStyle('info')}>
