@@ -73,22 +73,22 @@ const Nav = ({ layout, item, lp, onEnrollClick }: NavProps) => {
       }`}
       style={{ backgroundColor: isScrolled && lp.nav_bg_color ? lp.nav_bg_color : undefined }}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
-        <div className="flex items-center gap-3 shrink-0">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 h-16 sm:h-20 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 sm:gap-3 shrink min-w-0">
           {(lp.logo_url || item.organizacoes?.logo_url) ? (
             <img 
               src={lp.logo_url || item.organizacoes?.logo_url} 
               alt="Logo" 
-              className="object-contain shrink-0" 
+              className="object-contain shrink min-w-0 max-w-[120px] sm:max-w-[220px] max-h-[36px] sm:max-h-[48px]" 
               style={{ height: lp.nav_logo_height ? `${lp.nav_logo_height}px` : '40px' }}
             />
           ) : (
             <div 
               className="shrink-0 bg-primary rounded-xl flex items-center justify-center text-white font-bold tracking-tighter uppercase"
               style={{ 
-                width: lp.nav_logo_height ? `${lp.nav_logo_height}px` : '40px',
-                height: lp.nav_logo_height ? `${lp.nav_logo_height}px` : '40px',
-                fontSize: lp.nav_logo_height ? `${Math.max(16, lp.nav_logo_height / 2)}px` : '18px'
+                width: '36px',
+                height: '36px',
+                fontSize: '16px'
               }}
             >
               {item.organizacoes?.nome?.[0] || 'S'}
@@ -96,7 +96,7 @@ const Nav = ({ layout, item, lp, onEnrollClick }: NavProps) => {
           )}
         </div>
 
-        <div className="flex items-center gap-3 sm:gap-6">
+        <div className="flex items-center gap-2 sm:gap-6 shrink-0">
           <div className="hidden lg:flex items-center gap-8">
             <a href="#sobre" className={`typo-link font-bold text-sm hover:text-primary transition-colors ${layout === 'escuro' ? 'text-slate-400' : 'text-slate-500'}`}>Sobre</a>
             <a href="#instrutor" className={`typo-link font-bold text-sm hover:text-primary transition-colors ${layout === 'escuro' ? 'text-slate-400' : 'text-slate-500'}`}>Instrutor</a>
@@ -104,13 +104,13 @@ const Nav = ({ layout, item, lp, onEnrollClick }: NavProps) => {
           {/* #9 Smart redirect: if logged in go to dashboard, else to login */}
           <a
             href={loggedIn && orgSlug ? `/projeto/${orgSlug}` : '/login'}
-            className={`typo-link font-bold text-sm sm:text-base transition-all shrink-0 ${layout === 'escuro' ? 'text-white hover:text-primary' : 'text-slate-900 hover:text-primary'}`}
+            className={`typo-link font-bold text-xs sm:text-base transition-all shrink-0 ${layout === 'escuro' ? 'text-white hover:text-primary' : 'text-slate-900 hover:text-primary'}`}
           >
             {loggedIn ? 'Minha Área' : 'Entrar'}
           </a>
           <button
             onClick={onEnrollClick}
-            className="typo-btn px-4 sm:px-6 py-2 sm:py-2.5 bg-primary text-white rounded-full font-bold text-sm hover:opacity-90 shadow-lg shadow-primary/20 active:scale-95 transition-all whitespace-nowrap"
+            className="typo-btn px-3 sm:px-6 py-1.5 sm:py-2.5 bg-primary text-white rounded-full font-bold text-xs sm:text-sm hover:opacity-90 shadow-lg shadow-primary/20 active:scale-95 transition-all whitespace-nowrap"
           >
             {lp.cta_text || 'Inscrever-se'}
           </button>
@@ -672,6 +672,14 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
     }
     return style;
   };
+
+  const [isMobileScreen, setIsMobileScreen] = useState(false);
+  useEffect(() => {
+    const checkMobile = () => setIsMobileScreen(window.innerWidth < 1024);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => {
     if (item?.nome) {
@@ -1299,45 +1307,45 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             )}
           </div>
 
-          <div className="max-w-7xl mx-auto px-6 relative z-10 w-full min-h-[90vh] flex flex-col py-32">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 w-full min-h-0 lg:min-h-[90vh] flex flex-col py-16 lg:py-32">
             <div className={`w-full max-w-xl flex flex-col ${
               lp.hero_align_h === 'center' ? 'mx-auto text-center items-center' :
-              lp.hero_align_h === 'right' ? 'ml-auto text-right items-end' :
-              lp.hero_align_h === 'left' ? 'mr-auto text-left items-start' : 'lg:ml-auto text-left items-start' // Default to right for previous behavior
+              lp.hero_align_h === 'right' ? 'lg:ml-auto text-left lg:text-right items-start lg:items-end' :
+              lp.hero_align_h === 'left' ? 'mr-auto text-left items-start' : 'lg:ml-auto text-left items-start'
             } ${
               lp.hero_align_v === 'top' ? 'mb-auto' :
               lp.hero_align_v === 'bottom' ? 'mt-auto' :
               'my-auto'
             }`}>
               {/* Text Content */}
-              <div className="space-y-10 animate-in fade-in slide-in-from-bottom-12 duration-1000 flex flex-col w-full" style={{ alignItems: lp.hero_align_h === 'center' ? 'center' : lp.hero_align_h === 'right' ? 'flex-end' : 'flex-start' }}>
+              <div className="space-y-6 lg:space-y-10 animate-in fade-in slide-in-from-bottom-12 duration-1000 flex flex-col w-full" style={{ alignItems: !isMobileScreen ? (lp.hero_align_h === 'center' ? 'center' : lp.hero_align_h === 'right' ? 'flex-end' : 'flex-start') : 'flex-start' }}>
 
-                <div style={{ transform: `translate(${lp.hero_title_offset_x || 0}px, ${lp.hero_title_offset_y || 0}px)` }}>
+                <div style={{ transform: !isMobileScreen && (lp.hero_title_offset_x || lp.hero_title_offset_y) ? `translate(${lp.hero_title_offset_x || 0}px, ${lp.hero_title_offset_y || 0}px)` : undefined }}>
                   {(lp.hero_title && (lp.hero_title.startsWith('data:image') || lp.hero_title.startsWith('http')) && !lp.hero_title.includes(' ')) ? (
                     <img src={lp.hero_title} alt={item.nome || "Título"} className="object-contain w-auto mb-4 max-w-full" style={{ height: lp.hero_title_image_height ? `${lp.hero_title_image_height}px` : '120px' }} />
                   ) : (
-                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight typo-title">
+                    <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight typo-title">
                       {lp.hero_title || item.nome}
                     </h1>
                   )}
                 </div>
                 
-                <p className="text-xl text-slate-700 leading-relaxed max-w-xl typo-subtitle" style={{ transform: `translate(${lp.hero_subtitle_offset_x || 0}px, ${lp.hero_subtitle_offset_y || 0}px)` }}>
+                <p className="text-base sm:text-xl text-slate-200 lg:text-slate-700 leading-relaxed max-w-xl typo-subtitle" style={{ transform: !isMobileScreen && (lp.hero_subtitle_offset_x || lp.hero_subtitle_offset_y) ? `translate(${lp.hero_subtitle_offset_x || 0}px, ${lp.hero_subtitle_offset_y || 0}px)` : undefined }}>
                   {lp.hero_subtitle || item.descricao}
                 </p>
 
                 <CountdownTimer timeLeft={timeLeft} title={lp.countdown_title} layout={layout} />
 
-                <div className="flex flex-col sm:flex-row items-center gap-8 pt-4 w-full" style={{ transform: `translate(${lp.hero_cta_offset_x || 0}px, ${lp.hero_cta_offset_y || 0}px)`, justifyContent: lp.hero_align_h === 'center' ? 'center' : lp.hero_align_h === 'right' ? 'flex-end' : 'flex-start' }}>
+                <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8 pt-2 sm:pt-4 w-full" style={{ transform: !isMobileScreen && (lp.hero_cta_offset_x || lp.hero_cta_offset_y) ? `translate(${lp.hero_cta_offset_x || 0}px, ${lp.hero_cta_offset_y || 0}px)` : undefined, justifyContent: !isMobileScreen ? (lp.hero_align_h === 'center' ? 'center' : lp.hero_align_h === 'right' ? 'flex-end' : 'flex-start') : 'flex-start' }}>
                   <div className="flex flex-col items-center gap-2 w-full sm:w-auto">
                     <button 
                       onClick={handleEnrollClick}
-                      className="typo-btn w-full sm:w-auto px-12 py-6 bg-primary text-white rounded-3xl font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(var(--primary-rgb),0.3)] flex items-center justify-center gap-3"
+                      className="typo-btn w-full sm:w-auto px-8 sm:px-12 py-4 sm:py-6 bg-primary text-white rounded-2xl sm:rounded-3xl font-black text-lg sm:text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(var(--primary-rgb),0.3)] flex items-center justify-center gap-3"
                     >
-                      {lp.cta_text || 'COMPRAR AGORA'} <ArrowRight className="w-6 h-6" />
+                      {lp.cta_text || 'COMPRAR AGORA'} <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6" />
                     </button>
                     {lp.instructor?.name && (
-                      <span className={`text-sm ${layout === 'escuro' ? 'text-slate-400' : 'text-slate-500'} typo-text`}>
+                      <span className={`text-sm ${layout === 'escuro' ? 'text-slate-400' : 'text-slate-300 lg:text-slate-500'} typo-text`}>
                         By {lp.instructor.name}
                       </span>
                     )}
@@ -1891,51 +1899,66 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-bold border border-primary/20">
                 <Award className="w-4 h-4" /> Certificação Inclusa
               </div>
-              
-              <div style={{ transform: `translate(${lp.hero_title_offset_x || 0}px, ${lp.hero_title_offset_y || 0}px)` }}>
-                {(lp.hero_title && (lp.hero_title.startsWith('data:image') || lp.hero_title.startsWith('http')) && !lp.hero_title.includes(' ')) ? (
-                  <img src={lp.hero_title} alt={item.nome || "Título"} className="object-contain w-auto mb-4 max-w-full" style={{ height: lp.hero_title_image_height ? `${lp.hero_title_image_height}px` : '120px' }} />
-                ) : (
-                  <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 leading-[1.15] tracking-tight drop-shadow-sm typo-title">
-                    {lp.hero_title || item.nome}
-                  </h1>
-                )}
-              </div>
-
-              <p className="text-xl text-slate-700 leading-relaxed max-w-xl font-medium drop-shadow-sm typo-subtitle" style={{ transform: `translate(${lp.hero_subtitle_offset_x || 0}px, ${lp.hero_subtitle_offset_y || 0}px)` }}>
-                {lp.hero_subtitle || item.descricao}
-              </p>
-              
-              <CountdownTimer timeLeft={timeLeft} title={lp.countdown_title} layout={layout} />
-              
-              <div className="flex flex-col sm:flex-row items-center gap-4 pt-4 w-full" style={{ transform: `translate(${lp.hero_cta_offset_x || 0}px, ${lp.hero_cta_offset_y || 0}px)`, justifyContent: lp.hero_align_h === 'center' ? 'center' : lp.hero_align_h === 'right' ? 'flex-end' : 'flex-start' }}>
-                <div className="flex flex-col items-center gap-2 w-full sm:w-auto">
-                  <button
-                    onClick={handleEnrollClick}
-                    className="typo-btn w-full sm:w-auto px-10 py-5 bg-primary text-white rounded-2xl font-bold text-lg hover:opacity-90 shadow-xl shadow-primary/20 active:scale-95 transition-all flex items-center justify-center gap-3"
-                  >
-                    {lp.cta_text || 'Quero Garantir Minha Vaga'} <ArrowRight className="w-5 h-5" />
-                  </button>
-                  {lp.instructor?.name && (
-                    <span className={`text-sm ${layout === 'escuro' ? 'text-slate-400' : 'text-slate-500'} typo-text`}>
-                      By {lp.instructor.name}
-                    </span>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 w-full min-h-0 lg:min-h-[90vh] flex flex-col py-16 lg:py-32">
+            <div className={`w-full max-w-xl flex flex-col ${
+              lp.hero_align_h === 'center' ? 'mx-auto text-center items-center' :
+              lp.hero_align_h === 'right' ? 'lg:ml-auto text-left lg:text-right items-start lg:items-end' :
+              lp.hero_align_h === 'left' ? 'mr-auto text-left items-start' : 'lg:ml-auto text-left items-start'
+            } ${
+              lp.hero_align_v === 'top' ? 'mb-auto' :
+              lp.hero_align_v === 'bottom' ? 'mt-auto' :
+              'my-auto'
+            }`}>
+              {/* Text Content */}
+              <div className="space-y-6 lg:space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700 flex flex-col w-full" style={{ alignItems: !isMobileScreen ? (lp.hero_align_h === 'center' ? 'center' : lp.hero_align_h === 'right' ? 'flex-end' : 'flex-start') : 'flex-start' }}>
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-bold border border-primary/20">
+                  <Award className="w-4 h-4" /> Certificação Inclusa
+                </div>
+                
+                <div style={{ transform: !isMobileScreen && (lp.hero_title_offset_x || lp.hero_title_offset_y) ? `translate(${lp.hero_title_offset_x || 0}px, ${lp.hero_title_offset_y || 0}px)` : undefined }}>
+                  {(lp.hero_title && (lp.hero_title.startsWith('data:image') || lp.hero_title.startsWith('http')) && !lp.hero_title.includes(' ')) ? (
+                    <img src={lp.hero_title} alt={item.nome || "Título"} className="object-contain w-auto mb-4 max-w-full" style={{ height: lp.hero_title_image_height ? `${lp.hero_title_image_height}px` : '120px' }} />
+                  ) : (
+                    <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 leading-[1.15] tracking-tight drop-shadow-sm typo-title">
+                      {lp.hero_title || item.nome}
+                    </h1>
                   )}
                 </div>
-                {/* Real participant count */}
-                {(participantCount !== null ? participantCount : 0) > 0 && (
-                  <div className="flex items-center gap-2 text-slate-600 font-bold bg-white/50 px-3 py-1.5 rounded-full backdrop-blur-md">
-                    <div className="flex -space-x-2">
-                      {[1,2,3,4].map(i => (
-                        <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-slate-200 shadow-sm"></div>
-                      ))}
-                    </div>
-                    <span className="text-sm">+{participantCount} aluno{participantCount !== 1 ? 's' : ''} inscrito{participantCount !== 1 ? 's' : ''}</span>
+
+                <p className="text-base sm:text-xl text-slate-700 leading-relaxed max-w-xl font-medium drop-shadow-sm typo-subtitle" style={{ transform: !isMobileScreen && (lp.hero_subtitle_offset_x || lp.hero_subtitle_offset_y) ? `translate(${lp.hero_subtitle_offset_x || 0}px, ${lp.hero_subtitle_offset_y || 0}px)` : undefined }}>
+                  {lp.hero_subtitle || item.descricao}
+                </p>
+                
+                <CountdownTimer timeLeft={timeLeft} title={lp.countdown_title} layout={layout} />
+                
+                <div className="flex flex-col sm:flex-row items-center gap-4 pt-4 w-full" style={{ transform: !isMobileScreen && (lp.hero_cta_offset_x || lp.hero_cta_offset_y) ? `translate(${lp.hero_cta_offset_x || 0}px, ${lp.hero_cta_offset_y || 0}px)` : undefined, justifyContent: !isMobileScreen ? (lp.hero_align_h === 'center' ? 'center' : lp.hero_align_h === 'right' ? 'flex-end' : 'flex-start') : 'flex-start' }}>
+                  <div className="flex flex-col items-center gap-2 w-full sm:w-auto">
+                    <button
+                      onClick={handleEnrollClick}
+                      className="typo-btn w-full sm:w-auto px-8 sm:px-10 py-4 sm:py-5 bg-primary text-white rounded-2xl font-bold text-base sm:text-lg hover:opacity-90 shadow-xl shadow-primary/20 active:scale-95 transition-all flex items-center justify-center gap-3"
+                    >
+                      {lp.cta_text || 'Quero Garantir Minha Vaga'} <ArrowRight className="w-5 h-5" />
+                    </button>
+                    {lp.instructor?.name && (
+                      <span className={`text-sm ${layout === 'escuro' ? 'text-slate-400' : 'text-slate-500'} typo-text`}>
+                        By {lp.instructor.name}
+                      </span>
+                    )}
                   </div>
-                )}
+                  {/* Real participant count */}
+                  {(participantCount !== null ? participantCount : 0) > 0 && (
+                    <div className="flex items-center gap-2 text-slate-600 font-bold bg-white/50 px-3 py-1.5 rounded-full backdrop-blur-md">
+                      <div className="flex -space-x-2">
+                        {[1,2,3,4].map(i => (
+                          <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-slate-200 shadow-sm"></div>
+                        ))}
+                      </div>
+                      <span className="text-sm">+{participantCount} aluno{participantCount !== 1 ? 's' : ''} inscrito{participantCount !== 1 ? 's' : ''}</span>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
 
             {/* Mobile Only Image/Video */}
             <div className="lg:hidden relative animate-in fade-in zoom-in-95 duration-1000 mt-8">
