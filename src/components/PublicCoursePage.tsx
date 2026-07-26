@@ -1209,6 +1209,12 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
           .selection\:text-white *::selection { color: white; }
           .selection\:text-white ::selection { color: white; }
 
+          @media (max-width: 1023px) {
+            .hero-no-mobile-transform {
+              transform: none !important;
+            }
+          }
+
           /* Typography overrides */
           ${lp.font_title_color ? `.typo-title { color: ${lp.font_title_color} !important; }` : ''}
           ${lp.font_title_weight ? `.typo-title { font-weight: ${lp.font_title_weight} !important; }` : ''}
@@ -1320,7 +1326,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
               {/* Text Content */}
               <div className="space-y-6 lg:space-y-10 animate-in fade-in slide-in-from-bottom-12 duration-1000 flex flex-col w-full" style={{ alignItems: !isMobileScreen ? (lp.hero_align_h === 'center' ? 'center' : lp.hero_align_h === 'right' ? 'flex-end' : 'flex-start') : 'flex-start' }}>
 
-                <div style={{ transform: !isMobileScreen && (lp.hero_title_offset_x || lp.hero_title_offset_y) ? `translate(${lp.hero_title_offset_x || 0}px, ${lp.hero_title_offset_y || 0}px)` : undefined }}>
+                <div className="hero-no-mobile-transform" style={{ transform: (lp.hero_title_offset_x || lp.hero_title_offset_y) ? `translate(${lp.hero_title_offset_x || 0}px, ${lp.hero_title_offset_y || 0}px)` : undefined }}>
                   {(lp.hero_title && (lp.hero_title.startsWith('data:image') || lp.hero_title.startsWith('http')) && !lp.hero_title.includes(' ')) ? (
                     <img src={lp.hero_title} alt={item.nome || "Título"} className="object-contain w-auto mb-4 max-w-full" style={{ height: lp.hero_title_image_height ? `${lp.hero_title_image_height}px` : '120px' }} />
                   ) : (
@@ -1330,13 +1336,13 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                   )}
                 </div>
                 
-                <p className="text-base sm:text-xl text-slate-200 lg:text-slate-700 leading-relaxed max-w-xl typo-subtitle" style={{ transform: !isMobileScreen && (lp.hero_subtitle_offset_x || lp.hero_subtitle_offset_y) ? `translate(${lp.hero_subtitle_offset_x || 0}px, ${lp.hero_subtitle_offset_y || 0}px)` : undefined }}>
+                <p className="text-base sm:text-xl text-slate-200 lg:text-slate-700 leading-relaxed max-w-xl typo-subtitle hero-no-mobile-transform" style={{ transform: (lp.hero_subtitle_offset_x || lp.hero_subtitle_offset_y) ? `translate(${lp.hero_subtitle_offset_x || 0}px, ${lp.hero_subtitle_offset_y || 0}px)` : undefined }}>
                   {lp.hero_subtitle || item.descricao}
                 </p>
 
                 <CountdownTimer timeLeft={timeLeft} title={lp.countdown_title} layout={layout} />
 
-                <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8 pt-2 sm:pt-4 w-full" style={{ transform: !isMobileScreen && (lp.hero_cta_offset_x || lp.hero_cta_offset_y) ? `translate(${lp.hero_cta_offset_x || 0}px, ${lp.hero_cta_offset_y || 0}px)` : undefined, justifyContent: !isMobileScreen ? (lp.hero_align_h === 'center' ? 'center' : lp.hero_align_h === 'right' ? 'flex-end' : 'flex-start') : 'flex-start' }}>
+                <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8 pt-2 sm:pt-4 w-full hero-no-mobile-transform" style={{ transform: (lp.hero_cta_offset_x || lp.hero_cta_offset_y) ? `translate(${lp.hero_cta_offset_x || 0}px, ${lp.hero_cta_offset_y || 0}px)` : undefined, justifyContent: !isMobileScreen ? (lp.hero_align_h === 'center' ? 'center' : lp.hero_align_h === 'right' ? 'flex-end' : 'flex-start') : 'flex-start' }}>
                   <div className="flex flex-col items-center gap-2 w-full sm:w-auto">
                     <button 
                       onClick={handleEnrollClick}
@@ -1798,6 +1804,12 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
         .selection\:bg-primary\/20 ::selection { background-color: rgba(var(--primary-rgb), 0.2); }
         .selection\:text-primary *::selection { color: var(--primary); }
         .selection\:text-primary ::selection { color: var(--primary); }
+
+        @media (max-width: 1023px) {
+          .hero-no-mobile-transform {
+            transform: none !important;
+          }
+        }
       ` }} />
       
       <Nav 
@@ -1900,7 +1912,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                   <Award className="w-4 h-4" /> Certificação Inclusa
                 </div>
                 
-                <div style={{ transform: !isMobileScreen && (lp.hero_title_offset_x || lp.hero_title_offset_y) ? `translate(${lp.hero_title_offset_x || 0}px, ${lp.hero_title_offset_y || 0}px)` : undefined }}>
+                <div className="hero-no-mobile-transform" style={{ transform: (lp.hero_title_offset_x || lp.hero_title_offset_y) ? `translate(${lp.hero_title_offset_x || 0}px, ${lp.hero_title_offset_y || 0}px)` : undefined }}>
                   {(lp.hero_title && (lp.hero_title.startsWith('data:image') || lp.hero_title.startsWith('http')) && !lp.hero_title.includes(' ')) ? (
                     <img src={lp.hero_title} alt={item.nome || "Título"} className="object-contain w-auto mb-4 max-w-full" style={{ height: lp.hero_title_image_height ? `${lp.hero_title_image_height}px` : '120px' }} />
                   ) : (
@@ -1910,13 +1922,13 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                   )}
                 </div>
 
-                <p className="text-base sm:text-xl text-slate-700 leading-relaxed max-w-xl font-medium drop-shadow-sm typo-subtitle" style={{ transform: !isMobileScreen && (lp.hero_subtitle_offset_x || lp.hero_subtitle_offset_y) ? `translate(${lp.hero_subtitle_offset_x || 0}px, ${lp.hero_subtitle_offset_y || 0}px)` : undefined }}>
+                <p className="text-base sm:text-xl text-slate-700 leading-relaxed max-w-xl font-medium drop-shadow-sm typo-subtitle hero-no-mobile-transform" style={{ transform: (lp.hero_subtitle_offset_x || lp.hero_subtitle_offset_y) ? `translate(${lp.hero_subtitle_offset_x || 0}px, ${lp.hero_subtitle_offset_y || 0}px)` : undefined }}>
                   {lp.hero_subtitle || item.descricao}
                 </p>
                 
                 <CountdownTimer timeLeft={timeLeft} title={lp.countdown_title} layout={layout} />
                 
-                <div className="flex flex-col sm:flex-row items-center gap-4 pt-4 w-full" style={{ transform: !isMobileScreen && (lp.hero_cta_offset_x || lp.hero_cta_offset_y) ? `translate(${lp.hero_cta_offset_x || 0}px, ${lp.hero_cta_offset_y || 0}px)` : undefined, justifyContent: !isMobileScreen ? (lp.hero_align_h === 'center' ? 'center' : lp.hero_align_h === 'right' ? 'flex-end' : 'flex-start') : 'flex-start' }}>
+                <div className="flex flex-col sm:flex-row items-center gap-4 pt-4 w-full hero-no-mobile-transform" style={{ transform: (lp.hero_cta_offset_x || lp.hero_cta_offset_y) ? `translate(${lp.hero_cta_offset_x || 0}px, ${lp.hero_cta_offset_y || 0}px)` : undefined, justifyContent: !isMobileScreen ? (lp.hero_align_h === 'center' ? 'center' : lp.hero_align_h === 'right' ? 'flex-end' : 'flex-start') : 'flex-start' }}>
                   <div className="flex flex-col items-center gap-2 w-full sm:w-auto">
                     <button
                       onClick={handleEnrollClick}
