@@ -257,7 +257,10 @@ function MissoesPreview({ template, missoes, cursoId, loggedUser, showToast }: {
     load();
   }, [template?.id, userId, cursoId, missoes]);
 
+  const isAdmin = ['gestor', 'especialista', 'super_admin', 'curador', 'design'].includes(loggedUser?.role);
+
   const isUnlocked = (idx: number): boolean => {
+    if (isAdmin) return true; // Admins veem todas as missões desbloqueadas
     if (!template?.bloqueio_estrito) return true;
     if (idx === 0) return true;
     const prevMissao = missoes[idx - 1];
