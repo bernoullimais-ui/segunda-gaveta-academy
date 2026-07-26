@@ -15,7 +15,7 @@ router.get(['/public/curso/:slug', '/public/trilha/:slug'], async (req, res) => 
     const supabase = getSupabase();
     const table = isTrilha ? 'trilhas' : 'cursos';
     
-    const selectFields = isTrilha ? 'id, nome, descricao, thumbnail_url' : 'id, nome, descricao, thumbnail_url';
+    const selectFields = isTrilha ? 'id, nome, descricao, thumbnail_url, capa_url' : 'id, nome, descricao, thumbnail_url, capa_url, professor_foto_url';
     const { data: curso, error: cursoErr } = await supabase
       .from(table)
       .select(selectFields)
@@ -25,7 +25,7 @@ router.get(['/public/curso/:slug', '/public/trilha/:slug'], async (req, res) => 
     let landingPage: any = null;
     if (curso) {
       const lpColumn = isTrilha ? 'trilha_id' : 'curso_id';
-      const { data: lp } = await supabase.from('landing_pages').select('hero_video_url, about, hero_title, hero_subtitle').eq(lpColumn, curso.id).maybeSingle();
+      const { data: lp } = await supabase.from('landing_pages').select('hero_video_url, about, hero_title, hero_subtitle, instructor').eq(lpColumn, curso.id).maybeSingle();
       if (lp) landingPage = lp;
     }
 
@@ -51,7 +51,7 @@ router.get(['/public/curso/:slug', '/public/trilha/:slug'], async (req, res) => 
     }
 
     if (curso) {
-      let imageUrl = curso.thumbnail_url || '';
+      let imageUrl = curso.capa_url || curso.thumbnail_url || landingPage?.instructor?.avatar_url || (curso as any).professor_foto_url || '';
       if (!imageUrl && landingPage?.hero_video_url && !landingPage.hero_video_url.includes('youtube') && !landingPage.hero_video_url.includes('vimeo')) {
         imageUrl = landingPage.hero_video_url;
       }

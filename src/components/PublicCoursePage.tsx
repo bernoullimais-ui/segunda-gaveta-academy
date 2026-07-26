@@ -723,7 +723,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
     if (!item) return;
     const title = item.nome || lp.hero_title || 'Curso Online';
     const description = lp.hero_subtitle || item.descricao || '';
-    const image = item.thumbnail_url || item.capa_url || '';
+    const image = item.capa_url || item.thumbnail_url || lp.instructor?.avatar_url || item.professor_foto_url || item.organizacoes?.logo_url || '';
     document.title = item.nome || 'Curso Online';
     const setMeta = (property: string, content: string) => {
       let el = document.querySelector(`meta[property='${property}']`) as HTMLMetaElement | null;
