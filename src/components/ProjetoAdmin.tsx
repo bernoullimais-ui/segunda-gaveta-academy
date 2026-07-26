@@ -220,8 +220,167 @@ function CampoEditorModal({
   );
 }
 
+// ── MissoesPreview: Modo de teste das missões como se fosse um aluno ────────
+function MissoesPreview({ template, missoes, cursoId, loggedUser, showToast }: {
+  template: ProjetoTemplate | null;
+  missoes: ProjetoMissao[];
+  cursoId: string;
+  loggedUser: any;
+  showToast: (text: string, type?: 'success' | 'error' | 'info') => void;
+}) {
+  const [respostas, setRespostas] = useState<Record<string, ProjetoResposta | null>>({});
+  const [drafts, setDrafts] = useState<Record<string, Record<string, any>>>({});
+  const [saving, setSaving] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const userId = loggedUser?.id;
+
+  useEffect(() => {
+    if (!template?.id || !userId) { setIsLoading(false); return; }
+    async function load() {
+      setIsLoading(true);
+      const { data } = await supabase
+        .from('projeto_conclusao_respostas')
+        .select('*')
+        .eq('curso_id', cursoId)
+        .eq('usuario_id', userId);
+      const map: Record<string, ProjetoResposta | null> = {};
+      missoes.forEach(m => { map[m.id] = null; });
+      (data || []).forEach((r: ProjetoResposta) => { if (r.missao_id) map[r.missao_id] = r; });
+      setRespostas(map);
+      const draftMap: Record<string, Record<string, any>> = {};
+      (data || []).forEach((r: ProjetoResposta) => { if (r.missao_id) draftMap[r.missao_id] = r.respostas_json || {}; });
+      setDrafts(draftMap);
+      setIsLoading(false);
+    }
+    load();
+  }, [template?.id, userId, cursoId, missoes]);
+
+  const isUnlocked = (idx: number): boolean => {
+    if (!template?.bloqueio_estrito) return true;
+    if (idx === 0) return true;
+    const prevMissao = missoes[idx - 1];
+    const prevResp = respostas[prevMissao?.id];
+    return !!prevResp && (prevResp.status === 'submetido' || prevResp.status === 'com_feedback');
+  };
+
+  const handleSave = async (missao: ProjetoMissao, submit: boolean) => {
+    if (!userId || !template?.id) return;
+    setSaving(missao.id);
+    try {
+      const respJson = drafts[missao.id] || {};
+      const existing = respostas[missao.id];
+      const status = submit ? 'submetido' : 'rascunho';
+
+      if (existing?.id) {
+        await supabase.from('projeto_conclusao_respostas').update({
+          respostas_json: respJson,
+          status,
+          updated_at: new Date().toISOString()
+        }).eq('id', existing.id);
+        setRespostas(prev => ({ ...prev, [missao.id]: { ...existing, respostas_json: respJson, status } }));
+      } else {
+        const { data } = await supabase.from('projeto_conclusao_respostas').insert({
+          template_id: template.id,
+          missao_id: missao.id,
+          curso_id: cursoId,
+          usuario_id: userId,
+          respostas_json: respJson,
+          status,
+        }).select().single();
+        if (data) setRespostas(prev => ({ ...prev, [missao.id]: data }));
+      }
+      showToast(submit ? 'Missão submetida!' : 'Rascunho salvo!', 'success');
+    } catch (e: any) {
+      showToast('Erro ao salvar: ' + e.message, 'error');
+    } finally {
+      setSaving(null);
+    }
+  };
+
+  if (!template) return <div className="text-center py-12 text-slate-400 text-sm">Nenhum projeto configurado.</div>;
+
+  if (isLoading) return <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 text-blue-500 animate-spin" /></div>;
+
+  return (
+    <div className="space-y-5">
+      <div className="bg-amber-50 border border-amber-200 rounded-xl px-5 py-4 flex items-start gap-3">
+        <AlertCircle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+        <div>
+          <p className="font-bold text-amber-800 text-sm">Modo de Teste — Visão do Aluno</p>
+          <p className="text-amber-700 text-xs mt-0.5">Você está preenchendo as missões com seu próprio usuário. As respostas são reais e aparecerão na aba "Respostas dos Alunos".</p>
+        </div>
+      </div>
+
+      {missoes.map((missao, idx) => {
+        const unlocked = isUnlocked(idx);
+        const resposta = respostas[missao.id];
+        const status = resposta?.status || (unlocked ? 'rascunho' : 'bloqueada');
+        const cfg = STATUS_CONFIG[status] || STATUS_CONFIG['bloqueada'];
+        const isExpanded = expanded.includes(missao.id);
+
+        return (
+          <div key={missao.id} className={`rounded-2xl border transition-all ${unlocked ? 'bg-white border-slate-200' : 'bg-slate-50 border-dashed border-slate-200 opacity-60'}`}>
+            <div className="flex items-center justify-between p-5 cursor-pointer" onClick={() => unlocked && setExpanded(prev => prev.includes(missao.id) ? prev.filter(id => id !== missao.id) : [...prev, missao.id])}>
+              <div className="flex items-center gap-3">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${unlocked ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-400'}`}>{idx + 1}</div>
+                <div>
+                  <p className="font-bold text-slate-900 text-sm">{missao.titulo}</p>
+                  {missao.descricao && <p className="text-xs text-slate-400 mt-0.5">{missao.descricao}</p>}
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${cfg.color}`}>{cfg.icon}{cfg.label}</span>
+                {unlocked && (isExpanded ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />)}
+                {!unlocked && <Lock className="w-4 h-4 text-slate-300" />}
+              </div>
+            </div>
+
+            {unlocked && isExpanded && (
+              <div className="px-5 pb-5 space-y-4 border-t border-slate-100 pt-4">
+                {missao.campos_json.map(campo => (
+                  <CampoRenderer
+                    key={campo.id}
+                    campo={campo}
+                    value={drafts[missao.id]?.[campo.id]}
+                    onChange={(val: any) => setDrafts(prev => ({ ...prev, [missao.id]: { ...(prev[missao.id] || {}), [campo.id]: val } }))}
+                    readOnly={status === 'submetido' || status === 'com_feedback'}
+                  />
+                ))}
+                {status !== 'submetido' && status !== 'com_feedback' && (
+                  <div className="flex gap-3 pt-2">
+                    <button onClick={() => handleSave(missao, false)} disabled={saving === missao.id} className="flex items-center gap-2 px-4 py-2 border border-slate-200 text-slate-600 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors disabled:opacity-50">
+                      {saving === missao.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Salvar rascunho
+                    </button>
+                    <button onClick={() => handleSave(missao, true)} disabled={saving === missao.id} className="flex items-center gap-2 px-5 py-2 bg-blue-600 text-white rounded-lg text-sm font-bold hover:bg-blue-700 transition-colors disabled:opacity-50">
+                      {saving === missao.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />} Submeter missão
+                    </button>
+                  </div>
+                )}
+                {(status === 'submetido' || status === 'com_feedback') && (
+                  <div className="flex items-center gap-2 text-sm text-green-600 font-semibold pt-2">
+                    <CheckCircle2 className="w-4 h-4" /> Missão submetida
+                  </div>
+                )}
+                {status === 'com_feedback' && respostas[missao.id]?.feedback_publicado && (
+                  <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                    <p className="text-xs font-bold text-amber-700 uppercase tracking-wide mb-1">Feedback do instrutor</p>
+                    <p className="text-sm text-slate-700">{respostas[missao.id]?.feedback_geral}</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+
 export function ProjetoAdmin({ cursoId, orgId, nomeCurso, curriculo=[], loggedUser, showToast }: ProjetoAdminProps) {
-  const [subTab, setSubTab] = useState<'configurar'|'respostas'>('configurar');
+  const [subTab, setSubTab] = useState<'configurar'|'respostas'|'missoes'>('configurar');
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [template, setTemplate] = useState<ProjetoTemplate|null>(null);
@@ -423,10 +582,10 @@ export function ProjetoAdmin({ cursoId, orgId, nomeCurso, curriculo=[], loggedUs
     <div className="space-y-6">
       {/* Sub-tabs */}
       <div className="flex gap-1 bg-slate-100 p-1 rounded-xl w-fit">
-        {(['configurar','respostas'] as const).map(t=>(
+        {(['configurar','missoes','respostas'] as const).map(t=>(
           <button key={t} onClick={()=>setSubTab(t)} className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${subTab===t?'bg-white text-blue-700 shadow-sm':'text-slate-500 hover:text-slate-700'}`}>
-            {t==='configurar'?<Settings className="w-4 h-4" />:<Users className="w-4 h-4" />}
-            {t==='configurar'?'Configurar':'Respostas dos Alunos'}
+            {t==='configurar'?<Settings className="w-4 h-4" />:t==='missoes'?<ClipboardList className="w-4 h-4" />:<Users className="w-4 h-4" />}
+            {t==='configurar'?'Configurar':t==='missoes'?'Missões (Teste)':'Respostas dos Alunos'}
           </button>
         ))}
       </div>
@@ -703,6 +862,16 @@ export function ProjetoAdmin({ cursoId, orgId, nomeCurso, curriculo=[], loggedUs
             )}
           </AnimatePresence>
         </div>
+      )}
+
+      {subTab==='missoes'&&(
+        <MissoesPreview
+          template={template}
+          missoes={missoes}
+          cursoId={cursoId}
+          loggedUser={loggedUser}
+          showToast={showToast}
+        />
       )}
 
       {editingCampo&&(<CampoEditorModal campo={editingCampo.campo} onSave={c=>handleSaveCampo(editingCampo.missaoId,c)} onClose={()=>setEditingCampo(null)} missoes={missoes} />)}
