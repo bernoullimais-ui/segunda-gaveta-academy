@@ -3955,27 +3955,30 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wider text-xs" title="Aceita link do YouTube ou link direto para uma imagem (.jpg, .png, etc)">Vídeo (YouTube) ou Imagem (URL)</label>
+                        <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wider text-xs" title="URL da imagem do banner principal do hero">Banner Principal (Imagem URL)</label>
                         <div className="relative">
-                          <PlayCircle className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                          <ImageIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                           <input 
                             type="text" 
-                            value={lpData.hero_video_url}
-                            onChange={(e) => setLpData({...lpData, hero_video_url: e.target.value})}
+                            value={lpData.hero_image_url || ''}
+                            onChange={(e) => setLpData({...lpData, hero_image_url: e.target.value})}
                             className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                            placeholder="URL do vídeo promocional ou imagem"
+                            placeholder="https://exemplo.com/banner.jpg"
                           />
                         </div>
                       </div>
                       <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wider text-xs">Ativar Página?</label>
-                        <button 
-                          onClick={() => setLpData({...lpData, enabled: !lpData.enabled})}
-                          className={`w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium transition-all border ${lpData.enabled ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-slate-50 border-slate-200 text-slate-500'}`}
-                        >
-                          {lpData.enabled ? <Check className="w-4 h-4" /> : <X className="w-4 h-4" />}
-                          {lpData.enabled ? 'Página Publicada' : 'Página Oculta'}
-                        </button>
+                        <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wider text-xs" title="Link do vídeo no YouTube/Vimeo para a seção promocional">Vídeo Promocional (YouTube)</label>
+                        <div className="relative">
+                          <PlayCircle className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                          <input 
+                            type="text" 
+                            value={lpData.hero_video_url || ''}
+                            onChange={(e) => setLpData({...lpData, hero_video_url: e.target.value})}
+                            className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                            placeholder="https://www.youtube.com/watch?v=..."
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>

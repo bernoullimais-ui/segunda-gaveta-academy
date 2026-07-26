@@ -1273,44 +1273,13 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
           {/* Background Elements */}
           <div className="absolute top-10 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[120px] animate-pulse pointer-events-none"></div>
           
-          {/* Full Bleed Image/Video (Background) */}
+          {/* Full Bleed Image (Background) */}
           <div className="absolute inset-0 w-full h-full bg-slate-950 overflow-hidden">
-            {lp.hero_video_url ? (
-              (lp.hero_video_url.includes('youtube.com') || lp.hero_video_url.includes('youtu.be') || lp.hero_video_url.includes('vimeo.com')) ? (
-                <div className="absolute inset-[-20%] w-[140%] h-[140%] pointer-events-auto">
-                  <ReactPlayer 
-                    url={lp.hero_video_url} 
-                    width="100%" 
-                    height="100%" 
-                    style={{ position: 'absolute', top: 0, left: 0 }}
-                    playing={true}
-                    controls={false}
-                    light={item.thumbnail_url || item.capa_url || true}
-                    playIcon={
-                      <div className="absolute inset-0 cursor-pointer flex items-center justify-center z-10 group">
-                        <div className="absolute inset-0 bg-slate-900/40 group-hover:bg-slate-900/20 transition-colors" />
-                        <div className="relative z-20 w-24 h-24 bg-primary rounded-full flex items-center justify-center text-white shadow-2xl scale-110 group-hover:scale-125 transition-transform duration-500">
-                          <Play className="w-10 h-10 fill-current" />
-                        </div>
-                      </div>
-                    }
-                    config={{
-                      youtube: {
-                        playerVars: { modestbranding: 1, rel: 0, iv_load_policy: 3, showinfo: 0, cc_load_policy: 0, controls: 0, fs: 0 }
-                      }
-                    }}
-                  />
-                </div>
-              ) : (
-                <img src={lp.hero_video_url} alt="Apresentação" className="w-full h-full object-cover" />
-              )
-            ) : (
-              <img 
-                src={item.capa_url || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070'} 
-                alt="Capa"
-                className="w-full h-full object-cover"
-              />
-            )}
+            <img 
+              src={lp.hero_image_url || item.capa_url || item.thumbnail_url || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070'} 
+              alt="Banner Principal"
+              className="w-full h-full object-cover"
+            />
           </div>
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 w-full min-h-0 lg:min-h-[90vh] flex flex-col py-16 lg:py-32">
@@ -1326,45 +1295,15 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
               {/* Text Content */}
               <div className="space-y-6 lg:space-y-10 animate-in fade-in slide-in-from-bottom-12 duration-1000 flex flex-col w-full" style={{ alignItems: !isMobileScreen ? (lp.hero_align_h === 'center' ? 'center' : lp.hero_align_h === 'right' ? 'flex-end' : 'flex-start') : 'flex-start' }}>
 
-                {/* 1. Mobile Banner Image/Video (Order 1 on mobile) */}
+                {/* 1. Mobile Banner Image (Order 1 on mobile) */}
                 <div className="order-1 lg:hidden relative animate-in fade-in zoom-in-95 duration-1000 my-2 w-full">
                   <div className="bg-slate-950/80 rounded-3xl overflow-hidden shadow-2xl border border-slate-800 p-1.5 max-w-md mx-auto">
                     <div className="w-full rounded-2xl overflow-hidden">
-                      {lp.hero_video_url ? (
-                        (lp.hero_video_url.includes('youtube.com') || lp.hero_video_url.includes('youtu.be') || lp.hero_video_url.includes('vimeo.com')) ? (
-                          <div className="w-full aspect-video relative group">
-                            <ReactPlayer 
-                              url={lp.hero_video_url} 
-                              width="100%" 
-                              height="100%" 
-                              playing={true}
-                              controls={false}
-                              light={item.thumbnail_url || item.capa_url || true}
-                              playIcon={
-                                <div className="absolute inset-0 cursor-pointer flex items-center justify-center z-10 group">
-                                  <div className="absolute inset-0 bg-slate-900/40 group-hover:bg-slate-900/20 transition-colors" />
-                                  <div className="relative z-20 w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white shadow-2xl scale-110 group-hover:scale-125 transition-transform duration-500">
-                                    <Play className="w-8 h-8 fill-current" />
-                                  </div>
-                                </div>
-                              }
-                              config={{
-                                youtube: {
-                                  playerVars: { modestbranding: 1, rel: 0, iv_load_policy: 3, showinfo: 0, cc_load_policy: 0, controls: 0, fs: 0 }
-                                }
-                              }}
-                            />
-                          </div>
-                        ) : (
-                          <img src={lp.hero_video_url} alt="Apresentação" className="w-full h-auto max-h-[320px] object-cover rounded-2xl" />
-                        )
-                      ) : (
-                        <img 
-                          src={item.capa_url || item.thumbnail_url || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070'} 
-                          alt="Capa"
-                          className="w-full h-auto max-h-[360px] object-cover rounded-2xl"
-                        />
-                      )}
+                      <img 
+                        src={lp.hero_image_url || item.capa_url || item.thumbnail_url || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070'} 
+                        alt="Banner Principal"
+                        className="w-full h-auto max-h-[360px] object-cover rounded-2xl"
+                      />
                     </div>
                   </div>
                 </div>
@@ -1449,6 +1388,45 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             </div>
           </div>
         </section>
+
+        {/* Promotional Video Section (Below Info Bar) */}
+        {lp.hero_video_url && (
+          <section id="video" className="py-16 sm:py-24 bg-slate-950 border-b border-slate-800" style={getSectionStyle('video')}>
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center space-y-8">
+              <div className="w-16 h-1 bg-primary rounded-full mx-auto"></div>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white leading-tight typo-title">
+                {lp.video_title || 'Assista à Apresentação do Curso'}
+              </h2>
+              <div className="relative aspect-video rounded-3xl overflow-hidden shadow-[0_0_80px_rgba(0,0,0,0.6)] border border-slate-800 max-w-3xl mx-auto group bg-slate-900">
+                {(lp.hero_video_url.includes('youtube.com') || lp.hero_video_url.includes('youtu.be') || lp.hero_video_url.includes('vimeo.com')) ? (
+                  <ReactPlayer 
+                    url={lp.hero_video_url} 
+                    width="100%" 
+                    height="100%" 
+                    playing={false}
+                    controls={true}
+                    light={lp.hero_image_url || item.thumbnail_url || item.capa_url || true}
+                    playIcon={
+                      <div className="absolute inset-0 cursor-pointer flex items-center justify-center z-10 group">
+                        <div className="absolute inset-0 bg-slate-900/50 group-hover:bg-slate-900/30 transition-colors" />
+                        <div className="relative z-20 w-20 h-20 bg-primary rounded-full flex items-center justify-center text-white shadow-2xl scale-100 group-hover:scale-110 transition-transform duration-300">
+                          <Play className="w-8 h-8 fill-current ml-1" />
+                        </div>
+                      </div>
+                    }
+                    config={{
+                      youtube: {
+                        playerVars: { modestbranding: 1, rel: 0, showinfo: 0 }
+                      }
+                    }}
+                  />
+                ) : (
+                  <img src={lp.hero_video_url} alt="Vídeo Promocional" className="w-full h-full object-cover" />
+                )}
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* About Section - Dark */}
         <section id="sobre" className="py-32 bg-slate-900 border-b border-slate-800" style={getSectionStyle('about')}>
@@ -1863,44 +1841,13 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
         <div className="absolute top-0 right-0 -translate-y-1/4 translate-x-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
         <div className="absolute bottom-0 left-0 translate-y-1/4 -translate-x-1/4 w-96 h-96 bg-indigo-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
         
-        {/* Full Bleed Image/Video (Background) */}
-        <div className="absolute inset-0 w-full h-full bg-slate-100 overflow-hidden">
-          {lp.hero_video_url ? (
-            (lp.hero_video_url.includes('youtube.com') || lp.hero_video_url.includes('youtu.be') || lp.hero_video_url.includes('vimeo.com')) ? (
-              <div className="absolute inset-[-20%] w-[140%] h-[140%] pointer-events-auto">
-                <ReactPlayer 
-                  url={lp.hero_video_url} 
-                  width="100%" 
-                  height="100%" 
-                  style={{ position: 'absolute', top: 0, left: 0 }}
-                  playing={true}
-                  controls={false}
-                  light={item.thumbnail_url || item.capa_url || true}
-                  playIcon={
-                    <div className="absolute inset-0 cursor-pointer flex items-center justify-center z-10 group">
-                      <div className="absolute inset-0 bg-slate-900/40 group-hover:bg-slate-900/20 transition-colors" />
-                      <div className="relative z-20 w-24 h-24 bg-primary rounded-full flex items-center justify-center text-white shadow-2xl scale-110 group-hover:scale-125 transition-transform duration-500">
-                        <Play className="w-10 h-10 fill-current" />
-                      </div>
-                    </div>
-                  }
-                  config={{
-                    youtube: {
-                      playerVars: { modestbranding: 1, rel: 0, iv_load_policy: 3, showinfo: 0, cc_load_policy: 0, controls: 0, fs: 0 }
-                    }
-                  }}
-                />
-              </div>
-            ) : (
-              <img src={lp.hero_video_url} alt="Apresentação" className="w-full h-full object-cover" />
-            )
-          ) : (
-            <img 
-              src={item.capa_url || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070'} 
-              alt="Capa"
-              className="w-full h-full object-cover"
-            />
-          )}
+        {/* Full Bleed Image (Background) */}
+        <div className="absolute inset-0 w-full h-full bg-slate-900 overflow-hidden">
+          <img 
+            src={lp.hero_image_url || item.capa_url || item.thumbnail_url || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070'} 
+            alt="Banner Principal"
+            className="w-full h-full object-cover opacity-90"
+          />
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 w-full min-h-0 lg:min-h-[90vh] flex flex-col py-16 lg:py-32">
@@ -1916,45 +1863,15 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
               {/* Text Content */}
               <div className="space-y-6 lg:space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700 flex flex-col w-full" style={{ alignItems: !isMobileScreen ? (lp.hero_align_h === 'center' ? 'center' : lp.hero_align_h === 'right' ? 'flex-end' : 'flex-start') : 'flex-start' }}>
 
-                {/* 1. Mobile Banner Image/Video (Order 1 on mobile) */}
+                {/* 1. Mobile Banner Image (Order 1 on mobile) */}
                 <div className="order-1 lg:hidden relative animate-in fade-in zoom-in-95 duration-1000 my-2 w-full">
                   <div className="bg-white/80 rounded-3xl overflow-hidden shadow-2xl border border-slate-200 p-1.5 max-w-md mx-auto">
                     <div className="w-full rounded-2xl overflow-hidden">
-                      {lp.hero_video_url ? (
-                        (lp.hero_video_url.includes('youtube.com') || lp.hero_video_url.includes('youtu.be') || lp.hero_video_url.includes('vimeo.com')) ? (
-                          <div className="w-full aspect-video relative group">
-                            <ReactPlayer 
-                              url={lp.hero_video_url} 
-                              width="100%" 
-                              height="100%" 
-                              playing={true}
-                              controls={false}
-                              light={item.thumbnail_url || item.capa_url || true}
-                              playIcon={
-                                <div className="absolute inset-0 cursor-pointer flex items-center justify-center z-10 group">
-                                  <div className="absolute inset-0 bg-slate-900/40 group-hover:bg-slate-900/20 transition-colors" />
-                                  <div className="relative z-20 w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white shadow-2xl scale-110 group-hover:scale-125 transition-transform duration-500">
-                                    <Play className="w-8 h-8 fill-current" />
-                                  </div>
-                                </div>
-                              }
-                              config={{
-                                youtube: {
-                                  playerVars: { modestbranding: 1, rel: 0, iv_load_policy: 3, showinfo: 0, cc_load_policy: 0, controls: 0, fs: 0 }
-                                }
-                              }}
-                            />
-                          </div>
-                        ) : (
-                          <img src={lp.hero_video_url} alt="Apresentação" className="w-full h-auto max-h-[320px] object-cover rounded-2xl" />
-                        )
-                      ) : (
-                        <img 
-                          src={item.capa_url || item.thumbnail_url || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070'} 
-                          alt="Capa"
-                          className="w-full h-auto max-h-[360px] object-cover rounded-2xl"
-                        />
-                      )}
+                      <img 
+                        src={lp.hero_image_url || item.capa_url || item.thumbnail_url || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070'} 
+                        alt="Banner Principal"
+                        className="w-full h-auto max-h-[360px] object-cover rounded-2xl"
+                      />
                     </div>
                   </div>
                 </div>
@@ -2049,6 +1966,45 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
           </div>
         </div>
       </section>
+
+      {/* Promotional Video Section (Below Info Bar - Light Layout) */}
+      {lp.hero_video_url && (
+        <section id="video-light" className="py-16 sm:py-24 bg-slate-100 border-b border-slate-200" style={getSectionStyle('video')}>
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center space-y-8">
+            <div className="h-1.5 w-20 bg-primary rounded-full mx-auto"></div>
+            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-6 typo-title">
+              {lp.video_title || 'Assista à Apresentação do Curso'}
+            </h2>
+            <div className="relative aspect-video rounded-3xl overflow-hidden shadow-2xl border border-slate-200 max-w-3xl mx-auto group bg-white">
+              {(lp.hero_video_url.includes('youtube.com') || lp.hero_video_url.includes('youtu.be') || lp.hero_video_url.includes('vimeo.com')) ? (
+                <ReactPlayer 
+                  url={lp.hero_video_url} 
+                  width="100%" 
+                  height="100%" 
+                  playing={false}
+                  controls={true}
+                  light={lp.hero_image_url || item.thumbnail_url || item.capa_url || true}
+                  playIcon={
+                    <div className="absolute inset-0 cursor-pointer flex items-center justify-center z-10 group">
+                      <div className="absolute inset-0 bg-slate-900/40 group-hover:bg-slate-900/20 transition-colors" />
+                      <div className="relative z-20 w-20 h-20 bg-primary rounded-full flex items-center justify-center text-white shadow-2xl scale-100 group-hover:scale-110 transition-transform duration-300">
+                        <Play className="w-8 h-8 fill-current ml-1" />
+                      </div>
+                    </div>
+                  }
+                  config={{
+                    youtube: {
+                      playerVars: { modestbranding: 1, rel: 0, showinfo: 0 }
+                    }
+                  }}
+                />
+              ) : (
+                <img src={lp.hero_video_url} alt="Vídeo Promocional" className="w-full h-full object-cover" />
+              )}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* About Section */}
       <section id="sobre" className="py-24 bg-white" style={getSectionStyle('about')}>
