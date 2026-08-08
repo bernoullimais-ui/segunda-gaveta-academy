@@ -30,6 +30,7 @@ import { dailyRouter } from './routes/daily.js';
 import trafegoRouter from './routes/trafego.js';
 import whatsappRouter from './routes/whatsapp.js';
 import invoicesRouter from './routes/invoices.js';
+import produtoraLinksRouter from './routes/produtora-links.js';
 
 // ─── Middleware de segurança para webhook ────────────────────────────────────
 import { validatePagarmeWebhook } from './lib/webhookAuth.js';
@@ -90,6 +91,7 @@ app.use('/api', dailyRouter);                                              // /a
 app.use('/api/trafego', trafegoRouter);
 app.use('/api/whatsapp', whatsappRouter);               // Atendimento IA WhatsApp
 app.use('/api/invoices', invoicesRouter);               // NFS-e: aluno, cron e webhook Focus NF
+app.use('/api/produtora', produtoraLinksRouter);        // Links de pagamento da produtora
 
 // ─── Export ───────────────────────────────────────────────────────────────────
 export default app;

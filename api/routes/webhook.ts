@@ -92,6 +92,65 @@ router.post('/', async (req, res) => {
         coupon_code, discount_applied, utm_source, utm_medium, utm_campaign, affiliate_id
       } = order.metadata || {};
 
+      // ── Produtora service payment (via payment link) ─────────────────────
+      if (type === 'servico_produtora' && order.metadata?.link_id) {
+        const linkId = order.metadata.link_id;
+        const totalPaidBrl = (order.amount || 0) / 100;
+        const paymentMethod = order.charges?.[0]?.payment_method || 'pix';
+        const { netAmount } = calculatePagarmeNet(totalPaidBrl, paymentMethod);
+
+        console.log(`[Webhook] Produtora service payment confirmed: link_id=${linkId}, net=R$${netAmount}`);
+
+        // Mapping: servico → tipo_receita
+        const SERVICO_TO_TIPO_RECEITA: Record<string, string> = {
+          gestao_redes_sociais:         'gestao_mensal',
+          gestao_trafego_pago:          'gestao_mensal',
+          criacao_landing_page:         'landing_page',
+          consultoria:                  'mentoria_consultoria',
+          setup_onboarding:             'setup_onboarding',
+          gestao_atendimento_comercial: 'gestao_mensal',
+          outro:                        'outro',
+        };
+
+        // 1. Fetch link record
+        const { data: linkData } = await supabase
+          .from('produtora_payment_links')
+          .select('*, organizacoes(nome)')
+          .eq('id', linkId)
+          .maybeSingle();
+
+        if (linkData) {
+          // 2. Mark link as paid
+          await supabase
+            .from('produtora_payment_links')
+            .update({
+              status: 'pago',
+              pagarme_order_id: order.id,
+              valor_liquido: netAmount,
+              pago_em: new Date().toISOString(),
+            })
+            .eq('id', linkId);
+
+          // 3. Create receita automatically
+          const tipoReceita = SERVICO_TO_TIPO_RECEITA[linkData.servico] || 'outro';
+          await supabase.from('produtora_receitas').insert({
+            tipo: tipoReceita,
+            descricao: linkData.descricao,
+            organizacao_id: linkData.organizacao_id || null,
+            valor: netAmount,
+            data_referencia: new Date().toISOString().split('T')[0],
+            status: 'recebido',
+            observacoes: `Link Pagar.me ${(linkData.pagarme_link_id || '').slice(0, 12)} — Pedido ${order.id.slice(0, 8)} — Cliente: ${linkData.cliente_nome || linkData.organizacoes?.nome || 'N/A'}`,
+          });
+
+          console.log(`[Webhook] Produtora receita created for link ${linkId}, tipo=${tipoReceita}, valor=R$${netAmount}`);
+        } else {
+          console.warn(`[Webhook] produtora_payment_links record not found for link_id=${linkId}`);
+        }
+
+        return res.json({ success: true });
+      }
+
       // ── Onboarding payment ──────────────────────────────────────────────
       if (type === 'adesao_especialista' && onboarding_id) {
         console.log(`Processing onboarding payment for onboarding_id: ${onboarding_id}`);

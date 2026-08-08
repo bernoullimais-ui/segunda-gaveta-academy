@@ -8,12 +8,9 @@ import {
   BarChart3, 
   Plus, 
   Search, 
-  Filter, 
   Download, 
   Calendar, 
   AlertTriangle, 
-  CheckCircle2, 
-  Clock, 
   Trash2, 
   Edit3, 
   X, 
@@ -23,7 +20,15 @@ import {
   Wallet,
   ArrowUpRight,
   ArrowDownRight,
-  Sparkles
+  Sparkles,
+  Link,
+  Copy,
+  MessageCircle,
+  CheckCircle2,
+  XCircle,
+  ExternalLink,
+  CreditCard,
+  Repeat
 } from 'lucide-react';
 import { 
   ResponsiveContainer, 
@@ -78,6 +83,50 @@ export interface ProdutoraDespesa {
   created_at: string;
 }
 
+export interface ProdutoraPaymentLink {
+  id: string;
+  servico: string;
+  descricao: string;
+  organizacao_id: string | null;
+  cliente_nome: string | null;
+  cliente_email: string | null;
+  valor: number;
+  recorrente: boolean;
+  periodicidade: 'mensal' | 'trimestral' | 'anual' | null;
+  pagarme_link_id: string | null;
+  pagarme_link_url: string | null;
+  pagarme_order_id: string | null;
+  valor_liquido: number | null;
+  aceita_cartao: boolean;
+  aceita_pix: boolean;
+  aceita_boleto: boolean;
+  max_parcelas: number;
+  status: 'ativo' | 'pago' | 'expirado' | 'cancelado';
+  created_at: string;
+  pago_em: string | null;
+  organizacoes?: { nome: string } | null;
+}
+
+const SERVICO_LABELS: Record<string, string> = {
+  gestao_redes_sociais:          'Gestão de Rede Social',
+  gestao_trafego_pago:           'Gestão de Tráfego Pago',
+  criacao_landing_page:          'Criação de Landing Page',
+  consultoria:                   'Consultoria',
+  setup_onboarding:              'Taxa de Setup / Onboarding',
+  gestao_atendimento_comercial:  'Gestão do Atendimento Comercial',
+  outro:                         'Outro Serviço',
+};
+
+const SERVICO_DEFAULT_RECORRENTE: Record<string, boolean> = {
+  gestao_redes_sociais:          true,
+  gestao_trafego_pago:           true,
+  criacao_landing_page:          false,
+  consultoria:                   false,
+  setup_onboarding:              false,
+  gestao_atendimento_comercial:  true,
+  outro:                         false,
+};
+
 const TIPO_RECEITA_LABELS: Record<string, string> = {
   percentual_curso: 'Venda de Curso (Percentual)',
   landing_page: 'Criação de Landing Page',
@@ -102,9 +151,10 @@ const CATEGORIA_DESPESA_LABELS: Record<string, string> = {
 const PIE_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#6366f1', '#64748b'];
 
 export function ProdutoraFinanceiroAdmin({ loggedUser }: { loggedUser?: any }) {
-  const [activeSubTab, setActiveSubTab] = useState<'dashboard' | 'receitas' | 'despesas'>('dashboard');
+  const [activeSubTab, setActiveSubTab] = useState<'dashboard' | 'receitas' | 'despesas' | 'links'>('dashboard');
   const [receitas, setReceitas] = useState<ProdutoraReceita[]>([]);
   const [despesas, setDespesas] = useState<ProdutoraDespesa[]>([]);
+  const [paymentLinks, setPaymentLinks] = useState<ProdutoraPaymentLink[]>([]);
   const [organizacoes, setOrganizacoes] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -115,13 +165,36 @@ export function ProdutoraFinanceiroAdmin({ loggedUser }: { loggedUser?: any }) {
   const [categoriaFilter, setCategoriaFilter] = useState('todas');
   const [tipoReceitaFilter, setTipoReceitaFilter] = useState('todos');
   const [statusDespesaFilter, setStatusDespesaFilter] = useState('todos');
+  const [linksSearchFilter, setLinksSearchFilter] = useState('');
+  const [linksStatusFilter, setLinksStatusFilter] = useState('todos');
 
   // Modals
   const [showReceitaModal, setShowReceitaModal] = useState(false);
   const [showDespesaModal, setShowDespesaModal] = useState(false);
+  const [showLinkModal, setShowLinkModal] = useState(false);
   const [editingReceita, setEditingReceita] = useState<Partial<ProdutoraReceita> | null>(null);
   const [editingDespesa, setEditingDespesa] = useState<Partial<ProdutoraDespesa> | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isGeneratingLink, setIsGeneratingLink] = useState(false);
+  const [generatedLinkUrl, setGeneratedLinkUrl] = useState<string | null>(null);
+  const [copiedLinkId, setCopiedLinkId] = useState<string | null>(null);
+
+  // Link form state
+  const [formLink, setFormLink] = useState({
+    servico: 'gestao_redes_sociais',
+    descricao: '',
+    clienteType: 'org' as 'org' | 'externo',
+    organizacao_id: '',
+    cliente_nome: '',
+    cliente_email: '',
+    valor: '',
+    recorrente: true,
+    periodicidade: 'mensal',
+    aceita_cartao: true,
+    aceita_pix: true,
+    aceita_boleto: true,
+    max_parcelas: 1,
+  });
 
   // Form states - Receita
   const [formReceita, setFormReceita] = useState({
@@ -151,7 +224,7 @@ export function ProdutoraFinanceiroAdmin({ loggedUser }: { loggedUser?: any }) {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const [recRes, despRes, orgsRes] = await Promise.all([
+      const [recRes, despRes, orgsRes, linksRes] = await Promise.all([
         supabase
           .from('produtora_receitas')
           .select('*, organizacoes(nome), compras(valor_pago, valor_liquido, cursos(nome), usuarios!compras_usuario_id_fkey(nome, email))')
@@ -160,12 +233,17 @@ export function ProdutoraFinanceiroAdmin({ loggedUser }: { loggedUser?: any }) {
           .from('produtora_despesas')
           .select('*')
           .order('data_vencimento', { ascending: false }),
-        supabase.from('organizacoes').select('id, nome').order('nome')
+        supabase.from('organizacoes').select('id, nome').order('nome'),
+        supabase
+          .from('produtora_payment_links')
+          .select('*, organizacoes(nome)')
+          .order('created_at', { ascending: false }),
       ]);
 
       if (recRes.data) setReceitas(recRes.data as any);
       if (despRes.data) setDespesas(despRes.data as any);
       if (orgsRes.data) setOrganizacoes(orgsRes.data);
+      if (linksRes.data) setPaymentLinks(linksRes.data as any);
 
       // Perform historical sync & recurring expense auto-generation
       await syncHistoricalCompras(recRes.data || []);
@@ -181,6 +259,129 @@ export function ProdutoraFinanceiroAdmin({ loggedUser }: { loggedUser?: any }) {
   useEffect(() => {
     fetchData();
   }, []);
+
+  // ── Payment Link Handlers ─────────────────────────────────────────────────
+
+  const handleGenerateLink = async () => {
+    if (!formLink.valor || isNaN(Number(formLink.valor)) || Number(formLink.valor) <= 0) return;
+    if (!formLink.aceita_cartao && !formLink.aceita_pix && !formLink.aceita_boleto) return;
+
+    setIsGeneratingLink(true);
+    setGeneratedLinkUrl(null);
+
+    try {
+      const orgSelecionada = formLink.clienteType === 'org' && formLink.organizacao_id
+        ? organizacoes.find(o => o.id === formLink.organizacao_id)
+        : null;
+
+      const clienteNomeFinal = formLink.clienteType === 'org'
+        ? (orgSelecionada?.nome || '')
+        : formLink.cliente_nome;
+
+      const payload = {
+        servico: formLink.servico,
+        descricao: formLink.descricao.trim() || SERVICO_LABELS[formLink.servico],
+        valor: parseFloat(formLink.valor),
+        recorrente: formLink.recorrente,
+        periodicidade: formLink.recorrente ? formLink.periodicidade : undefined,
+        aceita_cartao: formLink.aceita_cartao,
+        aceita_pix: formLink.aceita_pix,
+        aceita_boleto: formLink.aceita_boleto,
+        max_parcelas: formLink.max_parcelas,
+        organizacao_id: formLink.clienteType === 'org' ? (formLink.organizacao_id || null) : null,
+        cliente_nome: clienteNomeFinal || null,
+        cliente_email: formLink.clienteType === 'externo' ? (formLink.cliente_email || null) : null,
+        created_by: loggedUser?.id || null,
+      };
+
+      const response = await fetch('/api/produtora/create-link', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.url) {
+        alert(`Erro ao gerar link: ${result.error || 'Erro desconhecido.'}`);
+        return;
+      }
+
+      setGeneratedLinkUrl(result.url);
+      await fetchData(); // Refresh the links table
+    } catch (err: any) {
+      console.error('[Links] Error generating link:', err);
+      alert(`Erro inesperado: ${err.message}`);
+    } finally {
+      setIsGeneratingLink(false);
+    }
+  };
+
+  const handleCancelLink = async (id: string) => {
+    if (!confirm('Deseja cancelar este link de pagamento?')) return;
+    try {
+      await fetch(`/api/produtora/cancel-link/${id}`, { method: 'DELETE' });
+      await fetchData();
+    } catch (err) {
+      console.error('[Links] Cancel error:', err);
+    }
+  };
+
+  const handleCopyLink = async (url: string, id: string) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiedLinkId(id);
+      setTimeout(() => setCopiedLinkId(null), 2000);
+    } catch {
+      // Fallback
+      const ta = document.createElement('textarea');
+      ta.value = url;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      setCopiedLinkId(id);
+      setTimeout(() => setCopiedLinkId(null), 2000);
+    }
+  };
+
+  const handleWhatsAppLink = (link: ProdutoraPaymentLink) => {
+    const servicoLabel = SERVICO_LABELS[link.servico] || link.servico;
+    const clienteNome = link.organizacoes?.nome || link.cliente_nome || 'Cliente';
+    const valorFmt = Number(link.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+    const periodicidade = link.recorrente ? `/${link.periodicidade || 'mês'}` : '';
+    const mensagem = `Olá! Segue o link de pagamento para *${servicoLabel}* | *${clienteNome}* | R$ ${valorFmt}${periodicidade}:\n\n${link.pagarme_link_url}`;
+    const encoded = encodeURIComponent(mensagem);
+    window.open(`https://wa.me/?text=${encoded}`, '_blank');
+  };
+
+  // Filtered payment links
+  const filteredLinks = useMemo(() => {
+    return paymentLinks.filter(l => {
+      const matchStatus = linksStatusFilter === 'todos' ? true : l.status === linksStatusFilter;
+      const search = linksSearchFilter.toLowerCase();
+      const matchSearch = !search ? true : (
+        (l.descricao || '').toLowerCase().includes(search) ||
+        (SERVICO_LABELS[l.servico] || '').toLowerCase().includes(search) ||
+        (l.cliente_nome || '').toLowerCase().includes(search) ||
+        (l.organizacoes?.nome || '').toLowerCase().includes(search)
+      );
+      return matchStatus && matchSearch;
+    });
+  }, [paymentLinks, linksStatusFilter, linksSearchFilter]);
+
+  // Links KPIs
+  const linksKpis = useMemo(() => {
+    const ativos = paymentLinks.filter(l => l.status === 'ativo').length;
+    const pagos = paymentLinks.filter(l => l.status === 'pago').length;
+    const recorrentes = paymentLinks.filter(l => l.status === 'ativo' && l.recorrente).length;
+    const volumeTotal = paymentLinks
+      .filter(l => l.status === 'pago')
+      .reduce((sum, l) => sum + Number(l.valor_liquido || l.valor || 0), 0);
+    return { ativos, pagos, recorrentes, volumeTotal };
+  }, [paymentLinks]);
+
+
 
   // 1. Sync historical compras to produtora_receitas automatically
   const syncHistoricalCompras = async (existingReceitas: any[]) => {
@@ -651,6 +852,16 @@ export function ProdutoraFinanceiroAdmin({ loggedUser }: { loggedUser?: any }) {
           {pendingUpcomingDespesas.length > 0 && (
             <span className="w-2 h-2 rounded-full bg-red-500 animate-ping absolute top-2 right-2" />
           )}
+        </button>
+        <button
+          onClick={() => setActiveSubTab('links')}
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold transition-all ${
+            activeSubTab === 'links'
+              ? 'bg-white text-blue-700 shadow-sm border border-slate-200'
+              : 'text-slate-600 hover:text-slate-900'
+          }`}
+        >
+          <Link className="w-4 h-4 text-blue-600" /> Links de Pagamento ({paymentLinks.length})
         </button>
       </div>
 
@@ -1439,6 +1650,504 @@ export function ProdutoraFinanceiroAdmin({ loggedUser }: { loggedUser?: any }) {
           </div>
         </div>
       )}
+
+      {/* SUB-TAB 4: LINKS DE PAGAMENTO */}
+      {activeSubTab === 'links' && (
+        <div className="space-y-6">
+          {/* KPI Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Links Ativos</span>
+                <div className="p-2 rounded-xl bg-blue-50 text-blue-600">
+                  <Link className="w-5 h-5" />
+                </div>
+              </div>
+              <p className="text-2xl font-black text-slate-900">{linksKpis.ativos}</p>
+              <p className="text-[11px] text-slate-400 font-medium">Aguardando pagamento</p>
+            </div>
+
+            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Links Pagos</span>
+                <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600">
+                  <CheckCircle2 className="w-5 h-5" />
+                </div>
+              </div>
+              <p className="text-2xl font-black text-emerald-600">{linksKpis.pagos}</p>
+              <p className="text-[11px] text-slate-400 font-medium">Pagamentos confirmados</p>
+            </div>
+
+            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Recorrentes Ativos</span>
+                <div className="p-2 rounded-xl bg-purple-50 text-purple-600">
+                  <Repeat className="w-5 h-5" />
+                </div>
+              </div>
+              <p className="text-2xl font-black text-slate-900">{linksKpis.recorrentes}</p>
+              <p className="text-[11px] text-slate-400 font-medium">Serviços mensais</p>
+            </div>
+
+            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Volume Confirmado</span>
+                <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600">
+                  <DollarSign className="w-5 h-5" />
+                </div>
+              </div>
+              <p className="text-2xl font-black text-slate-900">
+                R$ {linksKpis.volumeTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              </p>
+              <p className="text-[11px] text-slate-400 font-medium">Total gerado via links</p>
+            </div>
+          </div>
+
+          {/* Table & Controls */}
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden space-y-4 p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="relative">
+                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    placeholder="Buscar serviço ou cliente..."
+                    value={linksSearchFilter}
+                    onChange={(e) => setLinksSearchFilter(e.target.value)}
+                    className="pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-64"
+                  />
+                </div>
+
+                <select
+                  value={linksStatusFilter}
+                  onChange={(e) => setLinksStatusFilter(e.target.value)}
+                  className="px-3 py-2 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 bg-white cursor-pointer"
+                >
+                  <option value="todos">Todos Status</option>
+                  <option value="ativo">Ativo</option>
+                  <option value="pago">Pago</option>
+                  <option value="cancelado">Cancelado</option>
+                </select>
+              </div>
+
+              <button
+                onClick={() => {
+                  setGeneratedLinkUrl(null);
+                  setFormLink({
+                    servico: 'gestao_redes_sociais',
+                    descricao: '',
+                    clienteType: 'org',
+                    organizacao_id: '',
+                    cliente_nome: '',
+                    cliente_email: '',
+                    valor: '',
+                    recorrente: true,
+                    periodicidade: 'mensal',
+                    aceita_cartao: true,
+                    aceita_pix: true,
+                    aceita_boleto: true,
+                    max_parcelas: 1,
+                  });
+                  setShowLinkModal(true);
+                }}
+                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-sm font-bold shadow-md transition-colors"
+              >
+                <Plus className="w-4 h-4" /> Gerar Novo Link de Pagamento
+              </button>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-slate-50 text-slate-500 font-bold uppercase text-[11px] border-b border-slate-200">
+                  <tr>
+                    <th className="p-4">Criado em</th>
+                    <th className="p-4">Serviço</th>
+                    <th className="p-4">Cliente / Organização</th>
+                    <th className="p-4">Valor (R$)</th>
+                    <th className="p-4">Tipo</th>
+                    <th className="p-4">Status</th>
+                    <th className="p-4 text-right">Ações</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {filteredLinks.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="text-center py-8 text-slate-400">
+                        Nenhum link de pagamento gerado.
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredLinks.map((link) => (
+                      <tr key={link.id} className="hover:bg-slate-50/80 transition-colors">
+                        <td className="p-4 text-slate-600 font-medium whitespace-nowrap">
+                          {new Date(link.created_at).toLocaleDateString('pt-BR')}
+                        </td>
+                        <td className="p-4 font-semibold text-slate-900 whitespace-nowrap">
+                          <span className="px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 text-xs border border-blue-200">
+                            {SERVICO_LABELS[link.servico] || link.servico}
+                          </span>
+                        </td>
+                        <td className="p-4 text-slate-700 font-medium">
+                          {link.organizacoes?.nome ? (
+                            <span className="flex items-center gap-1.5 text-blue-700 font-semibold">
+                              <Building2 className="w-3.5 h-3.5" /> {link.organizacoes.nome}
+                            </span>
+                          ) : link.cliente_nome ? (
+                            <span>{link.cliente_nome}</span>
+                          ) : (
+                            <span className="text-slate-400">Geral</span>
+                          )}
+                        </td>
+                        <td className="p-4 font-black text-slate-900 whitespace-nowrap">
+                          R$ {Number(link.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          {link.recorrente && <span className="text-xs text-slate-400 font-normal">/mês</span>}
+                        </td>
+                        <td className="p-4 whitespace-nowrap">
+                          {link.recorrente ? (
+                            <span className="px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 text-xs font-bold flex items-center gap-1 w-fit">
+                              <Repeat className="w-3 h-3" /> Recorrente
+                            </span>
+                          ) : (
+                            <span className="text-slate-500 text-xs">Único (7d)</span>
+                          )}
+                        </td>
+                        <td className="p-4 whitespace-nowrap">
+                          <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
+                            link.status === 'pago'
+                              ? 'bg-emerald-100 text-emerald-800'
+                              : link.status === 'ativo'
+                              ? 'bg-blue-100 text-blue-800'
+                              : 'bg-slate-100 text-slate-600'
+                          }`}>
+                            {link.status === 'pago' ? 'Pago' : link.status === 'ativo' ? 'Ativo' : 'Cancelado'}
+                          </span>
+                        </td>
+                        <td className="p-4 text-right whitespace-nowrap">
+                          <div className="flex items-center justify-end gap-1.5">
+                            {link.pagarme_link_url && (
+                              <>
+                                <button
+                                  onClick={() => handleCopyLink(link.pagarme_link_url!, link.id)}
+                                  className="p-1.5 text-slate-500 hover:text-blue-600 rounded-lg hover:bg-blue-50 transition-colors flex items-center gap-1 text-xs font-bold"
+                                  title="Copiar Link"
+                                >
+                                  {copiedLinkId === link.id ? (
+                                    <span className="text-emerald-600 font-bold">Copiado!</span>
+                                  ) : (
+                                    <Copy className="w-4 h-4" />
+                                  )}
+                                </button>
+
+                                <button
+                                  onClick={() => handleWhatsAppLink(link)}
+                                  className="p-1.5 text-emerald-600 hover:text-emerald-700 rounded-lg hover:bg-emerald-50 transition-colors"
+                                  title="Enviar via WhatsApp"
+                                >
+                                  <MessageCircle className="w-4 h-4" />
+                                </button>
+
+                                <a
+                                  href={link.pagarme_link_url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors"
+                                  title="Abrir Link Pagar.me"
+                                >
+                                  <ExternalLink className="w-4 h-4" />
+                                </a>
+                              </>
+                            )}
+
+                            {link.status === 'ativo' && (
+                              <button
+                                onClick={() => handleCancelLink(link.id)}
+                                className="p-1.5 text-slate-300 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors"
+                                title="Cancelar Link"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL GERAR LINK DE PAGAMENTO */}
+      {showLinkModal && (
+        <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] flex flex-col">
+            <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-blue-600 text-white rounded-xl">
+                  <Link className="w-5 h-5" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-900">Gerar Link de Pagamento (Pagar.me)</h3>
+              </div>
+              <button onClick={() => setShowLinkModal(false)} className="text-slate-400 hover:text-slate-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4 overflow-y-auto flex-1">
+              {/* If link generated, show success screen */}
+              {generatedLinkUrl ? (
+                <div className="text-center py-6 space-y-4">
+                  <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
+                    <CheckCircle2 className="w-8 h-8" />
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-bold text-slate-900">Link Gerado com Sucesso!</h4>
+                    <p className="text-xs text-slate-500 mt-1">O link Pagar.me já está ativo e pronto para compartilhamento.</p>
+                  </div>
+
+                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs font-mono text-slate-700 break-all select-all">
+                    {generatedLinkUrl}
+                  </div>
+
+                  <div className="flex items-center justify-center gap-3 pt-2">
+                    <button
+                      onClick={() => handleCopyLink(generatedLinkUrl, 'modal')}
+                      className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold shadow-md transition-colors"
+                    >
+                      <Copy className="w-4 h-4" /> {copiedLinkId === 'modal' ? 'Copiado!' : 'Copiar Link'}
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        const servicoLabel = SERVICO_LABELS[formLink.servico] || formLink.servico;
+                        const clienteNome = formLink.clienteType === 'org'
+                          ? (organizacoes.find(o => o.id === formLink.organizacao_id)?.nome || 'Cliente')
+                          : (formLink.cliente_nome || 'Cliente');
+                        const valorFmt = Number(formLink.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+                        const periodicidade = formLink.recorrente ? `/${formLink.periodicidade}` : '';
+                        const msg = `Olá! Segue o link de pagamento para *${servicoLabel}* | *${clienteNome}* | R$ ${valorFmt}${periodicidade}:\n\n${generatedLinkUrl}`;
+                        window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+                      }}
+                      className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold shadow-md transition-colors"
+                    >
+                      <MessageCircle className="w-4 h-4" /> WhatsApp
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                /* Form fields */
+                <>
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Serviço da Produtora</label>
+                    <select
+                      value={formLink.servico}
+                      onChange={(e) => {
+                        const s = e.target.value;
+                        const isRec = SERVICO_DEFAULT_RECORRENTE[s] ?? false;
+                        setFormLink({ ...formLink, servico: s, recorrente: isRec });
+                      }}
+                      className="w-full p-3 border border-slate-200 rounded-xl text-sm font-semibold outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      {Object.keys(SERVICO_LABELS).map(key => (
+                        <option key={key} value={key}>{SERVICO_LABELS[key]}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Descrição</label>
+                    <input
+                      type="text"
+                      placeholder={`Ex: ${SERVICO_LABELS[formLink.servico]}`}
+                      value={formLink.descricao}
+                      onChange={(e) => setFormLink({ ...formLink, descricao: e.target.value })}
+                      className="w-full p-3 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  {/* Cliente selection */}
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Cliente / Destinatário</label>
+                    <div className="flex gap-2 mb-2">
+                      <button
+                        type="button"
+                        onClick={() => setFormLink({ ...formLink, clienteType: 'org' })}
+                        className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-bold border transition-colors ${
+                          formLink.clienteType === 'org'
+                            ? 'bg-blue-50 border-blue-300 text-blue-700'
+                            : 'bg-slate-50 border-slate-200 text-slate-600'
+                        }`}
+                      >
+                        Organização Cadastrada
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setFormLink({ ...formLink, clienteType: 'externo' })}
+                        className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-bold border transition-colors ${
+                          formLink.clienteType === 'externo'
+                            ? 'bg-blue-50 border-blue-300 text-blue-700'
+                            : 'bg-slate-50 border-slate-200 text-slate-600'
+                        }`}
+                      >
+                        Cliente Externo
+                      </button>
+                    </div>
+
+                    {formLink.clienteType === 'org' ? (
+                      <select
+                        value={formLink.organizacao_id}
+                        onChange={(e) => setFormLink({ ...formLink, organizacao_id: e.target.value })}
+                        className="w-full p-3 border border-slate-200 rounded-xl text-sm font-semibold outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="">Selecione a Organização</option>
+                        {organizacoes.map(org => (
+                          <option key={org.id} value={org.id}>{org.nome}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <div className="grid grid-cols-2 gap-3">
+                        <input
+                          type="text"
+                          placeholder="Nome do cliente"
+                          value={formLink.cliente_nome}
+                          onChange={(e) => setFormLink({ ...formLink, cliente_nome: e.target.value })}
+                          className="w-full p-3 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        <input
+                          type="email"
+                          placeholder="E-mail"
+                          value={formLink.cliente_email}
+                          onChange={(e) => setFormLink({ ...formLink, cliente_email: e.target.value })}
+                          className="w-full p-3 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Valor */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Valor (R$)</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        placeholder="0.00"
+                        value={formLink.valor}
+                        onChange={(e) => setFormLink({ ...formLink, valor: e.target.value })}
+                        className="w-full p-3 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Tipo de Cobrança</label>
+                      <div className="flex items-center gap-2 p-2 bg-slate-50 rounded-xl border border-slate-200 h-11">
+                        <input
+                          type="checkbox"
+                          id="recorrenteCheck"
+                          checked={formLink.recorrente}
+                          onChange={(e) => setFormLink({ ...formLink, recorrente: e.target.checked })}
+                          className="w-4 h-4 text-blue-600 rounded cursor-pointer"
+                        />
+                        <label htmlFor="recorrenteCheck" className="text-xs font-bold text-slate-700 cursor-pointer">
+                          {formLink.recorrente ? 'Recorrente (Reutilizável)' : 'Único (7 dias)'}
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Payment Methods */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase block">Métodos Aceitos</label>
+                    <div className="grid grid-cols-3 gap-2">
+                      <label className={`flex items-center gap-2 p-3 rounded-xl border cursor-pointer text-xs font-bold ${
+                        formLink.aceita_cartao ? 'border-blue-500 bg-blue-50/50 text-blue-700' : 'border-slate-200 text-slate-600'
+                      }`}>
+                        <input
+                          type="checkbox"
+                          checked={formLink.aceita_cartao}
+                          onChange={(e) => setFormLink({ ...formLink, aceita_cartao: e.target.checked })}
+                          className="hidden"
+                        />
+                        <CreditCard className="w-4 h-4" /> Cartão
+                      </label>
+
+                      <label className={`flex items-center gap-2 p-3 rounded-xl border cursor-pointer text-xs font-bold ${
+                        formLink.aceita_pix ? 'border-emerald-500 bg-emerald-50/50 text-emerald-700' : 'border-slate-200 text-slate-600'
+                      }`}>
+                        <input
+                          type="checkbox"
+                          checked={formLink.aceita_pix}
+                          onChange={(e) => setFormLink({ ...formLink, aceita_pix: e.target.checked })}
+                          className="hidden"
+                        />
+                        <DollarSign className="w-4 h-4" /> PIX
+                      </label>
+
+                      <label className={`flex items-center gap-2 p-3 rounded-xl border cursor-pointer text-xs font-bold ${
+                        formLink.aceita_boleto ? 'border-amber-500 bg-amber-50/50 text-amber-700' : 'border-slate-200 text-slate-600'
+                      }`}>
+                        <input
+                          type="checkbox"
+                          checked={formLink.aceita_boleto}
+                          onChange={(e) => setFormLink({ ...formLink, aceita_boleto: e.target.checked })}
+                          className="hidden"
+                        />
+                        <Calendar className="w-4 h-4" /> Boleto
+                      </label>
+                    </div>
+
+                    {formLink.aceita_cartao && (
+                      <div className="pt-2">
+                        <label className="text-xs font-semibold text-slate-500 block mb-1">
+                          Parcelamento Máximo no Cartão: <strong className="text-slate-800">{formLink.max_parcelas}x</strong>
+                        </label>
+                        <input
+                          type="range"
+                          min="1"
+                          max="12"
+                          value={formLink.max_parcelas}
+                          onChange={(e) => setFormLink({ ...formLink, max_parcelas: parseInt(e.target.value) })}
+                          className="w-full accent-blue-600 cursor-pointer"
+                        />
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div className="p-6 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
+              <button
+                onClick={() => setShowLinkModal(false)}
+                className="px-4 py-2 border border-slate-200 text-slate-600 rounded-xl text-sm font-bold hover:bg-slate-100 transition-colors"
+              >
+                {generatedLinkUrl ? 'Fechar' : 'Cancelar'}
+              </button>
+
+              {!generatedLinkUrl && (
+                <button
+                  onClick={handleGenerateLink}
+                  disabled={isGeneratingLink || !formLink.valor}
+                  className="px-5 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-sm font-bold shadow-md transition-colors disabled:opacity-50 flex items-center gap-2"
+                >
+                  {isGeneratingLink ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 animate-spin" /> Gerando Link...
+                    </>
+                  ) : (
+                    <>
+                      <Link className="w-4 h-4" /> Gerar Link Pagar.me
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
