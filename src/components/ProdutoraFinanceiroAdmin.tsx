@@ -128,13 +128,16 @@ const SERVICO_DEFAULT_RECORRENTE: Record<string, boolean> = {
 };
 
 const TIPO_RECEITA_LABELS: Record<string, string> = {
-  percentual_curso: 'Venda de Curso (Percentual)',
-  landing_page: 'Criação de Landing Page',
-  producao_video: 'Produção / Edição de Vídeo',
-  mentoria_consultoria: 'Mentoria / Consultoria',
-  setup_onboarding: 'Taxa de Setup / Onboarding',
-  gestao_mensal: 'Gestão Mensal de Plataforma',
-  outro: 'Outra Receita'
+  gestao_redes_sociais:          'Gestão de Rede Social',
+  gestao_trafego_pago:           'Gestão de Tráfego Pago',
+  criacao_landing_page:          'Criação de Landing Page',
+  consultoria:                   'Consultoria',
+  setup_onboarding:              'Taxa de Setup / Onboarding',
+  gestao_atendimento_comercial:  'Gestão do Atendimento Comercial',
+  producao_video:                'Produção / Edição de Vídeo',
+  gestao_mensal:                 'Gestão Mensal de Plataforma',
+  percentual_curso:              'Venda de Curso (Percentual)',
+  outro:                         'Outro Serviço'
 };
 
 const CATEGORIA_DESPESA_LABELS: Record<string, string> = {
@@ -198,7 +201,7 @@ export function ProdutoraFinanceiroAdmin({ loggedUser }: { loggedUser?: any }) {
 
   // Form states - Receita
   const [formReceita, setFormReceita] = useState({
-    tipo: 'landing_page',
+    tipo: 'gestao_redes_sociais',
     descricao: '',
     organizacao_id: '',
     valor: '',
@@ -1124,7 +1127,7 @@ export function ProdutoraFinanceiroAdmin({ loggedUser }: { loggedUser?: any }) {
                 onClick={() => {
                   setEditingReceita(null);
                   setFormReceita({
-                    tipo: 'landing_page',
+                    tipo: 'gestao_redes_sociais',
                     descricao: '',
                     organizacao_id: '',
                     valor: '',
