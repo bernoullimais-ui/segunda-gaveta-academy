@@ -300,7 +300,15 @@ export function ProdutoraFinanceiroAdmin({ loggedUser }: { loggedUser?: any }) {
         body: JSON.stringify(payload),
       });
 
-      const result = await response.json();
+      const responseText = await response.text();
+      let result: any = {};
+      try {
+        result = JSON.parse(responseText);
+      } catch {
+        console.error('[Links] Non-JSON response received:', responseText);
+        alert(`Erro no servidor (${response.status}): ${responseText || 'Erro ao comunicar com a API'}`);
+        return;
+      }
 
       if (!response.ok || !result.url) {
         alert(`Erro ao gerar link: ${result.error || 'Erro desconhecido.'}`);

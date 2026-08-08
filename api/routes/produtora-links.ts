@@ -2,7 +2,7 @@
  * Rota de Links de Pagamento da Produtora — /api/produtora/*
  *
  * POST /api/produtora/create-link
- *   Cria um payment link no Pagar.me e salva no banco produtora_payment_links
+ *   Cria um pedido com checkout link no Pagar.me v5 e salva no banco produtora_payment_links
  *
  * DELETE /api/produtora/cancel-link/:id
  *   Cancela/expira um link ativo
@@ -31,17 +31,6 @@ if (supabaseUrl && supabaseServiceKey) {
   }
 }
 
-// ─── Service → Tipo Receita mapping ──────────────────────────────────────────
-const SERVICO_TO_TIPO_RECEITA: Record<string, string> = {
-  gestao_redes_sociais:          'gestao_mensal',
-  gestao_trafego_pago:           'gestao_mensal',
-  criacao_landing_page:          'landing_page',
-  consultoria:                   'mentoria_consultoria',
-  setup_onboarding:              'setup_onboarding',
-  gestao_atendimento_comercial:  'gestao_mensal',
-  outro:                         'outro',
-};
-
 const SERVICO_LABELS: Record<string, string> = {
   gestao_redes_sociais:          'Gestão de Rede Social',
   gestao_trafego_pago:           'Gestão de Tráfego Pago',
@@ -56,7 +45,7 @@ const SERVICO_LABELS: Record<string, string> = {
 router.post('/create-link', async (req, res) => {
   try {
     if (!supabase) {
-      return res.status(503).json({ error: 'Database not configured.' });
+      return res.status(503).json({ error: 'Banco de dados não configurado.' });
     }
 
     const {
@@ -76,7 +65,7 @@ router.post('/create-link', async (req, res) => {
     } = req.body;
 
     if (!servico || !valor || isNaN(Number(valor)) || Number(valor) <= 0) {
-      return res.status(400).json({ error: 'Parâmetros inválidos: servico e valor são obrigatórios.' });
+      return res.status(400).json({ error: 'Parâmetros inválidos: serviço e valor são obrigatórios.' });
     }
 
     const valorNum = Number(valor);
@@ -96,37 +85,10 @@ router.post('/create-link', async (req, res) => {
 
     // Build installments array for credit card
     const numParcelas = Math.min(Math.max(1, parseInt(String(max_parcelas)) || 1), 12);
-    const installments = Array.from({ length: numParcelas }, (_, i) => ({ number: i + 1 }));
-
-    // Build Pagar.me payment_link payload
-    const pagarmePayload: any = {
-      name: `${servicoLabel} — ${clienteLabel}`,
-      payment_settings: {
-        accepted_payment_methods: acceptedMethods,
-      },
-      items: [
-        {
-          amount: valorCentavos,
-          description: descricao || servicoLabel,
-          quantity: 1,
-          tangible: false,
-        },
-      ],
-      metadata: {
-        type: 'servico_produtora',
-        // link_id will be set after DB insert
-      },
-    };
-
-    // Credit card installments settings
-    if (aceita_cartao) {
-      pagarmePayload.payment_settings.credit_card_settings = { installments };
-    }
-
-    // Expiry: 7 days (10080 min) for unique links; no expiry for recurring
-    if (!recorrente) {
-      pagarmePayload.expires_in = 10080;
-    }
+    const installments = Array.from({ length: numParcelas }, (_, i) => ({
+      number: i + 1,
+      total: valorCentavos,
+    }));
 
     // 1. Insert record into DB first to get the UUID for metadata
     const { data: dbRecord, error: dbInsertErr } = await supabase
@@ -155,11 +117,61 @@ router.post('/create-link', async (req, res) => {
       return res.status(500).json({ error: 'Falha ao registrar o link no banco de dados.' });
     }
 
-    // 2. Inject the DB record ID into metadata
-    pagarmePayload.metadata.link_id = dbRecord.id;
+    // 2. Build Pagar.me v5 Order Checkout Payload
+    const checkoutConfig: any = {
+      expires_in: recorrente ? 525600 : 10080, // 1 year for recurring links, 7 days for one-time
+      billing_address_editable: true,
+      customer_editable: true,
+      accepted_payment_methods: acceptedMethods,
+      success_url: process.env.APP_URL || 'https://segundagaveta.com.br',
+    };
 
-    // 3. Call Pagar.me to create payment link
-    const { ok, data: pagarmeData } = await pagarmeRequest('/payment_links', pagarmePayload);
+    if (aceita_cartao) {
+      checkoutConfig.credit_card = { installments };
+    }
+
+    if (aceita_pix) {
+      checkoutConfig.pix = { expires_in: 86400 };
+    }
+
+    if (aceita_boleto) {
+      checkoutConfig.boleto = {
+        instructions: 'Pagar até o vencimento',
+        due_at: new Date(Date.now() + 7 * 86400 * 1000).toISOString(),
+      };
+    }
+
+    const pagarmePayload = {
+      items: [
+        {
+          amount: valorCentavos,
+          description: (descricao || servicoLabel).substring(0, 250),
+          quantity: 1,
+          code: servico.substring(0, 50),
+        },
+      ],
+      customer: {
+        name: (clienteLabel).substring(0, 64),
+        email: cliente_email || 'contato@segundagaveta.com.br',
+        type: 'individual',
+        phones: {
+          mobile_phone: { country_code: '55', area_code: '11', number: '999999999' },
+        },
+      },
+      payments: [
+        {
+          payment_method: 'checkout',
+          checkout: checkoutConfig,
+        },
+      ],
+      metadata: {
+        type: 'servico_produtora',
+        link_id: dbRecord.id,
+      },
+    };
+
+    // 3. Call Pagar.me /orders to create checkout link
+    const { ok, data: pagarmeData } = await pagarmeRequest('/orders', pagarmePayload);
 
     if (!ok) {
       // Rollback DB insert on Pagar.me failure
@@ -171,16 +183,17 @@ router.post('/create-link', async (req, res) => {
       });
     }
 
-    const pagarmeLink = pagarmeData;
-    const linkUrl: string = pagarmeLink.url || pagarmeLink.payment_url || '';
-    const linkId: string = pagarmeLink.id || '';
+    const checkoutObj = pagarmeData?.checkouts?.[0];
+    const linkUrl: string = checkoutObj?.payment_url || pagarmeData?.payment_url || '';
+    const linkId: string = checkoutObj?.id || pagarmeData?.id || '';
 
-    // 4. Update DB record with Pagar.me link ID and URL
+    // 4. Update DB record with Pagar.me order ID & checkout link URL
     await supabase
       .from('produtora_payment_links')
       .update({
         pagarme_link_id: linkId,
         pagarme_link_url: linkUrl,
+        pagarme_order_id: pagarmeData.id,
       })
       .eq('id', dbRecord.id);
 
@@ -189,6 +202,7 @@ router.post('/create-link', async (req, res) => {
       id: dbRecord.id,
       url: linkUrl,
       pagarme_link_id: linkId,
+      pagarme_order_id: pagarmeData.id,
     });
 
   } catch (err: any) {
@@ -200,7 +214,7 @@ router.post('/create-link', async (req, res) => {
 // ─── DELETE /api/produtora/cancel-link/:id ────────────────────────────────────
 router.delete('/cancel-link/:id', async (req, res) => {
   try {
-    if (!supabase) return res.status(503).json({ error: 'Database not configured.' });
+    if (!supabase) return res.status(503).json({ error: 'Banco de dados não configurado.' });
 
     const { id } = req.params;
 
@@ -212,11 +226,10 @@ router.delete('/cancel-link/:id', async (req, res) => {
       .maybeSingle();
 
     if (!link) return res.status(404).json({ error: 'Link não encontrado.' });
-    if (link.status !== 'ativo') return res.status(400).json({ error: 'Link não está ativo.' });
 
-    // Cancel on Pagar.me if we have the pagarme_link_id
-    if (link.pagarme_link_id) {
-      await pagarmeRequest(`/payment_links/${link.pagarme_link_id}/cancel`, null, 'DELETE').catch((e) => {
+    // Cancel on Pagar.me order if we have order id
+    if (link.pagarme_order_id) {
+      await pagarmeRequest(`/orders/${link.pagarme_order_id}/closed`, { status: 'canceled' }, 'PATCH').catch((e) => {
         console.warn('[produtora-links] Pagar.me cancel error (non-fatal):', e);
       });
     }
