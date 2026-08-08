@@ -20,6 +20,14 @@
     {
       "path": "/api/cron/expire-access",
       "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/invoices/cron/process",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/invoices/cron/sync",
+      "schedule": "*/30 * * * *"
     }
   ]
 }

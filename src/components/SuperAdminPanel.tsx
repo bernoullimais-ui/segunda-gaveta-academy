@@ -21,7 +21,8 @@ import {
   ShoppingCart,
   DollarSign,
   Eye,
-  MonitorPlay
+  MonitorPlay,
+  Wallet
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { ActionModal } from './ActionModal';
@@ -30,6 +31,7 @@ import { Community } from './Community';
 import { CuponsAdmin } from './CuponsAdmin';
 import { WebsiteEditor } from './WebsiteEditor';
 import { ConfiguracaoAdmin } from './ConfiguracaoAdmin';
+import { ProdutoraFinanceiroAdmin } from './ProdutoraFinanceiroAdmin';
 
 interface Organization {
   id: string;
@@ -52,7 +54,7 @@ export function SuperAdminPanel({ loggedUser, showToast }: { loggedUser: any, sh
   const [usuarios, setUsuarios] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState<'organizacoes' | 'cursos' | 'comunidade' | 'atividades' | 'super_admins' | 'cupons' | 'trafego' | 'website' | 'config'>('organizacoes');
+  const [activeTab, setActiveTab] = useState<'organizacoes' | 'cursos' | 'comunidade' | 'atividades' | 'super_admins' | 'cupons' | 'trafego' | 'website' | 'financeiro_produtora' | 'config'>('organizacoes');
   const [orgModalTab, setOrgModalTab] = useState<'dados_basicos' | 'config_gerais'>('dados_basicos');
   
   // Traffic Analytics States
@@ -510,6 +512,18 @@ export function SuperAdminPanel({ loggedUser, showToast }: { loggedUser: any, sh
         >
           <MonitorPlay className="w-4 h-4" />
           Site Institucional
+        </button>
+        <button
+          onClick={() => {
+            setActiveTab('financeiro_produtora');
+            setSearchTerm('');
+          }}
+          className={`flex items-center gap-2 px-4 py-2 font-bold text-sm rounded-lg transition-all ${
+            activeTab === 'financeiro_produtora' ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md' : 'text-slate-600 hover:bg-white/50 hover:text-slate-900'
+          }`}
+        >
+          <Wallet className="w-4 h-4" />
+          Financeiro Produtora
         </button>
       </div>
 
@@ -1059,6 +1073,11 @@ export function SuperAdminPanel({ loggedUser, showToast }: { loggedUser: any, sh
       {/* 8. Website Institucional */}
       {activeTab === 'website' && (
         <WebsiteEditor />
+      )}
+
+      {/* 9. Financeiro Produtora */}
+      {activeTab === 'financeiro_produtora' && (
+        <ProdutoraFinanceiroAdmin loggedUser={loggedUser} />
       )}
 
       {/* Modal de Edição de Organização */}

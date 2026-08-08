@@ -17,6 +17,10 @@ import {
   notifyOnboarding,
   notifyPaymentFailed
 } from '../lib/notification.js';
+import {
+  scheduleInvoiceJob,
+  cancelInvoicesByTransaction,
+} from '../lib/invoiceService.js';
 
 const router = Router();
 
@@ -418,7 +422,7 @@ router.post('/', async (req, res) => {
           curso_id: targetType === 'curso' ? targetItemId : null,
           trilha_id: targetType === 'trilha' ? targetItemId : null,
           valor_pago: totalPaidBrl,
-          // valor_liquido: Number(netRevenueBrl.toFixed(2)),     // M5: valor líquido armazenado (coluna faltando no DB)
+          valor_liquido: Number(netRevenueBrl.toFixed(2)),          // M5: valor líquido após taxa Pagar.me
           metodo_pagamento: paymentMethod,
           status: 'pago',
           cupom_codigo: coupon_code || null,
@@ -426,13 +430,14 @@ router.post('/', async (req, res) => {
           utm_source: utm_source || null,
           utm_medium: utm_medium || null,
           utm_campaign: utm_campaign || null,
-          affiliate_id: validatedAffiliateId || null,           // M2: apenas afiliado validado
+          affiliate_id: validatedAffiliateId || null,               // M2: apenas afiliado validado
           comissao_afiliado: Number(affiliateShare.toFixed(2)),
           comissao_coprodutores: calculatedCoproducersList,
-          // pagarme_order_id: pagarmeOrderId,                     // M11: para estorno (coluna faltando no DB)
-          // pagarme_charge_id: pagarmeChargeId,                   // M11: para estorno (coluna faltando no DB)
+          pagarme_order_id: pagarmeOrderId,                         // M11: para estorno e NF
+          pagarme_charge_id: pagarmeChargeId,                       // M11: para estorno
           pagarme_subscription_id: order.subscription?.id || order.charges?.[0]?.subscription_id || null // M6: Assinatura
         }]);
+
 
         if (purchaseErr) {
           console.error('Failed to insert into compras table:', purchaseErr);
@@ -499,6 +504,26 @@ router.post('/', async (req, res) => {
         } catch (errWelcome) {
           console.error('[Notification Error] Failed to send welcome notification:', errWelcome);
         }
+      }
+
+      // 5. Agendar emissão de NFS-e (7 dias após aprovação do pagamento)
+      try {
+        const paidAt = order.closed_at || order.updated_at || new Date().toISOString();
+        const compraResult = await supabase
+          .from('compras')
+          .select('id')
+          .eq('pagarme_order_id', order.id)
+          .maybeSingle();
+
+        await scheduleInvoiceJob({
+          transactionId: order.id,
+          compraId: compraResult?.data?.id || undefined,
+          paidAt,
+        });
+        console.log(`[Invoice] Job agendado para transação ${order.id}`);
+      } catch (errInvoice) {
+        console.error('[Invoice] Falha ao agendar job de NF:', errInvoice);
+        // Não bloqueia o retorno do webhook — job pode ser criado manualmente
       }
 
     // ── order.payment_failed / charge.failed ──────────────────────────────
@@ -575,7 +600,27 @@ router.post('/', async (req, res) => {
           console.error('[Webhook] Error processing subscription event:', errSub);
         }
       }
+
+    // ── order.refunded / charge.chargeback — Cancelar NFS-e automaticamente ──
+    } else if (
+      event.type === 'order.refunded' ||
+      event.type === 'charge.refunded' ||
+      event.type === 'charge.chargeback_created'
+    ) {
+      const dataObj = event.data;
+      const orderId = dataObj.order?.id || dataObj.id || null;
+
+      if (orderId) {
+        try {
+          console.log(`[Invoice] Cancelando NFS-e por ${event.type} - order: ${orderId}`);
+          await cancelInvoicesByTransaction(orderId);
+        } catch (errCancel) {
+          console.error('[Invoice] Erro ao cancelar NFS-e por estorno:', errCancel);
+          // Não bloqueia o retorno do webhook — admin verá no painel
+        }
+      }
     }
+
 
     res.status(200).send('Webhook received');
   } catch (error: any) {

@@ -29,6 +29,7 @@ import ogRouter from './routes/og.js';
 import { dailyRouter } from './routes/daily.js';
 import trafegoRouter from './routes/trafego.js';
 import whatsappRouter from './routes/whatsapp.js';
+import invoicesRouter from './routes/invoices.js';
 
 // ─── Middleware de segurança para webhook ────────────────────────────────────
 import { validatePagarmeWebhook } from './lib/webhookAuth.js';
@@ -88,6 +89,7 @@ app.use('/api/pagarme', refundRouter);                                     // /a
 app.use('/api', dailyRouter);                                              // /api/daily/create-room
 app.use('/api/trafego', trafegoRouter);
 app.use('/api/whatsapp', whatsappRouter);               // Atendimento IA WhatsApp
+app.use('/api/invoices', invoicesRouter);               // NFS-e: aluno, cron e webhook Focus NF
 
 // ─── Export ───────────────────────────────────────────────────────────────────
 export default app;
