@@ -51,6 +51,7 @@ export interface ProdutoraReceita {
   tipo: 'percentual_curso' | 'landing_page' | 'producao_video' | 'mentoria_consultoria' | 'setup_onboarding' | 'gestao_mensal' | 'outro';
   descricao: string | null;
   organizacao_id: string | null;
+  cliente_nome?: string | null;
   compra_id: string | null;
   valor: number;
   percentual_aplicado: number | null;
@@ -203,7 +204,9 @@ export function ProdutoraFinanceiroAdmin({ loggedUser }: { loggedUser?: any }) {
   const [formReceita, setFormReceita] = useState({
     tipo: 'gestao_redes_sociais',
     descricao: '',
+    clienteType: 'sem' as 'sem' | 'org' | 'outro',
     organizacao_id: '',
+    cliente_nome: '',
     valor: '',
     data_referencia: new Date().toISOString().split('T')[0],
     status: 'recebido',
@@ -661,7 +664,8 @@ export function ProdutoraFinanceiroAdmin({ loggedUser }: { loggedUser?: any }) {
       const payload: any = {
         tipo: formReceita.tipo,
         descricao: formReceita.descricao.trim() || TIPO_RECEITA_LABELS[formReceita.tipo],
-        organizacao_id: formReceita.organizacao_id || null,
+        organizacao_id: formReceita.clienteType === 'org' ? (formReceita.organizacao_id || null) : null,
+        cliente_nome: formReceita.clienteType === 'outro' ? (formReceita.cliente_nome.trim() || null) : null,
         valor: parseFloat(formReceita.valor),
         data_referencia: formReceita.data_referencia,
         status: formReceita.status,
@@ -1185,6 +1189,8 @@ export function ProdutoraFinanceiroAdmin({ loggedUser }: { loggedUser?: any }) {
                           <span className="flex items-center gap-1.5 text-blue-700 font-semibold">
                             <Building2 className="w-3.5 h-3.5" /> {rec.organizacoes.nome}
                           </span>
+                        ) : rec.cliente_nome ? (
+                          <span className="font-semibold text-slate-800">{rec.cliente_nome}</span>
                         ) : (
                           <span className="text-slate-400">Sem Vínculo</span>
                         )}
@@ -1212,7 +1218,9 @@ export function ProdutoraFinanceiroAdmin({ loggedUser }: { loggedUser?: any }) {
                                 setFormReceita({
                                   tipo: rec.tipo,
                                   descricao: rec.descricao || '',
+                                  clienteType: rec.organizacao_id ? 'org' : rec.cliente_nome ? 'outro' : 'sem',
                                   organizacao_id: rec.organizacao_id || '',
+                                  cliente_nome: rec.cliente_nome || '',
                                   valor: String(rec.valor),
                                   data_referencia: rec.data_referencia,
                                   status: rec.status,
@@ -1453,15 +1461,41 @@ export function ProdutoraFinanceiroAdmin({ loggedUser }: { loggedUser?: any }) {
               <div>
                 <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Cliente / Organização (Opcional)</label>
                 <select
-                  value={formReceita.organizacao_id}
-                  onChange={(e) => setFormReceita({ ...formReceita, organizacao_id: e.target.value })}
-                  className="w-full p-3 border border-slate-200 rounded-xl text-sm font-semibold outline-none focus:ring-2 focus:ring-blue-500"
+                  value={formReceita.clienteType === 'org' ? formReceita.organizacao_id : formReceita.clienteType === 'outro' ? 'outro' : ''}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === 'outro') {
+                      setFormReceita({ ...formReceita, clienteType: 'outro', organizacao_id: '' });
+                    } else if (val === '') {
+                      setFormReceita({ ...formReceita, clienteType: 'sem', organizacao_id: '', cliente_nome: '' });
+                    } else {
+                      setFormReceita({ ...formReceita, clienteType: 'org', organizacao_id: val, cliente_nome: '' });
+                    }
+                  }}
+                  className="w-full p-3 border border-slate-200 rounded-xl text-sm font-semibold outline-none focus:ring-2 focus:ring-blue-500 bg-white cursor-pointer"
                 >
                   <option value="">Sem Organização Vinculada</option>
-                  {organizacoes.map(org => (
-                    <option key={org.id} value={org.id}>{org.nome}</option>
-                  ))}
+                  <optgroup label="Organizações Cadastradas">
+                    {organizacoes.map(org => (
+                      <option key={org.id} value={org.id}>{org.nome}</option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="Outro Cliente">
+                    <option value="outro">✨ Outro (Digitar Nome do Cliente)</option>
+                  </optgroup>
                 </select>
+
+                {formReceita.clienteType === 'outro' && (
+                  <div className="mt-2.5">
+                    <input
+                      type="text"
+                      placeholder="Digite o nome do cliente..."
+                      value={formReceita.cliente_nome}
+                      onChange={(e) => setFormReceita({ ...formReceita, cliente_nome: e.target.value })}
+                      className="w-full p-3 border border-blue-300 bg-blue-50/40 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-blue-500 text-slate-900"
+                    />
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-4">
