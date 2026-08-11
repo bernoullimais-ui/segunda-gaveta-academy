@@ -303,6 +303,64 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
   const [isAddTableModalOpen, setIsAddTableModalOpen] = useState(false);
   const [tableCols, setTableCols] = useState(4);
   const [tableRows, setTableRows] = useState(4);
+
+  const [participantesSubTab, setParticipantesSubTab] = useState<'inscritos' | 'leads'>('inscritos');
+  const [courseLeads, setCourseLeads] = useState<any[]>([]);
+  const [leadSearch, setLeadSearch] = useState('');
+
+  const loadCourseLeads = useCallback(async () => {
+    if (!orgId) return;
+    try {
+      const { data, error } = await supabase
+        .from('leads_contato')
+        .select('*')
+        .eq('organizacao_id', orgId)
+        .order('created_at', { ascending: false });
+
+      if (!error && data) {
+        setCourseLeads(data);
+      }
+    } catch (err) {
+      console.error('Erro ao carregar leads:', err);
+    }
+  }, [orgId]);
+
+  useEffect(() => {
+    if (activeTab === 'participantes') {
+      loadCourseLeads();
+    }
+  }, [activeTab, loadCourseLeads]);
+
+  const handleMarkLeadAsRead = async (leadId: string) => {
+    await supabase.from('leads_contato').update({ lido: true }).eq('id', leadId);
+    setCourseLeads(prev => prev.map(l => l.id === leadId ? { ...l, lido: true } : l));
+  };
+
+  const handleDeleteLead = async (leadId: string) => {
+    if (!confirm('Deseja excluir este lead?')) return;
+    await supabase.from('leads_contato').delete().eq('id', leadId);
+    setCourseLeads(prev => prev.filter(l => l.id !== leadId));
+  };
+
+  const handleExportLeadsCSV = () => {
+    if (courseLeads.length === 0) return;
+    const headers = ['Nome', 'Email', 'Telefone', 'Mensagem', 'Data'];
+    const rows = courseLeads.map(l => [
+      `"${l.nome || ''}"`,
+      `"${l.email || ''}"`,
+      `"${l.telefone || ''}"`,
+      `"${(l.mensagem || '').replace(/"/g, '""')}"`,
+      `"${new Date(l.created_at).toLocaleString('pt-BR')}"`
+    ]);
+    const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `leads_${activeCurso?.slug || 'curso'}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
   const artigoTextareaRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -3375,154 +3433,307 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
         
         {activeTab === 'participantes' && (
           <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h3 className="font-bold text-xl text-slate-900">{filteredParticipants.length} participantes ativos</h3>
-              <div className="flex items-center gap-3">
-                <button 
-                  onClick={handleExportCSV}
-                  className="flex items-center gap-2 px-4 py-2 border border-blue-200 text-blue-600 rounded-full text-sm font-medium hover:bg-blue-50 transition-colors"
-                >
-                  <Download className="w-4 h-4"/> Exportar CSV
-                </button>
-                
-                <div className="relative">
-                  <Filter className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-blue-600 pointer-events-none" />
-                  <select 
-                    value={participantStatusFilter}
-                    onChange={(e) => setParticipantStatusFilter(e.target.value)}
-                    className="pl-9 pr-8 py-2 border border-blue-200 text-blue-600 rounded-full text-sm font-medium hover:bg-blue-50 focus:outline-none appearance-none cursor-pointer bg-white"
-                  >
-                    <option value="todos">Todos os Status</option>
-                    <option value="concluido">Concluídos</option>
-                    <option value="andamento">Em Andamento</option>
-                    <option value="nao_comecou">Não Começaram</option>
-                  </select>
+            {/* Sub-tab Switcher: Inscritos vs Leads ("Em Breve") */}
+            <div className="flex items-center gap-3 border-b border-slate-200 pb-4">
+              <button
+                onClick={() => setParticipantesSubTab('inscritos')}
+                className={`px-5 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2 cursor-pointer ${
+                  participantesSubTab === 'inscritos' 
+                    ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20' 
+                    : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                }`}
+              >
+                <Users className="w-4 h-4" /> Alunos Inscritos ({filteredParticipants.length})
+              </button>
+
+              <button
+                onClick={() => setParticipantesSubTab('leads')}
+                className={`px-5 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2 cursor-pointer ${
+                  participantesSubTab === 'leads' 
+                    ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20' 
+                    : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                }`}
+              >
+                <Mail className="w-4 h-4" /> Leads ("Em Breve")
+                {courseLeads.filter(l => !l.lido).length > 0 && (
+                  <span className="bg-amber-400 text-slate-900 text-xs px-2 py-0.5 rounded-full font-black ml-1">
+                    {courseLeads.filter(l => !l.lido).length}
+                  </span>
+                )}
+              </button>
+            </div>
+
+            {participantesSubTab === 'inscritos' ? (
+              <div className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <h3 className="font-bold text-xl text-slate-900">{filteredParticipants.length} participantes ativos</h3>
+                  <div className="flex items-center gap-3">
+                    <button 
+                      onClick={handleExportCSV}
+                      className="flex items-center gap-2 px-4 py-2 border border-blue-200 text-blue-600 rounded-full text-sm font-medium hover:bg-blue-50 transition-colors"
+                    >
+                      <Download className="w-4 h-4"/> Exportar CSV
+                    </button>
+                    
+                    <div className="relative">
+                      <Filter className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-blue-600 pointer-events-none" />
+                      <select 
+                        value={participantStatusFilter}
+                        onChange={(e) => setParticipantStatusFilter(e.target.value)}
+                        className="pl-9 pr-8 py-2 border border-blue-200 text-blue-600 rounded-full text-sm font-medium hover:bg-blue-50 focus:outline-none appearance-none cursor-pointer bg-white"
+                      >
+                        <option value="todos">Todos os Status</option>
+                        <option value="concluido">Concluídos</option>
+                        <option value="andamento">Em Andamento</option>
+                        <option value="nao_comecou">Não Começaram</option>
+                      </select>
+                    </div>
+
+                    <div className="relative">
+                      <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                      <input 
+                        type="text" 
+                        placeholder="Pesquisar participante..." 
+                        value={participantSearch}
+                        onChange={(e) => setParticipantSearch(e.target.value)}
+                        className="pl-9 pr-4 py-2 border border-slate-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-64" 
+                      />
+                    </div>
+                  </div>
                 </div>
 
-                <div className="relative">
-                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input 
-                    type="text" 
-                    placeholder="Pesquisar participante..." 
-                    value={participantSearch}
-                    onChange={(e) => setParticipantSearch(e.target.value)}
-                    className="pl-9 pr-4 py-2 border border-slate-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-64" 
-                  />
+                <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                  <table className="w-full text-sm text-left">
+                    <thead className="bg-[#f2f6fe] text-slate-700 border-b border-blue-100">
+                      <tr>
+                        <th className="px-6 py-4 font-semibold">Nome</th>
+                        <th className="px-6 py-4 font-semibold">Desempenho <span className="text-blue-600">↓</span></th>
+                        <th className="px-6 py-4 font-semibold">Última atividade</th>
+                        <th className="px-6 py-4 font-semibold">Data de entrada</th>
+                        <th className="px-6 py-4 font-semibold">Preço</th>
+                        <th className="px-6 py-4 font-semibold">Certificado</th>
+                        <th className="px-6 py-4"></th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {(filteredParticipants.length > 0 ? filteredParticipants.map(participant => {
+                          const getInitials = (name?: string) => name ? name.substring(0, 2).toUpperCase() : '??';
+                          const cappedProgress = Math.min(100, Math.max(0, participant.progresso || 0));
+                          const isNew = cappedProgress === 0;
+                          const isFinished = cappedProgress >= 100;
+                          let totalQuizPercentage = 0;
+                          let numQuizzes = 0;
+                          if (participant.quiz_scores) {
+                            Object.values(participant.quiz_scores).forEach((score: any) => {
+                              if (score.total && score.total > 0) {
+                                totalQuizPercentage += ((score.correct || 0) / score.total) * 100;
+                                numQuizzes++;
+                              }
+                            });
+                          }
+                          const hasQuiz = numQuizzes > 0;
+                          const quizGrade = hasQuiz ? Math.round(totalQuizPercentage / numQuizzes) : null;
+
+                          let bgColor = 'bg-slate-200';
+                          let txColor = 'text-slate-700';
+                          let statusText = 'Baixo';
+                          if (cappedProgress >= 90) { bgColor = 'bg-emerald-100'; txColor = 'text-emerald-700'; statusText = 'Excepcional'; }
+                          else if (cappedProgress >= 50) { bgColor = 'bg-yellow-100'; txColor = 'text-yellow-700'; statusText = 'Alto'; }
+                          else if (cappedProgress > 0) { bgColor = 'bg-amber-100'; txColor = 'text-amber-700'; statusText = 'Baixo'; }
+                          else { bgColor = 'bg-slate-400'; txColor = 'text-white'; statusText = 'Baixo'; }
+
+                          return {
+                              nome: participant.usuarios?.nome || participant.usuarios?.email || 'Usuário Desconhecido',
+                              initials: getInitials(participant.usuarios?.nome || participant.usuarios?.email),
+                              rate: `${cappedProgress}%`,
+                              status: statusText,
+                              quizGrade,
+                              date1: new Date(participant.updated_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }),
+                              date2: new Date(participant.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }),
+                              bgColor,
+                              txColor,
+                              isNew,
+                              isFinished
+                          };
+                      }) : [
+                        { nome: 'Nenhum resultado encontrado', initials: '?', rate: '-', status: '-', date1: '-', date2: '-', bgColor: 'bg-slate-100', txColor: 'text-slate-400', quizGrade: null, isEmpty: true },
+                      ]).map((p, i) => (
+                        <tr key={i} className={`hover:bg-slate-50 ${(p as any).isEmpty ? 'opacity-50' : ''}`}>
+                          <td className="px-6 py-4">
+                             <div className="flex items-center gap-3">
+                               <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${p.bgColor} ${p.txColor}`}>{p.initials}</div>
+                               <div>
+                                 <div className="font-medium text-slate-900">{p.nome}</div>
+                                 {!(p as any).isEmpty && (
+                                   <div className={`text-[10px] uppercase font-semibold mt-0.5 px-2 py-0.5 inline-block rounded ${p.isNew ? 'bg-rose-100 text-rose-700' : p.isFinished ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-800'}`}>
+                                     {p.isNew ? 'Não começou' : p.isFinished ? 'Concluído' : 'Em Andamento'}
+                                   </div>
+                                 )}
+                               </div>
+                             </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="font-bold text-slate-900">{p.rate}</div>
+                            <div className="text-xs text-slate-500">{p.status}</div>
+                            {p.quizGrade !== null && (
+                              <div className="text-xs font-semibold text-blue-600 mt-0.5">Nota: {p.quizGrade}%</div>
+                            )}
+                          </td>
+                          <td className="px-6 py-4 text-slate-600">{p.date1}</td>
+                          <td className="px-6 py-4 text-slate-600">{p.date2}</td>
+                          <td className="px-6 py-4 text-slate-600">Gratuito</td>
+                          <td className="px-6 py-4 text-slate-400 font-medium">
+                            {p.isFinished ? (
+                              <span className="text-emerald-600">Concluído</span>
+                            ) : (
+                              <>Não<br/>emitido</>
+                            )}
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                             <div className="flex items-center justify-end gap-2">
+                                {p.isFinished && (
+                                   <button 
+                                     onClick={() => {
+                                       const participant = courseParticipants[i];
+                                       if (participant) handleDownloadParticipantCertificate(participant);
+                                     }}
+                                     className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
+                                     title="Baixar Certificado"
+                                   >
+                                     <Download className="w-5 h-5" />
+                                   </button>
+                                )}
+                                <button className="text-blue-600 hover:bg-blue-50 p-2 rounded-full">
+                                  <MoreHorizontal className="w-5 h-5"/>
+                                </button>
+                             </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
-            </div>
+            ) : (
+              /* Leads Table View */
+              <div className="space-y-6">
+                <div className="flex justify-between items-center flex-wrap gap-4">
+                  <div>
+                    <h3 className="font-bold text-xl text-slate-900">{courseLeads.length} leads de "Em Breve" capturados</h3>
+                    <p className="text-xs text-slate-500 mt-0.5">Contatos da lista de espera do curso/organização</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <button 
+                      onClick={handleExportLeadsCSV}
+                      disabled={courseLeads.length === 0}
+                      className="flex items-center gap-2 px-4 py-2 border border-blue-200 text-blue-600 rounded-full text-sm font-medium hover:bg-blue-50 transition-colors disabled:opacity-50 cursor-pointer"
+                    >
+                      <Download className="w-4 h-4"/> Exportar CSV
+                    </button>
 
-            <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-              <table className="w-full text-sm text-left">
-                <thead className="bg-[#f2f6fe] text-slate-700 border-b border-blue-100">
-                  <tr>
-                    <th className="px-6 py-4 font-semibold">Nome</th>
-                    <th className="px-6 py-4 font-semibold">Desempenho <span className="text-blue-600">↓</span></th>
-                    <th className="px-6 py-4 font-semibold">Última atividade</th>
-                    <th className="px-6 py-4 font-semibold">Data de entrada</th>
-                    <th className="px-6 py-4 font-semibold">Preço</th>
-                    <th className="px-6 py-4 font-semibold">Certificado</th>
-                    <th className="px-6 py-4"></th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {(filteredParticipants.length > 0 ? filteredParticipants.map(participant => {
-                      const getInitials = (name?: string) => name ? name.substring(0, 2).toUpperCase() : '??';
-                      const cappedProgress = Math.min(100, Math.max(0, participant.progresso || 0));
-                      const isNew = cappedProgress === 0;
-                      const isFinished = cappedProgress >= 100;
-                      let totalQuizPercentage = 0;
-                      let numQuizzes = 0;
-                      if (participant.quiz_scores) {
-                        Object.values(participant.quiz_scores).forEach((score: any) => {
-                          if (score.total && score.total > 0) {
-                            totalQuizPercentage += ((score.correct || 0) / score.total) * 100;
-                            numQuizzes++;
-                          }
-                        });
-                      }
-                      const hasQuiz = numQuizzes > 0;
-                      const quizGrade = hasQuiz ? Math.round(totalQuizPercentage / numQuizzes) : null;
+                    <div className="relative">
+                      <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                      <input 
+                        type="text" 
+                        placeholder="Pesquisar lead..." 
+                        value={leadSearch}
+                        onChange={(e) => setLeadSearch(e.target.value)}
+                        className="pl-9 pr-4 py-2 border border-slate-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-64" 
+                      />
+                    </div>
+                  </div>
+                </div>
 
-                      let bgColor = 'bg-slate-200';
-                      let txColor = 'text-slate-700';
-                      let statusText = 'Baixo';
-                      if (cappedProgress >= 90) { bgColor = 'bg-emerald-100'; txColor = 'text-emerald-700'; statusText = 'Excepcional'; }
-                      else if (cappedProgress >= 50) { bgColor = 'bg-yellow-100'; txColor = 'text-yellow-700'; statusText = 'Alto'; }
-                      else if (cappedProgress > 0) { bgColor = 'bg-amber-100'; txColor = 'text-amber-700'; statusText = 'Baixo'; }
-                      else { bgColor = 'bg-slate-400'; txColor = 'text-white'; statusText = 'Baixo'; }
-
-                      return {
-                          nome: participant.usuarios?.nome || participant.usuarios?.email || 'Usuário Desconhecido',
-                          initials: getInitials(participant.usuarios?.nome || participant.usuarios?.email),
-                          rate: `${cappedProgress}%`,
-                          status: statusText,
-                          quizGrade,
-                          date1: new Date(participant.updated_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }),
-                          date2: new Date(participant.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }),
-                          bgColor,
-                          txColor,
-                          isNew,
-                          isFinished
-                      };
-                  }) : [
-                    { nome: 'Nenhum resultado encontrado', initials: '?', rate: '-', status: '-', date1: '-', date2: '-', bgColor: 'bg-slate-100', txColor: 'text-slate-400', quizGrade: null, isEmpty: true },
-                  ]).map((p, i) => (
-                    <tr key={i} className={`hover:bg-slate-50 ${(p as any).isEmpty ? 'opacity-50' : ''}`}>
-                      <td className="px-6 py-4">
-                         <div className="flex items-center gap-3">
-                           <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${p.bgColor} ${p.txColor}`}>{p.initials}</div>
-                           <div>
-                             <div className="font-medium text-slate-900">{p.nome}</div>
-                             {!(p as any).isEmpty && (
-                               <div className={`text-[10px] uppercase font-semibold mt-0.5 px-2 py-0.5 inline-block rounded ${p.isNew ? 'bg-rose-100 text-rose-700' : p.isFinished ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-800'}`}>
-                                 {p.isNew ? 'Não começou' : p.isFinished ? 'Concluído' : 'Em Andamento'}
-                               </div>
-                             )}
-                           </div>
-                         </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="font-bold text-slate-900">{p.rate}</div>
-                        <div className="text-xs text-slate-500">{p.status}</div>
-                        {p.quizGrade !== null && (
-                          <div className="text-xs font-semibold text-blue-600 mt-0.5">Nota: {p.quizGrade}%</div>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 text-slate-600">{p.date1}</td>
-                      <td className="px-6 py-4 text-slate-600">{p.date2}</td>
-                      <td className="px-6 py-4 text-slate-600">Gratuito</td>
-                      <td className="px-6 py-4 text-slate-400 font-medium">
-                        {p.isFinished ? (
-                          <span className="text-emerald-600">Concluído</span>
-                        ) : (
-                          <>Não<br/>emitido</>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                         <div className="flex items-center justify-end gap-2">
-                            {p.isFinished && (
-                               <button 
-                                 onClick={() => {
-                                   const participant = courseParticipants[i];
-                                   if (participant) handleDownloadParticipantCertificate(participant);
-                                 }}
-                                 className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
-                                 title="Baixar Certificado"
-                               >
-                                 <Download className="w-5 h-5" />
-                               </button>
-                            )}
-                            <button className="text-blue-600 hover:bg-blue-50 p-2 rounded-full">
-                              <MoreHorizontal className="w-5 h-5"/>
-                            </button>
-                         </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                  {courseLeads.length === 0 ? (
+                    <div className="p-12 text-center text-slate-500">
+                      <Mail className="w-12 h-12 mx-auto text-slate-300 mb-3" />
+                      <p className="font-bold text-slate-700">Nenhum lead capturado ainda</p>
+                      <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
+                        Quando este curso for publicado e marcado como "Em Breve", os visitantes da página de vendas poderão deixar Nome, E-mail e WhatsApp nesta aba.
+                      </p>
+                    </div>
+                  ) : (
+                    <table className="w-full text-sm text-left">
+                      <thead className="bg-[#f2f6fe] text-slate-700 border-b border-blue-100">
+                        <tr>
+                          <th className="px-6 py-4 font-semibold">Nome</th>
+                          <th className="px-6 py-4 font-semibold">E-mail</th>
+                          <th className="px-6 py-4 font-semibold">WhatsApp</th>
+                          <th className="px-6 py-4 font-semibold">Mensagem / Origem</th>
+                          <th className="px-6 py-4 font-semibold">Data</th>
+                          <th className="px-6 py-4 font-semibold text-right">Ações</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {courseLeads
+                          .filter(l => 
+                            !leadSearch || 
+                            (l.nome || '').toLowerCase().includes(leadSearch.toLowerCase()) || 
+                            (l.email || '').toLowerCase().includes(leadSearch.toLowerCase()) || 
+                            (l.telefone || '').includes(leadSearch)
+                          )
+                          .map(lead => (
+                            <tr key={lead.id} className={`hover:bg-slate-50 ${!lead.lido ? 'bg-blue-50/20' : ''}`}>
+                              <td className="px-6 py-4 font-medium text-slate-900">
+                                <div className="flex items-center gap-2">
+                                  {!lead.lido && (
+                                    <span className="w-2 h-2 rounded-full bg-blue-600 shrink-0" title="Novo Lead" />
+                                  )}
+                                  <span>{lead.nome || 'Sem Nome'}</span>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 text-slate-600">
+                                <a href={`mailto:${lead.email}`} className="hover:text-blue-600 underline">
+                                  {lead.email}
+                                </a>
+                              </td>
+                              <td className="px-6 py-4 text-slate-600">
+                                {lead.telefone ? (
+                                  <a 
+                                    href={`https://wa.me/55${lead.telefone.replace(/\D/g, '')}`} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer" 
+                                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 font-medium text-xs hover:bg-emerald-100 transition-colors"
+                                  >
+                                    📱 {lead.telefone}
+                                  </a>
+                                ) : '-'}
+                              </td>
+                              <td className="px-6 py-4 text-xs text-slate-500 max-w-xs truncate">
+                                {lead.mensagem || 'Lista de Espera'}
+                              </td>
+                              <td className="px-6 py-4 text-slate-500 text-xs whitespace-nowrap">
+                                {new Date(lead.created_at).toLocaleString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                              </td>
+                              <td className="px-6 py-4 text-right">
+                                <div className="flex items-center justify-end gap-2">
+                                  {!lead.lido && (
+                                    <button 
+                                      onClick={() => handleMarkLeadAsRead(lead.id)}
+                                      className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                                      title="Marcar como lido"
+                                    >
+                                      <CheckCircle className="w-4 h-4" />
+                                    </button>
+                                  )}
+                                  <button 
+                                    onClick={() => handleDeleteLead(lead.id)}
+                                    className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                                    title="Excluir Lead"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         )}
 

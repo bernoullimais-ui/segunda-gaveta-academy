@@ -112,7 +112,7 @@ const Nav = ({ layout, item, lp, onEnrollClick }: NavProps) => {
             onClick={onEnrollClick}
             className="typo-btn px-3 sm:px-6 py-1.5 sm:py-2.5 bg-primary text-white rounded-full font-bold text-xs sm:text-sm hover:opacity-90 shadow-lg shadow-primary/20 active:scale-95 transition-all whitespace-nowrap"
           >
-            {lp.cta_text || 'Inscrever-se'}
+            {item?.em_breve ? 'Em Breve' : (lp.cta_text || 'Inscrever-se')}
           </button>
         </div>
       </div>
@@ -618,6 +618,10 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
 
   const [isHeroPlaying, setIsHeroPlaying] = useState(false);
   const [showEnrollModal, setShowEnrollModal] = useState(false);
+  const [showLeadModal, setShowLeadModal] = useState(false);
+  const [leadData, setLeadData] = useState({ nome: '', email: '', telefone: '' });
+  const [isSubmittingLead, setIsSubmittingLead] = useState(false);
+  const [leadSuccess, setLeadSuccess] = useState(false);
   const [enrollMode, setEnrollMode] = useState<'free' | 'paid' | null>(null);
   const [enrollStep, setEnrollStep] = useState<'data' | 'payment' | 'success'>('data');
   const [enrollData, setEnrollData] = useState({ nome: '', email: '', cpf: '', password: '' });
@@ -777,6 +781,17 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
   const paymentInstallmentsLimit = config.pagamento_parcelas_limite || '12';
 
   const renderPriceBlock = (isDarkLayout: boolean) => {
+    if (item?.em_breve) {
+      return (
+        <div className="inline-flex items-center gap-2 px-4 py-2.5 bg-amber-500/10 border border-amber-500/30 rounded-2xl">
+          <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
+          <span className={`text-sm sm:text-base font-black ${isDarkLayout ? 'text-amber-400' : 'text-amber-700'} uppercase tracking-wider`}>
+            Em Breve — Cadastre-se na Lista de Espera
+          </span>
+        </div>
+      );
+    }
+
     if (isFree) {
       return (
         <div className="flex items-center gap-2">
@@ -869,6 +884,12 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
   };
 
   const handleEnrollClick = () => {
+    if (item?.em_breve) {
+      setLeadData({ nome: '', email: '', telefone: '' });
+      setLeadSuccess(false);
+      setShowLeadModal(true);
+      return;
+    }
     if (isFree) {
       setEnrollMode('free');
       setEnrollStep('data');
@@ -877,6 +898,35 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
       setEnrollStep('data');
     }
     setShowEnrollModal(true);
+  };
+
+  const handleLeadSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!leadData.nome.trim() || !leadData.email.trim() || !leadData.telefone.trim()) return;
+
+    setIsSubmittingLead(true);
+    try {
+      const orgId = item?.organizacao_id || item?.organizacoes?.id || null;
+      const courseName = item?.nome || 'Curso';
+      const payload: any = {
+        nome: leadData.nome.trim(),
+        email: leadData.email.trim(),
+        telefone: leadData.telefone.trim(),
+        mensagem: `Interesse no lançamento (Em Breve): ${courseName}`,
+        organizacao_id: orgId,
+        lido: false
+      };
+
+      const { error } = await supabase.from('leads_contato').insert([payload]);
+      if (error) throw error;
+
+      setLeadSuccess(true);
+    } catch (err: any) {
+      console.error('Erro ao salvar lead:', err);
+      alert('Erro ao enviar cadastro: ' + (err.message || 'Tente novamente.'));
+    } finally {
+      setIsSubmittingLead(false);
+    }
   };
 
   const processRegistration = async () => {
@@ -1240,7 +1290,9 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
         {showStickyCTA && (
           <div className="fixed bottom-0 left-0 right-0 z-[80] md:hidden bg-slate-950/95 backdrop-blur-md border-t border-slate-800 px-4 py-3 flex items-center justify-between gap-3 animate-in slide-in-from-bottom-4 duration-300">
             <div className="text-left">
-              {isFree ? (
+              {item?.em_breve ? (
+                <span className="text-amber-400 font-black text-sm uppercase tracking-wider">Em Breve</span>
+              ) : isFree ? (
                 <span className="text-emerald-400 font-black text-lg">GRATUITO</span>
               ) : (
                 <>
@@ -1257,13 +1309,13 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                   )}
                 </>
               )}
-              <div className="text-slate-500 text-[10px] font-medium">{lp.guarantee_days || 7} dias de garantia</div>
+              <div className="text-slate-500 text-[10px] font-medium">{item?.em_breve ? 'Lista de Espera VIP' : `${lp.guarantee_days || 7} dias de garantia`}</div>
             </div>
             <button
               onClick={handleEnrollClick}
               className="typo-btn flex-1 max-w-[200px] py-3 bg-primary text-white rounded-2xl font-black text-sm hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-primary/30"
             >
-              {lp.cta_text || 'GARANTIR VAGA'}
+              {item?.em_breve ? 'Cadastrar-se' : (lp.cta_text || 'GARANTIR VAGA')}
             </button>
           </div>
         )}
@@ -1326,7 +1378,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                       onClick={handleEnrollClick}
                       className="typo-btn w-full sm:w-auto px-8 sm:px-12 py-4 sm:py-6 bg-primary text-white rounded-2xl sm:rounded-3xl font-black text-lg sm:text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(var(--primary-rgb),0.3)] flex items-center justify-center gap-3"
                     >
-                      {lp.cta_text || 'COMPRAR AGORA'} <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6" />
+                      {item?.em_breve ? 'Cadastrar-se' : (lp.cta_text || 'COMPRAR AGORA')} <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6" />
                     </button>
                     {lp.instructor?.name && (
                       <span className={`text-sm ${layout === 'escuro' ? 'text-slate-400' : 'text-slate-300 lg:text-slate-500'} typo-text`}>
@@ -1383,7 +1435,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                 onClick={handleEnrollClick}
                 className="typo-btn w-full sm:w-auto px-12 py-5 bg-primary text-white rounded-3xl font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(var(--primary-rgb),0.3)] flex items-center justify-center gap-3"
               >
-                {lp.cta_text || 'COMPRAR AGORA'} <ArrowRight className="w-6 h-6" />
+                {item?.em_breve ? 'Cadastrar-se' : (lp.cta_text || 'COMPRAR AGORA')} <ArrowRight className="w-6 h-6" />
               </button>
             </div>
           </div>
@@ -1503,7 +1555,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
               onClick={handleEnrollClick}
               className="typo-btn w-full sm:w-auto px-12 py-5 bg-primary text-white rounded-3xl font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(var(--primary-rgb),0.3)] flex items-center justify-center gap-3"
             >
-              {lp.cta_text || 'COMPRAR AGORA'} <ArrowRight className="w-6 h-6" />
+              {item?.em_breve ? 'Cadastrar-se' : (lp.cta_text || 'COMPRAR AGORA')} <ArrowRight className="w-6 h-6" />
             </button>
           </div>
         </section>
@@ -1707,9 +1759,10 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
               <div className="flex flex-col items-center gap-10">
                 <button 
                   onClick={handleEnrollClick}
-                  className="w-full sm:w-auto px-20 py-8 bg-white text-slate-900 rounded-[32px] font-black text-2xl hover:scale-110 active:scale-95 transition-all shadow-[0_30px_60px_rgba(255,255,255,0.1)]"
+                  className="typo-btn px-10 py-5 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white font-black text-xl rounded-2xl shadow-2xl shadow-blue-500/30 hover:scale-105 active:scale-95 transition-all flex items-center gap-3 mx-auto"
                 >
-                  {lp.cta_text || 'QUERO MINHA VAGA AGORA'}
+                  {item?.em_breve ? 'Cadastrar-se' : (lp.cta_text || 'QUERO MINHA VAGA AGORA')}
+                  <ArrowRight className="w-6 h-6" />
                 </button>
                 <div className="flex flex-col md:flex-row items-center gap-8 text-slate-500 font-bold uppercase tracking-widest text-[10px]">
                    <span className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-emerald-500" /> Garantia de {lp.guarantee_days || 7} dias</span>
@@ -1808,7 +1861,9 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             {showStickyCTA && (
               <div className="fixed bottom-0 left-0 right-0 z-[80] md:hidden bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 py-3 flex items-center justify-between gap-3 animate-in slide-in-from-bottom-4 duration-300 shadow-2xl">
                 <div className="text-left">
-                  {isFree ? (
+                  {item?.em_breve ? (
+                    <span className="text-amber-600 font-black text-sm uppercase tracking-wider">Em Breve</span>
+                  ) : isFree ? (
                     <span className="text-emerald-600 font-black text-lg">GRATUITO</span>
                   ) : (
                     <>
@@ -1825,13 +1880,13 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                       )}
                     </>
                   )}
-                  <div className="text-slate-400 text-[10px] font-medium">{lp.guarantee_days || 7} dias de garantia</div>
+                  <div className="text-slate-400 text-[10px] font-medium">{item?.em_breve ? 'Lista de Espera VIP' : `${lp.guarantee_days || 7} dias de garantia`}</div>
                 </div>
                 <button
                   onClick={handleEnrollClick}
                   className="typo-btn flex-1 max-w-[200px] py-3 bg-primary text-white rounded-2xl font-black text-sm hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-primary/20"
                 >
-                  {lp.cta_text || 'GARANTIR VAGA'}
+                  {item?.em_breve ? 'Cadastrar-se' : (lp.cta_text || 'GARANTIR VAGA')}
                 </button>
               </div>
             )}
@@ -1892,9 +1947,9 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                   <div className="flex flex-col items-center gap-2 w-full sm:w-auto">
                     <button
                       onClick={handleEnrollClick}
-                      className="typo-btn w-full sm:w-auto px-8 sm:px-10 py-4 sm:py-5 bg-primary text-white rounded-2xl font-bold text-base sm:text-lg hover:opacity-90 shadow-xl shadow-primary/20 active:scale-95 transition-all flex items-center justify-center gap-3"
+                      className="typo-btn px-6 sm:px-8 py-3.5 sm:py-4 bg-primary text-white rounded-2xl font-bold text-base sm:text-lg hover:opacity-90 active:scale-95 transition-all shadow-xl shadow-primary/20 flex items-center gap-3"
                     >
-                      {lp.cta_text || 'Quero Garantir Minha Vaga'} <ArrowRight className="w-5 h-5" />
+                      {item?.em_breve ? 'Cadastrar-se' : (lp.cta_text || 'Quero Garantir Minha Vaga')} <ArrowRight className="w-5 h-5" />
                     </button>
                     {lp.instructor?.name && (
                       <span className={`text-sm ${layout === 'escuro' ? 'text-slate-400' : 'text-slate-500'} typo-text`}>
@@ -1961,7 +2016,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
               onClick={handleEnrollClick}
               className="typo-btn w-full sm:w-auto px-12 py-5 bg-primary text-white rounded-3xl font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(var(--primary-rgb),0.2)] flex items-center justify-center gap-3"
             >
-              {lp.cta_text || 'COMPRAR AGORA'} <ArrowRight className="w-6 h-6" />
+              {item?.em_breve ? 'Cadastrar-se' : (lp.cta_text || 'COMPRAR AGORA')} <ArrowRight className="w-6 h-6" />
             </button>
           </div>
         </div>
@@ -2079,9 +2134,9 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
           )}
           <button 
             onClick={handleEnrollClick}
-            className="typo-btn w-full sm:w-auto px-12 py-5 bg-primary text-white rounded-3xl font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(var(--primary-rgb),0.3)] flex items-center justify-center gap-3"
+            className="typo-btn px-8 py-4 bg-primary text-white rounded-2xl font-bold text-lg hover:opacity-90 active:scale-95 transition-all shadow-xl shadow-primary/20 flex items-center gap-3"
           >
-            {lp.cta_text || 'COMPRAR AGORA'} <ArrowRight className="w-6 h-6" />
+            {item?.em_breve ? 'Cadastrar-se' : (lp.cta_text || 'COMPRAR AGORA')} <ArrowRight className="w-6 h-6" />
           </button>
         </div>
       </section>
@@ -2391,6 +2446,119 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
         />
       </ModalErrorBoundary>
       <WhatsAppFloatingButton item={item} />
+
+      {/* Lead Modal for "Em Breve" courses */}
+      <AnimatePresence>
+        {showLeadModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="relative w-full max-w-md bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-100 overflow-hidden text-slate-900"
+            >
+              <button
+                onClick={() => setShowLeadModal(false)}
+                className="absolute top-5 right-5 p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-full transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              {leadSuccess ? (
+                <div className="text-center py-6 space-y-4">
+                  <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-inner">
+                    <CheckCircle className="w-9 h-9" />
+                  </div>
+                  <h3 className="text-2xl font-black text-slate-900">Interesse Registrado!</h3>
+                  <p className="text-slate-600 text-sm leading-relaxed">
+                    Obrigado! Entraremos em contato via <strong>WhatsApp e E-mail</strong> assim que as matrículas para <strong>{item?.nome}</strong> forem liberadas.
+                  </p>
+                  <button
+                    onClick={() => setShowLeadModal(false)}
+                    className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl shadow-lg shadow-emerald-600/20 transition-all cursor-pointer"
+                  >
+                    Concluído
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-100 text-amber-800 text-xs font-black rounded-full uppercase tracking-wider">
+                      ✨ Curso Em Breve
+                    </div>
+                    <h3 className="text-2xl font-black tracking-tight text-slate-900">Lista de Espera VIP</h3>
+                    <p className="text-sm text-slate-600">
+                      Cadastre seus dados para receber o aviso em primeira mão e condições exclusivas de lançamento!
+                    </p>
+                  </div>
+
+                  <form onSubmit={handleLeadSubmit} className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Nome Completo</label>
+                      <div className="relative">
+                        <UserIcon className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <input
+                          type="text"
+                          required
+                          placeholder="Seu nome completo"
+                          value={leadData.nome}
+                          onChange={e => setLeadData({ ...leadData, nome: e.target.value })}
+                          className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-600 text-sm font-medium text-slate-800"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Seu E-mail</label>
+                      <div className="relative">
+                        <Mail className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <input
+                          type="email"
+                          required
+                          placeholder="seuemail@exemplo.com"
+                          value={leadData.email}
+                          onChange={e => setLeadData({ ...leadData, email: e.target.value })}
+                          className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-600 text-sm font-medium text-slate-800"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">WhatsApp / Celular</label>
+                      <div className="relative">
+                        <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-bold">📱</span>
+                        <input
+                          type="tel"
+                          required
+                          placeholder="(00) 90000-0000"
+                          value={leadData.telefone}
+                          onChange={e => setLeadData({ ...leadData, telefone: e.target.value })}
+                          className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-600 text-sm font-medium text-slate-800"
+                        />
+                      </div>
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={isSubmittingLead}
+                      className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-base rounded-2xl shadow-lg shadow-blue-600/30 transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+                    >
+                      {isSubmittingLead ? (
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                      ) : (
+                        <>
+                          <span>Quero ser Notificado(a)</span>
+                          <ArrowRight className="w-5 h-5" />
+                        </>
+                      )}
+                    </button>
+                  </form>
+                </div>
+              )}
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
