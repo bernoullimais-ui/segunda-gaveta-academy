@@ -20,11 +20,11 @@ if (supabaseUrl) {
     supabaseUrl = supabaseUrl.replace(/\/rest\/v1$/, '');
   }
 }
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || '';
 let supabase: any = null;
-if (supabaseUrl && supabaseServiceKey) {
+if (supabaseUrl && supabaseKey) {
   try {
-    supabase = createClient(supabaseUrl, supabaseServiceKey);
+    supabase = createClient(supabaseUrl, supabaseKey);
   } catch (e) {
     console.error('Failed to create Supabase client in bio-links router:', e);
   }
@@ -55,39 +55,40 @@ router.post('/track-click', async (req, res) => {
       console.warn('[bio-links] Click log table error (non-fatal):', e);
     });
 
-    // 2. Increment clicks in config_json.bio_links_config.custom_links
+    // 2. Increment clicks in config_json.bio_links_config.click_counts & custom_links
     const { data: org } = await supabase
       .from('organizacoes')
       .select('config_json')
       .eq('id', organizacao_id)
       .maybeSingle();
 
-    if (org?.config_json?.bio_links_config?.custom_links) {
-      const bioConfig = org.config_json.bio_links_config;
-      let updated = false;
+    if (org?.config_json) {
+      const bioConfig = org.config_json.bio_links_config || {};
+      const customLinks = bioConfig.custom_links || [];
+      const clickCounts = bioConfig.click_counts || {};
 
-      const updatedLinks = bioConfig.custom_links.map((link: any) => {
+      clickCounts[link_id] = (clickCounts[link_id] || 0) + 1;
+
+      const updatedLinks = customLinks.map((link: any) => {
         if (link.id === link_id) {
-          updated = true;
           return { ...link, clicks: (link.clicks || 0) + 1 };
         }
         return link;
       });
 
-      if (updated) {
-        const newConfigJson = {
-          ...org.config_json,
-          bio_links_config: {
-            ...bioConfig,
-            custom_links: updatedLinks,
-          },
-        };
+      const newConfigJson = {
+        ...org.config_json,
+        bio_links_config: {
+          ...bioConfig,
+          custom_links: updatedLinks,
+          click_counts: clickCounts,
+        },
+      };
 
-        await supabase
-          .from('organizacoes')
-          .update({ config_json: newConfigJson })
-          .eq('id', organizacao_id);
-      }
+      await supabase
+        .from('organizacoes')
+        .update({ config_json: newConfigJson })
+        .eq('id', organizacao_id);
     }
 
     return res.json({ success: true });
@@ -104,24 +105,33 @@ router.get('/stats/:orgId', async (req, res) => {
 
     const { orgId } = req.params;
 
-    const { data: clicks, error } = await supabase
+    const { data: org } = await supabase
+      .from('organizacoes')
+      .select('config_json')
+      .eq('id', orgId)
+      .maybeSingle();
+
+    const configClicks = org?.config_json?.bio_links_config?.click_counts || {};
+
+    const { data: clicks } = await supabase
       .from('bio_link_clicks')
       .select('link_id, created_at')
       .eq('organizacao_id', orgId)
       .order('created_at', { ascending: false })
       .limit(1000);
 
-    if (error) {
-      return res.status(500).json({ error: error.message });
-    }
-
-    const clickCounts: Record<string, number> = {};
+    const clickCounts: Record<string, number> = { ...configClicks };
     (clicks || []).forEach((c: any) => {
-      clickCounts[c.link_id] = (clickCounts[c.link_id] || 0) + 1;
+      if (c.link_id) {
+        const tableCount = (clicks || []).filter((x: any) => x.link_id === c.link_id).length;
+        clickCounts[c.link_id] = Math.max(clickCounts[c.link_id] || 0, tableCount);
+      }
     });
 
+    const totalClicks = Object.values(clickCounts).reduce((acc: number, val: any) => acc + (Number(val) || 0), 0);
+
     return res.json({
-      total_clicks: (clicks || []).length,
+      total_clicks: Math.max(totalClicks, (clicks || []).length),
       clicks_by_link: clickCounts,
       recent_clicks: clicks || [],
     });
@@ -132,3 +142,4 @@ router.get('/stats/:orgId', async (req, res) => {
 });
 
 export default router;
+

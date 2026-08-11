@@ -1092,7 +1092,7 @@ export function BioLinksEditor({ orgId, loggedUser, showToast }: BioLinksEditorP
                 ) : (
                   <div className="space-y-2">
                     {config.custom_links?.map((link: any) => {
-                      const count = stats?.clicks_by_link?.[link.id] ?? link.clicks ?? 0;
+                      const count = stats?.clicks_by_link?.[link.id] ?? config?.click_counts?.[link.id] ?? link.clicks ?? 0;
                       return (
                         <div key={link.id} className="flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200">
                           <div className="min-w-0">
@@ -1121,7 +1121,7 @@ export function BioLinksEditor({ orgId, loggedUser, showToast }: BioLinksEditorP
                 ) : (
                   <div className="space-y-2">
                     {(cursos || []).map((c: any) => {
-                      const count = stats?.clicks_by_link?.[c.id] || 0;
+                      const count = stats?.clicks_by_link?.[c.id] ?? config?.click_counts?.[c.id] ?? 0;
                       const url = `/public/curso/${c.slug || c.id}`;
                       return (
                         <div key={c.id} className="flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200">
@@ -1149,7 +1149,7 @@ export function BioLinksEditor({ orgId, loggedUser, showToast }: BioLinksEditorP
 
                   <div className="space-y-2">
                     {(trilhas || []).map((t: any) => {
-                      const count = stats?.clicks_by_link?.[t.id] || 0;
+                      const count = stats?.clicks_by_link?.[t.id] ?? config?.click_counts?.[t.id] ?? 0;
                       const url = `/public/trilha/${t.slug || t.id}`;
                       return (
                         <div key={t.id} className="flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200">
@@ -1185,7 +1185,7 @@ export function BioLinksEditor({ orgId, loggedUser, showToast }: BioLinksEditorP
                   ]
                     .filter((s) => config.social_links?.[s.key])
                     .map((s) => {
-                      const count = stats?.clicks_by_link?.[s.key] || 0;
+                      const count = stats?.clicks_by_link?.[s.key] ?? config?.click_counts?.[s.key] ?? 0;
                       return (
                         <div key={s.key} className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-200">
                           <span className="font-bold text-slate-800 text-xs">{s.name}</span>
