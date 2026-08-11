@@ -25,7 +25,9 @@ import {
   Shield,
   Loader2,
   Image as ImageIcon,
-  Pencil
+  Pencil,
+  BookOpen,
+  Award
 } from 'lucide-react';
 import { BioLinksPage } from './BioLinksPage';
 
@@ -1084,11 +1086,11 @@ export function BioLinksEditor({ orgId, loggedUser, showToast }: BioLinksEditorP
                   <h4 className="font-bold text-slate-900 text-xs uppercase tracking-wider">Cursos & Treinamentos</h4>
                 </div>
 
-                {cursos.length === 0 ? (
+                {(cursos || []).length === 0 ? (
                   <p className="text-xs text-slate-400 italic bg-slate-50 p-3 rounded-xl">Nenhum curso cadastrado nesta organização.</p>
                 ) : (
                   <div className="space-y-2">
-                    {cursos.map((c: any) => {
+                    {(cursos || []).map((c: any) => {
                       const count = stats?.clicks_by_link?.[c.id] || 0;
                       const url = `/public/curso/${c.slug || c.id}`;
                       return (
@@ -1108,7 +1110,7 @@ export function BioLinksEditor({ orgId, loggedUser, showToast }: BioLinksEditorP
               </div>
 
               {/* 3. Trilhas de Aprendizagem */}
-              {trilhas.length > 0 && (
+              {(trilhas || []).length > 0 && (
                 <div className="space-y-3 pt-2">
                   <div className="flex items-center gap-2">
                     <Award className="w-4 h-4 text-purple-600" />
@@ -1116,7 +1118,7 @@ export function BioLinksEditor({ orgId, loggedUser, showToast }: BioLinksEditorP
                   </div>
 
                   <div className="space-y-2">
-                    {trilhas.map((t: any) => {
+                    {(trilhas || []).map((t: any) => {
                       const count = stats?.clicks_by_link?.[t.id] || 0;
                       const url = `/public/trilha/${t.slug || t.id}`;
                       return (
