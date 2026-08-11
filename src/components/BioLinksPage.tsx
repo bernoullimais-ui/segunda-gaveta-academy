@@ -25,6 +25,7 @@ import {
 
 interface BioLinksPageProps {
   slug?: string;
+  orgId?: string;
   previewConfig?: any; // For Live Preview in Admin
 }
 
@@ -90,8 +91,8 @@ const THEME_STYLES: Record<string, {
   },
 };
 
-export function BioLinksPage({ slug, previewConfig }: BioLinksPageProps) {
-  const [loading, setLoading] = useState(!previewConfig);
+export function BioLinksPage({ slug, orgId, previewConfig }: BioLinksPageProps) {
+  const [loading, setLoading] = useState(true);
   const [org, setOrg] = useState<any>(null);
   const [bioConfig, setBioConfig] = useState<any>(previewConfig || null);
   const [cursos, setCursos] = useState<any[]>([]);
@@ -101,17 +102,15 @@ export function BioLinksPage({ slug, previewConfig }: BioLinksPageProps) {
   useEffect(() => {
     if (previewConfig) {
       setBioConfig(previewConfig);
-      setLoading(false);
-      return;
     }
 
     const loadBioData = async () => {
-      setLoading(true);
       try {
         let targetSlug = slug;
+        let targetOrgId = orgId;
 
-        // If no slug param, check subdomain
-        if (!targetSlug) {
+        // If no slug or orgId, check subdomain and URL path
+        if (!targetSlug && !targetOrgId) {
           const hostname = window.location.hostname;
           const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
           const isMainDomain =
@@ -127,62 +126,91 @@ export function BioLinksPage({ slug, previewConfig }: BioLinksPageProps) {
               targetSlug = parts[0];
             }
           }
-        }
 
-        if (!targetSlug) {
-          // Fallback check URL path
-          const path = window.location.pathname;
-          const match = path.match(/^\/(?:l|bio)\/([a-zA-Z0-9-]+)/);
-          if (match && match[1]) {
-            targetSlug = match[1];
+          if (!targetSlug) {
+            const path = window.location.pathname;
+            const match = path.match(/^\/(?:l|bio)\/([a-zA-Z0-9-]+)/);
+            if (match && match[1]) {
+              targetSlug = match[1];
+            }
           }
         }
 
-        if (targetSlug) {
+        let fetchedOrg = null;
+        if (targetOrgId) {
+          const { data: orgData } = await supabase
+            .from('organizacoes')
+            .select('*')
+            .eq('id', targetOrgId)
+            .maybeSingle();
+          fetchedOrg = orgData;
+        } else if (targetSlug) {
           const { data: orgData } = await supabase
             .from('organizacoes')
             .select('*')
             .eq('slug', targetSlug)
             .maybeSingle();
+          fetchedOrg = orgData;
+        }
 
-          if (orgData) {
-            setOrg(orgData);
-            const cfg = orgData.config_json?.bio_links_config || {};
+        if (fetchedOrg) {
+          setOrg(fetchedOrg);
+          if (!previewConfig) {
+            const cfg = fetchedOrg.config_json?.bio_links_config || {};
             setBioConfig(cfg);
+          }
 
-            // Fetch published courses
-            if (cfg.exibir_cursos !== false) {
-              const { data: coursesData } = await supabase
+          const currentCfg = previewConfig || fetchedOrg.config_json?.bio_links_config || {};
+
+          // Fetch published courses
+          if (currentCfg.exibir_cursos !== false) {
+            try {
+              const { data: coursesData, error: cErr } = await supabase
                 .from('cursos')
-                .select('id, nome, slug, preco, valor, thumbnail_url, capa_url, descricao, professor_nome')
-                .eq('organizacao_id', orgData.id)
-                .eq('status', 'publicado')
-                .order('ordem', { ascending: true })
-                .limit(6);
-              if (coursesData) setCursos(coursesData);
-            }
+                .select('*')
+                .eq('organizacao_id', fetchedOrg.id);
 
-            // Fetch published trilhas
-            if (cfg.exibir_trilhas !== false) {
-              const { data: trilhasData } = await supabase
+              if (cErr) console.warn('[BioLinks] Cursos fetch error:', cErr);
+
+              if (coursesData && coursesData.length > 0) {
+                const activeCourses = coursesData.filter((c: any) =>
+                  !c.status || ['publicado', 'ativo'].includes(String(c.status).toLowerCase())
+                );
+                const finalCourses = activeCourses.length > 0 ? activeCourses : coursesData;
+                setCursos(finalCourses.slice(0, 6));
+              }
+            } catch (err) {
+              console.error('[BioLinks] Error fetching courses:', err);
+            }
+          }
+
+          // Fetch published trilhas
+          if (currentCfg.exibir_trilhas !== false) {
+            try {
+              const { data: trilhasData, error: tErr } = await supabase
                 .from('trilhas')
-                .select('id, nome, slug, preco, valor, thumbnail_url, capa_url, descricao')
-                .eq('organizacao_id', orgData.id)
-                .order('created_at', { ascending: false })
-                .limit(4);
-              if (trilhasData) setTrilhas(trilhasData);
+                .select('*')
+                .eq('organizacao_id', fetchedOrg.id);
+
+              if (tErr) console.warn('[BioLinks] Trilhas fetch error:', tErr);
+
+              if (trilhasData && trilhasData.length > 0) {
+                setTrilhas(trilhasData.slice(0, 4));
+              }
+            } catch (err) {
+              console.error('[BioLinks] Error fetching trilhas:', err);
             }
           }
         }
       } catch (err) {
-        console.error('Error loading Bio Links:', err);
+        console.error('Error loading Bio Links data:', err);
       } finally {
         setLoading(false);
       }
     };
 
     loadBioData();
-  }, [slug, previewConfig]);
+  }, [slug, orgId, previewConfig]);
 
   if (loading) {
     return (

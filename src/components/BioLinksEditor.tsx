@@ -915,7 +915,7 @@ export function BioLinksEditor({ orgId, loggedUser, showToast }: BioLinksEditorP
             </div>
 
             <div className="rounded-[30px] overflow-hidden max-h-[580px] overflow-y-auto">
-              <BioLinksPage previewConfig={config} />
+              <BioLinksPage previewConfig={config} orgId={orgId} />
             </div>
           </div>
 
