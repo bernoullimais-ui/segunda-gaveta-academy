@@ -90,8 +90,10 @@ export function BioLinksEditor({ orgId, loggedUser, showToast }: BioLinksEditorP
     cor_botao: '#6366f1',
   });
 
-  // Analytics State
+  // Analytics & Course State
   const [stats, setStats] = useState<any>(null);
+  const [cursos, setCursos] = useState<any[]>([]);
+  const [trilhas, setTrilhas] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchOrgBioConfig = async () => {
@@ -131,6 +133,19 @@ export function BioLinksEditor({ orgId, loggedUser, showToast }: BioLinksEditorP
             pixels: existing.pixels || { meta_pixel_id: '', google_analytics_id: '', tiktok_pixel_id: '' },
           });
         }
+
+        // Fetch cursos & trilhas for click report
+        const { data: coursesData } = await supabase
+          .from('cursos')
+          .select('id, nome, slug, status')
+          .eq('organizacao_id', orgId);
+        if (coursesData) setCursos(coursesData);
+
+        const { data: trilhasData } = await supabase
+          .from('trilhas')
+          .select('id, nome, slug')
+          .eq('organizacao_id', orgId);
+        if (trilhasData) setTrilhas(trilhasData);
 
         // Fetch click analytics
         const res = await fetch(`/api/bio-links/stats/${orgId}`).catch(() => null);
@@ -1021,29 +1036,134 @@ export function BioLinksEditor({ orgId, loggedUser, showToast }: BioLinksEditorP
 
           {/* TAB 5: MÉTRICAS DE CLIQUES */}
           {activeTab === 'metricas' && (
-            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
               <div className="flex items-center justify-between border-b border-slate-100 pb-4">
                 <div>
-                  <h3 className="font-bold text-slate-900 text-sm">Relatório de Cliques por Link</h3>
-                  <p className="text-xs text-slate-500">Métricas de cliques gravadas na plataforma</p>
+                  <h3 className="font-bold text-slate-900 text-base">Relatório de Cliques por Categoria</h3>
+                  <p className="text-xs text-slate-500 mt-0.5">Métricas e contagem de acessos gravadas na plataforma</p>
                 </div>
-                <div className="p-3 bg-indigo-50 text-indigo-700 font-black text-lg rounded-xl">
-                  {stats?.total_clicks || 0} <span className="text-xs font-normal">cliques totais</span>
+                <div className="p-3 bg-indigo-50 border border-indigo-100 text-indigo-700 font-black text-lg rounded-2xl flex items-center gap-2">
+                  <span>{stats?.total_clicks || 0}</span>
+                  <span className="text-xs font-semibold text-indigo-600">cliques registrados</span>
                 </div>
               </div>
 
+              {/* 1. Links Personalizados */}
               <div className="space-y-3">
-                {config.custom_links?.map((link: any) => (
-                  <div key={link.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200">
-                    <div className="min-w-0">
-                      <span className="font-bold text-slate-900 text-sm block truncate">{link.titulo}</span>
-                      <span className="text-xs text-slate-400 truncate max-w-xs block">{link.url}</span>
-                    </div>
-                    <div className="px-3 py-1.5 bg-indigo-100 text-indigo-800 rounded-lg text-xs font-black shrink-0">
-                      {link.clicks || 0} cliques
-                    </div>
+                <div className="flex items-center gap-2">
+                  <LinkIcon className="w-4 h-4 text-indigo-600" />
+                  <h4 className="font-bold text-slate-900 text-xs uppercase tracking-wider">Links Personalizados</h4>
+                </div>
+
+                {config.custom_links?.length === 0 ? (
+                  <p className="text-xs text-slate-400 italic bg-slate-50 p-3 rounded-xl">Nenhum link personalizado cadastrado.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {config.custom_links?.map((link: any) => {
+                      const count = stats?.clicks_by_link?.[link.id] ?? link.clicks ?? 0;
+                      return (
+                        <div key={link.id} className="flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+                          <div className="min-w-0">
+                            <span className="font-bold text-slate-900 text-sm block truncate">{link.titulo}</span>
+                            <span className="text-xs text-slate-400 truncate max-w-xs block">{link.url}</span>
+                          </div>
+                          <div className="px-3 py-1.5 bg-indigo-100 text-indigo-800 rounded-lg text-xs font-black shrink-0">
+                            {count} {count === 1 ? 'clique' : 'cliques'}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
-                ))}
+                )}
+              </div>
+
+              {/* 2. Cursos & Treinamentos */}
+              <div className="space-y-3 pt-2">
+                <div className="flex items-center gap-2">
+                  <BookOpen className="w-4 h-4 text-indigo-600" />
+                  <h4 className="font-bold text-slate-900 text-xs uppercase tracking-wider">Cursos & Treinamentos</h4>
+                </div>
+
+                {cursos.length === 0 ? (
+                  <p className="text-xs text-slate-400 italic bg-slate-50 p-3 rounded-xl">Nenhum curso cadastrado nesta organização.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {cursos.map((c: any) => {
+                      const count = stats?.clicks_by_link?.[c.id] || 0;
+                      const url = `/public/curso/${c.slug || c.id}`;
+                      return (
+                        <div key={c.id} className="flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+                          <div className="min-w-0">
+                            <span className="font-bold text-slate-900 text-sm block truncate">{c.nome}</span>
+                            <span className="text-xs text-slate-400 truncate max-w-xs block">{url}</span>
+                          </div>
+                          <div className="px-3 py-1.5 bg-emerald-100 text-emerald-800 rounded-lg text-xs font-black shrink-0">
+                            {count} {count === 1 ? 'clique' : 'cliques'}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* 3. Trilhas de Aprendizagem */}
+              {trilhas.length > 0 && (
+                <div className="space-y-3 pt-2">
+                  <div className="flex items-center gap-2">
+                    <Award className="w-4 h-4 text-purple-600" />
+                    <h4 className="font-bold text-slate-900 text-xs uppercase tracking-wider">Trilhas de Aprendizagem</h4>
+                  </div>
+
+                  <div className="space-y-2">
+                    {trilhas.map((t: any) => {
+                      const count = stats?.clicks_by_link?.[t.id] || 0;
+                      const url = `/public/trilha/${t.slug || t.id}`;
+                      return (
+                        <div key={t.id} className="flex items-center justify-between p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+                          <div className="min-w-0">
+                            <span className="font-bold text-slate-900 text-sm block truncate">{t.nome}</span>
+                            <span className="text-xs text-slate-400 truncate max-w-xs block">{url}</span>
+                          </div>
+                          <div className="px-3 py-1.5 bg-purple-100 text-purple-800 rounded-lg text-xs font-black shrink-0">
+                            {count} {count === 1 ? 'clique' : 'cliques'}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* 4. Redes Sociais */}
+              <div className="space-y-3 pt-2">
+                <div className="flex items-center gap-2">
+                  <Share2 className="w-4 h-4 text-blue-600" />
+                  <h4 className="font-bold text-slate-900 text-xs uppercase tracking-wider">Redes Sociais & Contato</h4>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {[
+                    { key: 'whatsapp', name: 'WhatsApp' },
+                    { key: 'instagram', name: 'Instagram' },
+                    { key: 'youtube', name: 'YouTube' },
+                    { key: 'tiktok', name: 'TikTok' },
+                    { key: 'linkedin', name: 'LinkedIn' },
+                    { key: 'site', name: 'Site Oficial' },
+                  ]
+                    .filter((s) => config.social_links?.[s.key])
+                    .map((s) => {
+                      const count = stats?.clicks_by_link?.[s.key] || 0;
+                      return (
+                        <div key={s.key} className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-200">
+                          <span className="font-bold text-slate-800 text-xs">{s.name}</span>
+                          <span className="px-2.5 py-1 bg-slate-200 text-slate-800 rounded-md text-xs font-black">
+                            {count}
+                          </span>
+                        </div>
+                      );
+                    })}
+                </div>
               </div>
             </div>
           )}
