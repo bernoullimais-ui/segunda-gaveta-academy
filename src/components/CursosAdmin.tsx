@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { Settings, Users, BarChart2, BookOpen, Clock, Lock, PlayCircle, Plus, Eye, Share2, Download, Search, Filter, MoreHorizontal, MessageSquare, Mail, Award, CheckCircle, ChevronLeft, Calendar, FileText, Gift, DollarSign, Loader2, Image as ImageIcon, Minus, Code, Video as VideoIcon, ShoppingBag, User, CalendarCheck, List, Paperclip, Volume2, Pencil, Trash2, Check, X, Table, Bold, Italic, Underline, ListOrdered, GripVertical, AlertTriangle, Database, Upload, LayoutDashboard, Sparkles, AlertCircle, Info, Link as LinkIcon, BrainCircuit, Type } from 'lucide-react';
 import { motion, AnimatePresence, Reorder } from 'motion/react';
 import { MarketingLinksModal } from './MarketingLinksModal';
