@@ -198,7 +198,7 @@ const EnrollmentModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[999999] flex items-center justify-center p-4">
       <div className="bg-white w-full max-w-lg rounded-[32px] shadow-2xl overflow-hidden relative animate-in fade-in zoom-in-95 duration-300">
         <button
           onClick={onClose}
@@ -896,10 +896,25 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
   };
 
   const handleEnrollClick = () => {
-    if (isEmBreve) {
+    const isEmBreveCheck = Boolean(
+      isEmBreve ||
+      item?.em_breve === true ||
+      item?.em_breve === 'true' ||
+      item?.em_breve === 1 ||
+      item?.status === 'em_breve' ||
+      config?.em_breve === true ||
+      config?.em_breve === 'true' ||
+      config?.status === 'em_breve' ||
+      lp?.cta_text?.toLowerCase().includes('breve') ||
+      lp?.cta_text?.toLowerCase().includes('cadastrar') ||
+      lp?.cta_text?.toLowerCase().includes('espera')
+    );
+
+    if (isEmBreveCheck) {
       setLeadData({ nome: '', email: '', telefone: '' });
       setLeadSuccess(false);
       setShowLeadModal(true);
+      setShowEnrollModal(false);
       return;
     }
     if (isFree) {
@@ -2462,7 +2477,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
       {/* Lead Modal for "Em Breve" courses */}
       <AnimatePresence>
         {showLeadModal && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
