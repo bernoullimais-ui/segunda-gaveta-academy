@@ -112,7 +112,7 @@ const Nav = ({ layout, item, lp, onEnrollClick }: NavProps) => {
             onClick={onEnrollClick}
             className="typo-btn px-3 sm:px-6 py-1.5 sm:py-2.5 bg-primary text-white rounded-full font-bold text-xs sm:text-sm hover:opacity-90 shadow-lg shadow-primary/20 active:scale-95 transition-all whitespace-nowrap"
           >
-            {item?.em_breve ? 'Em Breve' : (lp.cta_text || 'Inscrever-se')}
+            {Boolean(item?.em_breve || item?.configuracao_json?.em_breve || item?.status === 'em_breve') ? 'Em Breve' : (lp.cta_text || 'Inscrever-se')}
           </button>
         </div>
       </div>
@@ -772,6 +772,15 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
   const isFree = isTrilha ? (item?.preco === 0) : (item?.preco === 'gratuito');
   const selectedPlan = planosAssinatura?.find(p => p.pagarme_plan_id === selectedPlanId);
   const config = item?.configuracao_json || {};
+  const isEmBreve = Boolean(
+    item?.em_breve === true ||
+    item?.em_breve === 'true' ||
+    item?.em_breve === 1 ||
+    item?.status === 'em_breve' ||
+    config?.em_breve === true ||
+    config?.em_breve === 'true' ||
+    config?.status === 'em_breve'
+  );
   const discountedPrice = !selectedPlan && !isTrilha && config.valor_com_desconto ? parseFloat(config.valor_com_desconto) : null;
   const itemPrice = selectedPlan ? (selectedPlan.valor_cents / 100) : (isTrilha ? (item?.preco || 0) : (parseFloat(item?.valor) || 0));
   const finalPrice = discountedPrice !== null ? discountedPrice : itemPrice;
@@ -781,7 +790,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
   const paymentInstallmentsLimit = config.pagamento_parcelas_limite || '12';
 
   const renderPriceBlock = (isDarkLayout: boolean) => {
-    if (item?.em_breve) {
+    if (isEmBreve) {
       return (
         <div className="inline-flex items-center gap-2 px-4 py-2.5 bg-amber-500/10 border border-amber-500/30 rounded-2xl">
           <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
@@ -884,7 +893,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
   };
 
   const handleEnrollClick = () => {
-    if (item?.em_breve) {
+    if (isEmBreve) {
       setLeadData({ nome: '', email: '', telefone: '' });
       setLeadSuccess(false);
       setShowLeadModal(true);
@@ -1290,7 +1299,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
         {showStickyCTA && (
           <div className="fixed bottom-0 left-0 right-0 z-[80] md:hidden bg-slate-950/95 backdrop-blur-md border-t border-slate-800 px-4 py-3 flex items-center justify-between gap-3 animate-in slide-in-from-bottom-4 duration-300">
             <div className="text-left">
-              {item?.em_breve ? (
+              {isEmBreve ? (
                 <span className="text-amber-400 font-black text-sm uppercase tracking-wider">Em Breve</span>
               ) : isFree ? (
                 <span className="text-emerald-400 font-black text-lg">GRATUITO</span>
@@ -1309,13 +1318,13 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                   )}
                 </>
               )}
-              <div className="text-slate-500 text-[10px] font-medium">{item?.em_breve ? 'Lista de Espera VIP' : `${lp.guarantee_days || 7} dias de garantia`}</div>
+              <div className="text-slate-500 text-[10px] font-medium">{isEmBreve ? 'Lista de Espera VIP' : `${lp.guarantee_days || 7} dias de garantia`}</div>
             </div>
             <button
               onClick={handleEnrollClick}
               className="typo-btn flex-1 max-w-[200px] py-3 bg-primary text-white rounded-2xl font-black text-sm hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-primary/30"
             >
-              {item?.em_breve ? 'Cadastrar-se' : (lp.cta_text || 'GARANTIR VAGA')}
+              {isEmBreve ? 'Cadastrar-se' : (lp.cta_text || 'GARANTIR VAGA')}
             </button>
           </div>
         )}
@@ -1378,7 +1387,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                       onClick={handleEnrollClick}
                       className="typo-btn w-full sm:w-auto px-8 sm:px-12 py-4 sm:py-6 bg-primary text-white rounded-2xl sm:rounded-3xl font-black text-lg sm:text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(var(--primary-rgb),0.3)] flex items-center justify-center gap-3"
                     >
-                      {item?.em_breve ? 'Cadastrar-se' : (lp.cta_text || 'COMPRAR AGORA')} <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6" />
+                      {isEmBreve ? 'Cadastrar-se' : (lp.cta_text || 'COMPRAR AGORA')} <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6" />
                     </button>
                     {lp.instructor?.name && (
                       <span className={`text-sm ${layout === 'escuro' ? 'text-slate-400' : 'text-slate-300 lg:text-slate-500'} typo-text`}>
@@ -1435,7 +1444,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                 onClick={handleEnrollClick}
                 className="typo-btn w-full sm:w-auto px-12 py-5 bg-primary text-white rounded-3xl font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(var(--primary-rgb),0.3)] flex items-center justify-center gap-3"
               >
-                {item?.em_breve ? 'Cadastrar-se' : (lp.cta_text || 'COMPRAR AGORA')} <ArrowRight className="w-6 h-6" />
+                {isEmBreve ? 'Cadastrar-se' : (lp.cta_text || 'COMPRAR AGORA')} <ArrowRight className="w-6 h-6" />
               </button>
             </div>
           </div>
@@ -1555,7 +1564,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
               onClick={handleEnrollClick}
               className="typo-btn w-full sm:w-auto px-12 py-5 bg-primary text-white rounded-3xl font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(var(--primary-rgb),0.3)] flex items-center justify-center gap-3"
             >
-              {item?.em_breve ? 'Cadastrar-se' : (lp.cta_text || 'COMPRAR AGORA')} <ArrowRight className="w-6 h-6" />
+              {isEmBreve ? 'Cadastrar-se' : (lp.cta_text || 'COMPRAR AGORA')} <ArrowRight className="w-6 h-6" />
             </button>
           </div>
         </section>
@@ -1761,7 +1770,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                   onClick={handleEnrollClick}
                   className="typo-btn px-10 py-5 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white font-black text-xl rounded-2xl shadow-2xl shadow-blue-500/30 hover:scale-105 active:scale-95 transition-all flex items-center gap-3 mx-auto"
                 >
-                  {item?.em_breve ? 'Cadastrar-se' : (lp.cta_text || 'QUERO MINHA VAGA AGORA')}
+                  {isEmBreve ? 'Cadastrar-se' : (lp.cta_text || 'QUERO MINHA VAGA AGORA')}
                   <ArrowRight className="w-6 h-6" />
                 </button>
                 <div className="flex flex-col md:flex-row items-center gap-8 text-slate-500 font-bold uppercase tracking-widest text-[10px]">
@@ -1861,7 +1870,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             {showStickyCTA && (
               <div className="fixed bottom-0 left-0 right-0 z-[80] md:hidden bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 py-3 flex items-center justify-between gap-3 animate-in slide-in-from-bottom-4 duration-300 shadow-2xl">
                 <div className="text-left">
-                  {item?.em_breve ? (
+                  {isEmBreve ? (
                     <span className="text-amber-600 font-black text-sm uppercase tracking-wider">Em Breve</span>
                   ) : isFree ? (
                     <span className="text-emerald-600 font-black text-lg">GRATUITO</span>
@@ -1880,13 +1889,13 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                       )}
                     </>
                   )}
-                  <div className="text-slate-400 text-[10px] font-medium">{item?.em_breve ? 'Lista de Espera VIP' : `${lp.guarantee_days || 7} dias de garantia`}</div>
+                  <div className="text-slate-400 text-[10px] font-medium">{isEmBreve ? 'Lista de Espera VIP' : `${lp.guarantee_days || 7} dias de garantia`}</div>
                 </div>
                 <button
                   onClick={handleEnrollClick}
                   className="typo-btn flex-1 max-w-[200px] py-3 bg-primary text-white rounded-2xl font-black text-sm hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-primary/20"
                 >
-                  {item?.em_breve ? 'Cadastrar-se' : (lp.cta_text || 'GARANTIR VAGA')}
+                  {isEmBreve ? 'Cadastrar-se' : (lp.cta_text || 'GARANTIR VAGA')}
                 </button>
               </div>
             )}
@@ -1949,7 +1958,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                       onClick={handleEnrollClick}
                       className="typo-btn px-6 sm:px-8 py-3.5 sm:py-4 bg-primary text-white rounded-2xl font-bold text-base sm:text-lg hover:opacity-90 active:scale-95 transition-all shadow-xl shadow-primary/20 flex items-center gap-3"
                     >
-                      {item?.em_breve ? 'Cadastrar-se' : (lp.cta_text || 'Quero Garantir Minha Vaga')} <ArrowRight className="w-5 h-5" />
+                      {isEmBreve ? 'Cadastrar-se' : (lp.cta_text || 'Quero Garantir Minha Vaga')} <ArrowRight className="w-5 h-5" />
                     </button>
                     {lp.instructor?.name && (
                       <span className={`text-sm ${layout === 'escuro' ? 'text-slate-400' : 'text-slate-500'} typo-text`}>
@@ -2016,7 +2025,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
               onClick={handleEnrollClick}
               className="typo-btn w-full sm:w-auto px-12 py-5 bg-primary text-white rounded-3xl font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(var(--primary-rgb),0.2)] flex items-center justify-center gap-3"
             >
-              {item?.em_breve ? 'Cadastrar-se' : (lp.cta_text || 'COMPRAR AGORA')} <ArrowRight className="w-6 h-6" />
+              {isEmBreve ? 'Cadastrar-se' : (lp.cta_text || 'COMPRAR AGORA')} <ArrowRight className="w-6 h-6" />
             </button>
           </div>
         </div>
@@ -2136,7 +2145,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             onClick={handleEnrollClick}
             className="typo-btn px-8 py-4 bg-primary text-white rounded-2xl font-bold text-lg hover:opacity-90 active:scale-95 transition-all shadow-xl shadow-primary/20 flex items-center gap-3"
           >
-            {item?.em_breve ? 'Cadastrar-se' : (lp.cta_text || 'COMPRAR AGORA')} <ArrowRight className="w-6 h-6" />
+            {isEmBreve ? 'Cadastrar-se' : (lp.cta_text || 'COMPRAR AGORA')} <ArrowRight className="w-6 h-6" />
           </button>
         </div>
       </section>
