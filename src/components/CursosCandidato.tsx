@@ -1370,7 +1370,7 @@ export function CursosCandidato({
                         <Award className="w-3 h-3" /> Cortesia
                       </span>
                     ) : curso.preco === 'pago' && curso.valor ? (
-                      <span className="text-sm font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-200">R$ {curso.valor.toFixed(2)}</span>
+                      <span className="text-sm font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-200">R$ {(typeof curso.valor === 'number' ? curso.valor : parseFloat(curso.valor || 0)).toFixed(2)}</span>
                     ) : (
                       <span className="text-sm font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200 uppercase tracking-wider">Gratuito</span>
                     )}

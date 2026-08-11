@@ -1445,11 +1445,11 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
   const activeCurso = editingTrilha ? null : (cursos || []).find(c => c.id === createdCourseId);
   const activeTrilha = editingTrilha;
   
-  const nomeExibido = editingTrilha ? activeTrilha.nome : createdCourseName;
+  const nomeExibido = editingTrilha ? activeTrilha?.nome : createdCourseName;
 
   const tempoText = activeCurso?.tempo === 'sem_limite' ? 'Sem limite' : (activeCurso?.duracao ? `${activeCurso?.duracao} ${activeCurso?.duracao_tipo}` : 'Sem limite');
   const ritmoText = activeCurso?.ritmo === 'programado' ? 'Programado' : 'Próprio ritmo';
-  const filteredParticipants = courseParticipants.filter(p => {
+  const filteredParticipants = (courseParticipants || []).filter(p => {
     const nome = (p.usuarios?.nome || '').toLowerCase();
     const email = (p.usuarios?.email || '').toLowerCase();
     const search = participantSearch.toLowerCase();

@@ -1173,7 +1173,7 @@ function RenderContent({
       return <DashboardCenso loggedUser={user} orgId={user?.organizacao_id} />;
     case 'cursos': {
       const isGlobalAdmin = role === 'super_admin' || role === 'design' || role === 'curador';
-      const adminOrgId = isGlobalAdmin ? null : user.organizacao_id;
+      const adminOrgId = isGlobalAdmin ? null : user?.organizacao_id;
       return isAdmin ? <CursosAdmin loggedUser={user} orgId={adminOrgId} /> : <CursosCandidato userRole={role} globalOrgId={globalOrgId} />;
     }
     case 'comunidade':
