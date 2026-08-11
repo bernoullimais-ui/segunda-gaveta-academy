@@ -195,6 +195,52 @@ export function BioLinksEditor({ orgId, loggedUser, showToast }: BioLinksEditorP
     fetchOrgBioConfig();
   }, [orgId]);
 
+  // Re-fetch stats when user switches to 'metricas' tab
+  useEffect(() => {
+    if (activeTab === 'metricas' && orgId) {
+      const refreshStats = async () => {
+        const { data: orgData } = await supabase
+          .from('organizacoes')
+          .select('config_json')
+          .eq('id', orgId)
+          .maybeSingle();
+
+        const configClicks = orgData?.config_json?.bio_links_config?.click_counts || {};
+
+        const { data: dbClicks } = await supabase
+          .from('bio_link_clicks')
+          .select('link_id')
+          .eq('organizacao_id', orgId);
+
+        const clickCounts: Record<string, number> = { ...configClicks };
+        if (dbClicks) {
+          dbClicks.forEach((c: any) => {
+            if (c.link_id) {
+              const tableCount = dbClicks.filter((x: any) => x.link_id === c.link_id).length;
+              clickCounts[c.link_id] = Math.max(clickCounts[c.link_id] || 0, tableCount);
+            }
+          });
+        }
+
+        const totalClicks = Object.values(clickCounts).reduce((acc: number, val: any) => acc + (Number(val) || 0), 0);
+
+        setStats({
+          total_clicks: Math.max(totalClicks, (dbClicks || []).length),
+          clicks_by_link: clickCounts,
+        });
+
+        if (orgData?.config_json?.bio_links_config) {
+          setConfig((prev: any) => ({
+            ...prev,
+            click_counts: clickCounts,
+          }));
+        }
+      };
+
+      refreshStats();
+    }
+  }, [activeTab, orgId]);
+
   const handleSave = async () => {
     if (!orgId) return;
     setSaving(true);

@@ -257,35 +257,34 @@ export function BioLinksPage({ slug, orgId, previewConfig }: BioLinksPageProps) 
       }
     }
 
-    // 2. Track click on server & Supabase directly
+    // 2. Track click on server & Supabase directly via RPC function
     if (org?.id && !previewConfig) {
-      const payload = {
-        organizacao_id: org.id,
-        link_id: linkId,
-        link_url: linkUrl || '',
-      };
+      // A) Direct RPC call (SECURITY DEFINER guarantees execution)
+      try {
+        supabase
+          .rpc('track_bio_link_click', {
+            p_org_id: org.id,
+            p_link_id: linkId,
+            p_link_url: linkUrl || '',
+          })
+          .then(() => {})
+          .catch((err: any) => {
+            console.warn('[BioLinks] RPC track click error:', err);
+          });
+      } catch (e) {}
 
-      // A) Fetch with keepalive: true to prevent browser cancellation on page unload/navigation
+      // B) API endpoint call with keepalive
       try {
         fetch('/api/bio-links/track-click', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-          keepalive: true,
-        }).catch(() => {});
-      } catch (e) {}
-
-      // B) Also insert directly into Supabase bio_link_clicks table
-      try {
-        supabase
-          .from('bio_link_clicks')
-          .insert({
+          body: JSON.stringify({
             organizacao_id: org.id,
             link_id: linkId,
             link_url: linkUrl || '',
-          })
-          .then(() => {})
-          .catch(() => {});
+          }),
+          keepalive: true,
+        }).catch(() => {});
       } catch (e) {}
     }
   };
