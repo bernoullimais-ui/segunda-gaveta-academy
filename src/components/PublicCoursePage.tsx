@@ -112,7 +112,7 @@ const Nav = ({ layout, item, lp, onEnrollClick }: NavProps) => {
             onClick={onEnrollClick}
             className="typo-btn px-3 sm:px-6 py-1.5 sm:py-2.5 bg-primary text-white rounded-full font-bold text-xs sm:text-sm hover:opacity-90 shadow-lg shadow-primary/20 active:scale-95 transition-all whitespace-nowrap"
           >
-            {Boolean(item?.em_breve || item?.configuracao_json?.em_breve || item?.status === 'em_breve') ? 'Em Breve' : (lp.cta_text || 'Inscrever-se')}
+            {Boolean(item?.em_breve || item?.configuracao_json?.em_breve || item?.status === 'em_breve' || lp?.cta_text?.toLowerCase().includes('breve') || lp?.cta_text?.toLowerCase().includes('cadastrar') || lp?.cta_text?.toLowerCase().includes('espera')) ? 'Em Breve' : (lp.cta_text || 'Inscrever-se')}
           </button>
         </div>
       </div>
@@ -779,7 +779,10 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
     item?.status === 'em_breve' ||
     config?.em_breve === true ||
     config?.em_breve === 'true' ||
-    config?.status === 'em_breve'
+    config?.status === 'em_breve' ||
+    lp?.cta_text?.toLowerCase().includes('breve') ||
+    lp?.cta_text?.toLowerCase().includes('cadastrar') ||
+    lp?.cta_text?.toLowerCase().includes('espera')
   );
   const discountedPrice = !selectedPlan && !isTrilha && config.valor_com_desconto ? parseFloat(config.valor_com_desconto) : null;
   const itemPrice = selectedPlan ? (selectedPlan.valor_cents / 100) : (isTrilha ? (item?.preco || 0) : (parseFloat(item?.valor) || 0));
