@@ -149,11 +149,41 @@ export function BioLinksEditor({ orgId, loggedUser, showToast }: BioLinksEditorP
           .eq('organizacao_id', orgId);
         if (trilhasData) setTrilhas(trilhasData);
 
-        // Fetch click analytics
-        const res = await fetch(`/api/bio-links/stats/${orgId}`).catch(() => null);
-        if (res && res.ok) {
-          const statsData = await res.json();
-          setStats(statsData);
+        // Fetch click analytics (API + Supabase fallback)
+        let statsLoaded = false;
+        try {
+          const res = await fetch(`/api/bio-links/stats/${orgId}`).catch(() => null);
+          if (res && res.ok) {
+            const statsData = await res.json();
+            if (statsData && typeof statsData.total_clicks === 'number') {
+              setStats(statsData);
+              statsLoaded = true;
+            }
+          }
+        } catch (e) {}
+
+        if (!statsLoaded) {
+          try {
+            const { data: dbClicks } = await supabase
+              .from('bio_link_clicks')
+              .select('link_id')
+              .eq('organizacao_id', orgId);
+
+            if (dbClicks) {
+              const clickCounts: Record<string, number> = {};
+              dbClicks.forEach((c: any) => {
+                if (c.link_id) {
+                  clickCounts[c.link_id] = (clickCounts[c.link_id] || 0) + 1;
+                }
+              });
+              setStats({
+                total_clicks: dbClicks.length,
+                clicks_by_link: clickCounts,
+              });
+            }
+          } catch (e) {
+            console.warn('[bio-links] Direct Supabase stats error:', e);
+          }
         }
       } catch (err: any) {
         console.error('Error loading bio links config:', err);

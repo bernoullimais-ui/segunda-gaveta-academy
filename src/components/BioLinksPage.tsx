@@ -257,21 +257,36 @@ export function BioLinksPage({ slug, orgId, previewConfig }: BioLinksPageProps) 
       }
     }
 
-    // 2. Track click on server
+    // 2. Track click on server & Supabase directly
     if (org?.id && !previewConfig) {
+      const payload = {
+        organizacao_id: org.id,
+        link_id: linkId,
+        link_url: linkUrl || '',
+      };
+
+      // A) Fetch with keepalive: true to prevent browser cancellation on page unload/navigation
       try {
-        await fetch('/api/bio-links/track-click', {
+        fetch('/api/bio-links/track-click', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
+          body: JSON.stringify(payload),
+          keepalive: true,
+        }).catch(() => {});
+      } catch (e) {}
+
+      // B) Also insert directly into Supabase bio_link_clicks table
+      try {
+        supabase
+          .from('bio_link_clicks')
+          .insert({
             organizacao_id: org.id,
             link_id: linkId,
-            link_url: linkUrl,
-          }),
-        });
-      } catch (e) {
-        console.warn('Track click server error:', e);
-      }
+            link_url: linkUrl || '',
+          })
+          .then(() => {})
+          .catch(() => {});
+      } catch (e) {}
     }
   };
 
