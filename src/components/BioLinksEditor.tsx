@@ -205,36 +205,22 @@ export function BioLinksEditor({ orgId, loggedUser, showToast }: BioLinksEditorP
           .eq('id', orgId)
           .maybeSingle();
 
-        const configClicks = orgData?.config_json?.bio_links_config?.click_counts || {};
+        if (!orgData) return;
 
-        const { data: dbClicks } = await supabase
-          .from('bio_link_clicks')
-          .select('link_id')
-          .eq('organizacao_id', orgId);
-
-        const clickCounts: Record<string, number> = { ...configClicks };
-        if (dbClicks) {
-          dbClicks.forEach((c: any) => {
-            if (c.link_id) {
-              const tableCount = dbClicks.filter((x: any) => x.link_id === c.link_id).length;
-              clickCounts[c.link_id] = Math.max(clickCounts[c.link_id] || 0, tableCount);
-            }
-          });
-        }
-
+        const bioConfig = orgData.config_json?.bio_links_config || {};
+        const clickCounts: Record<string, number> = bioConfig.click_counts || {};
         const totalClicks = Object.values(clickCounts).reduce((acc: number, val: any) => acc + (Number(val) || 0), 0);
 
         setStats({
-          total_clicks: Math.max(totalClicks, (dbClicks || []).length),
+          total_clicks: totalClicks,
           clicks_by_link: clickCounts,
         });
 
-        if (orgData?.config_json?.bio_links_config) {
-          setConfig((prev: any) => ({
-            ...prev,
-            click_counts: clickCounts,
-          }));
-        }
+        // Also update config.click_counts for display
+        setConfig((prev: any) => ({
+          ...prev,
+          click_counts: clickCounts,
+        }));
       };
 
       refreshStats();

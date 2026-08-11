@@ -257,23 +257,8 @@ export function BioLinksPage({ slug, orgId, previewConfig }: BioLinksPageProps) 
       }
     }
 
-    // 2. Track click on server & Supabase directly via RPC function
+    // 2. Track click via API endpoint (stores in config_json.bio_links_config.click_counts)
     if (org?.id && !previewConfig) {
-      // A) Direct RPC call (SECURITY DEFINER guarantees execution)
-      try {
-        supabase
-          .rpc('track_bio_link_click', {
-            p_org_id: org.id,
-            p_link_id: linkId,
-            p_link_url: linkUrl || '',
-          })
-          .then(() => {})
-          .catch((err: any) => {
-            console.warn('[BioLinks] RPC track click error:', err);
-          });
-      } catch (e) {}
-
-      // B) API endpoint call with keepalive
       try {
         fetch('/api/bio-links/track-click', {
           method: 'POST',
