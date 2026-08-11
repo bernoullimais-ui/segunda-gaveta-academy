@@ -202,4 +202,133 @@ router.get(['/', '/login'], async (req, res, next) => {
   res.send(html);
 });
 
+// Interceptador para rotas de Link na Bio: /links, /bio, /l/:slug e /bio/:slug
+router.get(['/links', '/bio', '/l/:slug', '/bio/:slug'], async (req, res, next) => {
+  const host = req.headers.host || '';
+  const protocol = req.headers['x-forwarded-proto'] || 'https';
+  const baseUrl = `${protocol}://${host}`;
+
+  const slugParam = req.params.slug;
+  const isLocalhost = host.includes('localhost') || host.includes('127.0.0.1');
+  const isMainDomain = 
+    host === 'segundagavetaacademy.com.br' || 
+    host === 'www.segundagavetaacademy.com.br' || 
+    host === 'segundagaveta.com.br' ||
+    host === 'www.segundagaveta.com.br' ||
+    host.endsWith('.vercel.app');
+
+  let projectSlug = slugParam || '';
+  if (!projectSlug && !isLocalhost && !isMainDomain) {
+    const parts = host.split('.');
+    if (parts.length > 2) {
+      projectSlug = parts[0];
+    }
+  }
+
+  let html = '';
+  try {
+    const response = await fetch(`${baseUrl}/index.html`);
+    if (response.ok) {
+      html = await response.text();
+    } else {
+      throw new Error('Falha ao buscar index.html');
+    }
+  } catch (e) {
+    return next();
+  }
+
+  if (projectSlug) {
+    try {
+      const supabase = getSupabase();
+      const { data: org } = await supabase
+        .from('organizacoes')
+        .select('id, nome, logo_url, config_json')
+        .eq('slug', projectSlug)
+        .maybeSingle();
+
+      if (org) {
+        const bioConfig = org.config_json?.bio_links_config || {};
+        const seoConfig = bioConfig.seo || {};
+        const pixelsConfig = bioConfig.pixels || {};
+
+        const title = (seoConfig.title || bioConfig.titulo || org.nome || 'Links Oficiais').replace(/"/g, '&quot;');
+        const description = (seoConfig.description || bioConfig.subtitulo || `Links oficiais e conteúdos de ${org.nome}`).replace(/"/g, '&quot;');
+        let imageUrl = seoConfig.og_image_url || bioConfig.avatar_url || org.logo_url || '';
+        if (imageUrl && !imageUrl.startsWith('http')) {
+          imageUrl = `${baseUrl}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
+        }
+        const absoluteUrl = `${protocol}://${host}${req.originalUrl || req.url}`;
+
+        // Build Pixel scripts to inject in <head>
+        let pixelScripts = '';
+        if (pixelsConfig.meta_pixel_id) {
+          const fbId = pixelsConfig.meta_pixel_id.trim();
+          pixelScripts += `
+          <!-- Meta Pixel Code -->
+          <script>
+          !function(f,b,e,v,n,t,s)
+          {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+          n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+          if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+          n.queue=[];t=b.createElement(e);t.async=!0;
+          t.src=v;s=b.getElementsByTagName(e)[0];
+          s.parentNode.insertBefore(t,s)}(window, document,'script',
+          'https://connect.facebook.net/en_US/fbevents.js');
+          fbq('init', '${fbId}');
+          fbq('track', 'PageView');
+          </script>`;
+        }
+
+        if (pixelsConfig.google_analytics_id) {
+          const gaId = pixelsConfig.google_analytics_id.trim();
+          pixelScripts += `
+          <!-- Google Analytics -->
+          <script async src="https://www.googletagmanager.com/gtag/js?id=${gaId}"></script>
+          <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${gaId}');
+          </script>`;
+        }
+
+        if (pixelsConfig.tiktok_pixel_id) {
+          const ttId = pixelsConfig.tiktok_pixel_id.trim();
+          pixelScripts += `
+          <!-- TikTok Pixel Code -->
+          <script>
+          !function (w, d, t) {
+            w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","addUserData"],ttq.setAndVerify=function(t,e){for(var n=0;n<ttq.methods.length;n++)ttq[t][ttq.methods[n]]=ttq[e](ttq.methods[n]);return ttq};ttq.instance=function(t){for(var e=ttq.methods,n=0;n<e.length;n++)t[e[n]]=ttq[t](e[n]);return t};ttq.load=function(e,n){var i="https://analytics.tiktok.com/i18n/pixel/events.js";ttq._i=ttq._i||{},ttq._i[e]=[],ttq._i[e]._u=i,ttq._t=ttq._t||{},ttq._t[e]=+new Date,ttq._o=ttq._o||{},ttq._o[e]=n||{};var o=document.createElement("script");o.type="text/javascript",o.async=!0,o.src=i+"?sdkid="+e+"&lib="+t;var a=document.getElementsByTagName("script")[0];a.parentNode.insertBefore(o,a)};
+            ttq.load('${ttId}');
+            ttq.page();
+          }(window, document, 'ttq');
+          </script>`;
+        }
+
+        const ogTags = `<title>${title}</title>
+        <meta name="description" content="${description}" />
+        <meta property="og:title" content="${title}" />
+        <meta property="og:description" content="${description}" />
+        <meta property="og:url" content="${absoluteUrl}" />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="${org.nome}" />
+        ${imageUrl ? `
+        <meta property="og:image" content="${imageUrl}" />
+        <meta property="og:image:secure_url" content="${imageUrl}" />` : ''}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="${title}" />
+        <meta name="twitter:description" content="${description}" />
+        ${imageUrl ? `<meta name="twitter:image" content="${imageUrl}" />` : ''}
+        ${pixelScripts}`;
+
+        html = html.replace(/<title>.*?<\/title>/gi, ogTags);
+        return res.send(html);
+      }
+    } catch (err) {
+      console.error('Erro ao injetar OG bio links:', err);
+    }
+  }
+  return res.send(html);
+});
+
 export default router;

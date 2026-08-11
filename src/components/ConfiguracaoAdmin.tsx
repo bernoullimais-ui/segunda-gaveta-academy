@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { Save, Loader2, Award, Palette, Image, Globe, Mail, Phone, MessageSquare, ShieldCheck, Ticket, DollarSign, FileText } from 'lucide-react';
+import { Save, Loader2, Award, Palette, Image, Globe, Mail, Phone, MessageSquare, ShieldCheck, Ticket, DollarSign, FileText, Sparkles } from 'lucide-react';
 import { CuponsAdmin } from './CuponsAdmin';
 import { DadosRecebimento } from './DadosRecebimento';
 import { OrgWebsiteEditor } from './OrgWebsiteEditor';
 import { DadosFiscais } from './DadosFiscais';
+import { BioLinksEditor } from './BioLinksEditor';
 
 interface ConfiguracaoAdminProps {
   loggedUser: any;
@@ -27,9 +28,10 @@ const PRESET_COLORS = [
 export function ConfiguracaoAdmin({ loggedUser, orgId, onOrgUpdate, showToast, isModal = false }: ConfiguracaoAdminProps) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<'visual' | 'contato' | 'integracao' | 'cupons' | 'recebimento' | 'fiscal' | 'website'>('visual');
+  const [activeTab, setActiveTab] = useState<'visual' | 'contato' | 'integracao' | 'cupons' | 'recebimento' | 'fiscal' | 'website' | 'bio_links'>('visual');
 
-  // Form states
+// Form states
+
   const [nome, setNome] = useState('');
   const [logoUrl, setLogoUrl] = useState('');
   const [corPrimaria, setCorPrimaria] = useState('#6366f1');
@@ -243,10 +245,27 @@ export function ConfiguracaoAdmin({ loggedUser, orgId, onOrgUpdate, showToast, i
           <Globe size={18} />
           Website
         </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('bio_links')}
+          className={`py-4 px-4 font-bold border-b-2 transition-all flex items-center gap-2 cursor-pointer ${
+            activeTab === 'bio_links'
+              ? 'text-slate-900 border-slate-900'
+              : 'text-slate-500 border-transparent hover:text-slate-800'
+          }`}
+          style={{ borderColor: activeTab === 'bio_links' ? corPrimaria : undefined, color: activeTab === 'bio_links' ? corPrimaria : undefined }}
+        >
+          <Sparkles size={18} />
+          Link na Bio (Linktree)
+        </button>
       </div>
 
       {/* Content / Form */}
-      {activeTab === 'cupons' ? (
+      {activeTab === 'bio_links' ? (
+        <div className="p-8">
+          <BioLinksEditor orgId={orgId} loggedUser={loggedUser} showToast={showToast} />
+        </div>
+      ) : activeTab === 'cupons' ? (
         <div className="p-8">
           <CuponsAdmin orgId={orgId} corPrimaria={corPrimaria} showToast={showToast} />
         </div>

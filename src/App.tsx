@@ -36,6 +36,7 @@ import { ResetPasswordScreen } from './components/ResetPasswordScreen';
 import { InstitutionalPage } from './components/InstitutionalPage';
 import { OrgInstitutionalPage } from './components/OrgInstitutionalPage';
 import { PaymentSuccessPage } from './components/PaymentSuccessPage';
+import { BioLinksPage } from './components/BioLinksPage';
 import { 
   User, 
   BookOpen, 
@@ -133,6 +134,8 @@ export default function App() {
   const [resumeOnboarding, setResumeOnboarding] = useState<any>(null);
   const [isPaymentSuccessRoute, setIsPaymentSuccessRoute] = useState(false);
   const [paymentSuccessParams, setPaymentSuccessParams] = useState<{ participantId: string; type?: string; subStatus?: string } | null>(null);
+  const [isBioLinksRoute, setIsBioLinksRoute] = useState(false);
+  const [bioLinksSlug, setBioLinksSlug] = useState<string | undefined>(undefined);
 
   const [impersonatedUser, setImpersonatedUser] = useState<any>(null);
   const [isLoadingOrg, setIsLoadingOrg] = useState(true);
@@ -244,6 +247,17 @@ export default function App() {
     const participarMatch = path.match(/^\/participar/);
     if (participarMatch) {
       setIsParticiparRoute(true);
+    }
+
+    // Bio Links (Linktree) route detection: /links, /bio, /l/:slug, /bio/:slug
+    if (path === '/links' || path === '/bio') {
+      setIsBioLinksRoute(true);
+    } else {
+      const bioMatch = path.match(/^\/(?:l|bio)\/([a-zA-Z0-9-]+)/);
+      if (bioMatch && bioMatch[1]) {
+        setIsBioLinksRoute(true);
+        setBioLinksSlug(bioMatch[1]);
+      }
     }
 
     const resetMatch = path.match(/^\/reset-password/);
@@ -738,6 +752,15 @@ export default function App() {
       return (
         <>
           <InstitutionalPage />
+          <Toast message={toastMessage} onClose={() => setToastMessage(null)} />
+        </>
+      );
+    }
+
+    if (isBioLinksRoute) {
+      return (
+        <>
+          <BioLinksPage slug={bioLinksSlug} />
           <Toast message={toastMessage} onClose={() => setToastMessage(null)} />
         </>
       );
