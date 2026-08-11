@@ -24,7 +24,8 @@ import {
   Video,
   Shield,
   Loader2,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Pencil
 } from 'lucide-react';
 import { BioLinksPage } from './BioLinksPage';
 
@@ -249,6 +250,61 @@ export function BioLinksEditor({ orgId, loggedUser, showToast }: BioLinksEditorP
     setConfig((prev: any) => ({ ...prev, custom_links: list }));
   };
 
+  // Edit Link Handlers
+  const [editingLinkId, setEditingLinkId] = useState<string | null>(null);
+  const [editLinkData, setEditLinkData] = useState<{
+    id: string;
+    titulo: string;
+    url: string;
+    destaque: boolean;
+    cor_botao: string;
+  }>({ id: '', titulo: '', url: '', destaque: false, cor_botao: '#6366f1' });
+
+  const handleStartEditLink = (link: any) => {
+    setEditingLinkId(link.id);
+    setEditLinkData({
+      id: link.id,
+      titulo: link.titulo || '',
+      url: link.url || '',
+      destaque: !!link.destaque,
+      cor_botao: link.cor_botao || '#6366f1',
+    });
+  };
+
+  const handleCancelEditLink = () => {
+    setEditingLinkId(null);
+  };
+
+  const handleSaveEditLink = () => {
+    if (!editLinkData.titulo.trim() || !editLinkData.url.trim()) {
+      showToast('Informe o título e a URL do link.', 'info');
+      return;
+    }
+
+    let urlFormatted = editLinkData.url.trim();
+    if (!urlFormatted.startsWith('http://') && !urlFormatted.startsWith('https://')) {
+      urlFormatted = `https://${urlFormatted}`;
+    }
+
+    setConfig((prev: any) => ({
+      ...prev,
+      custom_links: prev.custom_links.map((l: any) =>
+        l.id === editLinkData.id
+          ? {
+              ...l,
+              titulo: editLinkData.titulo.trim(),
+              url: urlFormatted,
+              destaque: editLinkData.destaque,
+              cor_botao: editLinkData.cor_botao,
+            }
+          : l
+      ),
+    }));
+
+    setEditingLinkId(null);
+    showToast('Link atualizado!', 'success');
+  };
+
   const publicUrl = orgSlug
     ? `https://${orgSlug}.segundagaveta.com.br/links`
     : `${window.location.origin}/l/default`;
@@ -454,75 +510,161 @@ export function BioLinksEditor({ orgId, loggedUser, showToast }: BioLinksEditorP
                 ) : (
                   <div className="space-y-3">
                     {config.custom_links.map((link: any, index: number) => (
-                      <div
-                        key={link.id}
-                        className={`flex items-center justify-between p-4 rounded-xl border transition-all ${
-                          link.ativo !== false ? 'bg-slate-50 border-slate-200' : 'bg-slate-100/60 border-slate-200 opacity-60'
-                        }`}
-                      >
-                        <div className="flex items-center gap-3 min-w-0">
-                          <div className="flex flex-col gap-1 text-slate-400">
-                            <button
-                              onClick={() => handleMoveLink(index, 'up')}
-                              disabled={index === 0}
-                              className="hover:text-slate-700 disabled:opacity-30"
-                            >
-                              <MoveUp className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              onClick={() => handleMoveLink(index, 'down')}
-                              disabled={index === config.custom_links.length - 1}
-                              className="hover:text-slate-700 disabled:opacity-30"
-                            >
-                              <MoveDown className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-2">
-                              <span className="font-bold text-slate-900 text-sm truncate">{link.titulo}</span>
-                              {link.destaque && (
-                                <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-indigo-100 text-indigo-700">
-                                  Destaque
-                                </span>
-                              )}
+                      <div key={link.id}>
+                        {editingLinkId === link.id ? (
+                          <div className="p-4 rounded-xl border border-indigo-300 bg-indigo-50/40 space-y-3">
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-bold text-indigo-900 uppercase">Editar Link</span>
                             </div>
-                            <p className="text-xs text-slate-400 truncate max-w-xs">{link.url}</p>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                              <div>
+                                <label className="text-[11px] font-bold text-slate-500 uppercase block mb-1">Título do Link</label>
+                                <input
+                                  type="text"
+                                  value={editLinkData.titulo}
+                                  onChange={(e) => setEditLinkData({ ...editLinkData, titulo: e.target.value })}
+                                  className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm font-semibold outline-none focus:ring-2 focus:ring-indigo-500"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="text-[11px] font-bold text-slate-500 uppercase block mb-1">URL de Destino</label>
+                                <input
+                                  type="url"
+                                  value={editLinkData.url}
+                                  onChange={(e) => setEditLinkData({ ...editLinkData, url: e.target.value })}
+                                  className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-indigo-100">
+                              <div className="flex items-center gap-4">
+                                <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700">
+                                  <input
+                                    type="checkbox"
+                                    checked={editLinkData.destaque}
+                                    onChange={(e) => setEditLinkData({ ...editLinkData, destaque: e.target.checked })}
+                                    className="w-4 h-4 text-indigo-600 rounded cursor-pointer"
+                                  />
+                                  ★ Destaque (Glow/Pulse)
+                                </label>
+
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs font-bold text-slate-500">Cor do Botão:</span>
+                                  <input
+                                    type="color"
+                                    value={editLinkData.cor_botao}
+                                    onChange={(e) => setEditLinkData({ ...editLinkData, cor_botao: e.target.value })}
+                                    className="w-7 h-7 rounded-lg border border-slate-200 cursor-pointer p-0"
+                                  />
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-2">
+                                <button
+                                  type="button"
+                                  onClick={handleCancelEditLink}
+                                  className="px-3 py-1.5 border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold text-xs rounded-lg transition-colors"
+                                >
+                                  Cancelar
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={handleSaveEditLink}
+                                  className="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-lg shadow-sm transition-colors"
+                                >
+                                  Salvar Link
+                                </button>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-
-                        <div className="flex items-center gap-2 shrink-0">
-                          <button
-                            onClick={() => handleToggleLinkDestaque(link.id)}
-                            className={`p-1.5 rounded-lg text-xs font-bold border ${
-                              link.destaque
-                                ? 'bg-indigo-50 border-indigo-200 text-indigo-700'
-                                : 'bg-white border-slate-200 text-slate-500'
-                            }`}
-                            title="Alternar Destaque"
-                          >
-                            ★
-                          </button>
-
-                          <button
-                            onClick={() => handleToggleLinkActive(link.id)}
-                            className={`px-2.5 py-1 rounded-lg text-xs font-bold border ${
-                              link.ativo !== false
-                                ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
-                                : 'bg-slate-200 border-slate-300 text-slate-600'
+                        ) : (
+                          <div
+                            className={`flex items-center justify-between p-4 rounded-xl border transition-all ${
+                              link.ativo !== false ? 'bg-slate-50 border-slate-200' : 'bg-slate-100/60 border-slate-200 opacity-60'
                             }`}
                           >
-                            {link.ativo !== false ? 'Ativo' : 'Oculto'}
-                          </button>
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div className="flex flex-col gap-1 text-slate-400">
+                                <button
+                                  type="button"
+                                  onClick={() => handleMoveLink(index, 'up')}
+                                  disabled={index === 0}
+                                  className="hover:text-slate-700 disabled:opacity-30"
+                                >
+                                  <MoveUp className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleMoveLink(index, 'down')}
+                                  disabled={index === config.custom_links.length - 1}
+                                  className="hover:text-slate-700 disabled:opacity-30"
+                                >
+                                  <MoveDown className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
 
-                          <button
-                            onClick={() => handleRemoveLink(link.id)}
-                            className="p-1.5 text-slate-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors"
-                            title="Remover Link"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
+                              <div className="min-w-0">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-bold text-slate-900 text-sm truncate">{link.titulo}</span>
+                                  {link.destaque && (
+                                    <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-indigo-100 text-indigo-700">
+                                      Destaque
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-xs text-slate-400 truncate max-w-xs">{link.url}</p>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-2 shrink-0">
+                              <button
+                                type="button"
+                                onClick={() => handleStartEditLink(link)}
+                                className="p-1.5 text-slate-500 hover:text-indigo-600 rounded-lg hover:bg-indigo-50 border border-slate-200 bg-white transition-colors flex items-center gap-1 text-xs font-bold"
+                                title="Editar Link"
+                              >
+                                <Pencil className="w-3.5 h-3.5" />
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => handleToggleLinkDestaque(link.id)}
+                                className={`p-1.5 rounded-lg text-xs font-bold border ${
+                                  link.destaque
+                                    ? 'bg-indigo-50 border-indigo-200 text-indigo-700'
+                                    : 'bg-white border-slate-200 text-slate-500'
+                                }`}
+                                title="Alternar Destaque"
+                              >
+                                ★
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => handleToggleLinkActive(link.id)}
+                                className={`px-2.5 py-1 rounded-lg text-xs font-bold border ${
+                                  link.ativo !== false
+                                    ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                                    : 'bg-slate-200 border-slate-300 text-slate-600'
+                                }`}
+                              >
+                                {link.ativo !== false ? 'Ativo' : 'Oculto'}
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveLink(link.id)}
+                                className="p-1.5 text-slate-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors"
+                                title="Remover Link"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
