@@ -1261,7 +1261,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                 <Reorder.Group axis="y" values={displayItems} onReorder={handleReorder} as="tbody" className="divide-y divide-slate-100">
                   {displayItems.map(item => (
                     <Reorder.Item 
-                      key={item.id} 
+                      key={`${item.type}-${item.id}`} 
                       value={item} 
                       as="tr" 
                       className="hover:bg-slate-50 cursor-pointer group"
