@@ -248,15 +248,39 @@ router.get(['/links', '/bio', '/l/:slug', '/bio/:slug'], async (req, res, next) 
 
       if (org) {
         const bioConfig = org.config_json?.bio_links_config || {};
+        const websiteConfig = org.config_json?.website_config || {};
         const seoConfig = bioConfig.seo || {};
         const pixelsConfig = bioConfig.pixels || {};
 
-        const title = (seoConfig.title || bioConfig.titulo || org.nome || 'Links Oficiais').replace(/"/g, '&quot;');
-        const description = (seoConfig.description || bioConfig.subtitulo || `Links oficiais e conteúdos de ${org.nome}`).replace(/"/g, '&quot;');
-        let imageUrl = seoConfig.og_image_url || bioConfig.avatar_url || org.logo_url || '';
+        const title = (seoConfig.title || bioConfig.titulo || websiteConfig.specialist_name || org.nome || 'Links Oficiais').replace(/"/g, '&quot;');
+        const subtitle = bioConfig.subtitulo || websiteConfig.specialist_bio || `Especialista — links oficiais, cursos e conteúdos de ${title}`;
+        const description = (seoConfig.description || subtitle).substring(0, 200).replace(/"/g, '&quot;');
+
+        // Image: priority cascade — SEO override > avatar > website hero > website foto > logo
+        let imageUrl = seoConfig.og_image_url
+          || bioConfig.avatar_url
+          || (websiteConfig.hero_images && websiteConfig.hero_images[0])
+          || websiteConfig.specialist_foto_url
+          || org.logo_url
+          || '';
+
+        // If still no image, try to get specialist photo from courses
+        if (!imageUrl && org.id) {
+          const { data: coursesData } = await supabase
+            .from('cursos')
+            .select('professor_foto_url, capa_url, thumbnail_url')
+            .eq('organizacao_id', org.id)
+            .not('professor_foto_url', 'is', null)
+            .limit(1);
+          if (coursesData && coursesData.length > 0) {
+            imageUrl = coursesData[0].professor_foto_url || coursesData[0].capa_url || coursesData[0].thumbnail_url || '';
+          }
+        }
+
         if (imageUrl && !imageUrl.startsWith('http')) {
           imageUrl = `${baseUrl}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
         }
+
         const absoluteUrl = `${protocol}://${host}${req.originalUrl || req.url}`;
 
         // Build Pixel scripts to inject in <head>
@@ -306,22 +330,28 @@ router.get(['/links', '/bio', '/l/:slug', '/bio/:slug'], async (req, res, next) 
         }
 
         const ogTags = `<title>${title}</title>
+        <meta charset="UTF-8" />
         <meta name="description" content="${description}" />
         <meta property="og:title" content="${title}" />
         <meta property="og:description" content="${description}" />
         <meta property="og:url" content="${absoluteUrl}" />
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="${org.nome}" />
+        <meta property="og:locale" content="pt_BR" />
         ${imageUrl ? `
         <meta property="og:image" content="${imageUrl}" />
-        <meta property="og:image:secure_url" content="${imageUrl}" />` : ''}
+        <meta property="og:image:secure_url" content="${imageUrl}" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content="${title}" />` : ''}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="${title}" />
         <meta name="twitter:description" content="${description}" />
-        ${imageUrl ? `<meta name="twitter:image" content="${imageUrl}" />` : ''}
+        ${imageUrl ? `<meta name="twitter:image" content="${imageUrl}" />
+        <meta name="twitter:image:alt" content="${title}" />` : ''}
         ${pixelScripts}`;
 
-        html = html.replace(/<title>.*?<\/title>/gi, ogTags);
+        html = html.replace(/<title>[^<]*<\/title>/, ogTags);
         return res.send(html);
       }
     } catch (err) {

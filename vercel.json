@@ -9,6 +9,10 @@
     { "src": "/public/trilha/(.*)", "dest": "/api/index.ts" },
     { "src": "/login", "dest": "/api/index.ts" },
     { "src": "/$", "dest": "/api/index.ts" },
+    { "src": "/links", "dest": "/api/index.ts" },
+    { "src": "/bio", "dest": "/api/index.ts" },
+    { "src": "/l/(.*)", "dest": "/api/index.ts" },
+    { "src": "/bio/(.*)", "dest": "/api/index.ts" },
     { "handle": "filesystem" },
     { "src": "/(.*)", "dest": "/index.html" }
   ],
