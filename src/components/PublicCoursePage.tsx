@@ -1,4 +1,4 @@
-import React, { useState, useEffect, createPortal } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { 
   Play, 
@@ -30,6 +30,7 @@ import { PaymentModal } from './PaymentModal';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { motion, AnimatePresence } from 'motion/react';
+import { createPortal } from 'react-dom';
 
 interface PublicCoursePageProps {
   courseId: string;
