@@ -2471,13 +2471,11 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
           organizacaoId={item.organizacao_id}
           planId={selectedPlanId || undefined}
         />
-      </ModalErrorBoundary>
-      <WhatsAppFloatingButton item={item} />
 
-      {/* Lead Modal for "Em Breve" courses */}
-      <AnimatePresence>
-        {showLeadModal && (
-          <div className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        {/* Lead Modal for "Em Breve" courses */}
+        <AnimatePresence>
+          {showLeadModal && (
+            <div className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -2586,6 +2584,8 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
           </div>
         )}
       </AnimatePresence>
+      </ModalErrorBoundary>
+      <WhatsAppFloatingButton item={item} />
     </div>
   );
 };
