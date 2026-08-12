@@ -499,16 +499,10 @@ export function BioLinksPage({ slug, orgId, previewConfig }: BioLinksPageProps) 
                       className="w-16 h-16 rounded-xl object-cover shrink-0 bg-slate-800"
                     />
                     <div className="flex-1 min-w-0">
-                      <h3 className={`font-bold text-sm ${currentTheme.textColor} truncate`}>{c.nome}</h3>
+                      <h3 className={`font-bold text-sm ${currentTheme.textColor} line-clamp-2 leading-snug`}>{c.nome}</h3>
                       <p className={`text-xs ${currentTheme.subtextColor} line-clamp-1 mt-0.5`}>
                         {c.descricao || 'Página oficial do curso'}
                       </p>
-                      <div className="flex items-center gap-2 mt-1.5">
-                        <span className="text-xs font-black text-emerald-400">{valorFmt}</span>
-                        <span className="text-[10px] px-2 py-0.5 bg-indigo-500/20 text-indigo-300 rounded-md font-semibold border border-indigo-500/30">
-                          Matrículas Abertas
-                        </span>
-                      </div>
                     </div>
                     <ChevronRight className={`w-4 h-4 ${currentTheme.subtextColor} shrink-0`} />
                   </a>
@@ -542,7 +536,7 @@ export function BioLinksPage({ slug, orgId, previewConfig }: BioLinksPageProps) 
                     className="w-16 h-16 rounded-xl object-cover shrink-0 bg-slate-800"
                   />
                   <div className="flex-1 min-w-0">
-                    <h3 className={`font-bold text-sm ${currentTheme.textColor} truncate`}>{t.nome}</h3>
+                    <h3 className={`font-bold text-sm ${currentTheme.textColor} line-clamp-2 leading-snug`}>{t.nome}</h3>
                     <p className={`text-xs ${currentTheme.subtextColor} line-clamp-1 mt-0.5`}>
                       {t.descricao || 'Formação completa'}
                     </p>
