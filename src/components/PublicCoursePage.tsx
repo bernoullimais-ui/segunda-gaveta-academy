@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, createPortal } from 'react';
 import { supabase } from '../lib/supabase';
 import { 
   Play, 
@@ -602,6 +602,114 @@ class ModalErrorBoundary extends React.Component<{children: React.ReactNode}, {h
     return this.props.children; 
   }
 }
+
+// LeadModal rendered as a portal directly into document.body
+// to guarantee it's always on top of everything
+interface LeadModalPortalProps {
+  show: boolean;
+  onClose: () => void;
+  onSubmit: (e: React.FormEvent) => void;
+  leadData: { nome: string; email: string; telefone: string };
+  setLeadData: (d: any) => void;
+  isSubmitting: boolean;
+  leadSuccess: boolean;
+  itemNome?: string;
+}
+const LeadModalPortal: React.FC<LeadModalPortalProps> = ({ show, onClose, onSubmit, leadData, setLeadData, isSubmitting, leadSuccess, itemNome }) => {
+  if (!show) return null;
+  const modal = (
+    <div
+      style={{ position: 'fixed', inset: 0, zIndex: 2147483647, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div style={{ position: 'relative', width: '100%', maxWidth: '28rem', background: 'white', borderRadius: '1.5rem', padding: '2rem', boxShadow: '0 25px 60px rgba(0,0,0,0.3)', color: '#0f172a' }}>
+        <button
+          onClick={onClose}
+          style={{ position: 'absolute', top: '1.25rem', right: '1.25rem', padding: '0.5rem', borderRadius: '50%', border: 'none', background: 'transparent', cursor: 'pointer', color: '#94a3b8' }}
+        >
+          <X className="w-5 h-5" />
+        </button>
+        {leadSuccess ? (
+          <div style={{ textAlign: 'center', paddingTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
+            <div style={{ width: '4rem', height: '4rem', background: '#d1fae5', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#059669' }}>
+              <CheckCircle className="w-9 h-9" />
+            </div>
+            <h3 style={{ fontSize: '1.5rem', fontWeight: 900, margin: 0 }}>Interesse Registrado!</h3>
+            <p style={{ color: '#475569', fontSize: '0.875rem', lineHeight: '1.6', margin: 0 }}>
+              Obrigado! Entraremos em contato via <strong>WhatsApp e E-mail</strong> assim que as matrículas para <strong>{itemNome}</strong> forem liberadas.
+            </p>
+            <button
+              onClick={onClose}
+              style={{ width: '100%', padding: '0.75rem', background: '#059669', color: 'white', fontWeight: 700, borderRadius: '1rem', border: 'none', cursor: 'pointer', fontSize: '1rem' }}
+            >
+              Concluído
+            </button>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <span style={{ display: 'inline-block', padding: '0.25rem 0.75rem', background: '#fef3c7', color: '#92400e', fontSize: '0.7rem', fontWeight: 900, borderRadius: '999px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>✨ Curso Em Breve</span>
+              <h3 style={{ fontSize: '1.5rem', fontWeight: 900, margin: 0 }}>Lista de Espera VIP</h3>
+              <p style={{ color: '#475569', fontSize: '0.875rem', margin: 0 }}>Cadastre seus dados para receber o aviso em primeira mão e condições exclusivas de lançamento!</p>
+            </div>
+            <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#64748b', marginBottom: '0.375rem' }}>Nome Completo</label>
+                <div style={{ position: 'relative' }}>
+                  <UserIcon style={{ position: 'absolute', left: '0.875rem', top: '50%', transform: 'translateY(-50%)', width: '1.25rem', height: '1.25rem', color: '#94a3b8' }} />
+                  <input
+                    type="text"
+                    required
+                    placeholder="Seu nome completo"
+                    value={leadData.nome}
+                    onChange={e => setLeadData({ ...leadData, nome: e.target.value })}
+                    style={{ width: '100%', paddingLeft: '2.75rem', paddingRight: '1rem', paddingTop: '0.75rem', paddingBottom: '0.75rem', borderRadius: '0.75rem', border: '1px solid #e2e8f0', fontSize: '0.875rem', color: '#1e293b', outline: 'none', boxSizing: 'border-box' }}
+                  />
+                </div>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#64748b', marginBottom: '0.375rem' }}>E-mail</label>
+                <div style={{ position: 'relative' }}>
+                  <Mail style={{ position: 'absolute', left: '0.875rem', top: '50%', transform: 'translateY(-50%)', width: '1.25rem', height: '1.25rem', color: '#94a3b8' }} />
+                  <input
+                    type="email"
+                    required
+                    placeholder="seuemail@exemplo.com"
+                    value={leadData.email}
+                    onChange={e => setLeadData({ ...leadData, email: e.target.value })}
+                    style={{ width: '100%', paddingLeft: '2.75rem', paddingRight: '1rem', paddingTop: '0.75rem', paddingBottom: '0.75rem', borderRadius: '0.75rem', border: '1px solid #e2e8f0', fontSize: '0.875rem', color: '#1e293b', outline: 'none', boxSizing: 'border-box' }}
+                  />
+                </div>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#64748b', marginBottom: '0.375rem' }}>WhatsApp / Celular</label>
+                <div style={{ position: 'relative' }}>
+                  <span style={{ position: 'absolute', left: '0.875rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontSize: '0.875rem' }}>📱</span>
+                  <input
+                    type="tel"
+                    required
+                    placeholder="(00) 90000-0000"
+                    value={leadData.telefone}
+                    onChange={e => setLeadData({ ...leadData, telefone: e.target.value })}
+                    style={{ width: '100%', paddingLeft: '2.75rem', paddingRight: '1rem', paddingTop: '0.75rem', paddingBottom: '0.75rem', borderRadius: '0.75rem', border: '1px solid #e2e8f0', fontSize: '0.875rem', color: '#1e293b', outline: 'none', boxSizing: 'border-box' }}
+                  />
+                </div>
+              </div>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                style={{ width: '100%', padding: '0.875rem', background: '#2563eb', color: 'white', fontWeight: 700, fontSize: '1rem', borderRadius: '1rem', border: 'none', cursor: isSubmitting ? 'not-allowed' : 'pointer', opacity: isSubmitting ? 0.6 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+              >
+                {isSubmitting ? <Loader2 style={{ width: '1.25rem', height: '1.25rem', animation: 'spin 1s linear infinite' }} /> : <><span>Quero ser Notificado(a)</span><ArrowRight style={{ width: '1.25rem', height: '1.25rem' }} /></>}
+              </button>
+            </form>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+  return createPortal(modal, document.body);
+};
 
 export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, isTrilha }) => {
   const [item, setItem] = useState<any>(null);
@@ -1838,6 +1946,16 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
           />
         </ModalErrorBoundary>
         <WhatsAppFloatingButton item={item} />
+        <LeadModalPortal
+          show={showLeadModal}
+          onClose={() => setShowLeadModal(false)}
+          onSubmit={handleLeadSubmit}
+          leadData={leadData}
+          setLeadData={setLeadData}
+          isSubmitting={isSubmittingLead}
+          leadSuccess={leadSuccess}
+          itemNome={item?.nome}
+        />
       </div>
     );
   }
@@ -2471,121 +2589,18 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
           organizacaoId={item.organizacao_id}
           planId={selectedPlanId || undefined}
         />
-
-        {/* Lead Modal for "Em Breve" courses */}
-        <AnimatePresence>
-          {showLeadModal && (
-            <div className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="relative w-full max-w-md bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-100 overflow-hidden text-slate-900"
-            >
-              <button
-                onClick={() => setShowLeadModal(false)}
-                className="absolute top-5 right-5 p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-full transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-
-              {leadSuccess ? (
-                <div className="text-center py-6 space-y-4">
-                  <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-inner">
-                    <CheckCircle className="w-9 h-9" />
-                  </div>
-                  <h3 className="text-2xl font-black text-slate-900">Interesse Registrado!</h3>
-                  <p className="text-slate-600 text-sm leading-relaxed">
-                    Obrigado! Entraremos em contato via <strong>WhatsApp e E-mail</strong> assim que as matrículas para <strong>{item?.nome}</strong> forem liberadas.
-                  </p>
-                  <button
-                    onClick={() => setShowLeadModal(false)}
-                    className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl shadow-lg shadow-emerald-600/20 transition-all cursor-pointer"
-                  >
-                    Concluído
-                  </button>
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  <div className="space-y-2">
-                    <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-100 text-amber-800 text-xs font-black rounded-full uppercase tracking-wider">
-                      ✨ Curso Em Breve
-                    </div>
-                    <h3 className="text-2xl font-black tracking-tight text-slate-900">Lista de Espera VIP</h3>
-                    <p className="text-sm text-slate-600">
-                      Cadastre seus dados para receber o aviso em primeira mão e condições exclusivas de lançamento!
-                    </p>
-                  </div>
-
-                  <form onSubmit={handleLeadSubmit} className="space-y-4">
-                    <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Nome Completo</label>
-                      <div className="relative">
-                        <UserIcon className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                        <input
-                          type="text"
-                          required
-                          placeholder="Seu nome completo"
-                          value={leadData.nome}
-                          onChange={e => setLeadData({ ...leadData, nome: e.target.value })}
-                          className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-600 text-sm font-medium text-slate-800"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Seu E-mail</label>
-                      <div className="relative">
-                        <Mail className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                        <input
-                          type="email"
-                          required
-                          placeholder="seuemail@exemplo.com"
-                          value={leadData.email}
-                          onChange={e => setLeadData({ ...leadData, email: e.target.value })}
-                          className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-600 text-sm font-medium text-slate-800"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">WhatsApp / Celular</label>
-                      <div className="relative">
-                        <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-bold">📱</span>
-                        <input
-                          type="tel"
-                          required
-                          placeholder="(00) 90000-0000"
-                          value={leadData.telefone}
-                          onChange={e => setLeadData({ ...leadData, telefone: e.target.value })}
-                          className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-600 text-sm font-medium text-slate-800"
-                        />
-                      </div>
-                    </div>
-
-                    <button
-                      type="submit"
-                      disabled={isSubmittingLead}
-                      className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-base rounded-2xl shadow-lg shadow-blue-600/30 transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
-                    >
-                      {isSubmittingLead ? (
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                      ) : (
-                        <>
-                          <span>Quero ser Notificado(a)</span>
-                          <ArrowRight className="w-5 h-5" />
-                        </>
-                      )}
-                    </button>
-                  </form>
-                </div>
-              )}
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
       </ModalErrorBoundary>
       <WhatsAppFloatingButton item={item} />
+      <LeadModalPortal
+        show={showLeadModal}
+        onClose={() => setShowLeadModal(false)}
+        onSubmit={handleLeadSubmit}
+        leadData={leadData}
+        setLeadData={setLeadData}
+        isSubmitting={isSubmittingLead}
+        leadSuccess={leadSuccess}
+        itemNome={item?.nome}
+      />
     </div>
   );
 };
