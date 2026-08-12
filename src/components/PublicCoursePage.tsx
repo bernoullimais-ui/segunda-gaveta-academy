@@ -1050,6 +1050,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
         telefone: leadData.telefone.trim(),
         mensagem: `Interesse no lançamento (Em Breve): ${courseName}`,
         organizacao_id: orgId,
+        curso_id: item?.id || null,
         lido: false
       };
 

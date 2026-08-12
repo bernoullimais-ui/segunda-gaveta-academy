@@ -309,12 +309,12 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
   const [leadSearch, setLeadSearch] = useState('');
 
   const loadCourseLeads = useCallback(async () => {
-    if (!orgId) return;
+    if (!createdCourseId) return;
     try {
       const { data, error } = await supabase
         .from('leads_contato')
         .select('*')
-        .eq('organizacao_id', orgId)
+        .eq('curso_id', createdCourseId)
         .order('created_at', { ascending: false });
 
       if (!error && data) {
@@ -323,7 +323,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
     } catch (err) {
       console.error('Erro ao carregar leads:', err);
     }
-  }, [orgId]);
+  }, [createdCourseId]);
 
   useEffect(() => {
     if (activeTab === 'participantes') {
