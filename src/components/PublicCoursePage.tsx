@@ -174,7 +174,7 @@ const Footer = ({ layout, item, lp = {}, style }: FooterProps) => {
           <div className="lg:col-span-5 space-y-6">
             <div className="flex items-center gap-3">
               <img 
-                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRYvssOYKiGZj1IQzExgqzSRJ8bGvyq6rARDA&s" 
+                src="https://static.wixstatic.com/media/0e8544_53ba61f9cc6b4143a45c75425fc76cf3~mv2.png" 
                 alt="Segunda Gaveta Logo" 
                 className="h-12 sm:h-14 w-auto max-w-[240px] object-contain" 
               />
