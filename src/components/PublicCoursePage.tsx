@@ -475,7 +475,7 @@ const TestimonialsCarousel = ({ testimonials, layout, primaryColor, lp }: { test
       {/* Testimonial Active Card */}
       <div className="relative z-10 w-full max-w-2xl mx-auto px-8 sm:px-14 py-6 min-h-[220px] flex flex-col justify-center items-center">
         {/* Top-Left Double Quote */}
-        <span className="absolute -top-6 sm:-top-[512px] -left-4 sm:-left-12 text-[120px] sm:text-[1024px] font-serif text-white/25 select-none pointer-events-none leading-none z-0">
+        <span className="absolute -top-6 sm:-top-[384px] -left-4 sm:-left-[96px] text-[120px] sm:text-[1024px] font-serif text-white/25 select-none pointer-events-none leading-none z-0">
           “
         </span>
 
@@ -496,7 +496,7 @@ const TestimonialsCarousel = ({ testimonials, layout, primaryColor, lp }: { test
         </p>
 
         {/* Bottom-Right Double Quote */}
-        <span className="absolute -bottom-8 sm:-bottom-[512px] -right-4 sm:-right-12 text-[120px] sm:text-[1024px] font-serif text-white/25 select-none pointer-events-none leading-none z-0">
+        <span className="absolute -bottom-8 sm:-bottom-[384px] -right-4 sm:-right-[96px] text-[120px] sm:text-[1024px] font-serif text-white/25 select-none pointer-events-none leading-none z-0">
           ”
         </span>
       </div>
