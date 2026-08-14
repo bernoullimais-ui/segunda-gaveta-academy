@@ -252,6 +252,38 @@ export interface ProjetoResposta {
 
 export type LpVersionStatus = 'publicada' | 'rascunho';
 
+export interface TypographyStyle {
+  font_family?: string;
+  font_weight?: string;
+  font_size?: string;
+  line_height?: string;
+  letter_spacing?: string;
+}
+
+export type TextTypeKey =
+  | 'titulo_1'
+  | 'titulo_2'
+  | 'titulo_3'
+  | 'texto_corrido_1'
+  | 'texto_corrido_2'
+  | 'texto_corrido_3'
+  | 'texto_corrido_4'
+  | 'texto_botao_1'
+  | 'texto_botao_2';
+
+export interface TypographyConfig {
+  titulo_1?: TypographyStyle;
+  titulo_2?: TypographyStyle;
+  titulo_3?: TypographyStyle;
+  texto_corrido_1?: TypographyStyle;
+  texto_corrido_2?: TypographyStyle;
+  texto_corrido_3?: TypographyStyle;
+  texto_corrido_4?: TypographyStyle;
+  texto_botao_1?: TypographyStyle;
+  texto_botao_2?: TypographyStyle;
+  [key: string]: TypographyStyle | undefined;
+}
+
 export interface LandingPageVersionConfig {
   id: string;                      // ex: 'v1', 'v2'
   nome: string;                    // ex: 'Versão Principal', 'Campanha Meta Ads'
@@ -280,6 +312,7 @@ export interface LandingPageVersionConfig {
   logo_url?: string;
   nav_logo_height?: number;
   nav_bg_color?: string;
+  typography?: TypographyConfig;
   instructor?: {
     name?: string;
     role?: string;

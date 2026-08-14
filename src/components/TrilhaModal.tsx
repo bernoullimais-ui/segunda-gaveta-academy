@@ -548,60 +548,159 @@ export function TrilhaModal({ isOpen, onClose, fetchTrilhas, editingTrilha, orgI
                 </div>
               </div>
 
-              {/* Typography section */}
-              <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
-                <div className="flex items-center gap-2 text-slate-800 border-b border-slate-100 pb-4 mb-2">
+              {/* Typography Table section */}
+              <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden space-y-4 p-6">
+                <div className="flex items-center gap-2 text-slate-800 border-b border-slate-100 pb-4">
                   <Type className="w-5 h-5 text-blue-600" />
-                  <h4 className="font-bold text-lg">Tipografia (Textos e Botões)</h4>
+                  <div>
+                    <h4 className="font-bold text-lg">Tipografia (Tabela de Estilos de Texto)</h4>
+                    <p className="text-xs text-slate-500">Configure fonte, peso, tamanho, entrelinhas e espaçamento para os tipos de texto da página.</p>
+                  </div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {[
-                    { id: 'title', label: 'Títulos' },
-                    { id: 'subtitle', label: 'Subtítulos' },
-                    { id: 'text', label: 'Textos' },
-                    { id: 'button', label: 'Botões (Com Fundo)' },
-                    { id: 'link', label: 'Links (Sem Fundo)' }
-                  ].map((type) => (
-                    <div key={type.id} className="space-y-3 p-4 border border-slate-100 rounded-xl bg-slate-50/50">
-                      <label className="text-[10px] uppercase font-bold text-slate-400 tracking-widest block mb-2">{type.label}</label>
-                      <div className="flex flex-col gap-3">
-                        <div className="flex items-center gap-3">
-                          <input 
-                            type="color"
-                            value={lpData[`font_${type.id}_color`] || '#000000'}
-                            onChange={(e) => setLpData({...lpData, [`font_${type.id}_color`]: e.target.value})}
-                            className="w-10 h-10 p-1 bg-white border border-slate-200 rounded cursor-pointer shrink-0"
-                          />
-                          <div className="flex-1 flex flex-col">
-                            <span className="text-xs text-slate-400 font-bold mb-1">Cor</span>
-                            <input 
-                              type="text"
-                              value={lpData[`font_${type.id}_color`] || ''}
-                              onChange={(e) => setLpData({...lpData, [`font_${type.id}_color`]: e.target.value})}
-                              placeholder="Ex: #000000 ou Padrão"
-                              className="w-full px-3 py-1.5 text-sm border border-slate-200 rounded-lg outline-none focus:ring-1 focus:ring-blue-500"
-                            />
-                          </div>
-                        </div>
-                        <div>
-                          <span className="text-xs text-slate-400 font-bold mb-1 block">Peso da Fonte</span>
-                          <select
-                            value={lpData[`font_${type.id}_weight`] || ''}
-                            onChange={(e) => setLpData({...lpData, [`font_${type.id}_weight`]: e.target.value})}
-                            className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg outline-none focus:ring-1 focus:ring-blue-500 bg-white"
-                          >
-                            <option value="">Padrão</option>
-                            <option value="400">Normal</option>
-                            <option value="500">Média (Medium)</option>
-                            <option value="600">Seminegrito (Semibold)</option>
-                            <option value="700">Negrito (Bold)</option>
-                            <option value="800">Extranegrito (Extrabold)</option>
-                            <option value="900">Preta (Black)</option>
-                          </select>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs text-left border-collapse border border-slate-300">
+                    <thead>
+                      <tr className="bg-slate-100 border-b border-slate-300 text-slate-800 font-bold">
+                        <th className="p-3 border border-slate-300 min-w-[140px]">Tipo de texto</th>
+                        <th className="p-3 border border-slate-300 min-w-[140px]">Font</th>
+                        <th className="p-3 border border-slate-300 min-w-[130px]">Peso</th>
+                        <th className="p-3 border border-slate-300 min-w-[100px]">Tamanho</th>
+                        <th className="p-3 border border-slate-300 min-w-[110px]">Entrelinhas</th>
+                        <th className="p-3 border border-slate-300 min-w-[130px]">Espaço entre letras</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {[
+                        { key: 'titulo_1', label: 'Título 1', defaultSize: '48px', defaultWeight: '800', defaultLineHeight: '1.1', defaultLetterSpacing: '-0.03em' },
+                        { key: 'titulo_2', label: 'Título 2', defaultSize: '32px', defaultWeight: '700', defaultLineHeight: '1.2', defaultLetterSpacing: '-0.02em' },
+                        { key: 'titulo_3', label: 'Título 3', defaultSize: '22px', defaultWeight: '600', defaultLineHeight: '1.3', defaultLetterSpacing: '0em' },
+                        { key: 'texto_corrido_1', label: 'Texto corrido 1', defaultSize: '20px', defaultWeight: '400', defaultLineHeight: '1.5', defaultLetterSpacing: '0em' },
+                        { key: 'texto_corrido_2', label: 'Texto corrido 2', defaultSize: '16px', defaultWeight: '400', defaultLineHeight: '1.5', defaultLetterSpacing: '0em' },
+                        { key: 'texto_corrido_3', label: 'Texto corrido 3', defaultSize: '14px', defaultWeight: '400', defaultLineHeight: '1.4', defaultLetterSpacing: '0em' },
+                        { key: 'texto_corrido_4', label: 'Texto corrido 4', defaultSize: '12px', defaultWeight: '500', defaultLineHeight: '1.4', defaultLetterSpacing: '0.05em' },
+                        { key: 'texto_botao_1', label: 'Texto Botão 1', defaultSize: '18px', defaultWeight: '800', defaultLineHeight: '1.2', defaultLetterSpacing: '0.02em' },
+                        { key: 'texto_botao_2', label: 'Texto botão 2', defaultSize: '14px', defaultWeight: '700', defaultLineHeight: '1.2', defaultLetterSpacing: '0em' }
+                      ].map((item) => {
+                        const typoObj = lpData.typography?.[item.key] || {};
+                        const fontFamily = typoObj.font_family || 'Inter';
+                        const fontWeight = typoObj.font_weight || item.defaultWeight;
+                        const fontSize = typoObj.font_size || item.defaultSize;
+                        const lineHeight = typoObj.line_height || item.defaultLineHeight;
+                        const letterSpacing = typoObj.letter_spacing || item.defaultLetterSpacing;
+
+                        return (
+                          <tr key={item.key} className="hover:bg-slate-50 border-b border-slate-200">
+                            <td className="p-3 border border-slate-300 font-bold text-slate-800 bg-slate-50/50">
+                              {item.label}
+                            </td>
+                            <td className="p-2 border border-slate-300">
+                              <select
+                                value={fontFamily}
+                                onChange={(e) => {
+                                  const currentTypo = lpData.typography || {};
+                                  setLpData({
+                                    ...lpData,
+                                    typography: {
+                                      ...currentTypo,
+                                      [item.key]: { ...(currentTypo[item.key] || {}), font_family: e.target.value }
+                                    }
+                                  });
+                                }}
+                                className="w-full p-1.5 border border-slate-200 rounded text-xs outline-none bg-white font-medium"
+                              >
+                                <option value="Inter">Inter</option>
+                                <option value="Outfit">Outfit</option>
+                                <option value="Montserrat">Montserrat</option>
+                                <option value="Poppins">Poppins</option>
+                                <option value="Plus Jakarta Sans">Plus Jakarta Sans</option>
+                                <option value="Roboto">Roboto</option>
+                                <option value="Playfair Display">Playfair Display</option>
+                                <option value="Space Grotesk">Space Grotesk</option>
+                              </select>
+                            </td>
+                            <td className="p-2 border border-slate-300">
+                              <select
+                                value={fontWeight}
+                                onChange={(e) => {
+                                  const currentTypo = lpData.typography || {};
+                                  setLpData({
+                                    ...lpData,
+                                    typography: {
+                                      ...currentTypo,
+                                      [item.key]: { ...(currentTypo[item.key] || {}), font_weight: e.target.value }
+                                    }
+                                  });
+                                }}
+                                className="w-full p-1.5 border border-slate-200 rounded text-xs outline-none bg-white font-medium"
+                              >
+                                <option value="300">300 Light</option>
+                                <option value="400">400 Normal</option>
+                                <option value="500">500 Medium</option>
+                                <option value="600">600 Semibold</option>
+                                <option value="700">700 Bold</option>
+                                <option value="800">800 ExtraBold</option>
+                                <option value="900">900 Black</option>
+                              </select>
+                            </td>
+                            <td className="p-2 border border-slate-300">
+                              <input
+                                type="text"
+                                value={fontSize}
+                                onChange={(e) => {
+                                  const currentTypo = lpData.typography || {};
+                                  setLpData({
+                                    ...lpData,
+                                    typography: {
+                                      ...currentTypo,
+                                      [item.key]: { ...(currentTypo[item.key] || {}), font_size: e.target.value }
+                                    }
+                                  });
+                                }}
+                                placeholder="ex: 48px"
+                                className="w-full p-1.5 border border-slate-200 rounded text-xs outline-none bg-white font-mono"
+                              />
+                            </td>
+                            <td className="p-2 border border-slate-300">
+                              <input
+                                type="text"
+                                value={lineHeight}
+                                onChange={(e) => {
+                                  const currentTypo = lpData.typography || {};
+                                  setLpData({
+                                    ...lpData,
+                                    typography: {
+                                      ...currentTypo,
+                                      [item.key]: { ...(currentTypo[item.key] || {}), line_height: e.target.value }
+                                    }
+                                  });
+                                }}
+                                placeholder="ex: 1.2"
+                                className="w-full p-1.5 border border-slate-200 rounded text-xs outline-none bg-white font-mono"
+                              />
+                            </td>
+                            <td className="p-2 border border-slate-300">
+                              <input
+                                type="text"
+                                value={letterSpacing}
+                                onChange={(e) => {
+                                  const currentTypo = lpData.typography || {};
+                                  setLpData({
+                                    ...lpData,
+                                    typography: {
+                                      ...currentTypo,
+                                      [item.key]: { ...(currentTypo[item.key] || {}), letter_spacing: e.target.value }
+                                    }
+                                  });
+                                }}
+                                placeholder="ex: -0.03em"
+                                className="w-full p-1.5 border border-slate-200 rounded text-xs outline-none bg-white font-mono"
+                              />
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
                 </div>
               </div>
 

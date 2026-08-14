@@ -1389,6 +1389,8 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
     return (
       <div className="min-h-screen bg-slate-900 selection:bg-primary/30 selection:text-white font-sans text-slate-300">
         <style dangerouslySetInnerHTML={{ __html: `
+          @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300..900;1,300..900&family=Outfit:wght@300..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=Roboto:ital,wght@0,300;0,400;0,500;0,700;0,900&family=Space+Grotesk:wght@300..700&display=swap');
+
           :root { 
             --primary: ${lp.primary_color || '#2563eb'};
             --primary-rgb: ${primaryRgb};
@@ -1419,17 +1421,76 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             }
           }
 
-          /* Typography overrides */
-          ${lp.font_title_color ? `.typo-title { color: ${lp.font_title_color} !important; }` : ''}
-          ${lp.font_title_weight ? `.typo-title { font-weight: ${lp.font_title_weight} !important; }` : ''}
-          ${lp.font_subtitle_color ? `.typo-subtitle { color: ${lp.font_subtitle_color} !important; }` : ''}
-          ${lp.font_subtitle_weight ? `.typo-subtitle { font-weight: ${lp.font_subtitle_weight} !important; }` : ''}
-          ${lp.font_text_color ? `.typo-text { color: ${lp.font_text_color} !important; }` : ''}
-          ${lp.font_text_weight ? `.typo-text { font-weight: ${lp.font_text_weight} !important; }` : ''}
-          ${lp.font_button_color ? `.typo-btn { color: ${lp.font_button_color} !important; }` : ''}
-          ${lp.font_button_weight ? `.typo-btn { font-weight: ${lp.font_button_weight} !important; }` : ''}
-          ${lp.font_link_color ? `.typo-link { color: ${lp.font_link_color} !important; }` : ''}
-          ${lp.font_link_weight ? `.typo-link { font-weight: ${lp.font_link_weight} !important; }` : ''}
+          /* Regras da Tabela de Tipografia */
+          .typo-title-1 {
+            font-family: '${lp.typography?.titulo_1?.font_family || 'Inter'}', sans-serif !important;
+            font-weight: ${lp.typography?.titulo_1?.font_weight || '800'} !important;
+            font-size: ${lp.typography?.titulo_1?.font_size || '48px'} !important;
+            line-height: ${lp.typography?.titulo_1?.line_height || '1.1'} !important;
+            letter-spacing: ${lp.typography?.titulo_1?.letter_spacing || '-0.03em'} !important;
+          }
+          .typo-title-2 {
+            font-family: '${lp.typography?.titulo_2?.font_family || 'Inter'}', sans-serif !important;
+            font-weight: ${lp.typography?.titulo_2?.font_weight || '700'} !important;
+            font-size: ${lp.typography?.titulo_2?.font_size || '32px'} !important;
+            line-height: ${lp.typography?.titulo_2?.line_height || '1.2'} !important;
+            letter-spacing: ${lp.typography?.titulo_2?.letter_spacing || '-0.02em'} !important;
+          }
+          .typo-title-3 {
+            font-family: '${lp.typography?.titulo_3?.font_family || 'Inter'}', sans-serif !important;
+            font-weight: ${lp.typography?.titulo_3?.font_weight || '600'} !important;
+            font-size: ${lp.typography?.titulo_3?.font_size || '22px'} !important;
+            line-height: ${lp.typography?.titulo_3?.line_height || '1.3'} !important;
+            letter-spacing: ${lp.typography?.titulo_3?.letter_spacing || '0em'} !important;
+          }
+          .typo-body-1 {
+            font-family: '${lp.typography?.texto_corrido_1?.font_family || 'Inter'}', sans-serif !important;
+            font-weight: ${lp.typography?.texto_corrido_1?.font_weight || '400'} !important;
+            font-size: ${lp.typography?.texto_corrido_1?.font_size || '20px'} !important;
+            line-height: ${lp.typography?.texto_corrido_1?.line_height || '1.5'} !important;
+            letter-spacing: ${lp.typography?.texto_corrido_1?.letter_spacing || '0em'} !important;
+          }
+          .typo-body-2 {
+            font-family: '${lp.typography?.texto_corrido_2?.font_family || 'Inter'}', sans-serif !important;
+            font-weight: ${lp.typography?.texto_corrido_2?.font_weight || '400'} !important;
+            font-size: ${lp.typography?.texto_corrido_2?.font_size || '16px'} !important;
+            line-height: ${lp.typography?.texto_corrido_2?.line_height || '1.5'} !important;
+            letter-spacing: ${lp.typography?.texto_corrido_2?.letter_spacing || '0em'} !important;
+          }
+          .typo-body-3 {
+            font-family: '${lp.typography?.texto_corrido_3?.font_family || 'Inter'}', sans-serif !important;
+            font-weight: ${lp.typography?.texto_corrido_3?.font_weight || '400'} !important;
+            font-size: ${lp.typography?.texto_corrido_3?.font_size || '14px'} !important;
+            line-height: ${lp.typography?.texto_corrido_3?.line_height || '1.4'} !important;
+            letter-spacing: ${lp.typography?.texto_corrido_3?.letter_spacing || '0em'} !important;
+          }
+          .typo-body-4 {
+            font-family: '${lp.typography?.texto_corrido_4?.font_family || 'Inter'}', sans-serif !important;
+            font-weight: ${lp.typography?.texto_corrido_4?.font_weight || '500'} !important;
+            font-size: ${lp.typography?.texto_corrido_4?.font_size || '12px'} !important;
+            line-height: ${lp.typography?.texto_corrido_4?.line_height || '1.4'} !important;
+            letter-spacing: ${lp.typography?.texto_corrido_4?.letter_spacing || '0.05em'} !important;
+          }
+          .typo-btn-1 {
+            font-family: '${lp.typography?.texto_botao_1?.font_family || 'Inter'}', sans-serif !important;
+            font-weight: ${lp.typography?.texto_botao_1?.font_weight || '800'} !important;
+            font-size: ${lp.typography?.texto_botao_1?.font_size || '18px'} !important;
+            line-height: ${lp.typography?.texto_botao_1?.line_height || '1.2'} !important;
+            letter-spacing: ${lp.typography?.texto_botao_1?.letter_spacing || '0.02em'} !important;
+          }
+          .typo-btn-2 {
+            font-family: '${lp.typography?.texto_botao_2?.font_family || 'Inter'}', sans-serif !important;
+            font-weight: ${lp.typography?.texto_botao_2?.font_weight || '700'} !important;
+            font-size: ${lp.typography?.texto_botao_2?.font_size || '14px'} !important;
+            line-height: ${lp.typography?.texto_botao_2?.line_height || '1.2'} !important;
+            letter-spacing: ${lp.typography?.texto_botao_2?.letter_spacing || '0em'} !important;
+          }
+
+          /* Classes legadas mantidas para compatibilidade */
+          .typo-title { font-family: '${lp.typography?.titulo_1?.font_family || 'Inter'}', sans-serif; }
+          .typo-subtitle { font-family: '${lp.typography?.texto_corrido_1?.font_family || 'Inter'}', sans-serif; }
+          .typo-text { font-family: '${lp.typography?.texto_corrido_2?.font_family || 'Inter'}', sans-serif; }
+          .typo-btn { font-family: '${lp.typography?.texto_botao_1?.font_family || 'Inter'}', sans-serif; }
 
         ` }} />
         
@@ -1519,7 +1580,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                   {(lp.hero_title && (lp.hero_title.startsWith('data:image') || lp.hero_title.startsWith('http')) && !lp.hero_title.includes(' ')) ? (
                     <img src={lp.hero_title} alt={item.nome || "Título"} className="object-contain w-auto mb-4 max-w-full" style={{ height: lp.hero_title_image_height ? `${lp.hero_title_image_height}px` : '120px' }} />
                   ) : (
-                    <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight typo-title">
+                    <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight typo-title typo-title-1">
                       {lp.hero_title || item.nome}
                     </h1>
                   )}
@@ -1530,12 +1591,12 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                   <div className="flex flex-col items-center gap-2 w-full sm:w-auto">
                     <button 
                       onClick={handleEnrollClick}
-                      className="typo-btn w-full sm:w-auto px-8 sm:px-12 py-4 sm:py-6 bg-primary text-white rounded-2xl sm:rounded-3xl font-black text-lg sm:text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(var(--primary-rgb),0.3)] flex items-center justify-center gap-3"
+                      className="typo-btn typo-btn-1 w-full sm:w-auto px-8 sm:px-12 py-4 sm:py-6 bg-primary text-white rounded-2xl sm:rounded-3xl font-black text-lg sm:text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(var(--primary-rgb),0.3)] flex items-center justify-center gap-3"
                     >
                       {isEmBreve ? 'Cadastrar-se' : (lp.cta_text || 'COMPRAR AGORA')} <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6" />
                     </button>
                     {lp.instructor?.name && (
-                      <span className={`text-sm ${layout === 'escuro' ? 'text-slate-400' : 'text-slate-300 lg:text-slate-500'} typo-text`}>
+                      <span className={`text-sm ${layout === 'escuro' ? 'text-slate-400' : 'text-slate-300 lg:text-slate-500'} typo-text typo-body-4`}>
                         By {lp.instructor.name}
                       </span>
                     )}
@@ -1543,7 +1604,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                 </div>
 
                 {/* 4. Subtítulo (Order 4 on mobile) */}
-                <p className="order-4 lg:order-none text-base sm:text-xl text-slate-200 lg:text-slate-700 leading-relaxed max-w-xl typo-subtitle hero-no-mobile-transform" style={{ transform: (lp.hero_subtitle_offset_x || lp.hero_subtitle_offset_y) ? `translate(${lp.hero_subtitle_offset_x || 0}px, ${lp.hero_subtitle_offset_y || 0}px)` : undefined }}>
+                <p className="order-4 lg:order-none text-base sm:text-xl text-slate-200 lg:text-slate-700 leading-relaxed max-w-xl typo-subtitle typo-body-1 hero-no-mobile-transform" style={{ transform: (lp.hero_subtitle_offset_x || lp.hero_subtitle_offset_y) ? `translate(${lp.hero_subtitle_offset_x || 0}px, ${lp.hero_subtitle_offset_y || 0}px)` : undefined }}>
                   {lp.hero_subtitle || item.descricao}
                 </p>
 
