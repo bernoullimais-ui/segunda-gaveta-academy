@@ -1509,7 +1509,419 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '37, 99, 235';
   };
-  const primaryRgb = hexToRgb(lp.primary_color || '#2563eb');
+  const sectionMap: Record<string, React.ReactNode> = {
+    info: (
+      <section key="info" className="bg-slate-950/60 border-y border-slate-800/80 py-10" style={getSectionStyle('info')}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 flex flex-col items-center gap-8">
+          <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-6 w-full">
+            {(isTrilha ? [
+              { icon: BookOpen, text: `${cursosTrilha.length} Cursos` },
+              { icon: Clock, text: `${item.carga_horaria || '04'} horas de conteúdo` },
+              { icon: Calendar, text: item.tempo === 'com_limite' ? `Acesso por ${item.duracao || ''} ${item.duracao_tipo || 'meses'}` : 'Acesso vitalício' },
+              ...(item.tem_certificado ? [{ icon: Award, text: 'Certificado Incluso' }] : [])
+            ] : [
+              { icon: BookOpen, text: `${item.curriculo_json?.length || 0} Módulos` },
+              { icon: Play, text: `${item.curriculo_json?.reduce((acc: number, secao: any) => acc + (secao.etapas?.length || 0), 0) || 0} Aulas` },
+              { icon: Clock, text: `${item.carga_horaria || '04'} horas de conteúdo` },
+              { icon: Calendar, text: item.tempo === 'com_limite' ? `Acesso por ${item.duracao || ''} ${item.duracao_tipo || 'meses'}` : 'Acesso vitalício' },
+              ...(item.tem_certificado ? [{ icon: Award, text: 'Certificado Incluso' }] : [])
+            ]).map((stat, i) => (
+              <div 
+                key={i} 
+                className="px-6 py-3.5 rounded-2xl border border-white/20 bg-white/5 backdrop-blur-sm flex items-center gap-3.5 text-white hover:border-primary/60 hover:bg-white/10 transition-all shadow-sm"
+              >
+                <stat.icon className="w-5 h-5 sm:w-6 sm:h-6 text-primary shrink-0" />
+                <span className="text-sm sm:text-base font-semibold tracking-tight whitespace-nowrap">{stat.text}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-12 w-full border-t border-slate-800/80 pt-8 mt-2">
+            {renderPriceBlock(true)}
+            <button 
+              onClick={handleEnrollClick}
+              className="typo-btn w-full sm:w-auto px-10 py-4 bg-primary text-white rounded-full font-serif italic text-lg sm:text-xl hover:scale-105 active:scale-95 transition-all shadow-lg shadow-primary/30 flex items-center justify-center gap-3"
+            >
+              {isEmBreve ? 'Cadastrar-se' : (lp.cta_text || 'GARANTIR VAGA')} <ArrowRight className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      </section>
+    ),
+    about: (
+      <section key="about" id="sobre" className="relative w-full overflow-hidden bg-slate-900 border-b border-slate-800 text-left" style={getSectionStyle('about')}>
+        <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[550px] lg:min-h-[650px] w-full items-stretch">
+          <div className="p-8 sm:p-12 lg:p-20 xl:p-24 flex flex-col justify-center text-left space-y-6 sm:space-y-8">
+            <div className="space-y-3">
+              <span className="text-xs font-mono font-bold tracking-widest text-primary uppercase">
+                SOBRE O PROGRAMA
+              </span>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-[1.15] tracking-tight typo-title">
+                {lp.about_title || item.nome}
+              </h2>
+            </div>
+
+            <div className="text-base sm:text-lg lg:text-xl text-slate-300/90 leading-relaxed font-sans space-y-4 typo-body-1">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {lp.about || item.descricao}
+              </ReactMarkdown>
+            </div>
+
+            <div className="pt-2">
+              <button 
+                onClick={handleEnrollClick}
+                className="typo-btn px-8 sm:px-10 py-4 bg-primary text-white rounded-full font-serif italic text-lg sm:text-xl shadow-xl hover:scale-105 active:scale-95 transition-all"
+              >
+                <span>{lp.copy_section_cta_text || lp.cta_text || 'Quero me inscrever'}</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="relative w-full h-full min-h-[400px] lg:min-h-full overflow-hidden bg-slate-900">
+            {lp.hero_video_url ? (
+              <div className="relative w-full h-full min-h-[400px] lg:min-h-full bg-black group">
+                {isPlayingAboutVideo ? (
+                  <ReactPlayer 
+                    url={lp.hero_video_url} 
+                    width="100%" 
+                    height="100%" 
+                    playing={true} 
+                    controls={true} 
+                  />
+                ) : (
+                  <div className="relative w-full h-full cursor-pointer" onClick={() => setIsPlayingAboutVideo(true)}>
+                    <img 
+                      src={lp.about_image_url || item.capa_url || item.thumbnail_url || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=1200'} 
+                      alt="Sobre o Programa" 
+                      className="w-full h-full object-cover object-center"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-20 h-20 bg-primary/90 text-white rounded-full flex items-center justify-center shadow-2xl group-hover:scale-110 transition-all">
+                        <Play className="w-8 h-8 fill-current ml-1" />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <img 
+                src={lp.about_image_url || item.capa_url || item.thumbnail_url || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=1200'} 
+                alt="Sobre o Programa" 
+                className="w-full h-full object-cover object-center"
+              />
+            )}
+          </div>
+        </div>
+      </section>
+    ),
+    copy: (lp.copy_section_text || lp.copy_section_cta_text) ? (
+      <section key="copy" id="copy-cta" className="py-24 sm:py-32 bg-slate-900 border-b border-slate-800 relative text-center overflow-hidden" style={getSectionStyle('copy')}>
+        <div className="max-w-4xl mx-auto px-6 flex flex-col items-center justify-center space-y-8 lg:space-y-10">
+          {lp.copy_section_text && (
+            <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif text-white font-normal leading-[1.25] tracking-tight typo-title">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {lp.copy_section_text}
+              </ReactMarkdown>
+            </div>
+          )}
+          
+          <button 
+            onClick={handleEnrollClick}
+            className="typo-btn px-8 sm:px-10 py-4 bg-primary/90 hover:bg-primary text-white rounded-full font-serif italic text-lg sm:text-xl shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2 group"
+          >
+            <span>{lp.copy_section_cta_text || lp.cta_text || 'Acesse o guia'}</span>
+          </button>
+        </div>
+      </section>
+    ) : null,
+    features: lp.benefits?.length > 0 ? (
+      <section key="features" id="vantagens" className="py-20 sm:py-28 bg-slate-900/60 border-b border-slate-800 text-center overflow-hidden" style={getSectionStyle('features')}>
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-0 items-stretch text-center">
+            {(lp.benefits || []).slice(0, 3).map((benefit: any, idx: number) => {
+              const itemObj = typeof benefit === 'object' && benefit !== null ? benefit : { title: typeof benefit === 'string' ? benefit : '', description: '' };
+              const totalItems = Math.min(lp.benefits.length, 3);
+              const isNotLast = idx < (totalItems - 1);
+              return (
+                <div 
+                  key={idx} 
+                  className={`px-4 sm:px-8 py-4 flex flex-col items-center justify-start text-center space-y-4 ${
+                    isNotLast ? 'md:border-r md:border-white/20' : ''
+                  }`}
+                >
+                  <h4 className="text-5xl sm:text-6xl lg:text-7xl font-serif font-normal text-white leading-none tracking-tight">
+                    {itemObj.title}
+                  </h4>
+
+                  {itemObj.description && (
+                    <p className="text-sm sm:text-base text-slate-300/90 leading-relaxed font-sans max-w-xs mx-auto text-center">
+                      {itemObj.description}
+                    </p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+    ) : null,
+    testimonials: lp.testimonials?.length > 0 ? (
+      <section key="testimonials" id="depoimentos" className="py-24 sm:py-32 bg-slate-900 border-b border-slate-800 relative overflow-hidden" style={getSectionStyle('testimonials')}>
+        <div className="max-w-5xl mx-auto px-6 text-center space-y-8">
+          <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight typo-title">
+            O que dizem nossos alunos
+          </h3>
+          <TestimonialsCarousel testimonials={lp.testimonials} layout={layout} primaryColor={lp.primary_color} />
+        </div>
+      </section>
+    ) : null,
+    audience: (
+      <TargetAudienceSection key="audience" targetAudience={lp.target_audience} layout={layout} style={getSectionStyle('audience')} />
+    ),
+    instructor: (
+      <section key="instructor" id="instrutor" className="relative w-full overflow-hidden bg-slate-950 border-b border-slate-800 text-left" style={getSectionStyle('instructor')}>
+        <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[550px] lg:min-h-[650px] w-full items-stretch">
+          <div className="relative w-full h-full min-h-[400px] lg:min-h-full overflow-hidden bg-slate-900">
+            <img 
+              src={lp.instructor?.avatar_url || item.professor_foto_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1000'} 
+              alt={lp.instructor?.name || item.professor_nome || 'Instrutor'} 
+              className="w-full h-full object-cover object-center"
+            />
+          </div>
+
+          <div className="p-8 sm:p-12 lg:p-20 xl:p-24 flex flex-col justify-center text-left space-y-6 sm:space-y-8">
+            <div className="space-y-3">
+              <span className="text-xs font-mono font-bold tracking-widest text-primary uppercase">
+                QUEM VAI TE GUIAR
+              </span>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-[1.15] tracking-tight typo-title">
+                {lp.instructor?.name || item.professor_nome || 'Especialista'}
+              </h2>
+              {Boolean(lp.instructor?.role?.trim()) && (
+                <p className="text-lg sm:text-xl text-primary font-medium tracking-wide">
+                  {lp.instructor.role}
+                </p>
+              )}
+            </div>
+            
+            <div className="text-base sm:text-lg text-slate-300/90 leading-relaxed font-sans space-y-4 typo-body-2">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {lp.instructor?.bio || item.professor_bio || 'Comprometido em guiar alunos na jornada de transformação profissional através de métodos validados no mercado.'}
+              </ReactMarkdown>
+            </div>
+          </div>
+        </div>
+      </section>
+    ),
+    curriculum: !isTrilha ? (
+      <section key="curriculum" id="curriculo" className="relative w-full overflow-hidden bg-slate-950 border-y border-slate-900 text-left" style={getSectionStyle('curriculum')}>
+        <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[550px] lg:min-h-[650px] w-full items-stretch">
+          <div className="p-8 sm:p-12 lg:p-20 xl:p-24 flex flex-col justify-center text-left space-y-6 sm:space-y-8">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-[1.15] tracking-tight typo-title">
+              {lp.curriculum_title || 'O que você verá por aqui:'}
+            </h2>
+            
+            <div className="space-y-4 w-full">
+              {item.curriculo_json?.map((modulo: any, idx: number) => {
+                const isExpanded = !!openModules[idx];
+                return (
+                  <div key={idx} className="w-full">
+                    <div 
+                      onClick={() => toggleModule(idx)}
+                      className="px-6 py-4 rounded-full border border-white/20 bg-white/5 backdrop-blur-sm hover:border-primary/60 hover:bg-white/10 transition-all flex items-center justify-between cursor-pointer select-none group"
+                    >
+                      <div className="flex items-center gap-4 flex-1">
+                        <span className="font-serif text-2xl font-semibold text-white/90">
+                          {String(idx + 1).padStart(2, '0')}
+                        </span>
+                        <span className="font-medium text-white text-base sm:text-lg tracking-tight">
+                          {modulo.nome}
+                        </span>
+                      </div>
+                      <ChevronDown className={`w-5 h-5 text-white/70 group-hover:text-white transition-transform duration-300 ${isExpanded ? 'rotate-180 text-primary' : ''}`} />
+                    </div>
+
+                    <AnimatePresence initial={false}>
+                      {isExpanded && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.2 }}
+                          className="overflow-hidden px-6 py-4 mt-2 bg-white/5 rounded-3xl border border-white/10 space-y-2 text-slate-300"
+                        >
+                          {modulo.etapas && modulo.etapas.length > 0 ? (
+                            modulo.etapas.map((etapa: any, sIdx: number) => (
+                              <div key={sIdx} className="py-2 flex items-center justify-between text-slate-300 hover:text-white transition-colors">
+                                <div className="flex items-center gap-3">
+                                  <span className="text-xs text-slate-500 font-mono w-5">{(sIdx + 1).toString().padStart(2, '0')}</span>
+                                  {etapa.tipo === 'video' ? (
+                                    <Play className="w-4 h-4 text-primary fill-primary/10 shrink-0" />
+                                  ) : etapa.tipo === 'quiz' ? (
+                                    <HelpCircle className="w-4 h-4 text-emerald-500 shrink-0" />
+                                  ) : (
+                                    <FileText className="w-4 h-4 text-blue-400 shrink-0" />
+                                  )}
+                                  <span className="text-sm font-medium">{etapa.nome}</span>
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="py-2 text-slate-500 text-xs font-medium">Este módulo não possui etapas cadastradas.</div>
+                          )}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="pt-4 w-full">
+              <button 
+                onClick={handleEnrollClick}
+                className="typo-btn w-full py-4 px-6 bg-primary text-white rounded-full font-serif italic text-lg sm:text-xl shadow-xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center text-center"
+              >
+                <span>{lp.copy_section_cta_text || lp.cta_text || 'Acesse agora'}</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="relative w-full h-full min-h-[400px] lg:min-h-full overflow-hidden bg-slate-900">
+            <img 
+              src={lp.curriculum_image_url || lp.about_image_url || item.capa_url || item.thumbnail_url || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=1200'} 
+              alt="Conteúdo do Curso" 
+              className="w-full h-full object-cover object-center"
+            />
+          </div>
+        </div>
+      </section>
+    ) : null,
+    faq: lp.faq?.length > 0 ? (
+      <section key="faq" id="faq" className="py-24 sm:py-32 bg-slate-950 border-b border-slate-800" style={getSectionStyle('faq')}>
+        <div className="max-w-4xl mx-auto px-6 text-center space-y-10">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white tracking-tight typo-title">
+            Perguntas frequentes:
+          </h2>
+          
+          <div className="space-y-4 w-full">
+            {lp.faq.map((f: any, idx: number) => {
+              const isFaqExpanded = !!openFaqs[idx];
+              return f.question && (
+                <div key={idx} className="w-full text-left">
+                  <div 
+                    onClick={() => toggleFaq(idx)}
+                    className="px-6 py-4 rounded-full border border-white/20 bg-white/5 backdrop-blur-sm hover:border-primary/60 hover:bg-white/10 transition-all flex items-center justify-between cursor-pointer select-none group"
+                  >
+                    <div className="flex items-center gap-4 flex-1">
+                      <span className="font-serif text-2xl font-semibold text-white/90">
+                        {String(idx + 1).padStart(2, '0')}
+                      </span>
+                      <span className="font-medium text-white text-base sm:text-lg tracking-tight">
+                        {f.question}
+                      </span>
+                    </div>
+                    <ChevronDown className={`w-5 h-5 text-white/70 group-hover:text-white transition-transform duration-300 ${isFaqExpanded ? 'rotate-180 text-primary' : ''}`} />
+                  </div>
+
+                  <AnimatePresence initial={false}>
+                    {isFaqExpanded && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="overflow-hidden px-6 py-5 mt-2 bg-white/5 rounded-3xl border border-white/10 text-slate-300 text-base leading-relaxed"
+                      >
+                        <p className="text-slate-300 leading-relaxed text-base sm:text-lg typo-text">{f.answer}</p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="pt-4 w-full">
+            <button 
+              onClick={handleEnrollClick}
+              className="typo-btn w-full py-4 px-6 bg-primary text-white rounded-full font-serif italic text-lg sm:text-xl shadow-xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center text-center"
+            >
+              <span>{lp.copy_section_cta_text || lp.cta_text || 'Acesse agora'}</span>
+            </button>
+          </div>
+        </div>
+      </section>
+    ) : null,
+    bonuses: lp.bonuses?.length > 0 ? (
+      <section key="bonuses" className="py-32 bg-emerald-950/40 text-white overflow-hidden relative border-t border-slate-800" style={getSectionStyle('bonuses')}>
+        <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2"></div>
+        <div className="max-w-7xl mx-auto px-6 relative z-10">
+          <div className="text-center mb-16 space-y-4">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 rounded-full text-xs font-black uppercase tracking-widest text-emerald-400 border border-emerald-500/20">
+              Oportunidade Única
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold typo-title">Bônus Exclusivos Para Você</h2>
+            <p className="text-slate-700 text-lg typo-text">Inscreva-se hoje e leve gratuitamente estes materiais complementares.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {lp.bonuses.map((bonus: any, idx: number) => (
+              <div key={idx} className="bg-slate-900/50 backdrop-blur-sm p-8 rounded-3xl border border-slate-800 hover:border-emerald-500/50 transition-all group">
+                 <div className="w-14 h-14 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                   <Gift className="w-7 h-7 text-emerald-400" />
+                 </div>
+                 <h4 className="text-xl font-bold mb-3 typo-title">{bonus.title}</h4>
+                 {bonus.value && (
+                   <div className="mb-3 flex items-center gap-2">
+                     <span className="text-emerald-400 text-xs font-bold uppercase tracking-wider">Valor:</span>
+                     <span className="text-slate-500 line-through text-sm">R$ {bonus.value}</span>
+                     <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 text-[10px] font-black px-2 py-0.5 rounded-full uppercase">Grátis</span>
+                   </div>
+                 )}
+                 <p className="text-slate-700 leading-relaxed typo-text">{bonus.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    ) : null,
+    guarantee: (
+      <TrustAndGuarantee key="guarantee" layout={layout} guaranteeDays={lp.guarantee_days || 7} style={getSectionStyle('guarantee')} />
+    ),
+    pricing: (
+      <section key="pricing" className="py-40 bg-slate-900 relative overflow-hidden" style={getSectionStyle('pricing')}>
+         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-primary/20 rounded-full blur-[180px]"></div>
+         </div>
+
+         <div className="max-w-4xl mx-auto px-6 text-center relative z-10 space-y-12">
+            <h2 className="text-5xl md:text-7xl font-bold text-white tracking-tighter leading-tight typo-title">Escolha o seu futuro hoje.</h2>
+            <p className="text-xl text-slate-700 max-w-2xl mx-auto typo-subtitle">Não deixe para depois a oportunidade de se tornar um especialista com quem realmente entende do assunto.</p>
+            
+            <div className="flex flex-col items-center gap-10">
+              <button 
+                onClick={handleEnrollClick}
+                className="typo-btn px-10 py-5 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white font-black text-xl rounded-2xl shadow-2xl shadow-blue-500/30 hover:scale-105 active:scale-95 transition-all flex items-center gap-3 mx-auto"
+              >
+                {isEmBreve ? 'Cadastrar-se' : (lp.cta_text || 'QUERO MINHA VAGA AGORA')}
+                <ArrowRight className="w-6 h-6" />
+              </button>
+              <div className="flex flex-col md:flex-row items-center gap-8 text-slate-500 font-bold uppercase tracking-widest text-[10px]">
+                 <span className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-emerald-500" /> Garantia de {lp.guarantee_days || 7} dias</span>
+                 <span className="flex items-center gap-2"><Lock className="w-4 h-4 text-primary" /> Pagamento 100% Seguro</span>
+              </div>
+            </div>
+         </div>
+      </section>
+    )
+  };
+
+  const defaultOrderKeys = ['info', 'about', 'copy', 'features', 'testimonials', 'audience', 'instructor', 'curriculum', 'faq', 'bonuses', 'guarantee', 'pricing'];
+  const userOrderKeys = (lp.section_order && lp.section_order.length > 0) ? lp.section_order : defaultOrderKeys;
+  const filteredUserOrder = userOrderKeys.filter((k: string) => k !== 'hero' && k !== 'footer');
+  const missingKeys = defaultOrderKeys.filter(k => !filteredUserOrder.includes(k));
+  const activeSectionOrder = [...filteredUserOrder, ...missingKeys];
 
   if (layout === 'escuro') {
     return (

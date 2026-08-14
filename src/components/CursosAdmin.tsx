@@ -322,19 +322,47 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
   };
 
 
+  const ALL_SECTION_KEYS = [
+    'hero',
+    'info',
+    'about',
+    'copy',
+    'features',
+    'testimonials',
+    'audience',
+    'instructor',
+    'curriculum',
+    'faq',
+    'bonuses',
+    'guarantee',
+    'pricing'
+  ];
+
   const sectionLabels: Record<string, string> = {
     hero: 'Seção Principal (Hero)',
-    about: 'Sobre o Especialista/Curso',
-    features: 'Vantagens / Depoimentos',
-    instructor: 'Instrutor Detalhado',
-    curriculum: 'Currículo (Conteúdo)',
+    info: 'Faixa de Informações Rápidas',
+    about: 'Sobre o Programa',
+    copy: 'Copy / Frase de Impacto',
+    features: 'O que você vai aprender (Vantagens)',
+    testimonials: 'Depoimentos de Alunos',
+    audience: 'Para Quem É',
+    instructor: 'Sobre o Instrutor',
+    curriculum: 'Conteúdo Programático (Currículo)',
     faq: 'Perguntas Frequentes (FAQ)',
-    pricing: 'Preços (Checkout)'
+    bonuses: 'Bônus Exclusivos',
+    guarantee: 'Garantia Incondicional',
+    pricing: 'Ambiente de Pagamento Seguro / Oferta Final'
+  };
+
+  const getFullSectionOrder = (savedOrder?: string[]) => {
+    const current = savedOrder && savedOrder.length > 0 ? savedOrder : ALL_SECTION_KEYS;
+    const missing = ALL_SECTION_KEYS.filter(k => !current.includes(k));
+    return [...current, ...missing];
   };
 
   const onSectionDragEnd = (result: DropResult) => {
     if (!result.destination) return;
-    const currentOrder = lpData.section_order || ['hero', 'about', 'features', 'instructor', 'curriculum', 'faq', 'pricing'];
+    const currentOrder = getFullSectionOrder(lpData.section_order);
     const newOrder = Array.from(currentOrder);
     const [reorderedItem] = newOrder.splice(result.source.index, 1);
     newOrder.splice(result.destination.index, 0, reorderedItem);
@@ -4230,7 +4258,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                       <Droppable droppableId="sections">
                         {(provided) => (
                           <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-3">
-                            {(lpData.section_order || ['hero', 'about', 'features', 'instructor', 'curriculum', 'faq', 'pricing']).map((sectionKey: string, index: number) => (
+                            {getFullSectionOrder(lpData.section_order).map((sectionKey: string, index: number) => (
                               <Draggable key={sectionKey} draggableId={sectionKey} index={index}>
                                 {(provided, snapshot) => (
                                   <div
