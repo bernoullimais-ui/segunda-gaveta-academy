@@ -1911,76 +1911,95 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
           </section>
         )}
 
-      {/* Curriculum Preview / Only for Courses */}
+      {/* Curriculum Preview / Only for Courses (Ref Image 50/50 Full Bleed Layout) */}
       {!isTrilha && (
-        <section id="curriculo" className="py-32 bg-slate-950 border-y border-slate-900" style={getSectionStyle('curriculum')}>
-          <div className="max-w-3xl mx-auto px-6 text-center mb-20">
-            <h2 className="text-4xl font-bold text-white mb-4 typo-title">Grade Curricular</h2>
-            <p className="text-slate-700 text-lg typo-text">Confira os módulos que preparamos para acelerar seu aprendizado.</p>
-          </div>
-          
-          <div className="max-w-4xl mx-auto px-6 space-y-4">
-            {item.curriculo_json?.map((modulo: any, idx: number) => {
-              const isExpanded = !!openModules[idx];
-              return (
-                <div key={idx} className="bg-slate-900 rounded-3xl border border-slate-800 overflow-hidden shadow-xl text-left transition-all duration-300">
-                  {/* Header/Trigger */}
-                  <div 
-                    onClick={() => toggleModule(idx)}
-                    className="p-8 flex items-center gap-6 cursor-pointer hover:bg-slate-800/40 select-none transition-colors"
-                  >
-                    <div className="w-14 h-14 bg-slate-800 text-primary rounded-2xl flex items-center justify-center font-bold text-2xl shrink-0 transition-all shadow-inner">
-                      {idx + 1}
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-bold text-white text-xl typo-title">{modulo.nome}</h4>
-                      <p className="text-sm text-slate-700 mt-1 typo-text">{modulo.etapas?.length || 0} lições de alto impacto</p>
-                    </div>
-                    {isExpanded ? (
-                      <ChevronDown className="w-6 h-6 text-slate-400" />
-                    ) : (
-                      <ChevronRight className="w-6 h-6 text-slate-600 animate-pulse" />
-                    )}
-                  </div>
-
-                  {/* Body/Etapas List */}
-                  <AnimatePresence initial={false}>
-                    {isExpanded && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="border-t border-slate-800/50 bg-slate-950/20 px-8 py-4 divide-y divide-slate-800/45"
+        <section id="curriculo" className="relative w-full overflow-hidden bg-slate-950 border-y border-slate-900 text-left" style={getSectionStyle('curriculum')}>
+          <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[550px] lg:min-h-[650px] w-full items-stretch">
+            
+            {/* Left Column: Title, Pill Accordions & CTA Button */}
+            <div className="p-8 sm:p-12 lg:p-20 xl:p-24 flex flex-col justify-center text-left space-y-6 sm:space-y-8">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-[1.15] tracking-tight typo-title">
+                {lp.curriculum_title || 'O que você verá por aqui:'}
+              </h2>
+              
+              <div className="space-y-4 w-full">
+                {item.curriculo_json?.map((modulo: any, idx: number) => {
+                  const isExpanded = !!openModules[idx];
+                  return (
+                    <div key={idx} className="w-full">
+                      {/* Pill Header */}
+                      <div 
+                        onClick={() => toggleModule(idx)}
+                        className="px-6 py-4 rounded-full border border-white/20 bg-white/5 backdrop-blur-sm hover:border-primary/60 hover:bg-white/10 transition-all flex items-center justify-between cursor-pointer select-none group"
                       >
-                        {modulo.etapas && modulo.etapas.length > 0 ? (
-                          modulo.etapas.map((etapa: any, sIdx: number) => (
-                            <div key={sIdx} className="py-3 flex items-center justify-between text-slate-400 hover:text-white transition-colors">
-                              <div className="flex items-center gap-3">
-                                <span className="text-xs text-slate-600 font-mono w-5">{(sIdx + 1).toString().padStart(2, '0')}</span>
-                                {etapa.tipo === 'video' ? (
-                                  <Play className="w-4 h-4 text-primary fill-primary/10 shrink-0" />
-                                ) : etapa.tipo === 'quiz' ? (
-                                  <HelpCircle className="w-4 h-4 text-emerald-500 shrink-0" />
-                                ) : (
-                                  <FileText className="w-4 h-4 text-blue-400 shrink-0" />
-                                )}
-                                <span className="text-sm font-medium">{etapa.nome}</span>
-                              </div>
-                              <span className="text-[10px] uppercase font-bold text-slate-600 tracking-wider bg-slate-850 px-2.5 py-0.75 rounded border border-slate-800">
-                                {etapa.tipo}
-                              </span>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="py-4 text-center text-slate-600 text-xs font-medium">Este módulo não possui etapas cadastradas.</div>
+                        <div className="flex items-center gap-4 flex-1">
+                          <span className="font-serif text-2xl font-semibold text-white/90">
+                            {String(idx + 1).padStart(2, '0')}
+                          </span>
+                          <span className="font-medium text-white text-base sm:text-lg tracking-tight">
+                            {modulo.nome}
+                          </span>
+                        </div>
+                        <ChevronDown className={`w-5 h-5 text-white/70 group-hover:text-white transition-transform duration-300 ${isExpanded ? 'rotate-180 text-primary' : ''}`} />
+                      </div>
+
+                      {/* Expanded Lessons */}
+                      <AnimatePresence initial={false}>
+                        {isExpanded && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="overflow-hidden px-6 py-4 mt-2 bg-white/5 rounded-3xl border border-white/10 space-y-2 text-slate-300"
+                          >
+                            {modulo.etapas && modulo.etapas.length > 0 ? (
+                              modulo.etapas.map((etapa: any, sIdx: number) => (
+                                <div key={sIdx} className="py-2 flex items-center justify-between text-slate-300 hover:text-white transition-colors">
+                                  <div className="flex items-center gap-3">
+                                    <span className="text-xs text-slate-500 font-mono w-5">{(sIdx + 1).toString().padStart(2, '0')}</span>
+                                    {etapa.tipo === 'video' ? (
+                                      <Play className="w-4 h-4 text-primary fill-primary/10 shrink-0" />
+                                    ) : etapa.tipo === 'quiz' ? (
+                                      <HelpCircle className="w-4 h-4 text-emerald-500 shrink-0" />
+                                    ) : (
+                                      <FileText className="w-4 h-4 text-blue-400 shrink-0" />
+                                    )}
+                                    <span className="text-sm font-medium">{etapa.nome}</span>
+                                  </div>
+                                </div>
+                              ))
+                            ) : (
+                              <div className="py-2 text-slate-500 text-xs font-medium">Este módulo não possui etapas cadastradas.</div>
+                            )}
+                          </motion.div>
                         )}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              );
-            })}
+                      </AnimatePresence>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Bottom CTA Button */}
+              <div className="pt-4">
+                <button 
+                  onClick={handleEnrollClick}
+                  className="typo-btn px-8 sm:px-10 py-4 bg-primary text-white rounded-full font-serif italic text-lg sm:text-xl shadow-xl hover:scale-105 active:scale-95 transition-all"
+                >
+                  <span>{lp.copy_section_cta_text || lp.cta_text || 'Acesse agora'}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Right Column: Full Bleed Photo (No margins, no rounded corners) */}
+            <div className="relative w-full h-full min-h-[400px] lg:min-h-full overflow-hidden bg-slate-900">
+              <img 
+                src={lp.curriculum_image_url || lp.about_image_url || item.capa_url || item.thumbnail_url || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=1200'} 
+                alt="Conteúdo do Curso" 
+                className="w-full h-full object-cover object-center"
+              />
+            </div>
+
           </div>
         </section>
       )}

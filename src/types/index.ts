@@ -308,6 +308,8 @@ export interface LandingPageVersionConfig {
   about_image_url?: string;
   copy_section_text?: string;
   copy_section_cta_text?: string;
+  curriculum_title?: string;
+  curriculum_image_url?: string;
   benefits?: Array<string | { title: string; description?: string }>;
   target_audience?: string;
   faq?: Array<{ question: string; answer: string }>;

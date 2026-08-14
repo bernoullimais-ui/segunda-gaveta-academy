@@ -4510,6 +4510,39 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                   </div>
                 </div>
 
+                {/* Seção Conteúdo Programático / Currículo */}
+                <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                  <div className="p-5 border-b border-slate-100 bg-slate-50/50">
+                    <h4 className="font-bold text-slate-800">Seção Conteúdo Programático (Currículo)</h4>
+                    <p className="text-xs text-slate-500">Configure o título e a imagem de destaque exibidos ao lado dos módulos.</p>
+                  </div>
+                  <div className="p-6 space-y-4">
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wider text-xs">Título da Seção Currículo</label>
+                      <input
+                        type="text"
+                        value={lpData.curriculum_title || ''}
+                        onChange={(e) => setLpData({...lpData, curriculum_title: e.target.value})}
+                        className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all font-medium"
+                        placeholder="Ex: O que você verá por aqui:"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wider text-xs">Foto de Destaque da Seção (URL)</label>
+                      <div className="relative">
+                        <ImageIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                        <input 
+                          type="text" 
+                          value={lpData.curriculum_image_url || ''}
+                          onChange={(e) => setLpData({...lpData, curriculum_image_url: e.target.value})}
+                          className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                          placeholder="https://..."
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Benefits */}
                 <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                   <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
