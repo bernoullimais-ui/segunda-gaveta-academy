@@ -1609,39 +1609,40 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
           </div>
         </section>
 
-        {/* Modern Dark Info Bar */}
-        <section className="bg-slate-950/50 border-y border-slate-800 py-16" style={getSectionStyle('info')}>
-          <div className="max-w-7xl mx-auto px-6 flex flex-col items-center gap-12">
-            <div className="flex flex-wrap justify-center gap-8 md:gap-16 w-full">
-              {/* #3 Conditional stats based on real data */}
+        {/* Info Bar - Horizontal Pill Cards Layout (Ref Image 2) */}
+        <section className="bg-slate-950/60 border-y border-slate-800/80 py-10" style={getSectionStyle('info')}>
+          <div className="max-w-7xl mx-auto px-4 sm:px-8 flex flex-col items-center gap-8">
+            <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-6 w-full">
               {(isTrilha ? [
-                { icon: BookOpen, label: 'Cursos', value: `${cursosTrilha.length} cursos` },
-                { icon: Clock, label: 'Duração', value: `${item.carga_horaria || '--'} Horas` },
-                { icon: Calendar, label: 'Acesso', value: item.tempo === 'com_limite' ? `${item.duracao || ''} ${item.duracao_tipo || 'meses'}` : 'Vitalício' },
-                ...(item.tem_certificado ? [{ icon: Award, label: 'Certificado', value: 'Incluso' }] : [])
+                { icon: BookOpen, text: `${cursosTrilha.length} Cursos` },
+                { icon: Clock, text: `${item.carga_horaria || '04'} horas de conteúdo` },
+                { icon: Calendar, text: item.tempo === 'com_limite' ? `Acesso por ${item.duracao || ''} ${item.duracao_tipo || 'meses'}` : 'Acesso vitalício' },
+                ...(item.tem_certificado ? [{ icon: Award, text: 'Certificado Incluso' }] : [])
               ] : [
-                { icon: BookOpen, label: 'Módulos', value: `${item.curriculo_json?.length || 0} módulos` },
-                { icon: Play, label: 'Aulas', value: `${item.curriculo_json?.reduce((acc: number, secao: any) => acc + (secao.etapas?.length || 0), 0) || 0} aulas` },
-                { icon: Clock, label: 'Duração', value: `${item.carga_horaria || '--'} Horas` },
-                { icon: Calendar, label: 'Acesso', value: item.tempo === 'com_limite' ? `${item.duracao || ''} ${item.duracao_tipo || 'meses'}` : 'Vitalício' },
-                ...(item.tem_certificado ? [{ icon: Award, label: 'Certificado', value: 'Incluso' }] : [])
+                { icon: BookOpen, text: `${item.curriculo_json?.length || 0} Módulos` },
+                { icon: Play, text: `${item.curriculo_json?.reduce((acc: number, secao: any) => acc + (secao.etapas?.length || 0), 0) || 0} Aulas` },
+                { icon: Clock, text: `${item.carga_horaria || '04'} horas de conteúdo` },
+                { icon: Calendar, text: item.tempo === 'com_limite' ? `Acesso por ${item.duracao || ''} ${item.duracao_tipo || 'meses'}` : 'Acesso vitalício' },
+                ...(item.tem_certificado ? [{ icon: Award, text: 'Certificado Incluso' }] : [])
               ]).map((stat, i) => (
-                <div key={i} className="flex flex-col items-center md:items-start text-center md:text-left gap-2 group min-w-[120px]">
-                  <stat.icon className="w-8 h-8 text-primary mb-2 group-hover:scale-110 transition-transform" />
-                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">{stat.label}</span>
-                  <span className="text-xl font-bold text-white tracking-tight">{stat.value}</span>
+                <div 
+                  key={i} 
+                  className="px-6 py-3.5 rounded-2xl border border-white/20 bg-white/5 backdrop-blur-sm flex items-center gap-3.5 text-white hover:border-primary/60 hover:bg-white/10 transition-all shadow-sm"
+                >
+                  <stat.icon className="w-5 h-5 sm:w-6 sm:h-6 text-primary shrink-0" />
+                  <span className="text-sm sm:text-base font-semibold tracking-tight whitespace-nowrap">{stat.text}</span>
                 </div>
               ))}
             </div>
 
             {/* Price and CTA Button */}
-            <div className="flex flex-col md:flex-row items-center justify-center gap-12 md:gap-16 w-full border-t border-slate-850 pt-8 mt-4">
+            <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-12 w-full border-t border-slate-800/80 pt-8 mt-2">
               {renderPriceBlock(true)}
               <button 
                 onClick={handleEnrollClick}
-                className="typo-btn w-full sm:w-auto px-12 py-5 bg-primary text-white rounded-3xl font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(var(--primary-rgb),0.3)] flex items-center justify-center gap-3"
+                className="typo-btn w-full sm:w-auto px-10 py-4 bg-primary text-white rounded-full font-serif italic text-lg sm:text-xl hover:scale-105 active:scale-95 transition-all shadow-lg shadow-primary/30 flex items-center justify-center gap-3"
               >
-                {isEmBreve ? 'Cadastrar-se' : (lp.cta_text || 'COMPRAR AGORA')} <ArrowRight className="w-6 h-6" />
+                {isEmBreve ? 'Cadastrar-se' : (lp.cta_text || 'GARANTIR VAGA')} <ArrowRight className="w-5 h-5" />
               </button>
             </div>
           </div>
