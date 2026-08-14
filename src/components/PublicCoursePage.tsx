@@ -107,7 +107,7 @@ const Nav = ({ layout, item, lp, onEnrollClick, timeLeft }: NavProps) => {
               href={loggedIn && orgSlug ? `/projeto/${orgSlug}` : '/login'}
               className={`typo-link text-sm font-medium underline underline-offset-4 decoration-slate-400/60 hover:decoration-white transition-colors ${layout === 'escuro' ? 'text-slate-200 hover:text-white' : 'text-slate-800 hover:text-slate-950'}`}
             >
-              {loggedIn ? 'Minha Área' : 'Login'}
+              Login
             </a>
           </div>
           
