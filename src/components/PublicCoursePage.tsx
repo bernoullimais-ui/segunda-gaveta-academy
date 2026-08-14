@@ -852,6 +852,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
   const heroRef = React.useRef<HTMLElement>(null);
 
   const [isHeroPlaying, setIsHeroPlaying] = useState(false);
+  const [isPlayingAboutVideo, setIsPlayingAboutVideo] = useState(false);
   const [showEnrollModal, setShowEnrollModal] = useState(false);
   const [showLeadModal, setShowLeadModal] = useState(false);
   const [leadData, setLeadData] = useState({ nome: '', email: '', telefone: '' });
