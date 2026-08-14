@@ -4587,7 +4587,21 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                               setLpData({...lpData, testimonials: newT});
                             }}
                             className="px-3 py-2 border border-slate-200 rounded text-sm outline-none focus:border-blue-500"
-                            placeholder="Cargo/Empresa"
+                            placeholder="Cargo/Empresa (ex: Aluna VIP / Designer)"
+                          />
+                        </div>
+                        <div className="relative">
+                          <ImageIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                          <input 
+                            type="text" 
+                            value={t.photo_url || ''}
+                            onChange={(e) => {
+                              const newT = [...lpData.testimonials];
+                              newT[idx].photo_url = e.target.value;
+                              setLpData({...lpData, testimonials: newT});
+                            }}
+                            className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded text-sm outline-none focus:border-blue-500"
+                            placeholder="URL da Foto do Aluno (ex: https://...)"
                           />
                         </div>
                         <textarea 
