@@ -173,14 +173,11 @@ const Footer = ({ layout, item, lp = {}, style }: FooterProps) => {
           {/* Left Side: Brand Logo & Tagline */}
           <div className="lg:col-span-5 space-y-6">
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-10 bg-primary/20 border border-primary/40 rounded-xl flex items-center justify-center text-white font-bold text-xl font-serif">
-                  sg
-                </div>
-                <span className="font-bold text-white text-xl tracking-tight leading-tight font-serif">
-                  segunda<br />gaveta
-                </span>
-              </div>
+              <img 
+                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRYvssOYKiGZj1IQzExgqzSRJ8bGvyq6rARDA&s" 
+                alt="Segunda Gaveta Logo" 
+                className="h-12 sm:h-14 w-auto max-w-[240px] object-contain" 
+              />
             </div>
 
             <h3 className="text-3xl sm:text-4xl text-white font-serif font-normal leading-snug tracking-tight max-w-sm">
