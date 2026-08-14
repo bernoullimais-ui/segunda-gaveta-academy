@@ -4108,6 +4108,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                           <th className="p-3 border border-slate-300 min-w-[100px]">Tamanho</th>
                           <th className="p-3 border border-slate-300 min-w-[110px]">Entrelinhas</th>
                           <th className="p-3 border border-slate-300 min-w-[130px]">Espaço entre letras</th>
+                          <th className="p-3 border border-slate-300 min-w-[100px]">Cor</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -4128,6 +4129,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                           const fontSize = typoObj.font_size || item.defaultSize;
                           const lineHeight = typoObj.line_height || item.defaultLineHeight;
                           const letterSpacing = typoObj.letter_spacing || item.defaultLetterSpacing;
+                          const fontColor = typoObj.color || '';
 
                           return (
                             <tr key={item.key} className="hover:bg-slate-50 border-b border-slate-200">
@@ -4237,6 +4239,41 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                                   placeholder="ex: -0.03em"
                                   className="w-full p-1.5 border border-slate-200 rounded text-xs outline-none bg-white font-mono"
                                 />
+                              </td>
+                              <td className="p-2 border border-slate-300">
+                                <div className="flex items-center gap-1.5">
+                                  <input
+                                    type="color"
+                                    value={fontColor || '#ffffff'}
+                                    onChange={(e) => {
+                                      const currentTypo = lpData.typography || {};
+                                      setLpData({
+                                        ...lpData,
+                                        typography: {
+                                          ...currentTypo,
+                                          [item.key]: { ...(currentTypo[item.key] || {}), color: e.target.value }
+                                        }
+                                      });
+                                    }}
+                                    className="w-7 h-7 p-0.5 border border-slate-200 rounded cursor-pointer shrink-0"
+                                  />
+                                  <input
+                                    type="text"
+                                    value={fontColor}
+                                    onChange={(e) => {
+                                      const currentTypo = lpData.typography || {};
+                                      setLpData({
+                                        ...lpData,
+                                        typography: {
+                                          ...currentTypo,
+                                          [item.key]: { ...(currentTypo[item.key] || {}), color: e.target.value }
+                                        }
+                                      });
+                                    }}
+                                    placeholder="#ffffff"
+                                    className="w-full p-1 border border-slate-200 rounded text-[11px] outline-none font-mono"
+                                  />
+                                </div>
                               </td>
                             </tr>
                           );
