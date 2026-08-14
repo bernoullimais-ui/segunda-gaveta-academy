@@ -42,7 +42,7 @@ interface NavProps {
   item: any;
   lp: any;
   onEnrollClick: () => void;
-  timeLeft?: { hours: number; minutes: number; seconds: number } | null;
+  timeLeft?: { days: number; hours: number; minutes: number; seconds: number } | null;
 }
 
 const Nav = ({ layout, item, lp, onEnrollClick, timeLeft }: NavProps) => {
@@ -82,7 +82,7 @@ const Nav = ({ layout, item, lp, onEnrollClick, timeLeft }: NavProps) => {
             <div className="flex items-center gap-1.5 px-3 py-1 bg-white/10 border border-white/20 rounded-full text-white text-xs font-mono font-bold shrink-0 shadow-sm">
               <Clock className="w-3.5 h-3.5 text-primary shrink-0" />
               <span className="tracking-wider">
-                {pad(timeLeft.hours)}:{pad(timeLeft.minutes)}:{pad(timeLeft.seconds)}
+                {timeLeft.days > 0 ? `${pad(timeLeft.days)}d ` : ''}{pad(timeLeft.hours)}h {pad(timeLeft.minutes)}m {pad(timeLeft.seconds)}s
               </span>
             </div>
           </div>
@@ -602,7 +602,7 @@ const TrustAndGuarantee = ({ layout, guaranteeDays, style }: { layout: string, g
   );
 };
 
-const CountdownTimer = ({ timeLeft, title, layout }: { timeLeft: { hours: number, minutes: number, seconds: number } | null, title?: string, layout: string }) => {
+const CountdownTimer = ({ timeLeft, title, layout }: { timeLeft: { days: number, hours: number, minutes: number, seconds: number } | null, title?: string, layout: string }) => {
   if (!timeLeft) return null;
 
   const pad = (num: number) => num.toString().padStart(2, '0');
@@ -616,10 +616,22 @@ const CountdownTimer = ({ timeLeft, title, layout }: { timeLeft: { hours: number
       <span className={`text-[10px] font-bold tracking-widest uppercase block mb-3 text-primary`}>
         {title || 'Lote promocional termina em:'}
       </span>
-      <div className="flex gap-3 text-center">
+      <div className="flex gap-2.5 text-center">
+        {/* Days */}
+        <div className="flex flex-col">
+          <div className={`w-12 sm:w-14 py-3 rounded-2xl text-xl sm:text-2xl font-black ${
+            layout === 'escuro' ? 'bg-slate-900 text-white border border-slate-800' : 'bg-slate-50 text-slate-900 border border-slate-100'
+          }`}>
+            {pad(timeLeft.days)}
+          </div>
+          <span className="text-[9px] font-black text-slate-500 mt-1 uppercase tracking-wider">Dias</span>
+        </div>
+
+        <span className={`text-xl sm:text-2xl font-black mt-2 ${layout === 'escuro' ? 'text-slate-700' : 'text-slate-300'}`}>:</span>
+
         {/* Hours */}
         <div className="flex flex-col">
-          <div className={`w-14 py-3 rounded-2xl text-2xl font-black ${
+          <div className={`w-12 sm:w-14 py-3 rounded-2xl text-xl sm:text-2xl font-black ${
             layout === 'escuro' ? 'bg-slate-900 text-white border border-slate-800' : 'bg-slate-50 text-slate-900 border border-slate-100'
           }`}>
             {pad(timeLeft.hours)}
@@ -627,11 +639,11 @@ const CountdownTimer = ({ timeLeft, title, layout }: { timeLeft: { hours: number
           <span className="text-[9px] font-black text-slate-500 mt-1 uppercase tracking-wider">Horas</span>
         </div>
         
-        <span className={`text-2xl font-black mt-2 ${layout === 'escuro' ? 'text-slate-700' : 'text-slate-300'}`}>:</span>
+        <span className={`text-xl sm:text-2xl font-black mt-2 ${layout === 'escuro' ? 'text-slate-700' : 'text-slate-300'}`}>:</span>
 
         {/* Minutes */}
         <div className="flex flex-col">
-          <div className={`w-14 py-3 rounded-2xl text-2xl font-black ${
+          <div className={`w-12 sm:w-14 py-3 rounded-2xl text-xl sm:text-2xl font-black ${
             layout === 'escuro' ? 'bg-slate-900 text-white border border-slate-800' : 'bg-slate-50 text-slate-900 border border-slate-100'
           }`}>
             {pad(timeLeft.minutes)}
@@ -639,11 +651,11 @@ const CountdownTimer = ({ timeLeft, title, layout }: { timeLeft: { hours: number
           <span className="text-[9px] font-black text-slate-500 mt-1 uppercase tracking-wider">Minutos</span>
         </div>
 
-        <span className={`text-2xl font-black mt-2 ${layout === 'escuro' ? 'text-slate-700' : 'text-slate-300'}`}>:</span>
+        <span className={`text-xl sm:text-2xl font-black mt-2 ${layout === 'escuro' ? 'text-slate-700' : 'text-slate-300'}`}>:</span>
 
         {/* Seconds */}
         <div className="flex flex-col">
-          <div className={`w-14 py-3 rounded-2xl text-2xl font-black ${
+          <div className={`w-12 sm:w-14 py-3 rounded-2xl text-xl sm:text-2xl font-black ${
             layout === 'escuro' ? 'bg-slate-900 text-white border border-slate-800' : 'bg-slate-50 text-slate-900 border border-slate-100'
           }`}>
             {pad(timeLeft.seconds)}
@@ -864,7 +876,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
     setOpenFaqs(prev => ({ ...prev, [idx]: !prev[idx] }));
   };
 
-  const [timeLeft, setTimeLeft] = useState<{ hours: number, minutes: number, seconds: number } | null>(null);
+  const [timeLeft, setTimeLeft] = useState<{ days: number, hours: number, minutes: number, seconds: number } | null>(null);
   
   // Resolução dinâmica da versão da página de vendas (URL param ?v= ou ?version=)
   const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
@@ -945,8 +957,9 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
         return null;
       }
       return {
-        hours: Math.floor(difference / (1000 * 60 * 60)),
-        minutes: Math.floor((difference / 1000 / 60) % 65 % 60),
+        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+        minutes: Math.floor((difference / 1000 / 60) % 60),
         seconds: Math.floor((difference / 1000) % 60)
       };
     };
