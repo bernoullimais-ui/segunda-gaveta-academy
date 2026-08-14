@@ -4472,42 +4472,74 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                 {/* Benefits */}
                 <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                   <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-                    <h4 className="font-bold text-slate-800">O que você vai aprender (Vantagens)</h4>
+                    <div>
+                      <h4 className="font-bold text-slate-800">O que você vai aprender (Vantagens)</h4>
+                      <p className="text-xs text-slate-500">Cadastre os tópicos do curso com título e detalhamento explicativo.</p>
+                    </div>
                     <button 
-                      onClick={() => setLpData({...lpData, benefits: [...lpData.benefits, '']})}
-                      className="text-blue-600 text-xs font-bold uppercase hover:underline flex items-center gap-1"
+                      onClick={() => setLpData({...lpData, benefits: [...(lpData.benefits || []), { title: '', description: '' }]})}
+                      className="text-blue-600 text-xs font-bold uppercase hover:underline flex items-center gap-1 shrink-0"
                     >
                       <Plus className="w-3 h-3" /> Adicionar item
                     </button>
                   </div>
-                  <div className="p-6 space-y-3">
-                    {lpData.benefits.map((benefit: string, idx: number) => (
-                      <div key={idx} className="flex gap-2">
-                        <div className="w-6 h-6 shrink-0 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold mt-2">
-                          {idx + 1}
+                  <div className="p-6 space-y-4">
+                    {(lpData.benefits || []).map((benefit: any, idx: number) => {
+                      const itemObj = typeof benefit === 'object' && benefit !== null ? benefit : { title: typeof benefit === 'string' ? benefit : '', description: '' };
+
+                      return (
+                        <div key={idx} className="p-4 border border-slate-200 rounded-xl bg-slate-50/40 relative space-y-3">
+                          <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-2">
+                            <div className="flex items-center gap-2">
+                              <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold">
+                                {idx + 1}
+                              </span>
+                              <span className="text-xs font-bold text-slate-600 uppercase">Item {idx + 1}</span>
+                            </div>
+                            <button 
+                              onClick={() => {
+                                const newBenefits = (lpData.benefits || []).filter((_: any, i: number) => i !== idx);
+                                setLpData({...lpData, benefits: newBenefits});
+                              }}
+                              className="p-1 text-slate-400 hover:text-red-500 transition-colors"
+                              title="Remover item"
+                            >
+                              <Minus className="w-4 h-4" />
+                            </button>
+                          </div>
+                          
+                          <div className="grid grid-cols-1 gap-3">
+                            <div>
+                              <label className="block text-xs font-bold text-slate-600 mb-1">Título</label>
+                              <input 
+                                type="text" 
+                                value={itemObj.title || ''}
+                                onChange={(e) => {
+                                  const newBenefits = [...(lpData.benefits || [])];
+                                  newBenefits[idx] = { ...itemObj, title: e.target.value };
+                                  setLpData({...lpData, benefits: newBenefits});
+                                }}
+                                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                                placeholder="Ex: Título da vantagem / aprendizado"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-bold text-slate-600 mb-1">Detalhamento</label>
+                              <textarea 
+                                value={itemObj.description || ''}
+                                onChange={(e) => {
+                                  const newBenefits = [...(lpData.benefits || [])];
+                                  newBenefits[idx] = { ...itemObj, description: e.target.value };
+                                  setLpData({...lpData, benefits: newBenefits});
+                                }}
+                                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 bg-white min-h-[70px]"
+                                placeholder="Ex: Detalhamento explicativo do tópico..."
+                              />
+                            </div>
+                          </div>
                         </div>
-                        <input 
-                          type="text" 
-                          value={benefit}
-                          onChange={(e) => {
-                            const newBenefits = [...lpData.benefits];
-                            newBenefits[idx] = e.target.value;
-                            setLpData({...lpData, benefits: newBenefits});
-                          }}
-                          className="flex-1 px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                          placeholder="Ex: Técnicas avançadas de iluminação"
-                        />
-                        <button 
-                          onClick={() => {
-                            const newBenefits = lpData.benefits.filter((_: any, i: number) => i !== idx);
-                            setLpData({...lpData, benefits: newBenefits});
-                          }}
-                          className="p-2 text-slate-400 hover:text-red-500 transition-colors"
-                         >
-                          <Minus className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
 

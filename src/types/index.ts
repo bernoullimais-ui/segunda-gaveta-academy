@@ -305,7 +305,7 @@ export interface LandingPageVersionConfig {
   hero_cta_offset_y?: number;
   about_title?: string;
   about?: string;
-  benefits?: string[];
+  benefits?: Array<string | { title: string; description?: string }>;
   target_audience?: string;
   faq?: Array<{ question: string; answer: string }>;
   primary_color?: string;

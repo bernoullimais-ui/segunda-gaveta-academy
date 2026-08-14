@@ -1715,14 +1715,22 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                   <div className={(lp.benefits?.length > 0 && lp.testimonials?.length > 0) ? '' : 'max-w-4xl mx-auto w-full'}>
                     <h3 className={`font-bold text-white mb-10 ${(lp.benefits?.length > 0 && lp.testimonials?.length > 0) ? 'text-3xl text-center lg:text-left' : 'text-4xl text-center'}`}>O que você vai dominar</h3>
                     <div className={`grid grid-cols-1 ${(!lp.testimonials || lp.testimonials.length === 0) ? 'sm:grid-cols-2' : 'sm:grid-cols-1 xl:grid-cols-2'} gap-6`}>
-                      {(lp.benefits || []).filter(Boolean).map((benefit: string, idx: number) => (
-                        <div key={idx} className="bg-slate-800/40 p-8 rounded-[32px] border border-slate-700 hover:border-primary/50 transition-colors group text-left">
-                           <div className="w-10 h-10 bg-primary/10 text-primary rounded-2xl flex items-center justify-center mb-6">
-                             <CheckCircle className="w-5 h-5" />
-                           </div>
-                           <p className="font-bold text-white text-lg leading-tight group-hover:text-primary transition-colors">{benefit}</p>
-                        </div>
-                      ))}
+                      {(lp.benefits || []).filter(Boolean).map((benefit: any, idx: number) => {
+                        const itemObj = typeof benefit === 'object' && benefit !== null ? benefit : { title: typeof benefit === 'string' ? benefit : '', description: '' };
+                        return (
+                          <div key={idx} className="bg-slate-800/40 p-6 rounded-[28px] border border-slate-700 hover:border-primary/50 transition-colors group text-left flex gap-4 items-start">
+                             <div className="w-10 h-10 bg-primary/10 text-primary rounded-2xl flex items-center justify-center shrink-0 mt-0.5">
+                               <CheckCircle className="w-5 h-5" />
+                             </div>
+                             <div className="space-y-1.5 flex-1">
+                               <h4 className="font-bold text-white text-lg leading-snug group-hover:text-primary transition-colors typo-title-3">{itemObj.title}</h4>
+                               {itemObj.description && (
+                                 <p className="text-slate-400 text-sm leading-relaxed typo-body-3">{itemObj.description}</p>
+                               )}
+                             </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
@@ -2283,14 +2291,22 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                 <div className={(lp.benefits?.length > 0 && lp.testimonials?.length > 0) ? '' : 'max-w-4xl mx-auto w-full'}>
                   <h3 className={`font-bold text-slate-900 mb-8 ${(lp.benefits?.length > 0 && lp.testimonials?.length > 0) ? 'text-3xl text-center lg:text-left' : 'text-4xl text-center'}`}>O que você vai dominar</h3>
                   <div className="space-y-4">
-                    {(lp.benefits || []).filter(Boolean).map((benefit: string, idx: number) => (
-                      <div key={idx} className="flex items-start gap-4 p-5 bg-white rounded-2xl border border-slate-200 shadow-sm">
-                        <div className="w-8 h-8 shrink-0 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center">
-                          <CheckCircle className="w-5 h-5" />
+                    {(lp.benefits || []).filter(Boolean).map((benefit: any, idx: number) => {
+                      const itemObj = typeof benefit === 'object' && benefit !== null ? benefit : { title: typeof benefit === 'string' ? benefit : '', description: '' };
+                      return (
+                        <div key={idx} className="flex items-start gap-4 p-5 bg-white rounded-2xl border border-slate-200 shadow-sm text-left">
+                          <div className="w-8 h-8 shrink-0 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mt-0.5">
+                            <CheckCircle className="w-5 h-5" />
+                          </div>
+                          <div className="space-y-1 flex-1">
+                            <h4 className="font-bold text-slate-800 leading-snug typo-title-3">{itemObj.title}</h4>
+                            {itemObj.description && (
+                              <p className="text-slate-500 text-sm leading-relaxed typo-body-3">{itemObj.description}</p>
+                            )}
+                          </div>
                         </div>
-                        <span className="font-bold text-slate-800 leading-snug">{benefit}</span>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               )}
