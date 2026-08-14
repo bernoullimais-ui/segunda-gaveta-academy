@@ -4481,6 +4481,34 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                   </div>
                 </div>
 
+                {/* Seção Copy / Frase de Impacto com CTA */}
+                <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                  <div className="p-5 border-b border-slate-100 bg-slate-50/50">
+                    <h4 className="font-bold text-slate-800">Seção Copy (Frase de Impacto com Botão)</h4>
+                    <p className="text-xs text-slate-500">Exibe uma frase em destaque centralizada com um botão CTA de ação rápida.</p>
+                  </div>
+                  <div className="p-6 space-y-4">
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wider text-xs">Frase de Impacto (Texto)</label>
+                      <textarea
+                        value={lpData.copy_section_text || ''}
+                        onChange={(e) => setLpData({...lpData, copy_section_text: e.target.value})}
+                        className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all min-h-[100px] font-serif"
+                        placeholder="Ex: Conheça a melhor versão da sua pele em poucos passos."
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wider text-xs">Texto do Botão CTA</label>
+                      <input
+                        type="text"
+                        value={lpData.copy_section_cta_text || ''}
+                        onChange={(e) => setLpData({...lpData, copy_section_cta_text: e.target.value})}
+                        className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all font-medium"
+                        placeholder="Ex: Acesse o guia"
+                      />
+                    </div>
+                  </div>
+                </div>
 
                 {/* Benefits */}
                 <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">

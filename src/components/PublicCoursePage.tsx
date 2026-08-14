@@ -1716,6 +1716,28 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
           </div>
         </section>
 
+        {/* Copy Section - Impact Statement with Action Button (Ref Image) */}
+        {(lp.copy_section_text || lp.copy_section_cta_text) && (
+          <section id="copy-cta" className="py-24 sm:py-32 bg-slate-900 border-b border-slate-800 relative text-center overflow-hidden" style={getSectionStyle('copy')}>
+            <div className="max-w-4xl mx-auto px-6 flex flex-col items-center justify-center space-y-8 lg:space-y-10">
+              {lp.copy_section_text && (
+                <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif text-white font-normal leading-[1.25] tracking-tight typo-title">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {lp.copy_section_text}
+                  </ReactMarkdown>
+                </div>
+              )}
+              
+              <button 
+                onClick={handleEnrollClick}
+                className="typo-btn px-8 sm:px-10 py-4 bg-primary/90 hover:bg-primary text-white rounded-full font-serif italic text-lg sm:text-xl shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2 group"
+              >
+                <span>{lp.copy_section_cta_text || lp.cta_text || 'Acesse o guia'}</span>
+              </button>
+            </div>
+          </section>
+        )}
+
         {/* Benefits & Testimonials Section - Dark */}
         {(lp.benefits?.length > 0 || lp.testimonials?.length > 0) && (
           <section id="vantagens-depoimentos" className="py-32 bg-slate-900/50 border-b border-slate-800" style={getSectionStyle('features')}>

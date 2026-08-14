@@ -306,6 +306,8 @@ export interface LandingPageVersionConfig {
   about_title?: string;
   about?: string;
   about_image_url?: string;
+  copy_section_text?: string;
+  copy_section_cta_text?: string;
   benefits?: Array<string | { title: string; description?: string }>;
   target_audience?: string;
   faq?: Array<{ question: string; answer: string }>;
