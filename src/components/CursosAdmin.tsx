@@ -4978,19 +4978,19 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                         
                         <div>
                           <label className="block text-[10px] font-bold text-slate-500 mb-2 uppercase">Cor de Fundo</label>
-                          <div className="flex gap-2">
+                          <div className="flex items-center gap-2 w-full min-w-0">
                             <input 
                               type="color" 
                               value={(lpData as any)[`section_${section.key}_bg_color`] || '#ffffff'}
                               onChange={(e) => setLpData({...lpData, [`section_${section.key}_bg_color`]: e.target.value})}
-                              className="w-10 h-10 border-0 p-0 overflow-hidden cursor-pointer rounded-lg bg-transparent"
+                              className="w-10 h-10 border-0 p-0 overflow-hidden cursor-pointer rounded-lg bg-transparent shrink-0"
                             />
                             <input 
                               type="text" 
                               value={(lpData as any)[`section_${section.key}_bg_color`] || ''}
                               onChange={(e) => setLpData({...lpData, [`section_${section.key}_bg_color`]: e.target.value})}
                               placeholder="ex: #ffffff"
-                              className="flex-1 px-4 py-2 border border-slate-200 rounded-lg text-sm font-mono focus:ring-2 focus:ring-blue-500 outline-none bg-white"
+                              className="flex-1 min-w-0 px-3 py-2 border border-slate-200 rounded-lg text-sm font-mono focus:ring-2 focus:ring-blue-500 outline-none bg-white"
                             />
                           </div>
                         </div>
