@@ -1536,12 +1536,12 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
         <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[550px] lg:min-h-[650px] w-full items-stretch">
           <div className="p-8 sm:p-12 lg:p-20 xl:p-24 flex flex-col justify-center text-left space-y-6 sm:space-y-8">
             <div className="space-y-3">
-              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-[1.15] tracking-tight typo-title">
+              <h2 className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-[1.15] tracking-tight ${lp.about_title_style || 'typo-title-1'}`}>
                 {lp.about_title || item.nome}
               </h2>
             </div>
 
-            <div className="text-base sm:text-lg lg:text-xl text-slate-300/90 leading-relaxed font-sans space-y-4 typo-body-1">
+            <div className={`text-base sm:text-lg lg:text-xl text-slate-300/90 leading-relaxed font-sans space-y-4 ${lp.about_text_style || 'typo-body-1'}`}>
               <ReactMarkdown remarkPlugins={[remarkGfm]}>
                 {lp.about || item.descricao}
               </ReactMarkdown>
@@ -1589,7 +1589,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
       <section key="copy" id="copy-cta" className="py-24 sm:py-32 bg-slate-900 relative text-center overflow-hidden" style={getSectionStyle('copy')}>
         <div className="max-w-4xl mx-auto px-6 flex flex-col items-center justify-center space-y-8 lg:space-y-10">
           {lp.copy_section_text && (
-            <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif text-white font-normal leading-[1.25] tracking-tight typo-title">
+            <div className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif text-white font-normal leading-[1.25] tracking-tight ${lp.copy_text_style || 'typo-title-1'}`}>
               <ReactMarkdown remarkPlugins={[remarkGfm]}>
                 {lp.copy_section_text}
               </ReactMarkdown>
@@ -1598,7 +1598,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
           
           <button 
             onClick={handleEnrollClick}
-            className="typo-btn px-8 sm:px-10 py-4 bg-primary/90 hover:bg-primary text-white rounded-full font-serif italic text-lg sm:text-xl shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2 group"
+            className={`px-8 sm:px-10 py-4 bg-primary/90 hover:bg-primary text-white rounded-full font-serif italic text-lg sm:text-xl shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2 group ${lp.copy_cta_style || 'typo-btn-1'}`}
           >
             <span>{lp.copy_section_cta_text || lp.cta_text || 'Acesse o guia'}</span>
           </button>
