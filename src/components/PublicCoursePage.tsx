@@ -173,22 +173,14 @@ const Footer = ({ layout, item, lp = {}, style }: FooterProps) => {
           {/* Left Side: Brand Logo & Tagline */}
           <div className="lg:col-span-5 space-y-6">
             <div className="flex items-center gap-3">
-              {(lp.logo_url || item.organizacoes?.logo_url) ? (
-                <img 
-                  src={lp.logo_url || item.organizacoes?.logo_url} 
-                  alt="Segunda Gaveta Logo" 
-                  className="h-12 sm:h-14 w-auto max-w-[240px] object-contain" 
-                />
-              ) : (
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 bg-primary/20 border border-primary/40 rounded-xl flex items-center justify-center text-white font-bold text-xl font-serif">
-                    sg
-                  </div>
-                  <span className="font-bold text-white text-xl tracking-tight leading-tight">
-                    segunda<br />gaveta
-                  </span>
+              <div className="flex items-center gap-2">
+                <div className="w-10 h-10 bg-primary/20 border border-primary/40 rounded-xl flex items-center justify-center text-white font-bold text-xl font-serif">
+                  sg
                 </div>
-              )}
+                <span className="font-bold text-white text-xl tracking-tight leading-tight font-serif">
+                  segunda<br />gaveta
+                </span>
+              </div>
             </div>
 
             <h3 className="text-3xl sm:text-4xl text-white font-serif font-normal leading-snug tracking-tight max-w-sm">
@@ -201,8 +193,8 @@ const Footer = ({ layout, item, lp = {}, style }: FooterProps) => {
             
             {/* Coluna 1: Redes Sociais da Segunda Gaveta */}
             <div className="space-y-4">
-              <h4 className="font-bold text-white text-sm sm:text-base tracking-wider uppercase">
-                Segunda Gaveta
+              <h4 className="font-bold text-white text-sm sm:text-base tracking-wider">
+                produtora
               </h4>
               <ul className="space-y-2.5 text-sm sm:text-base text-slate-400">
                 <li>
@@ -235,8 +227,8 @@ const Footer = ({ layout, item, lp = {}, style }: FooterProps) => {
 
             {/* Coluna 2: Redes Sociais do Especialista */}
             <div className="space-y-4">
-              <h4 className="font-bold text-white text-sm sm:text-base tracking-wider uppercase">
-                {specialistName}
+              <h4 className="font-bold text-white text-sm sm:text-base tracking-wider">
+                especialista
               </h4>
               <ul className="space-y-2.5 text-sm sm:text-base text-slate-400">
                 <li>
@@ -269,8 +261,8 @@ const Footer = ({ layout, item, lp = {}, style }: FooterProps) => {
 
             {/* Coluna 3: Navegação na Página */}
             <div className="space-y-4">
-              <h4 className="font-bold text-white text-sm sm:text-base tracking-wider uppercase">
-                Navegação
+              <h4 className="font-bold text-white text-sm sm:text-base tracking-wider">
+                navegação
               </h4>
               <ul className="space-y-2.5 text-sm sm:text-base text-slate-400">
                 <li>
@@ -664,50 +656,27 @@ const CountdownTimer = ({ timeLeft, title, layout }: { timeLeft: { hours: number
 };
 
 const TargetAudienceSection = ({ targetAudience, layout, style }: { targetAudience: string, layout: string, style?: React.CSSProperties }) => {
-  if (!targetAudience) return null;
-
-  const items = targetAudience
-    .split(/[,;\n]+/)
-    .map(item => item.trim())
-    .filter(Boolean);
-
-  if (items.length === 0) return null;
+  if (!targetAudience?.trim()) return null;
 
   return (
     <section className={`py-24 border-b ${
       layout === 'escuro' ? 'bg-slate-950/60 border-slate-900' : 'bg-slate-50 border-slate-100'
     }`} style={style}>
-      <div className="max-w-7xl mx-auto px-6 text-center">
-        <div className="max-w-2xl mx-auto space-y-4 mb-16">
-          <span className="text-primary font-bold text-xs uppercase tracking-widest block">Público-Alvo</span>
-          <h2 className={`text-4xl font-bold tracking-tight ${layout === 'escuro' ? 'text-white' : 'text-slate-900'}`}>
-            Para quem é este curso?
-          </h2>
-          <p className={layout === 'escuro' ? 'text-slate-400 text-lg' : 'text-slate-500 text-lg'}>
-            Descubra se este programa de treinamento é a escolha certa para seus objetivos.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {items.map((item, idx) => (
-            <div 
-              key={idx} 
-              className={`p-8 rounded-[32px] border relative transition-all duration-300 hover:scale-[1.02] text-left group ${
-                layout === 'escuro' 
-                  ? 'bg-slate-900/30 border-slate-800 hover:border-primary/45 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.15)]' 
-                  : 'bg-white/80 border-slate-200/60 shadow-[0_10px_30px_rgba(0,0,0,0.01)] hover:border-primary/25 backdrop-blur-md'
-              }`}
-            >
-              <div className="w-10 h-10 bg-primary/10 text-primary rounded-2xl flex items-center justify-center font-bold text-sm mb-6 group-hover:scale-110 transition-transform">
-                {idx + 1}
-              </div>
-              <p className={`font-bold text-lg leading-relaxed ${
-                layout === 'escuro' ? 'text-slate-200' : 'text-slate-800'
-              }`}>
-                {item}
-              </p>
-            </div>
-          ))}
+      <div className="max-w-4xl mx-auto px-6 text-center space-y-6">
+        <h2 className={`text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight typo-title ${
+          layout === 'escuro' ? 'text-white' : 'text-slate-900'
+        }`}>
+          Para quem é este programa?
+        </h2>
+        
+        <div className={`p-8 md:p-12 rounded-[35px] border ${
+          layout === 'escuro' 
+            ? 'bg-transparent border-white/20 text-slate-300/90' 
+            : 'bg-transparent border-slate-200 text-slate-700'
+        } backdrop-blur-sm text-center text-base sm:text-lg lg:text-xl leading-relaxed font-sans typo-body-1 space-y-4`}>
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            {targetAudience}
+          </ReactMarkdown>
         </div>
       </div>
     </section>
