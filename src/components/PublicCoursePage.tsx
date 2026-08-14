@@ -168,10 +168,10 @@ const Footer = ({ layout, item, lp = {}, style }: FooterProps) => {
       <div className="max-w-7xl mx-auto px-6 sm:px-8">
         
         {/* Main Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-start text-left">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-stretch text-left">
           
           {/* Left Side: Brand Logo & Tagline */}
-          <div className="lg:col-span-5 space-y-6">
+          <div className="lg:col-span-5 flex flex-col justify-between space-y-12 sm:space-y-16 lg:space-y-0 py-1">
             <div className="flex items-center gap-3">
               <img 
                 src="https://static.wixstatic.com/media/0e8544_53ba61f9cc6b4143a45c75425fc76cf3~mv2.png" 
