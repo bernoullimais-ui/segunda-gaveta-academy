@@ -42,12 +42,15 @@ interface NavProps {
   item: any;
   lp: any;
   onEnrollClick: () => void;
+  timeLeft?: { hours: number; minutes: number; seconds: number } | null;
 }
 
-const Nav = ({ layout, item, lp, onEnrollClick }: NavProps) => {
+const Nav = ({ layout, item, lp, onEnrollClick, timeLeft }: NavProps) => {
   const [loggedIn, setLoggedIn] = React.useState(false);
   const [orgSlug, setOrgSlug] = React.useState('');
   const [isScrolled, setIsScrolled] = React.useState(false);
+
+  const pad = (num: number) => num.toString().padStart(2, '0');
 
   React.useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -96,7 +99,7 @@ const Nav = ({ layout, item, lp, onEnrollClick }: NavProps) => {
           )}
         </div>
 
-        <div className="flex items-center gap-4 sm:gap-8 shrink-0">
+        <div className="flex items-center gap-3 sm:gap-6 shrink-0">
           <div className="hidden lg:flex items-center gap-8">
             <a href="#sobre" className={`typo-link text-sm font-medium tracking-wide transition-colors ${layout === 'escuro' ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-900'}`}>Sobre</a>
             <a href="#instrutor" className={`typo-link text-sm font-medium tracking-wide transition-colors ${layout === 'escuro' ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-900'}`}>Expert</a>
@@ -107,12 +110,23 @@ const Nav = ({ layout, item, lp, onEnrollClick }: NavProps) => {
               {loggedIn ? 'Minha Área' : 'Login'}
             </a>
           </div>
+          
           <button
             onClick={onEnrollClick}
-            className="typo-btn px-6 sm:px-8 py-2.5 sm:py-3 bg-primary text-white rounded-full font-serif italic text-sm sm:text-base hover:opacity-95 hover:scale-105 active:scale-95 transition-all shadow-lg shadow-primary/25 whitespace-nowrap"
+            className="typo-btn px-5 sm:px-7 py-2.5 sm:py-3 bg-primary text-white rounded-full font-serif italic text-sm sm:text-base hover:opacity-95 hover:scale-105 active:scale-95 transition-all shadow-lg shadow-primary/25 whitespace-nowrap"
           >
             {Boolean(item?.em_breve || item?.configuracao_json?.em_breve || item?.status === 'em_breve' || lp?.cta_text?.toLowerCase().includes('breve') || lp?.cta_text?.toLowerCase().includes('cadastrar') || lp?.cta_text?.toLowerCase().includes('espera')) ? 'Em Breve' : (lp.cta_text || 'Acesse agora')}
           </button>
+
+          {/* Countdown Timer Badge on the right of CTA button */}
+          {timeLeft && (
+            <div className="flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 bg-white/10 border border-white/20 rounded-full text-white text-xs font-mono font-bold shrink-0 animate-pulse shadow-md">
+              <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary shrink-0" />
+              <span className="tracking-wider">
+                {pad(timeLeft.hours)}:{pad(timeLeft.minutes)}:{pad(timeLeft.seconds)}
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </nav>
@@ -1610,6 +1624,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
           item={item}
           lp={lp}
           onEnrollClick={handleEnrollClick}
+          timeLeft={timeLeft}
         />
 
         {/* #2 Sticky CTA bar for mobile */}
