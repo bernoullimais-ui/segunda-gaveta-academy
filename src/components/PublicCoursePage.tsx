@@ -470,14 +470,14 @@ const TestimonialsCarousel = ({ testimonials, layout, primaryColor }: { testimon
   };
 
   return (
-    <div className="relative w-full max-w-4xl mx-auto px-4 py-8 sm:py-12 flex flex-col items-center justify-center text-center">
-      {/* Giant Decorative Top-Left Quote */}
-      <span className="absolute -top-6 left-0 sm:left-4 text-7xl sm:text-9xl font-serif text-slate-950/25 select-none pointer-events-none leading-none">
+    <div className="relative w-full max-w-6xl mx-auto px-4 py-16 sm:py-24 flex flex-col items-center justify-center text-center overflow-visible">
+      {/* Giant Decorative Top-Left Quote - touching section top-left boundary */}
+      <span className="absolute -top-12 sm:-top-20 -left-2 sm:left-2 text-8xl sm:text-[140px] lg:text-[180px] font-serif text-slate-950/40 select-none pointer-events-none leading-none z-0">
         “
       </span>
 
-      {/* Giant Decorative Bottom-Right Quote */}
-      <span className="absolute -bottom-6 right-0 sm:right-4 text-7xl sm:text-9xl font-serif text-slate-950/25 select-none pointer-events-none leading-none">
+      {/* Giant Decorative Bottom-Right Quote - touching section bottom-right boundary */}
+      <span className="absolute -bottom-12 sm:-bottom-20 -right-2 sm:right-2 text-8xl sm:text-[140px] lg:text-[180px] font-serif text-slate-950/40 select-none pointer-events-none leading-none z-0">
         ”
       </span>
 
