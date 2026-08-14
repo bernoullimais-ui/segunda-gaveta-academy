@@ -1823,30 +1823,40 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
           </section>
         )}
 
-        {/* Instructor - Dark */}
-        <section id="instrutor" className="py-32 bg-slate-950" style={getSectionStyle('instructor')}>
-           <div className="max-w-7xl mx-auto px-6">
-              <div className="flex flex-col lg:flex-row gap-20 items-center justify-center">
-                 <div className="w-64 h-64 md:w-80 md:h-80 relative shrink-0">
-                    <div className="absolute inset-0 bg-primary/20 rounded-[64px] rotate-6 border border-primary/20"></div>
-                    <img 
-                      src={lp.instructor?.avatar_url || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=2070'} 
-                      alt="Instrutor" 
-                      className="w-full h-full object-cover rounded-[64px] absolute inset-0 shadow-2xl"
-                    />
-                 </div>
-                 <div className="max-w-xl text-center lg:text-left space-y-8">
-                    <div className="text-left">
-                       <span className="text-primary font-bold text-sm tracking-widest uppercase block mb-3">Seu instrutor</span>
-                       <h2 className="text-4xl md:text-5xl font-bold text-white typo-title">{lp.instructor?.name || 'Mestre do Conteúdo'}</h2>
-                       <p className="text-lg text-slate-500 font-medium mt-1">{lp.instructor?.role || 'Especialista e Mentor'}</p>
-                    </div>
-                    <p className="text-xl text-slate-700 italic font-light leading-relaxed text-left typo-subtitle">
-                      "{lp.instructor?.bio || 'Comprometido em guiar alunos na jornada de transformação profissional através de métodos validados no mercado.'}"
-                    </p>
-                 </div>
+        {/* Instructor / Expert Section - 50/50 Full Bleed Layout (Ref Image: Photo Left | Name & Bio Right) */}
+        <section id="instrutor" className="relative w-full overflow-hidden bg-slate-950 border-b border-slate-800 text-left" style={getSectionStyle('instructor')}>
+          <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[500px] lg:min-h-[650px] w-full items-stretch">
+            
+            {/* Left Column: Full Bleed Photo (No margins, no rounded corners) */}
+            <div className="relative w-full h-full min-h-[400px] lg:min-h-full overflow-hidden bg-slate-900">
+              <img 
+                src={lp.instructor?.avatar_url || item.professor_foto_url || item.capa_url || item.thumbnail_url || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=1200'} 
+                alt={lp.instructor?.name || item.professor_nome || 'Especialista'} 
+                className="w-full h-full object-cover object-center"
+              />
+            </div>
+
+            {/* Right Column: Full Name & Bio */}
+            <div className="p-8 sm:p-12 lg:p-20 xl:p-24 flex flex-col justify-center text-left space-y-6 sm:space-y-8">
+              <div className="space-y-2">
+                <h2 className="text-4xl sm:text-5xl lg:text-6xl font-serif font-bold text-white leading-[1.15] tracking-tight typo-title">
+                  {lp.instructor?.name || item.professor_nome || 'Especialista'}
+                </h2>
+                {lp.instructor?.role && (
+                  <p className="text-lg sm:text-xl text-primary font-medium tracking-wide">
+                    {lp.instructor.role}
+                  </p>
+                )}
               </div>
-           </div>
+              
+              <div className="text-base sm:text-lg text-slate-300/90 leading-relaxed font-sans space-y-4 typo-body-2">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {lp.instructor?.bio || item.professor_bio || 'Comprometido em guiar alunos na jornada de transformação profissional através de métodos validados no mercado.'}
+                </ReactMarkdown>
+              </div>
+            </div>
+
+          </div>
         </section>
 
 
