@@ -5079,13 +5079,18 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     {[
                       { key: 'info', label: 'Faixa de Informações Rápidas' },
-                      { key: 'about', label: 'Seção "Sobre o Curso"' },
-                      { key: 'features', label: 'Seção "Vantagens / Diferenciais"' },
+                      { key: 'about', label: 'Seção "Sobre o Programa"' },
+                      { key: 'copy', label: 'Seção "Copy / Frase de Impacto"' },
+                      { key: 'features', label: 'Seção "O que você vai aprender (Vantagens)"' },
+                      { key: 'testimonials', label: 'Seção "Depoimentos de Alunos"' },
                       { key: 'audience', label: 'Seção "Para Quem É"' },
                       { key: 'instructor', label: 'Seção "Sobre o Instrutor"' },
-                      { key: 'curriculum', label: 'Seção "Módulos do Curso"' },
+                      { key: 'curriculum', label: 'Seção "Conteúdo Programático (Currículo)"' },
                       { key: 'faq', label: 'Seção "Perguntas Frequentes"' },
-                      { key: 'pricing', label: 'Seção "Oferta Final"' }
+                      { key: 'bonuses', label: 'Seção "Bônus Exclusivos"' },
+                      { key: 'guarantee', label: 'Seção "Garantia Incondicional"' },
+                      { key: 'pricing', label: 'Seção "Ambiente de Pagamento Seguro / Oferta Final"' },
+                      { key: 'footer', label: 'Seção "Rodapé"' }
                     ].map((section) => (
                       <div key={section.key} className="p-5 border border-slate-100 rounded-xl bg-slate-50 space-y-4">
                         <h4 className="font-bold text-slate-700 text-sm border-b border-slate-200 pb-2 mb-4">{section.label}</h4>

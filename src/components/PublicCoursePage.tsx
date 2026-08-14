@@ -523,13 +523,13 @@ const TestimonialsCarousel = ({ testimonials, layout, primaryColor }: { testimon
   );
 };
 
-const TrustAndGuarantee = ({ layout, guaranteeDays }: { layout: string, guaranteeDays: number }) => {
+const TrustAndGuarantee = ({ layout, guaranteeDays, style }: { layout: string, guaranteeDays: number, style?: React.CSSProperties }) => {
   return (
     <section className={`py-20 border-t ${
       layout === 'escuro' 
         ? 'bg-slate-950/60 border-slate-850 text-slate-300' 
         : 'bg-slate-50 border-slate-100 text-slate-600'
-    }`}>
+    }`} style={style}>
       <div className="max-w-5xl mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
           {/* Guarantee Card */}
@@ -1923,7 +1923,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
 
         {/* Bonus Section - Dark */}
         {lp.bonuses?.length > 0 && (
-          <section className="py-32 bg-emerald-950/40 text-white overflow-hidden relative border-t border-slate-800" style={getSectionStyle('features')}>
+          <section className="py-32 bg-emerald-950/40 text-white overflow-hidden relative border-t border-slate-800" style={getSectionStyle('bonuses')}>
             <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2"></div>
             <div className="max-w-7xl mx-auto px-6 relative z-10">
               <div className="text-center mb-16 space-y-4">
@@ -2150,7 +2150,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
         </section>
       )}
 
-        <TrustAndGuarantee layout={layout} guaranteeDays={lp.guarantee_days || 7} />
+        <TrustAndGuarantee layout={layout} guaranteeDays={lp.guarantee_days || 7} style={getSectionStyle('guarantee')} />
 
         {/* Final CTA - Space style */}
         <section className="py-40 bg-slate-900 relative overflow-hidden" style={getSectionStyle('pricing')}>
