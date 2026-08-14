@@ -473,10 +473,15 @@ const TestimonialsCarousel = ({ testimonials, layout, primaryColor, lp }: { test
     <div className="relative w-full max-w-4xl mx-auto px-4 py-8 sm:py-12 flex flex-col items-center justify-center text-center">
 
       {/* Testimonial Active Card */}
-      <div className="relative z-10 w-full max-w-2xl mx-auto px-8 sm:px-14 space-y-6 min-h-[220px] flex flex-col justify-center items-center">
+      <div className="relative z-10 w-full max-w-2xl mx-auto px-8 sm:px-14 py-6 min-h-[220px] flex flex-col justify-center items-center">
+        {/* Top-Left Double Quote */}
+        <span className="absolute -top-6 sm:-top-10 -left-2 sm:-left-8 text-7xl sm:text-9xl font-serif text-white/35 select-none pointer-events-none leading-none z-0">
+          “
+        </span>
+
         {/* Student Name */}
         <h3 
-          className={`text-3xl sm:text-4xl lg:text-5xl font-serif font-normal text-white tracking-tight ${lp?.testimonial_name_style || 'typo-title-2'}`}
+          className={`relative z-10 text-3xl sm:text-4xl lg:text-5xl font-serif font-normal text-white tracking-tight ${lp?.testimonial_name_style || 'typo-title-2'}`}
           style={lp?.testimonial_name_color ? { color: lp.testimonial_name_color } : undefined}
         >
           {current.name}
@@ -484,11 +489,16 @@ const TestimonialsCarousel = ({ testimonials, layout, primaryColor, lp }: { test
 
         {/* Testimonial Text */}
         <p 
-          className={`text-base sm:text-lg lg:text-xl text-slate-300/90 leading-relaxed font-sans max-w-2xl text-center ${lp?.testimonial_text_style || 'typo-body-1'}`}
+          className={`relative z-10 text-base sm:text-lg lg:text-xl text-slate-300/90 leading-relaxed font-sans max-w-2xl text-center mt-4 ${lp?.testimonial_text_style || 'typo-body-1'}`}
           style={lp?.testimonial_text_color ? { color: lp.testimonial_text_color } : undefined}
         >
           {current.text}
         </p>
+
+        {/* Bottom-Right Double Quote */}
+        <span className="absolute -bottom-8 sm:-bottom-12 -right-2 sm:-right-8 text-7xl sm:text-9xl font-serif text-white/35 select-none pointer-events-none leading-none z-0">
+          ”
+        </span>
       </div>
 
       {/* Navigation Arrows (Left & Right) */}
@@ -1660,16 +1670,6 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
     ) : null,
     testimonials: lp.testimonials?.length > 0 ? (
       <section key="testimonials" id="depoimentos" className="py-24 sm:py-32 bg-slate-900 relative overflow-hidden" style={getSectionStyle('testimonials')}>
-        {/* Giant Bleeding Top-Left Quote */}
-        <span className="absolute -top-12 sm:-top-20 -left-6 sm:-left-12 text-[140px] sm:text-[220px] lg:text-[280px] font-serif text-slate-950/45 select-none pointer-events-none leading-none z-0">
-          “
-        </span>
-
-        {/* Giant Bleeding Bottom-Right Quote */}
-        <span className="absolute -bottom-20 sm:-bottom-32 -right-6 sm:-right-12 text-[140px] sm:text-[220px] lg:text-[280px] font-serif text-slate-950/45 select-none pointer-events-none leading-none z-0">
-          ”
-        </span>
-
         <div className="max-w-5xl mx-auto px-6 text-center space-y-8 relative z-10">
           <TestimonialsCarousel testimonials={lp.testimonials} layout={layout} primaryColor={lp.primary_color} lp={lp} />
         </div>
