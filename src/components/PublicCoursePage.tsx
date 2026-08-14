@@ -1650,10 +1650,10 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
         {/* About Section - 2-Column Split (Ref: Title & Description Left | Photo & Play Video Right) */}
         <section id="sobre" className="py-24 lg:py-32 bg-slate-900 border-b border-slate-800 relative overflow-hidden text-left" style={getSectionStyle('about')}>
           <div className="max-w-7xl mx-auto px-4 sm:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-stretch">
               
               {/* Left Column: Title & Description */}
-              <div className="space-y-6 sm:space-y-8 text-left">
+              <div className="space-y-6 sm:space-y-8 text-left flex flex-col justify-center">
                 <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-[1.15] tracking-tight typo-title typo-title-2">
                   {lp.about_title || 'Prepare-se para uma experiência de aprendizado sem precedentes.'}
                 </h2>
@@ -1668,8 +1668,8 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
               </div>
 
               {/* Right Column: Photo with Play Button Overlay / Video Player */}
-              <div className="relative w-full">
-                <div className="relative aspect-[4/5] sm:aspect-[16/10] lg:aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl border border-white/10 bg-slate-950 group">
+              <div className="relative w-full h-full flex flex-col min-h-[450px] lg:min-h-[550px]">
+                <div className="relative w-full h-full min-h-[450px] lg:min-h-[550px] rounded-3xl overflow-hidden shadow-2xl border border-white/10 bg-slate-950 group">
                   {isHeroPlaying && lp.hero_video_url ? (
                     <ReactPlayer 
                       url={lp.hero_video_url} 
