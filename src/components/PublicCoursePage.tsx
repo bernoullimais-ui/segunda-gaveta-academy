@@ -1726,28 +1726,33 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
           </section>
         )}
 
-        {/* Benefits Section - Full-Width Single Column */}
+        {/* Benefits / Stats Section - 3 Columns with Vertical Dividers (Ref Image) */}
         {lp.benefits?.length > 0 && (
-          <section id="vantagens" className="py-24 sm:py-32 bg-slate-900/50 border-b border-slate-800" style={getSectionStyle('features')}>
-            <div className="max-w-5xl mx-auto px-6 text-center space-y-12">
-              <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight typo-title">
-                O que você vai dominar
-              </h3>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-left">
-                {(lp.benefits || []).filter(Boolean).map((benefit: any, idx: number) => {
+          <section id="vantagens" className="py-20 sm:py-28 bg-slate-900/60 border-b border-slate-800 text-center overflow-hidden" style={getSectionStyle('features')}>
+            <div className="max-w-6xl mx-auto px-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-0 items-stretch text-center">
+                {(lp.benefits || []).slice(0, 3).map((benefit: any, idx: number) => {
                   const itemObj = typeof benefit === 'object' && benefit !== null ? benefit : { title: typeof benefit === 'string' ? benefit : '', description: '' };
+                  const totalItems = Math.min(lp.benefits.length, 3);
+                  const isNotLast = idx < (totalItems - 1);
                   return (
-                    <div key={idx} className="bg-slate-800/40 p-6 sm:p-8 rounded-[28px] border border-slate-700 hover:border-primary/50 transition-colors group flex gap-4 items-start">
-                      <div className="w-10 h-10 bg-primary/10 text-primary rounded-2xl flex items-center justify-center shrink-0 mt-0.5">
-                        <CheckCircle className="w-5 h-5" />
-                      </div>
-                      <div className="space-y-1.5 flex-1">
-                        <h4 className="font-bold text-white text-lg leading-snug group-hover:text-primary transition-colors typo-title-3">{itemObj.title}</h4>
-                        {itemObj.description && (
-                          <p className="text-slate-400 text-sm leading-relaxed typo-body-3">{itemObj.description}</p>
-                        )}
-                      </div>
+                    <div 
+                      key={idx} 
+                      className={`px-4 sm:px-8 py-4 flex flex-col items-center justify-start text-center space-y-4 ${
+                        isNotLast ? 'md:border-r md:border-white/20' : ''
+                      }`}
+                    >
+                      {/* Big Highlight Title/Stat */}
+                      <h4 className="text-5xl sm:text-6xl lg:text-7xl font-serif font-normal text-white leading-none tracking-tight">
+                        {itemObj.title}
+                      </h4>
+
+                      {/* Description */}
+                      {itemObj.description && (
+                        <p className="text-sm sm:text-base text-slate-300/90 leading-relaxed font-sans max-w-xs mx-auto text-center">
+                          {itemObj.description}
+                        </p>
+                      )}
                     </div>
                   );
                 })}
