@@ -51,6 +51,8 @@ const Nav = ({ layout, item, lp, onEnrollClick, timeLeft }: NavProps) => {
   const [isScrolled, setIsScrolled] = React.useState(false);
 
   const pad = (num: number) => num.toString().padStart(2, '0');
+  const whatsappNum = (lp?.whatsapp_number || item?.whatsapp_suporte || '').replace(/\D/g, '');
+  const whatsappUrl = whatsappNum ? `https://wa.me/${whatsappNum}` : '#';
 
   React.useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -68,68 +70,85 @@ const Nav = ({ layout, item, lp, onEnrollClick, timeLeft }: NavProps) => {
   }, [item]);
 
   return (
-    <nav 
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled 
-          ? `backdrop-blur-md border-b ${layout === 'escuro' ? 'bg-slate-950/90 border-slate-800/80 shadow-lg' : 'bg-white/90 border-slate-200/80 shadow-sm'}`
-          : 'bg-transparent border-transparent'
-      }`}
-      style={{ backgroundColor: isScrolled && lp.nav_bg_color ? lp.nav_bg_color : undefined }}
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-8 h-20 sm:h-24 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3 shrink min-w-0">
-          {(lp.logo_url || item.organizacoes?.logo_url) ? (
-            <img 
-              src={lp.logo_url || item.organizacoes?.logo_url} 
-              alt="Logo" 
-              className="object-contain shrink min-w-0 max-w-[140px] sm:max-w-[240px] max-h-[44px] sm:max-h-[56px]" 
-              style={{ height: lp.nav_logo_height ? `${lp.nav_logo_height}px` : '44px' }}
-            />
-          ) : (
-            <div 
-              className="shrink-0 bg-primary rounded-xl flex items-center justify-center text-white font-bold tracking-tighter uppercase"
-              style={{ 
-                width: '40px',
-                height: '40px',
-                fontSize: '18px'
-              }}
-            >
-              {item.organizacoes?.nome?.[0] || 'S'}
-            </div>
-          )}
-        </div>
-
-        <div className="flex items-center gap-3 sm:gap-6 shrink-0">
-          <div className="hidden lg:flex items-center gap-8">
-            <a href="#sobre" className={`typo-link text-sm font-medium tracking-wide transition-colors ${layout === 'escuro' ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-900'}`}>Sobre</a>
-            <a href="#instrutor" className={`typo-link text-sm font-medium tracking-wide transition-colors ${layout === 'escuro' ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-900'}`}>Expert</a>
-            <a
-              href={loggedIn && orgSlug ? `/projeto/${orgSlug}` : '/login'}
-              className={`typo-link text-sm font-medium underline underline-offset-4 decoration-slate-400/60 hover:decoration-white transition-colors ${layout === 'escuro' ? 'text-slate-200 hover:text-white' : 'text-slate-800 hover:text-slate-950'}`}
-            >
-              Login
-            </a>
-          </div>
-          
-          <button
-            onClick={onEnrollClick}
-            className="typo-btn px-5 sm:px-7 py-2.5 sm:py-3 bg-primary text-white rounded-full font-serif italic text-sm sm:text-base hover:opacity-95 hover:scale-105 active:scale-95 transition-all shadow-lg shadow-primary/25 whitespace-nowrap"
-          >
-            {Boolean(item?.em_breve || item?.configuracao_json?.em_breve || item?.status === 'em_breve' || lp?.cta_text?.toLowerCase().includes('breve') || lp?.cta_text?.toLowerCase().includes('cadastrar') || lp?.cta_text?.toLowerCase().includes('espera')) ? 'Em Breve' : (lp.cta_text || 'Acesse agora')}
-          </button>
-
-          {/* Countdown Timer Badge on the right of CTA button */}
-          {timeLeft && (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 bg-white/10 border border-white/20 rounded-full text-white text-xs font-mono font-bold shrink-0 animate-pulse shadow-md">
-              <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary shrink-0" />
+    <header className="fixed top-0 left-0 right-0 z-50">
+      {/* Top Countdown Bar - Centered horizontally with Title left & Timer right */}
+      {timeLeft && (
+        <div className="w-full bg-slate-950/95 border-b border-slate-800/80 py-2 px-4 shadow-md">
+          <div className="max-w-7xl mx-auto flex items-center justify-between gap-4 text-white">
+            <span className="text-xs sm:text-sm font-semibold tracking-wide text-slate-200">
+              {lp?.countdown_title || 'Oferta por tempo limitado'}
+            </span>
+            <div className="flex items-center gap-1.5 px-3 py-1 bg-white/10 border border-white/20 rounded-full text-white text-xs font-mono font-bold shrink-0 shadow-sm">
+              <Clock className="w-3.5 h-3.5 text-primary shrink-0" />
               <span className="tracking-wider">
                 {pad(timeLeft.hours)}:{pad(timeLeft.minutes)}:{pad(timeLeft.seconds)}
               </span>
             </div>
-          )}
+          </div>
         </div>
-      </div>
-    </nav>
+      )}
+
+      <nav 
+        className={`w-full transition-all duration-300 ${
+          isScrolled 
+            ? `backdrop-blur-md border-b ${layout === 'escuro' ? 'bg-slate-950/90 border-slate-800/80 shadow-lg' : 'bg-white/90 border-slate-200/80 shadow-sm'}`
+            : 'bg-transparent border-transparent'
+        }`}
+        style={{ backgroundColor: isScrolled && lp?.nav_bg_color ? lp.nav_bg_color : undefined }}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 h-20 sm:h-24 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 shrink min-w-0">
+            {(lp?.logo_url || item?.organizacoes?.logo_url) ? (
+              <img 
+                src={lp?.logo_url || item?.organizacoes?.logo_url} 
+                alt="Logo" 
+                className="object-contain shrink min-w-0 max-w-[140px] sm:max-w-[240px] max-h-[44px] sm:max-h-[56px]" 
+                style={{ height: lp?.nav_logo_height ? `${lp.nav_logo_height}px` : '44px' }}
+              />
+            ) : (
+              <div 
+                className="shrink-0 bg-primary rounded-xl flex items-center justify-center text-white font-bold tracking-tighter uppercase"
+                style={{ 
+                  width: '40px',
+                  height: '40px',
+                  fontSize: '18px'
+                }}
+              >
+                {item?.organizacoes?.nome?.[0] || 'S'}
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center gap-3 sm:gap-6 shrink-0">
+            <div className="hidden lg:flex items-center gap-8">
+              <a href="#sobre" className={`typo-link text-sm font-medium tracking-wide transition-colors ${layout === 'escuro' ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-900'}`}>Sobre</a>
+              <a href="#instrutor" className={`typo-link text-sm font-medium tracking-wide transition-colors ${layout === 'escuro' ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-900'}`}>Expert</a>
+              <a 
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`typo-link text-sm font-medium tracking-wide transition-colors ${layout === 'escuro' ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-900'}`}
+              >
+                Fale Conosco
+              </a>
+              <a
+                href={loggedIn && orgSlug ? `/projeto/${orgSlug}` : '/login'}
+                className={`typo-link text-sm font-medium underline underline-offset-4 decoration-slate-400/60 hover:decoration-white transition-colors ${layout === 'escuro' ? 'text-slate-200 hover:text-white' : 'text-slate-800 hover:text-slate-950'}`}
+              >
+                Login
+              </a>
+            </div>
+            
+            <button
+              onClick={onEnrollClick}
+              className="typo-btn px-5 sm:px-7 py-2.5 sm:py-3 bg-primary text-white rounded-full font-serif italic text-sm sm:text-base hover:opacity-95 hover:scale-105 active:scale-95 transition-all shadow-lg shadow-primary/25 whitespace-nowrap"
+            >
+              {Boolean(item?.em_breve || item?.configuracao_json?.em_breve || item?.status === 'em_breve' || lp?.cta_text?.toLowerCase().includes('breve') || lp?.cta_text?.toLowerCase().includes('cadastrar') || lp?.cta_text?.toLowerCase().includes('espera')) ? 'Em Breve' : (lp?.cta_text || 'Acesse agora')}
+            </button>
+          </div>
+        </div>
+      </nav>
+    </header>
   );
 };
 
@@ -1531,22 +1550,12 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             ]).map((stat, i) => (
               <div 
                 key={i} 
-                className="px-6 py-3.5 rounded-2xl border border-white/20 bg-white/5 backdrop-blur-sm flex items-center gap-3.5 text-white hover:border-primary/60 hover:bg-white/10 transition-all shadow-sm"
+                className="px-6 py-3.5 rounded-2xl border border-white/20 bg-transparent backdrop-blur-sm flex items-center gap-3.5 text-white hover:border-primary/60 hover:bg-white/10 transition-all shadow-sm"
               >
                 <stat.icon className="w-5 h-5 sm:w-6 sm:h-6 text-primary shrink-0" />
                 <span className="text-sm sm:text-base font-semibold tracking-tight whitespace-nowrap">{stat.text}</span>
               </div>
             ))}
-          </div>
-
-          <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-12 w-full border-t border-slate-800/80 pt-8 mt-2">
-            {renderPriceBlock(true)}
-            <button 
-              onClick={handleEnrollClick}
-              className="typo-btn w-full sm:w-auto px-10 py-4 bg-primary text-white rounded-full font-serif italic text-lg sm:text-xl hover:scale-105 active:scale-95 transition-all shadow-lg shadow-primary/30 flex items-center justify-center gap-3"
-            >
-              {isEmBreve ? 'Cadastrar-se' : (lp.cta_text || 'GARANTIR VAGA')} <ArrowRight className="w-5 h-5" />
-            </button>
           </div>
         </div>
       </section>
@@ -1556,9 +1565,6 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
         <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[550px] lg:min-h-[650px] w-full items-stretch">
           <div className="p-8 sm:p-12 lg:p-20 xl:p-24 flex flex-col justify-center text-left space-y-6 sm:space-y-8">
             <div className="space-y-3">
-              <span className="text-xs font-mono font-bold tracking-widest text-primary uppercase">
-                SOBRE O PROGRAMA
-              </span>
               <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-[1.15] tracking-tight typo-title">
                 {lp.about_title || item.nome}
               </h2>
@@ -1568,15 +1574,6 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
               <ReactMarkdown remarkPlugins={[remarkGfm]}>
                 {lp.about || item.descricao}
               </ReactMarkdown>
-            </div>
-
-            <div className="pt-2">
-              <button 
-                onClick={handleEnrollClick}
-                className="typo-btn px-8 sm:px-10 py-4 bg-primary text-white rounded-full font-serif italic text-lg sm:text-xl shadow-xl hover:scale-105 active:scale-95 transition-all"
-              >
-                <span>{lp.copy_section_cta_text || lp.cta_text || 'Quero me inscrever'}</span>
-              </button>
             </div>
           </div>
 
@@ -1671,9 +1668,6 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
     testimonials: lp.testimonials?.length > 0 ? (
       <section key="testimonials" id="depoimentos" className="py-24 sm:py-32 bg-slate-900 border-b border-slate-800 relative overflow-hidden" style={getSectionStyle('testimonials')}>
         <div className="max-w-5xl mx-auto px-6 text-center space-y-8">
-          <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight typo-title">
-            O que dizem nossos alunos
-          </h3>
           <TestimonialsCarousel testimonials={lp.testimonials} layout={layout} primaryColor={lp.primary_color} />
         </div>
       </section>
@@ -1694,9 +1688,6 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
 
           <div className="p-8 sm:p-12 lg:p-20 xl:p-24 flex flex-col justify-center text-left space-y-6 sm:space-y-8">
             <div className="space-y-3">
-              <span className="text-xs font-mono font-bold tracking-widest text-primary uppercase">
-                QUEM VAI TE GUIAR
-              </span>
               <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-[1.15] tracking-tight typo-title">
                 {lp.instructor?.name || item.professor_nome || 'Especialista'}
               </h2>
@@ -1731,7 +1722,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                   <div key={idx} className="w-full">
                     <div 
                       onClick={() => toggleModule(idx)}
-                      className="px-6 py-4 rounded-full border border-white/20 bg-white/5 backdrop-blur-sm hover:border-primary/60 hover:bg-white/10 transition-all flex items-center justify-between cursor-pointer select-none group"
+                      className="px-6 py-4 rounded-full border border-white/20 bg-transparent backdrop-blur-sm hover:border-primary/60 hover:bg-white/10 transition-all flex items-center justify-between cursor-pointer select-none group"
                     >
                       <div className="flex items-center gap-4 flex-1">
                         <span className="font-serif text-2xl font-semibold text-white/90">
@@ -1814,7 +1805,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                 <div key={idx} className="w-full text-left">
                   <div 
                     onClick={() => toggleFaq(idx)}
-                    className="px-6 py-4 rounded-full border border-white/20 bg-white/5 backdrop-blur-sm hover:border-primary/60 hover:bg-white/10 transition-all flex items-center justify-between cursor-pointer select-none group"
+                    className="px-6 py-4 rounded-full border border-white/20 bg-transparent backdrop-blur-sm hover:border-primary/60 hover:bg-white/10 transition-all flex items-center justify-between cursor-pointer select-none group"
                   >
                     <div className="flex items-center gap-4 flex-1">
                       <span className="font-serif text-2xl font-semibold text-white/90">
@@ -2186,7 +2177,6 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             planId={selectedPlanId || undefined}
           />
         </ModalErrorBoundary>
-        <WhatsAppFloatingButton item={item} />
         <LeadModalPortal
           show={showLeadModal}
           onClose={() => setShowLeadModal(false)}
@@ -2797,7 +2787,6 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
           planId={selectedPlanId || undefined}
         />
       </ModalErrorBoundary>
-      <WhatsAppFloatingButton item={item} />
       <LeadModalPortal
         show={showLeadModal}
         onClose={() => setShowLeadModal(false)}
