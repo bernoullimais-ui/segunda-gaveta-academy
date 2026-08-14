@@ -308,6 +308,10 @@ const EnrollmentModal = ({
 const TestimonialsCarousel = ({ testimonials, layout, primaryColor }: { testimonials: any[], layout: string, primaryColor: string }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  if (!testimonials || testimonials.length === 0) return null;
+
+  const current = testimonials[currentIndex] || testimonials[0];
+
   const handlePrev = () => {
     setCurrentIndex(prev => (prev === 0 ? testimonials.length - 1 : prev - 1));
   };
@@ -317,95 +321,79 @@ const TestimonialsCarousel = ({ testimonials, layout, primaryColor }: { testimon
   };
 
   return (
-    <div className="relative w-full max-w-5xl mx-auto px-4 group">
-      {/* Testimonials Track */}
-      <div className="overflow-hidden py-6">
-        <div 
-          className="flex transition-transform duration-500 ease-out gap-6"
-          style={{ transform: `translateX(calc(-${currentIndex * 100}% - ${currentIndex * 24}px))` }}
-        >
-          {testimonials.map((t: any, idx: number) => (
-            <div 
-              key={idx} 
-              className={`w-full shrink-0 p-8 md:p-10 rounded-[32px] border relative transition-all duration-500 ${
-                layout === 'escuro' 
-                  ? 'bg-slate-800/40 border-slate-700 hover:border-primary/50 shadow-[0_0_15px_rgba(0,0,0,0.2)]' 
-                  : 'bg-white border-slate-150/60 shadow-[0_15px_35px_rgba(0,0,0,0.02)]'
-              }`}
-              style={{ 
-                width: '100%',
-                boxShadow: idx === currentIndex ? `0 0 30px rgba(var(--primary-rgb, 37, 99, 235), 0.2)` : undefined
-              }}
-            >
-              <Quote className={`absolute top-6 right-8 w-16 h-16 ${layout === 'escuro' ? 'text-slate-800/20' : 'text-slate-100'} pointer-events-none`} />
-              <div className="relative z-10 space-y-6 text-left">
-                <div className="flex items-center gap-1 text-amber-500">
-                  {[1,2,3,4,5].map(i => <Star key={i} className="w-5 h-5 fill-current" />)}
-                </div>
-                <p className={`text-lg md:text-xl leading-relaxed font-semibold italic ${layout === 'escuro' ? 'text-slate-200' : 'text-slate-700'}`}>
-                  "{t.text}"
-                </p>
-                <div className="flex items-center gap-4 pt-4 border-t border-slate-500/10">
-                  <div className={`w-14 h-14 rounded-full overflow-hidden bg-slate-100 border-2 ${layout === 'escuro' ? 'border-slate-700' : 'border-slate-100'}`}>
-                    {t.photo_url ? (
-                      <img src={t.photo_url} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-primary/10 text-primary uppercase font-black text-xl">{t.name?.[0]}</div>
-                    )}
-                  </div>
-                  <div>
-                    <h4 className={`font-bold text-lg ${layout === 'escuro' ? 'text-white' : 'text-slate-900'}`}>{t.name}</h4>
-                    <span className="text-xs text-primary font-bold uppercase tracking-wider">{t.role || 'Estudante'}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+    <div className="relative w-full max-w-4xl mx-auto px-4 py-8 sm:py-12 flex flex-col items-center justify-center text-center">
+      {/* Giant Decorative Top-Left Quote */}
+      <span className="absolute -top-6 left-0 sm:left-4 text-7xl sm:text-9xl font-serif text-slate-950/25 select-none pointer-events-none leading-none">
+        “
+      </span>
+
+      {/* Giant Decorative Bottom-Right Quote */}
+      <span className="absolute -bottom-6 right-0 sm:right-4 text-7xl sm:text-9xl font-serif text-slate-950/25 select-none pointer-events-none leading-none">
+        ”
+      </span>
+
+      {/* Testimonial Active Card */}
+      <div className="relative z-10 w-full max-w-2xl mx-auto px-8 sm:px-14 space-y-6 min-h-[220px] flex flex-col justify-center items-center">
+        {/* Student Name */}
+        <h3 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-normal text-white tracking-tight">
+          {current.name}
+        </h3>
+
+        {/* Testimonial Text */}
+        <p className="text-base sm:text-lg lg:text-xl text-slate-300/90 leading-relaxed font-sans max-w-2xl text-center">
+          {current.text}
+        </p>
       </div>
 
-      {/* Navigation Arrows */}
+      {/* Navigation Arrows (Left & Right) */}
       {testimonials.length > 1 && (
         <>
           <button 
             onClick={handlePrev}
-            className={`absolute left-0 md:-left-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full flex items-center justify-center shadow-lg border transition-all hover:scale-110 active:scale-95 z-20 cursor-pointer ${
-              layout === 'escuro' 
-                ? 'bg-slate-800 border-slate-700 text-white hover:bg-slate-700 hover:border-primary' 
-                : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-primary'
-            }`}
+            aria-label="Anterior"
+            className="absolute left-0 sm:left-2 top-1/2 -translate-y-1/2 p-2 text-white/70 hover:text-white hover:scale-125 active:scale-95 transition-all z-20 cursor-pointer"
           >
-            <ChevronLeft className="w-6 h-6" />
+            <ChevronLeft className="w-8 h-8 sm:w-10 sm:h-10" />
           </button>
           <button 
             onClick={handleNext}
-            className={`absolute right-0 md:-right-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full flex items-center justify-center shadow-lg border transition-all hover:scale-110 active:scale-95 z-20 cursor-pointer ${
-              layout === 'escuro' 
-                ? 'bg-slate-800 border-slate-700 text-white hover:bg-slate-700 hover:border-primary' 
-                : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-primary'
-            }`}
+            aria-label="Próximo"
+            className="absolute right-0 sm:right-2 top-1/2 -translate-y-1/2 p-2 text-white/70 hover:text-white hover:scale-125 active:scale-95 transition-all z-20 cursor-pointer"
           >
-            <ChevronRight className="w-6 h-6" />
+            <ChevronRight className="w-8 h-8 sm:w-10 sm:h-10" />
           </button>
         </>
       )}
 
-      {/* Indicators/Dots */}
-      {testimonials.length > 1 && (
-        <div className="flex items-center justify-center gap-2 mt-4">
-          {testimonials.map((_, idx) => (
+      {/* Student Photos / Avatars Navigation Bar */}
+      <div className="relative z-10 flex items-center justify-center gap-3 mt-10">
+        {testimonials.map((t: any, idx: number) => {
+          const isActive = idx === currentIndex;
+          return (
             <button
               key={idx}
               onClick={() => setCurrentIndex(idx)}
-              className={`h-2.5 rounded-full transition-all duration-300 cursor-pointer ${
-                idx === currentIndex 
-                  ? 'w-8 bg-primary' 
-                  : `w-2.5 ${layout === 'escuro' ? 'bg-slate-700 hover:bg-slate-600' : 'bg-slate-200 hover:bg-slate-350'}`
+              className={`relative rounded-full transition-all duration-300 cursor-pointer flex items-center justify-center ${
+                isActive 
+                  ? 'w-12 h-12 border-2 border-white scale-110 shadow-xl opacity-100 z-10' 
+                  : 'w-7 h-7 sm:w-8 sm:h-8 opacity-40 hover:opacity-80 scale-90'
               }`}
-            />
-          ))}
-        </div>
-      )}
+            >
+              {t.photo_url ? (
+                <img 
+                  src={t.photo_url} 
+                  alt={t.name} 
+                  className="w-full h-full rounded-full object-cover" 
+                />
+              ) : (
+                <div className={`w-full h-full rounded-full flex items-center justify-center text-white font-bold ${isActive ? 'bg-primary text-xs' : 'bg-white/30 text-[10px]'}`}>
+                  {t.name?.[0]}
+                </div>
+              )}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 };
