@@ -1868,51 +1868,67 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
         </section>
 
 
-        {/* FAQ - Dark */}
+        {/* FAQ - Perguntas Frequentes (Ref Image Layout) */}
         {lp.faq?.length > 0 && (
-          <section className="py-32 bg-slate-900" style={getSectionStyle('faq')}>
-             <div className="max-w-4xl mx-auto px-6">
-                <h2 className="text-4xl font-bold text-white text-center mb-20 tracking-tight typo-title">Perguntas Frequentes</h2>
-                <div className="space-y-4">
-                   {lp.faq.map((f: any, idx: number) => {
-                     const isFaqExpanded = !!openFaqs[idx];
-                     return f.question && (
-                       <div 
-                         key={idx} 
-                         className="bg-slate-800/40 rounded-[32px] border border-slate-700/50 hover:bg-slate-800 transition-all text-left overflow-hidden"
-                       >
-                         {/* Header */}
-                         <div 
-                           onClick={() => toggleFaq(idx)}
-                           className="p-8 flex items-center justify-between gap-4 cursor-pointer select-none"
-                         >
-                           <h4 className="text-xl font-bold text-white typo-title">{f.question}</h4>
-                           {isFaqExpanded ? (
-                             <ChevronDown className="w-6 h-6 text-primary shrink-0" />
-                           ) : (
-                             <ChevronRight className="w-6 h-6 text-slate-500 shrink-0" />
-                           )}
-                         </div>
+          <section id="faq" className="py-24 sm:py-32 bg-slate-950 border-b border-slate-800" style={getSectionStyle('faq')}>
+            <div className="max-w-4xl mx-auto px-6 text-center space-y-10">
+              {/* Title */}
+              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white tracking-tight typo-title">
+                Perguntas frequentes:
+              </h2>
+              
+              {/* FAQ Pill Items */}
+              <div className="space-y-4 w-full">
+                {lp.faq.map((f: any, idx: number) => {
+                  const isFaqExpanded = !!openFaqs[idx];
+                  return f.question && (
+                    <div key={idx} className="w-full text-left">
+                      {/* Header Pill */}
+                      <div 
+                        onClick={() => toggleFaq(idx)}
+                        className="px-6 py-4 rounded-full border border-white/20 bg-white/5 backdrop-blur-sm hover:border-primary/60 hover:bg-white/10 transition-all flex items-center justify-between cursor-pointer select-none group"
+                      >
+                        <div className="flex items-center gap-4 flex-1">
+                          <span className="font-serif text-2xl font-semibold text-white/90">
+                            {String(idx + 1).padStart(2, '0')}
+                          </span>
+                          <span className="font-medium text-white text-base sm:text-lg tracking-tight">
+                            {f.question}
+                          </span>
+                        </div>
+                        <ChevronDown className={`w-5 h-5 text-white/70 group-hover:text-white transition-transform duration-300 ${isFaqExpanded ? 'rotate-180 text-primary' : ''}`} />
+                      </div>
 
-                         {/* Answer */}
-                         <AnimatePresence initial={false}>
-                           {isFaqExpanded && (
-                             <motion.div
-                               initial={{ height: 0, opacity: 0 }}
-                               animate={{ height: 'auto', opacity: 1 }}
-                               exit={{ height: 0, opacity: 0 }}
-                               transition={{ duration: 0.2 }}
-                               className="border-t border-slate-700/30 bg-slate-850/20 px-8 pb-8 pt-4"
-                             >
-                               <p className="text-slate-700 leading-relaxed text-lg typo-text">{f.answer}</p>
-                             </motion.div>
-                           )}
-                         </AnimatePresence>
-                       </div>
-                     );
-                   })}
-                </div>
-             </div>
+                      {/* Answer Body */}
+                      <AnimatePresence initial={false}>
+                        {isFaqExpanded && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="overflow-hidden px-6 py-5 mt-2 bg-white/5 rounded-3xl border border-white/10 text-slate-300 text-base leading-relaxed"
+                          >
+                            <p className="text-slate-300 leading-relaxed text-base sm:text-lg typo-text">{f.answer}</p>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Bottom Responsive Full-Width CTA Button */}
+              <div className="pt-4 w-full">
+                <button 
+                  onClick={handleEnrollClick}
+                  className="typo-btn w-full py-4 px-6 bg-primary text-white rounded-full font-serif italic text-lg sm:text-xl shadow-xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center text-center"
+                >
+                  <span>{lp.copy_section_cta_text || lp.cta_text || 'Acesse agora'}</span>
+                </button>
+              </div>
+
+            </div>
           </section>
         )}
 
