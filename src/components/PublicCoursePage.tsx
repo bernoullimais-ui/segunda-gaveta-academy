@@ -1423,63 +1423,63 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
 
           /* Regras da Tabela de Tipografia */
           .typo-title-1 {
-            font-family: '${lp.typography?.titulo_1?.font_family || 'Inter'}', sans-serif !important;
+            font-family: ${(lp.typography?.titulo_1?.font_family === 'Times New Roman' ? "'Times New Roman', Times, serif" : lp.typography?.titulo_1?.font_family === 'Playfair Display' ? "'Playfair Display', Georgia, serif" : `'${lp.typography?.titulo_1?.font_family || 'Inter'}', sans-serif`)} !important;
             font-weight: ${lp.typography?.titulo_1?.font_weight || '800'} !important;
             font-size: ${lp.typography?.titulo_1?.font_size || '48px'} !important;
             line-height: ${lp.typography?.titulo_1?.line_height || '1.1'} !important;
             letter-spacing: ${lp.typography?.titulo_1?.letter_spacing || '-0.03em'} !important;
           }
           .typo-title-2 {
-            font-family: '${lp.typography?.titulo_2?.font_family || 'Inter'}', sans-serif !important;
+            font-family: ${(lp.typography?.titulo_2?.font_family === 'Times New Roman' ? "'Times New Roman', Times, serif" : lp.typography?.titulo_2?.font_family === 'Playfair Display' ? "'Playfair Display', Georgia, serif" : `'${lp.typography?.titulo_2?.font_family || 'Inter'}', sans-serif`)} !important;
             font-weight: ${lp.typography?.titulo_2?.font_weight || '700'} !important;
             font-size: ${lp.typography?.titulo_2?.font_size || '32px'} !important;
             line-height: ${lp.typography?.titulo_2?.line_height || '1.2'} !important;
             letter-spacing: ${lp.typography?.titulo_2?.letter_spacing || '-0.02em'} !important;
           }
           .typo-title-3 {
-            font-family: '${lp.typography?.titulo_3?.font_family || 'Inter'}', sans-serif !important;
+            font-family: ${(lp.typography?.titulo_3?.font_family === 'Times New Roman' ? "'Times New Roman', Times, serif" : lp.typography?.titulo_3?.font_family === 'Playfair Display' ? "'Playfair Display', Georgia, serif" : `'${lp.typography?.titulo_3?.font_family || 'Inter'}', sans-serif`)} !important;
             font-weight: ${lp.typography?.titulo_3?.font_weight || '600'} !important;
             font-size: ${lp.typography?.titulo_3?.font_size || '22px'} !important;
             line-height: ${lp.typography?.titulo_3?.line_height || '1.3'} !important;
             letter-spacing: ${lp.typography?.titulo_3?.letter_spacing || '0em'} !important;
           }
           .typo-body-1 {
-            font-family: '${lp.typography?.texto_corrido_1?.font_family || 'Inter'}', sans-serif !important;
+            font-family: ${(lp.typography?.texto_corrido_1?.font_family === 'Times New Roman' ? "'Times New Roman', Times, serif" : lp.typography?.texto_corrido_1?.font_family === 'Playfair Display' ? "'Playfair Display', Georgia, serif" : `'${lp.typography?.texto_corrido_1?.font_family || 'Inter'}', sans-serif`)} !important;
             font-weight: ${lp.typography?.texto_corrido_1?.font_weight || '400'} !important;
             font-size: ${lp.typography?.texto_corrido_1?.font_size || '20px'} !important;
             line-height: ${lp.typography?.texto_corrido_1?.line_height || '1.5'} !important;
             letter-spacing: ${lp.typography?.texto_corrido_1?.letter_spacing || '0em'} !important;
           }
           .typo-body-2 {
-            font-family: '${lp.typography?.texto_corrido_2?.font_family || 'Inter'}', sans-serif !important;
+            font-family: ${(lp.typography?.texto_corrido_2?.font_family === 'Times New Roman' ? "'Times New Roman', Times, serif" : lp.typography?.texto_corrido_2?.font_family === 'Playfair Display' ? "'Playfair Display', Georgia, serif" : `'${lp.typography?.texto_corrido_2?.font_family || 'Inter'}', sans-serif`)} !important;
             font-weight: ${lp.typography?.texto_corrido_2?.font_weight || '400'} !important;
             font-size: ${lp.typography?.texto_corrido_2?.font_size || '16px'} !important;
             line-height: ${lp.typography?.texto_corrido_2?.line_height || '1.5'} !important;
             letter-spacing: ${lp.typography?.texto_corrido_2?.letter_spacing || '0em'} !important;
           }
           .typo-body-3 {
-            font-family: '${lp.typography?.texto_corrido_3?.font_family || 'Inter'}', sans-serif !important;
+            font-family: ${(lp.typography?.texto_corrido_3?.font_family === 'Times New Roman' ? "'Times New Roman', Times, serif" : lp.typography?.texto_corrido_3?.font_family === 'Playfair Display' ? "'Playfair Display', Georgia, serif" : `'${lp.typography?.texto_corrido_3?.font_family || 'Inter'}', sans-serif`)} !important;
             font-weight: ${lp.typography?.texto_corrido_3?.font_weight || '400'} !important;
             font-size: ${lp.typography?.texto_corrido_3?.font_size || '14px'} !important;
             line-height: ${lp.typography?.texto_corrido_3?.line_height || '1.4'} !important;
             letter-spacing: ${lp.typography?.texto_corrido_3?.letter_spacing || '0em'} !important;
           }
           .typo-body-4 {
-            font-family: '${lp.typography?.texto_corrido_4?.font_family || 'Inter'}', sans-serif !important;
+            font-family: ${(lp.typography?.texto_corrido_4?.font_family === 'Times New Roman' ? "'Times New Roman', Times, serif" : lp.typography?.texto_corrido_4?.font_family === 'Playfair Display' ? "'Playfair Display', Georgia, serif" : `'${lp.typography?.texto_corrido_4?.font_family || 'Inter'}', sans-serif`)} !important;
             font-weight: ${lp.typography?.texto_corrido_4?.font_weight || '500'} !important;
             font-size: ${lp.typography?.texto_corrido_4?.font_size || '12px'} !important;
             line-height: ${lp.typography?.texto_corrido_4?.line_height || '1.4'} !important;
             letter-spacing: ${lp.typography?.texto_corrido_4?.letter_spacing || '0.05em'} !important;
           }
           .typo-btn-1 {
-            font-family: '${lp.typography?.texto_botao_1?.font_family || 'Inter'}', sans-serif !important;
+            font-family: ${(lp.typography?.texto_botao_1?.font_family === 'Times New Roman' ? "'Times New Roman', Times, serif" : lp.typography?.texto_botao_1?.font_family === 'Playfair Display' ? "'Playfair Display', Georgia, serif" : `'${lp.typography?.texto_botao_1?.font_family || 'Inter'}', sans-serif`)} !important;
             font-weight: ${lp.typography?.texto_botao_1?.font_weight || '800'} !important;
             font-size: ${lp.typography?.texto_botao_1?.font_size || '18px'} !important;
             line-height: ${lp.typography?.texto_botao_1?.line_height || '1.2'} !important;
             letter-spacing: ${lp.typography?.texto_botao_1?.letter_spacing || '0.02em'} !important;
           }
           .typo-btn-2 {
-            font-family: '${lp.typography?.texto_botao_2?.font_family || 'Inter'}', sans-serif !important;
+            font-family: ${(lp.typography?.texto_botao_2?.font_family === 'Times New Roman' ? "'Times New Roman', Times, serif" : lp.typography?.texto_botao_2?.font_family === 'Playfair Display' ? "'Playfair Display', Georgia, serif" : `'${lp.typography?.texto_botao_2?.font_family || 'Inter'}', sans-serif`)} !important;
             font-weight: ${lp.typography?.texto_botao_2?.font_weight || '700'} !important;
             font-size: ${lp.typography?.texto_botao_2?.font_size || '14px'} !important;
             line-height: ${lp.typography?.texto_botao_2?.line_height || '1.2'} !important;

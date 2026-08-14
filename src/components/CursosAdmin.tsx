@@ -4128,6 +4128,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                                   <option value="Plus Jakarta Sans">Plus Jakarta Sans</option>
                                   <option value="Roboto">Roboto</option>
                                   <option value="Playfair Display">Playfair Display</option>
+                                  <option value="Times New Roman">Times New Roman</option>
                                   <option value="Space Grotesk">Space Grotesk</option>
                                 </select>
                               </td>
