@@ -1510,6 +1510,8 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '37, 99, 235';
   };
+  const primaryRgb = hexToRgb(lp.primary_color || '#2563eb');
+
   const sectionMap: Record<string, React.ReactNode> = {
     info: (
       <section key="info" className="bg-slate-950/60 border-y border-slate-800/80 py-10" style={getSectionStyle('info')}>
