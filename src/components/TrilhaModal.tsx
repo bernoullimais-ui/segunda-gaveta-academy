@@ -769,16 +769,6 @@ export function TrilhaModal({ isOpen, onClose, fetchTrilhas, editingTrilha, orgI
                       </div>
                     )}
                   </div>
-                  <div>
-                    <label className="text-[10px] uppercase font-bold text-slate-400 tracking-widest block mb-2">Subtítulo Persuasivo</label>
-                    <textarea 
-                      value={lpData.hero_subtitle}
-                      onChange={(e) => setLpData({...lpData, hero_subtitle: e.target.value})}
-                      className="w-full px-4 py-3 border border-slate-200 rounded-xl text-slate-800 min-h-[100px] outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                      placeholder="Uma frase curta que resuma o benefício principal..."
-                    />
-                  </div>
-
                   {/* Advanced Positioning */}
                   <div className="pt-6 border-t border-slate-100">
                     <label className="text-[10px] uppercase font-bold text-slate-400 tracking-widest block mb-4">Posicionamento Avançado (Hero)</label>
@@ -821,20 +811,6 @@ export function TrilhaModal({ isOpen, onClose, fetchTrilhas, editingTrilha, orgI
                           <div>
                             <span className="text-[10px] text-slate-400 block mb-1">Vertical (Y): {lpData.hero_title_offset_y || 0}px</span>
                             <input type="range" min="-500" max="500" step="10" value={lpData.hero_title_offset_y || 0} onChange={(e) => setLpData({...lpData, hero_title_offset_y: parseInt(e.target.value)})} className="w-full accent-blue-500" />
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
-                        <label className="block text-[10px] font-bold text-slate-600 mb-3 uppercase">Deslocamento do Subtítulo (X e Y)</label>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <span className="text-[10px] text-slate-400 block mb-1">Horizontal (X): {lpData.hero_subtitle_offset_x || 0}px</span>
-                            <input type="range" min="-500" max="500" step="10" value={lpData.hero_subtitle_offset_x || 0} onChange={(e) => setLpData({...lpData, hero_subtitle_offset_x: parseInt(e.target.value)})} className="w-full accent-blue-500" />
-                          </div>
-                          <div>
-                            <span className="text-[10px] text-slate-400 block mb-1">Vertical (Y): {lpData.hero_subtitle_offset_y || 0}px</span>
-                            <input type="range" min="-500" max="500" step="10" value={lpData.hero_subtitle_offset_y || 0} onChange={(e) => setLpData({...lpData, hero_subtitle_offset_y: parseInt(e.target.value)})} className="w-full accent-blue-500" />
                           </div>
                         </div>
                       </div>

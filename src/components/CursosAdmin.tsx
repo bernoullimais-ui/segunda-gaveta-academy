@@ -4320,15 +4320,6 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                         </div>
                       )}
                     </div>
-                    <div>
-                      <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wider text-xs">Subtítulo ou Chamada (CTA)</label>
-                      <textarea 
-                        value={lpData.hero_subtitle}
-                        onChange={(e) => setLpData({...lpData, hero_subtitle: e.target.value})}
-                        className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all min-h-[100px]"
-                        placeholder="Uma breve frase que resume o valor do seu curso e convida o aluno a se inscrever."
-                      />
-                    </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wider text-xs">Texto do Botão (CTA)</label>
@@ -4405,20 +4396,6 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                         </div>
 
                         <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
-                          <label className="block text-xs font-bold text-slate-600 mb-3">Deslocamento do Subtítulo (X e Y)</label>
-                          <div className="grid grid-cols-2 gap-4">
-                            <div>
-                              <span className="text-[10px] text-slate-400 block mb-1">Horizontal (X): {lpData.hero_subtitle_offset_x || 0}px</span>
-                              <input type="range" min="-500" max="500" step="10" value={lpData.hero_subtitle_offset_x || 0} onChange={(e) => setLpData({...lpData, hero_subtitle_offset_x: parseInt(e.target.value)})} className="w-full accent-blue-500" />
-                            </div>
-                            <div>
-                              <span className="text-[10px] text-slate-400 block mb-1">Vertical (Y): {lpData.hero_subtitle_offset_y || 0}px</span>
-                              <input type="range" min="-500" max="500" step="10" value={lpData.hero_subtitle_offset_y || 0} onChange={(e) => setLpData({...lpData, hero_subtitle_offset_y: parseInt(e.target.value)})} className="w-full accent-blue-500" />
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
                           <label className="block text-xs font-bold text-slate-600 mb-3">Deslocamento do Botão/CTA (X e Y)</label>
                           <div className="grid grid-cols-2 gap-4">
                             <div>
@@ -4433,32 +4410,17 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                         </div>
                       </div>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wider text-xs" title="URL da imagem do banner principal do hero">Banner Principal (Imagem URL)</label>
-                        <div className="relative">
-                          <ImageIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                          <input 
-                            type="text" 
-                            value={lpData.hero_image_url || ''}
-                            onChange={(e) => setLpData({...lpData, hero_image_url: e.target.value})}
-                            className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                            placeholder="https://exemplo.com/banner.jpg"
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wider text-xs" title="Link do vídeo no YouTube/Vimeo para a seção promocional">Vídeo Promocional (YouTube)</label>
-                        <div className="relative">
-                          <PlayCircle className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                          <input 
-                            type="text" 
-                            value={lpData.hero_video_url || ''}
-                            onChange={(e) => setLpData({...lpData, hero_video_url: e.target.value})}
-                            className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                            placeholder="https://www.youtube.com/watch?v=..."
-                          />
-                        </div>
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wider text-xs" title="URL da imagem do banner principal do hero">Banner Principal (Imagem URL)</label>
+                      <div className="relative">
+                        <ImageIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                        <input 
+                          type="text" 
+                          value={lpData.hero_image_url || ''}
+                          onChange={(e) => setLpData({...lpData, hero_image_url: e.target.value})}
+                          className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                          placeholder="https://exemplo.com/banner.jpg"
+                        />
                       </div>
                     </div>
                   </div>
@@ -4480,6 +4442,19 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                         className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all font-medium"
                         placeholder="Ex: Tudo o que você precisa em um só lugar"
                       />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wider text-xs" title="Link do vídeo no YouTube/Vimeo para a seção Sobre o Programa">Vídeo Promocional (YouTube)</label>
+                      <div className="relative">
+                        <PlayCircle className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                        <input 
+                          type="text" 
+                          value={lpData.hero_video_url || ''}
+                          onChange={(e) => setLpData({...lpData, hero_video_url: e.target.value})}
+                          className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                          placeholder="https://www.youtube.com/watch?v=..."
+                        />
+                      </div>
                     </div>
                     <div>
                       <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wider text-xs">Descrição Detalhada</label>

@@ -1656,15 +1656,16 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
           </div>
         </section>
 
-        {/* Promotional Video Section (Below Info Bar) */}
-        {lp.hero_video_url && (
-          <section id="video" className="py-16 sm:py-24 bg-slate-950 border-b border-slate-800" style={getSectionStyle('video')}>
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center space-y-8">
-              <div className="w-16 h-1 bg-primary rounded-full mx-auto"></div>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white leading-tight typo-title">
-                {lp.video_title || 'Assista à Apresentação do Curso'}
-              </h2>
-              <div className="relative aspect-video rounded-3xl overflow-hidden shadow-[0_0_80px_rgba(0,0,0,0.6)] border border-slate-800 max-w-3xl mx-auto group bg-slate-900">
+        {/* About Section - Dark (Com Vídeo Promocional Integrado) */}
+        <section id="sobre" className="py-32 bg-slate-900 border-b border-slate-800" style={getSectionStyle('about')}>
+          <div className="max-w-4xl mx-auto px-6 text-center space-y-10">
+            <div className="w-16 h-1 bg-primary rounded-full mx-auto"></div>
+            {/* #7 Configurable about_title */}
+            <h2 className="text-4xl md:text-5xl font-bold text-white leading-tight typo-title typo-title-2">{lp.about_title || 'Prepare-se para uma experiência de aprendizado sem precedentes.'}</h2>
+            
+            {/* Vídeo Promocional (incorporado na seção Sobre) */}
+            {lp.hero_video_url && (
+              <div className="relative aspect-video rounded-3xl overflow-hidden shadow-[0_0_80px_rgba(0,0,0,0.6)] border border-slate-800 max-w-3xl mx-auto group bg-slate-950 my-6">
                 {(lp.hero_video_url.includes('youtube.com') || lp.hero_video_url.includes('youtu.be') || lp.hero_video_url.includes('vimeo.com')) ? (
                   <ReactPlayer 
                     url={lp.hero_video_url} 
@@ -1691,18 +1692,10 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                   <img src={lp.hero_video_url} alt="Vídeo Promocional" className="w-full h-full object-cover" />
                 )}
               </div>
-            </div>
-          </section>
-        )}
+            )}
 
-        {/* About Section - Dark */}
-        <section id="sobre" className="py-32 bg-slate-900 border-b border-slate-800" style={getSectionStyle('about')}>
-          <div className="max-w-4xl mx-auto px-6 text-center">
-            <div className="w-16 h-1 bg-primary rounded-full mx-auto mb-8"></div>
-            {/* #7 Configurable about_title */}
-            <h2 className="text-4xl md:text-5xl font-bold text-white leading-tight mb-8 typo-title">{lp.about_title || 'Prepare-se para uma experiência de aprendizado sem precedentes.'}</h2>
             <div className="text-lg text-slate-400 leading-relaxed text-left">
-              <div className="prose prose-invert max-w-none text-slate-400">
+              <div className="prose prose-invert max-w-none text-slate-400 typo-body-2">
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
                   {lp.about || item.descricao}
                 </ReactMarkdown>
@@ -2210,52 +2203,37 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
         </section>
 
       {/* Info bar */}
-      <section className="bg-slate-50 border-y border-slate-100" style={getSectionStyle('info')}>
-        <div className="max-w-7xl mx-auto px-6 py-12 flex flex-col items-center gap-8">
-          {/* #3 Conditional stats based on real data */}
-          <div className="flex flex-wrap justify-center gap-8 md:gap-16 w-full">
-            {(isTrilha ? [
-              { icon: BookOpen, label: 'Cursos', value: `${cursosTrilha.length} cursos` },
-              { icon: Clock, label: 'Duração', value: `${item.carga_horaria || '--'} Horas` },
-              { icon: Calendar, label: 'Acesso', value: item.tempo === 'com_limite' ? `${item.duracao || ''} ${item.duracao_tipo || 'meses'}` : 'Vitalício' },
-              ...(item.tem_certificado ? [{ icon: Award, label: 'Certificado', value: 'Incluso' }] : [])
-            ] : [
-              { icon: BookOpen, label: 'Módulos', value: `${item.curriculo_json?.length || 0} módulos` },
-              { icon: Play, label: 'Aulas', value: `${item.curriculo_json?.reduce((acc: number, secao: any) => acc + (secao.etapas?.length || 0), 0) || 0} aulas` },
-              { icon: Clock, label: 'Duração', value: `${item.carga_horaria || '--'} Horas` },
-              { icon: Calendar, label: 'Acesso', value: item.tempo === 'com_limite' ? `${item.duracao || ''} ${item.duracao_tipo || 'meses'}` : 'Vitalício' },
-              ...(item.tem_certificado ? [{ icon: Award, label: 'Certificado', value: 'Incluso' }] : [])
-            ]).map((stat, i) => (
-              <div key={i} className="flex flex-col items-center text-center gap-2 group min-w-[120px]">
-                <stat.icon className="w-8 h-8 text-primary mb-1 group-hover:scale-110 transition-transform" />
-                <span className="text-sm font-bold text-slate-700 uppercase tracking-widest typo-link">{stat.label}</span>
-                <span className="text-lg font-bold text-slate-900 capitalize">{stat.value}</span>
-              </div>
-            ))}
+      <section className="bg-slate-900 border-y border-slate-800 py-10 shadow-xl relative z-10" style={getSectionStyle('info')}>
+        <div className="max-w-6xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          <div className="flex flex-col items-center">
+            <span className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Módulos</span>
+            <span className="text-2xl font-extrabold text-white">{totalModulos} Módulos</span>
           </div>
-
-          {/* Price and CTA Button */}
-          <div className="flex flex-col md:flex-row items-center justify-center gap-12 md:gap-16 w-full border-t border-slate-200 pt-8 mt-4">
-            {renderPriceBlock(false)}
-            <button 
-              onClick={handleEnrollClick}
-              className="typo-btn w-full sm:w-auto px-12 py-5 bg-primary text-white rounded-3xl font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(var(--primary-rgb),0.2)] flex items-center justify-center gap-3"
-            >
-              {isEmBreve ? 'Cadastrar-se' : (lp.cta_text || 'COMPRAR AGORA')} <ArrowRight className="w-6 h-6" />
-            </button>
+          <div className="flex flex-col items-center">
+            <span className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1 font-medium">Aulas</span>
+            <span className="text-2xl font-extrabold text-white">{totalAulas} Aulas</span>
+          </div>
+          <div className="flex flex-col items-center">
+            <span className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1 font-medium">Duração</span>
+            <span className="text-2xl font-extrabold text-white">{formatDuration(totalDuracao)}</span>
+          </div>
+          <div className="flex flex-col items-center">
+            <span className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1 font-medium">Acesso</span>
+            <span className="text-2xl font-extrabold text-white">Vitalício</span>
           </div>
         </div>
       </section>
 
-      {/* Promotional Video Section (Below Info Bar - Light Layout) */}
-      {lp.hero_video_url && (
-        <section id="video-light" className="py-16 sm:py-24 bg-slate-100 border-b border-slate-200" style={getSectionStyle('video')}>
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center space-y-8">
-            <div className="h-1.5 w-20 bg-primary rounded-full mx-auto"></div>
-            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-6 typo-title">
-              {lp.video_title || 'Assista à Apresentação do Curso'}
-            </h2>
-            <div className="relative aspect-video rounded-3xl overflow-hidden shadow-2xl border border-slate-200 max-w-3xl mx-auto group bg-white">
+      {/* About Section */}
+      <section id="sobre" className="py-24 bg-white" style={getSectionStyle('about')}>
+        <div className="max-w-4xl mx-auto px-6 text-center space-y-8">
+          {/* #7 Configurable about_title */}
+          <h2 className="text-4xl font-bold text-slate-900 mb-6 typo-title typo-title-2">{lp.about_title || 'Tudo o que você precisa em um só lugar.'}</h2>
+          <div className="h-1.5 w-20 bg-primary rounded-full mx-auto mb-6"></div>
+
+          {/* Vídeo Promocional (incorporado na seção Sobre) */}
+          {lp.hero_video_url && (
+            <div className="relative aspect-video rounded-3xl overflow-hidden shadow-2xl border border-slate-200 max-w-3xl mx-auto group bg-white my-6">
               {(lp.hero_video_url.includes('youtube.com') || lp.hero_video_url.includes('youtu.be') || lp.hero_video_url.includes('vimeo.com')) ? (
                 <ReactPlayer 
                   url={lp.hero_video_url} 
@@ -2282,18 +2260,10 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                 <img src={lp.hero_video_url} alt="Vídeo Promocional" className="w-full h-full object-cover" />
               )}
             </div>
-          </div>
-        </section>
-      )}
+          )}
 
-      {/* About Section */}
-      <section id="sobre" className="py-24 bg-white" style={getSectionStyle('about')}>
-        <div className="max-w-4xl mx-auto px-6 text-center">
-          {/* #7 Configurable about_title */}
-          <h2 className="text-4xl font-bold text-slate-900 mb-6 typo-title">{lp.about_title || 'Tudo o que você precisa em um só lugar.'}</h2>
-          <div className="h-1.5 w-20 bg-primary rounded-full mx-auto mb-10"></div>
           <div className="text-lg text-slate-600 leading-relaxed text-left">
-            <div className="prose max-w-none text-slate-600">
+            <div className="prose max-w-none text-slate-600 typo-body-2">
               <ReactMarkdown remarkPlugins={[remarkGfm]}>
                 {lp.about || item.descricao}
               </ReactMarkdown>
