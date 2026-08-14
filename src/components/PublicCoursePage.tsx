@@ -1981,10 +1981,10 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
               </div>
 
               {/* Bottom CTA Button */}
-              <div className="pt-4">
+              <div className="pt-4 w-full">
                 <button 
                   onClick={handleEnrollClick}
-                  className="typo-btn px-8 sm:px-10 py-4 bg-primary text-white rounded-full font-serif italic text-lg sm:text-xl shadow-xl hover:scale-105 active:scale-95 transition-all"
+                  className="typo-btn w-full py-4 px-6 bg-primary text-white rounded-full font-serif italic text-lg sm:text-xl shadow-xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center text-center"
                 >
                   <span>{lp.copy_section_cta_text || lp.cta_text || 'Acesse agora'}</span>
                 </button>
