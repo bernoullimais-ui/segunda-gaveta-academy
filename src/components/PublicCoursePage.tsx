@@ -470,16 +470,7 @@ const TestimonialsCarousel = ({ testimonials, layout, primaryColor }: { testimon
   };
 
   return (
-    <div className="relative w-full max-w-6xl mx-auto px-4 py-16 sm:py-24 flex flex-col items-center justify-center text-center overflow-visible">
-      {/* Giant Decorative Top-Left Quote - touching section top-left boundary */}
-      <span className="absolute -top-12 sm:-top-20 -left-2 sm:left-2 text-8xl sm:text-[140px] lg:text-[180px] font-serif text-slate-950/40 select-none pointer-events-none leading-none z-0">
-        “
-      </span>
-
-      {/* Giant Decorative Bottom-Right Quote - touching section bottom-right boundary */}
-      <span className="absolute -bottom-12 sm:-bottom-20 -right-2 sm:right-2 text-8xl sm:text-[140px] lg:text-[180px] font-serif text-slate-950/40 select-none pointer-events-none leading-none z-0">
-        ”
-      </span>
+    <div className="relative w-full max-w-4xl mx-auto px-4 py-8 sm:py-12 flex flex-col items-center justify-center text-center">
 
       {/* Testimonial Active Card */}
       <div className="relative z-10 w-full max-w-2xl mx-auto px-8 sm:px-14 space-y-6 min-h-[220px] flex flex-col justify-center items-center">
@@ -1647,7 +1638,17 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
     ) : null,
     testimonials: lp.testimonials?.length > 0 ? (
       <section key="testimonials" id="depoimentos" className="py-24 sm:py-32 bg-slate-900 relative overflow-hidden" style={getSectionStyle('testimonials')}>
-        <div className="max-w-5xl mx-auto px-6 text-center space-y-8">
+        {/* Giant Bleeding Top-Left Quote */}
+        <span className="absolute -top-12 sm:-top-20 -left-6 sm:-left-12 text-[140px] sm:text-[220px] lg:text-[280px] font-serif text-slate-950/45 select-none pointer-events-none leading-none z-0">
+          “
+        </span>
+
+        {/* Giant Bleeding Bottom-Right Quote */}
+        <span className="absolute -bottom-20 sm:-bottom-32 -right-6 sm:-right-12 text-[140px] sm:text-[220px] lg:text-[280px] font-serif text-slate-950/45 select-none pointer-events-none leading-none z-0">
+          ”
+        </span>
+
+        <div className="max-w-5xl mx-auto px-6 text-center space-y-8 relative z-10">
           <TestimonialsCarousel testimonials={lp.testimonials} layout={layout} primaryColor={lp.primary_color} />
         </div>
       </section>
