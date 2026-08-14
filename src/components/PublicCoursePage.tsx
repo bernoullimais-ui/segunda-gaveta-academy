@@ -1647,75 +1647,71 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
           </div>
         </section>
 
-        {/* About Section - 2-Column Split (Ref: Title & Description Left | Photo & Play Video Right) */}
-        <section id="sobre" className="py-24 lg:py-32 bg-slate-900 border-b border-slate-800 relative overflow-hidden text-left" style={getSectionStyle('about')}>
-          <div className="max-w-7xl mx-auto px-4 sm:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-stretch">
+        {/* About Section - 50/50 Edge-to-Edge Full Bleed Layout (Ref Image 2) */}
+        <section id="sobre" className="relative w-full overflow-hidden bg-slate-900 border-b border-slate-800 text-left" style={getSectionStyle('about')}>
+          <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[500px] lg:min-h-[650px] w-full items-stretch">
+            
+            {/* Left Column: Title & Description */}
+            <div className="p-8 sm:p-12 lg:p-20 xl:p-24 flex flex-col justify-center text-left space-y-6 sm:space-y-8">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-[1.15] tracking-tight typo-title typo-title-2">
+                {lp.about_title || 'Prepare-se para uma experiência de aprendizado sem precedentes.'}
+              </h2>
               
-              {/* Left Column: Title & Description */}
-              <div className="space-y-6 sm:space-y-8 text-left flex flex-col justify-center">
-                <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-[1.15] tracking-tight typo-title typo-title-2">
-                  {lp.about_title || 'Prepare-se para uma experiência de aprendizado sem precedentes.'}
-                </h2>
-                
-                <div className="text-base sm:text-lg text-slate-300/90 leading-relaxed font-sans typo-body-2">
-                  <div className="prose prose-invert max-w-none text-slate-300 typo-body-2">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                      {lp.about || item.descricao}
-                    </ReactMarkdown>
-                  </div>
+              <div className="text-base sm:text-lg text-slate-300/90 leading-relaxed font-sans typo-body-2">
+                <div className="prose prose-invert max-w-none text-slate-300 typo-body-2">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {lp.about || item.descricao}
+                  </ReactMarkdown>
                 </div>
               </div>
+            </div>
 
-              {/* Right Column: Photo with Play Button Overlay / Video Player */}
-              <div className="relative w-full h-full flex flex-col self-stretch">
-                <div className="relative w-full h-full flex-1 min-h-[350px] rounded-3xl overflow-hidden shadow-2xl border border-white/10 bg-slate-950 group">
-                  {isHeroPlaying && lp.hero_video_url ? (
-                    <div className="absolute inset-0 w-full h-full">
-                      <ReactPlayer 
-                        url={lp.hero_video_url} 
-                        width="100%" 
-                        height="100%" 
-                        playing={true}
-                        controls={true}
-                        config={{
-                          youtube: {
-                            playerVars: { modestbranding: 1, rel: 0, showinfo: 0, autoplay: 1 }
-                          }
-                        }}
-                      />
-                    </div>
-                  ) : (
-                    <div 
-                      onClick={() => {
-                        if (lp.hero_video_url) {
-                          setIsHeroPlaying(true);
-                        }
-                      }}
-                      className={`absolute inset-0 w-full h-full ${lp.hero_video_url ? 'cursor-pointer' : ''}`}
-                    >
-                      <img 
-                        src={lp.about_image_url || item.capa_url || item.thumbnail_url || lp.hero_image_url || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=1200'} 
-                        alt="Sobre o Programa" 
-                        className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
-                      />
-                      
-                      {/* Play Button Overlay */}
-                      {lp.hero_video_url && (
-                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white/30 backdrop-blur-md border border-white/50 flex items-center justify-center text-white shadow-2xl group-hover:scale-110 active:scale-95 transition-all duration-300 pointer-events-auto">
-                            <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center text-white shadow-lg">
-                              <Play className="w-7 h-7 fill-current ml-1" />
-                            </div>
-                          </div>
+            {/* Right Column: Full Bleed Photo with Play Button Overlay / Video Player */}
+            <div className="relative w-full h-full min-h-[400px] lg:min-h-full overflow-hidden bg-slate-950 group">
+              {isHeroPlaying && lp.hero_video_url ? (
+                <div className="absolute inset-0 w-full h-full">
+                  <ReactPlayer 
+                    url={lp.hero_video_url} 
+                    width="100%" 
+                    height="100%" 
+                    playing={true}
+                    controls={true}
+                    config={{
+                      youtube: {
+                        playerVars: { modestbranding: 1, rel: 0, showinfo: 0, autoplay: 1 }
+                      }
+                    }}
+                  />
+                </div>
+              ) : (
+                <div 
+                  onClick={() => {
+                    if (lp.hero_video_url) {
+                      setIsHeroPlaying(true);
+                    }
+                  }}
+                  className={`absolute inset-0 w-full h-full ${lp.hero_video_url ? 'cursor-pointer' : ''}`}
+                >
+                  <img 
+                    src={lp.about_image_url || item.capa_url || item.thumbnail_url || lp.hero_image_url || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=1200'} 
+                    alt="Sobre o Programa" 
+                    className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
+                  />
+                  
+                  {/* Play Button Overlay */}
+                  {lp.hero_video_url && (
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white/20 backdrop-blur-md border border-white/40 flex items-center justify-center text-white shadow-2xl group-hover:scale-110 active:scale-95 transition-all duration-300 pointer-events-auto">
+                        <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center text-white shadow-lg">
+                          <Play className="w-7 h-7 fill-current ml-1" />
                         </div>
-                      )}
+                      </div>
                     </div>
                   )}
                 </div>
-              </div>
-
+              )}
             </div>
+
           </div>
         </section>
 
