@@ -1536,13 +1536,12 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
         {/* Dark Hero Section - Full-bleed background banner layout */}
         <section ref={heroRef} className="relative min-h-[92vh] flex items-center pt-28 pb-20 md:pt-36 md:pb-28 overflow-hidden bg-slate-950 text-left" style={getSectionStyle('hero')}>
           {/* Full Bleed Background Image */}
-          <div className="absolute inset-0 w-full h-full bg-slate-950 overflow-hidden pointer-events-none">
+          <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
             <img 
               src={lp.hero_image_url || item.capa_url || item.thumbnail_url || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070'} 
               alt="Banner Principal"
               className="w-full h-full object-cover object-center"
             />
-            <div className="absolute inset-0 bg-slate-950/40"></div>
           </div>
           
           <div className="max-w-7xl mx-auto px-4 sm:px-8 relative z-10 w-full min-h-0 lg:min-h-[85vh] flex flex-col justify-center">
