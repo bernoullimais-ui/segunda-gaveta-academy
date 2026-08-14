@@ -4444,6 +4444,19 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                       />
                     </div>
                     <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wider text-xs">Foto de Capa do Vídeo / Destaque (URL)</label>
+                      <div className="relative">
+                        <ImageIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                        <input 
+                          type="text" 
+                          value={lpData.about_image_url || ''}
+                          onChange={(e) => setLpData({...lpData, about_image_url: e.target.value})}
+                          className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                          placeholder="https://..."
+                        />
+                      </div>
+                    </div>
+                    <div>
                       <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wider text-xs" title="Link do vídeo no YouTube/Vimeo para a seção Sobre o Programa">Vídeo Promocional (YouTube)</label>
                       <div className="relative">
                         <PlayCircle className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />

@@ -1647,50 +1647,72 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
           </div>
         </section>
 
-        {/* About Section - Dark (Com Vídeo Promocional Integrado) */}
-        <section id="sobre" className="py-32 bg-slate-900 border-b border-slate-800" style={getSectionStyle('about')}>
-          <div className="max-w-4xl mx-auto px-6 text-center space-y-10">
-            <div className="w-16 h-1 bg-primary rounded-full mx-auto"></div>
-            {/* #7 Configurable about_title */}
-            <h2 className="text-4xl md:text-5xl font-bold text-white leading-tight typo-title typo-title-2">{lp.about_title || 'Prepare-se para uma experiência de aprendizado sem precedentes.'}</h2>
-            
-            {/* Vídeo Promocional (incorporado na seção Sobre) */}
-            {lp.hero_video_url && (
-              <div className="relative aspect-video rounded-3xl overflow-hidden shadow-[0_0_80px_rgba(0,0,0,0.6)] border border-slate-800 max-w-3xl mx-auto group bg-slate-950 my-6">
-                {(lp.hero_video_url.includes('youtube.com') || lp.hero_video_url.includes('youtu.be') || lp.hero_video_url.includes('vimeo.com')) ? (
-                  <ReactPlayer 
-                    url={lp.hero_video_url} 
-                    width="100%" 
-                    height="100%" 
-                    playing={false}
-                    controls={true}
-                    light={lp.hero_image_url || item.thumbnail_url || item.capa_url || true}
-                    playIcon={
-                      <div className="absolute inset-0 cursor-pointer flex items-center justify-center z-10 group">
-                        <div className="absolute inset-0 bg-slate-900/50 group-hover:bg-slate-900/30 transition-colors" />
-                        <div className="relative z-20 w-20 h-20 bg-primary rounded-full flex items-center justify-center text-white shadow-2xl scale-100 group-hover:scale-110 transition-transform duration-300">
-                          <Play className="w-8 h-8 fill-current ml-1" />
-                        </div>
-                      </div>
-                    }
-                    config={{
-                      youtube: {
-                        playerVars: { modestbranding: 1, rel: 0, showinfo: 0 }
-                      }
-                    }}
-                  />
-                ) : (
-                  <img src={lp.hero_video_url} alt="Vídeo Promocional" className="w-full h-full object-cover" />
-                )}
+        {/* About Section - 2-Column Split (Ref: Title & Description Left | Photo & Play Video Right) */}
+        <section id="sobre" className="py-24 lg:py-32 bg-slate-900 border-b border-slate-800 relative overflow-hidden text-left" style={getSectionStyle('about')}>
+          <div className="max-w-7xl mx-auto px-4 sm:px-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+              
+              {/* Left Column: Title & Description */}
+              <div className="space-y-6 sm:space-y-8 text-left">
+                <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-[1.15] tracking-tight typo-title typo-title-2">
+                  {lp.about_title || 'Prepare-se para uma experiência de aprendizado sem precedentes.'}
+                </h2>
+                
+                <div className="text-base sm:text-lg text-slate-300/90 leading-relaxed font-sans typo-body-2">
+                  <div className="prose prose-invert max-w-none text-slate-300 typo-body-2">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {lp.about || item.descricao}
+                    </ReactMarkdown>
+                  </div>
+                </div>
               </div>
-            )}
 
-            <div className="text-lg text-slate-400 leading-relaxed text-left">
-              <div className="prose prose-invert max-w-none text-slate-400 typo-body-2">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {lp.about || item.descricao}
-                </ReactMarkdown>
+              {/* Right Column: Photo with Play Button Overlay / Video Player */}
+              <div className="relative w-full">
+                <div className="relative aspect-[4/5] sm:aspect-[16/10] lg:aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl border border-white/10 bg-slate-950 group">
+                  {isHeroPlaying && lp.hero_video_url ? (
+                    <ReactPlayer 
+                      url={lp.hero_video_url} 
+                      width="100%" 
+                      height="100%" 
+                      playing={true}
+                      controls={true}
+                      config={{
+                        youtube: {
+                          playerVars: { modestbranding: 1, rel: 0, showinfo: 0, autoplay: 1 }
+                        }
+                      }}
+                    />
+                  ) : (
+                    <div 
+                      onClick={() => {
+                        if (lp.hero_video_url) {
+                          setIsHeroPlaying(true);
+                        }
+                      }}
+                      className={`relative w-full h-full ${lp.hero_video_url ? 'cursor-pointer' : ''}`}
+                    >
+                      <img 
+                        src={lp.about_image_url || item.capa_url || item.thumbnail_url || lp.hero_image_url || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=1200'} 
+                        alt="Sobre o Programa" 
+                        className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
+                      />
+                      
+                      {/* Play Button Overlay */}
+                      {lp.hero_video_url && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/25 group-hover:bg-black/15 transition-colors">
+                          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white/20 backdrop-blur-md border border-white/40 flex items-center justify-center text-white shadow-2xl group-hover:scale-110 active:scale-95 transition-all duration-300">
+                            <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center text-white shadow-lg">
+                              <Play className="w-7 h-7 fill-current ml-1" />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
+
             </div>
           </div>
         </section>
