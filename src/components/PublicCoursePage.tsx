@@ -496,7 +496,7 @@ const TestimonialsCarousel = ({ testimonials, layout, primaryColor, lp }: { test
         </p>
 
         {/* Bottom-Right Double Quote */}
-        <span className="absolute -bottom-8 sm:-bottom-[600px] -right-4 sm:-right-[400px] text-[120px] sm:text-[1024px] font-serif text-white/25 select-none pointer-events-none leading-none z-0">
+        <span className="absolute -bottom-8 sm:-bottom-[800px] -right-4 sm:-right-[400px] text-[120px] sm:text-[1024px] font-serif text-white/25 select-none pointer-events-none leading-none z-0">
           ”
         </span>
       </div>
