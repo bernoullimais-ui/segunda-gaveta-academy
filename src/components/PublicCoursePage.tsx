@@ -125,32 +125,157 @@ interface FooterProps {
   lp?: any;
 }
 
-const Footer = ({ layout, item, lp = {} }: FooterProps) => (
-  <footer className={`py-16 border-t ${layout === 'escuro' ? 'bg-slate-950 border-slate-900 text-slate-400' : 'bg-white border-slate-100 text-slate-400'}`}>
-    <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-10">
-      <div className="flex flex-col items-center md:items-start gap-4">
-        <div className="flex items-center gap-3">
-          {(lp.logo_url || item.organizacoes?.logo_url) ? (
-            <img src={lp.logo_url || item.organizacoes?.logo_url} alt="Logo" className="h-16 w-auto max-w-[240px] object-contain" />
-          ) : (
-            <div className="w-16 h-16 bg-slate-900 rounded-2xl flex items-center justify-center text-white font-bold text-2xl tracking-tighter uppercase">
-              {item.organizacoes?.nome?.[0] || 'S'}
+const Footer = ({ layout, item, lp = {} }: FooterProps) => {
+  const specialistName = lp.instructor?.name || item.professor_nome || 'Especialista';
+
+  return (
+    <footer className="py-16 sm:py-24 bg-slate-950 border-t border-slate-900 text-slate-300 font-sans">
+      <div className="max-w-7xl mx-auto px-6 sm:px-8">
+        
+        {/* Main Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-start text-left">
+          
+          {/* Left Side: Brand Logo & Tagline */}
+          <div className="lg:col-span-5 space-y-6">
+            <div className="flex items-center gap-3">
+              {(lp.logo_url || item.organizacoes?.logo_url) ? (
+                <img 
+                  src={lp.logo_url || item.organizacoes?.logo_url} 
+                  alt="Segunda Gaveta Logo" 
+                  className="h-12 sm:h-14 w-auto max-w-[240px] object-contain" 
+                />
+              ) : (
+                <div className="flex items-center gap-2">
+                  <div className="w-10 h-10 bg-primary/20 border border-primary/40 rounded-xl flex items-center justify-center text-white font-bold text-xl font-serif">
+                    sg
+                  </div>
+                  <span className="font-bold text-white text-xl tracking-tight leading-tight">
+                    segunda<br />gaveta
+                  </span>
+                </div>
+              )}
             </div>
-          )}
+
+            <h3 className="text-3xl sm:text-4xl text-white font-serif font-normal leading-snug tracking-tight max-w-sm">
+              Boas ideias no lugar <span className="italic font-serif">certo.</span>
+            </h3>
+          </div>
+
+          {/* Right Side: 3 Columns of Links */}
+          <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-6 text-left">
+            
+            {/* Coluna 1: Redes Sociais da Segunda Gaveta */}
+            <div className="space-y-4">
+              <h4 className="font-bold text-white text-sm sm:text-base tracking-wider uppercase">
+                Segunda Gaveta
+              </h4>
+              <ul className="space-y-2.5 text-sm sm:text-base text-slate-400">
+                <li>
+                  <a href="https://segundagaveta.com.br" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+                    Site
+                  </a>
+                </li>
+                <li>
+                  <a href="https://instagram.com/segundagaveta" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+                    Instagram
+                  </a>
+                </li>
+                <li>
+                  <a href="https://youtube.com/@segundagaveta" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+                    YouTube
+                  </a>
+                </li>
+                <li>
+                  <a href="https://linkedin.com/company/segundagaveta" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+                    LinkedIn
+                  </a>
+                </li>
+                <li>
+                  <a href="https://wa.me/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+                    WhatsApp
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Coluna 2: Redes Sociais do Especialista */}
+            <div className="space-y-4">
+              <h4 className="font-bold text-white text-sm sm:text-base tracking-wider uppercase">
+                {specialistName}
+              </h4>
+              <ul className="space-y-2.5 text-sm sm:text-base text-slate-400">
+                <li>
+                  <a href={lp.instructor?.website_url || "#"} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+                    Site
+                  </a>
+                </li>
+                <li>
+                  <a href={lp.instructor?.instagram_url || "#"} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+                    Instagram
+                  </a>
+                </li>
+                <li>
+                  <a href={lp.instructor?.youtube_url || "#"} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+                    YouTube
+                  </a>
+                </li>
+                <li>
+                  <a href={lp.instructor?.linkedin_url || "#"} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+                    LinkedIn
+                  </a>
+                </li>
+                <li>
+                  <a href={lp.instructor?.whatsapp_url || "#"} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+                    WhatsApp
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Coluna 3: Navegação na Página */}
+            <div className="space-y-4">
+              <h4 className="font-bold text-white text-sm sm:text-base tracking-wider uppercase">
+                Navegação
+              </h4>
+              <ul className="space-y-2.5 text-sm sm:text-base text-slate-400">
+                <li>
+                  <a href="#curriculo" className="hover:text-white transition-colors">
+                    Guia
+                  </a>
+                </li>
+                <li>
+                  <a href="#instrutor" className="hover:text-white transition-colors">
+                    Expert
+                  </a>
+                </li>
+                <li>
+                  <a href="#faq" className="hover:text-white transition-colors">
+                    FAQ
+                  </a>
+                </li>
+                <li>
+                  <a href="#suporte" className="hover:text-white transition-colors">
+                    Suporte
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+          </div>
+
         </div>
-        <p className="text-sm max-w-xs text-center md:text-left">Excelência em educação digital e desenvolvimento profissional.</p>
+
+        {/* Bottom Horizontal Line & Copyright */}
+        <div className="border-t border-white/15 mt-16 pt-8 text-center">
+          <p className="text-xs sm:text-sm text-slate-400 font-sans tracking-wide">
+            2026 Segunda Gaveta Company | Todos os direitos reservados.
+          </p>
+        </div>
+
       </div>
-      <div className="flex flex-col items-center md:items-end gap-6">
-         <div className="flex items-center gap-8">
-            <a href="#" className="hover:text-primary font-bold text-sm transition-colors">Termos de Uso</a>
-            <a href="#" className="hover:text-primary font-bold text-sm transition-colors">Privacidade</a>
-            <a href="#" className="hover:text-primary font-bold text-sm transition-colors">Suporte</a>
-         </div>
-         <p className="text-xs font-medium">© 2026 {item.organizacoes?.nome}. Todos os direitos reservados.</p>
-      </div>
-    </div>
-  </footer>
-);
+    </footer>
+  );
+};
 
 interface EnrollmentModalProps {
   isOpen: boolean;

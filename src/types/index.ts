@@ -325,6 +325,11 @@ export interface LandingPageVersionConfig {
     avatar_url?: string;
     students_count?: string;
     projects_count?: string;
+    instagram_url?: string;
+    youtube_url?: string;
+    linkedin_url?: string;
+    website_url?: string;
+    whatsapp_url?: string;
   };
   testimonials?: Array<{ name: string; role: string; text: string; photo_url?: string }>;
   bonuses?: Array<{ title: string; description: string; value?: string }>;

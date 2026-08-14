@@ -4801,9 +4801,49 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                       <textarea
                         value={lpData.instructor?.bio || ''}
                         onChange={(e) => setLpData({...lpData, instructor: {...lpData.instructor, bio: e.target.value}})}
-                        className="w-full px-3 py-2 border border-slate-200 rounded text-sm min-h-[100px]"
+                        className="w-full px-3 py-2 border border-slate-200 rounded text-sm min-h-[100px] mb-3"
                         placeholder="Fale um pouco sobre sua trajetória profissional..."
                       />
+                      <div className="pt-2 border-t border-slate-100 space-y-2">
+                        <label className="text-[10px] uppercase font-bold text-slate-400 tracking-widest block">Redes Sociais do Especialista (Exibidas no Rodapé)</label>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          <input
+                            type="text"
+                            value={lpData.instructor?.website_url || ''}
+                            onChange={(e) => setLpData({...lpData, instructor: {...lpData.instructor, website_url: e.target.value}})}
+                            className="px-3 py-1.5 border border-slate-200 rounded text-xs outline-none focus:border-blue-500"
+                            placeholder="Site URL"
+                          />
+                          <input
+                            type="text"
+                            value={lpData.instructor?.instagram_url || ''}
+                            onChange={(e) => setLpData({...lpData, instructor: {...lpData.instructor, instagram_url: e.target.value}})}
+                            className="px-3 py-1.5 border border-slate-200 rounded text-xs outline-none focus:border-blue-500"
+                            placeholder="Instagram URL"
+                          />
+                          <input
+                            type="text"
+                            value={lpData.instructor?.youtube_url || ''}
+                            onChange={(e) => setLpData({...lpData, instructor: {...lpData.instructor, youtube_url: e.target.value}})}
+                            className="px-3 py-1.5 border border-slate-200 rounded text-xs outline-none focus:border-blue-500"
+                            placeholder="YouTube URL"
+                          />
+                          <input
+                            type="text"
+                            value={lpData.instructor?.linkedin_url || ''}
+                            onChange={(e) => setLpData({...lpData, instructor: {...lpData.instructor, linkedin_url: e.target.value}})}
+                            className="px-3 py-1.5 border border-slate-200 rounded text-xs outline-none focus:border-blue-500"
+                            placeholder="LinkedIn URL"
+                          />
+                          <input
+                            type="text"
+                            value={lpData.instructor?.whatsapp_url || ''}
+                            onChange={(e) => setLpData({...lpData, instructor: {...lpData.instructor, whatsapp_url: e.target.value}})}
+                            className="px-3 py-1.5 border border-slate-200 rounded text-xs outline-none focus:border-blue-500 sm:col-span-2"
+                            placeholder="WhatsApp URL"
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
