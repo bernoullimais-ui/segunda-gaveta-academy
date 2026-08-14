@@ -782,7 +782,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
       name: lpRaw?.instructor?.name || item?.professor_nome || item?.instrutores?.[0]?.nome || item?.instrutores?.[0]?.usuarios?.nome || '', 
       bio: lpRaw?.instructor?.bio || item?.professor_bio || item?.instrutores?.[0]?.mini_bio || '', 
       avatar_url: lpRaw?.instructor?.avatar_url || item?.professor_foto_url || item?.instrutores?.[0]?.foto_url || item?.instrutores?.[0]?.usuarios?.avatar_url || '', 
-      role: lpRaw?.instructor?.role || 'Instrutor(a)' 
+      role: lpRaw?.instructor?.role || '' 
     }
   };
 
@@ -1842,7 +1842,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                 <h2 className="text-4xl sm:text-5xl lg:text-6xl font-serif font-bold text-white leading-[1.15] tracking-tight typo-title">
                   {lp.instructor?.name || item.professor_nome || 'Especialista'}
                 </h2>
-                {lp.instructor?.role && (
+                {Boolean(lp.instructor?.role?.trim()) && (
                   <p className="text-lg sm:text-xl text-primary font-medium tracking-wide">
                     {lp.instructor.role}
                   </p>
@@ -2426,7 +2426,9 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
               <div>
                 <span className="text-primary font-bold text-sm uppercase tracking-widest mb-2 block">Conheça seu mentor</span>
                 <h2 className="text-4xl font-bold text-slate-900 typo-title">{lp.instructor?.name || 'Professor Especialista'}</h2>
-                <p className="text-slate-700 font-medium typo-text">{lp.instructor?.role || 'Instrutor e Mentor'}</p>
+                {Boolean(lp.instructor?.role?.trim()) && (
+                  <p className="text-slate-700 font-medium typo-text">{lp.instructor.role}</p>
+                )}
               </div>
               <p className="text-lg text-slate-600 leading-relaxed italic">
                 "{lp.instructor?.bio || 'Dedicado a transformar vidas através da educação prática e compartilhamento de experiências reais de mercado.'}"
