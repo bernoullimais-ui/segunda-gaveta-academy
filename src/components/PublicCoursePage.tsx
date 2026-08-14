@@ -475,7 +475,7 @@ const TestimonialsCarousel = ({ testimonials, layout, primaryColor, lp }: { test
       {/* Testimonial Active Card */}
       <div className="relative z-10 w-full max-w-2xl mx-auto px-8 sm:px-14 py-6 min-h-[220px] flex flex-col justify-center items-center">
         {/* Top-Left Double Quote */}
-        <span className="absolute -top-6 sm:-top-[100px] -left-2 sm:-left-8 text-7xl sm:text-[48px] font-serif text-white/35 select-none pointer-events-none leading-none z-0">
+        <span className="absolute -top-6 sm:-top-[100px] -left-2 sm:-left-8 text-7xl sm:text-[512px] font-serif text-white/35 select-none pointer-events-none leading-none z-0">
           “
         </span>
 
