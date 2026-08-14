@@ -1700,8 +1700,8 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                       
                       {/* Play Button Overlay */}
                       {lp.hero_video_url && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/25 group-hover:bg-black/15 transition-colors">
-                          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white/20 backdrop-blur-md border border-white/40 flex items-center justify-center text-white shadow-2xl group-hover:scale-110 active:scale-95 transition-all duration-300">
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white/30 backdrop-blur-md border border-white/50 flex items-center justify-center text-white shadow-2xl group-hover:scale-110 active:scale-95 transition-all duration-300 pointer-events-auto">
                             <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center text-white shadow-lg">
                               <Play className="w-7 h-7 fill-current ml-1" />
                             </div>
