@@ -1726,52 +1726,45 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
           </section>
         )}
 
-        {/* Benefits & Testimonials Section - Dark */}
-        {(lp.benefits?.length > 0 || lp.testimonials?.length > 0) && (
-          <section id="vantagens-depoimentos" className="py-32 bg-slate-900/50 border-b border-slate-800" style={getSectionStyle('features')}>
-            <div className="max-w-7xl mx-auto px-6">
-              <div className={`grid grid-cols-1 ${(lp.benefits?.length > 0 && lp.testimonials?.length > 0) ? 'lg:grid-cols-2 gap-16' : 'gap-16'}`}>
-                
-                {/* Vantagens */}
-                {lp.benefits?.length > 0 && (
-                  <div className={(lp.benefits?.length > 0 && lp.testimonials?.length > 0) ? '' : 'max-w-4xl mx-auto w-full'}>
-                    <h3 className={`font-bold text-white mb-10 ${(lp.benefits?.length > 0 && lp.testimonials?.length > 0) ? 'text-3xl text-center lg:text-left' : 'text-4xl text-center'}`}>O que você vai dominar</h3>
-                    <div className={`grid grid-cols-1 ${(!lp.testimonials || lp.testimonials.length === 0) ? 'sm:grid-cols-2' : 'sm:grid-cols-1 xl:grid-cols-2'} gap-6`}>
-                      {(lp.benefits || []).filter(Boolean).map((benefit: any, idx: number) => {
-                        const itemObj = typeof benefit === 'object' && benefit !== null ? benefit : { title: typeof benefit === 'string' ? benefit : '', description: '' };
-                        return (
-                          <div key={idx} className="bg-slate-800/40 p-6 rounded-[28px] border border-slate-700 hover:border-primary/50 transition-colors group text-left flex gap-4 items-start">
-                             <div className="w-10 h-10 bg-primary/10 text-primary rounded-2xl flex items-center justify-center shrink-0 mt-0.5">
-                               <CheckCircle className="w-5 h-5" />
-                             </div>
-                             <div className="space-y-1.5 flex-1">
-                               <h4 className="font-bold text-white text-lg leading-snug group-hover:text-primary transition-colors typo-title-3">{itemObj.title}</h4>
-                               {itemObj.description && (
-                                 <p className="text-slate-400 text-sm leading-relaxed typo-body-3">{itemObj.description}</p>
-                               )}
-                             </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-
-                {/* Depoimentos */}
-                {lp.testimonials?.length > 0 && (
-                  <div className={(lp.benefits?.length > 0 && lp.testimonials?.length > 0) ? '' : 'max-w-4xl mx-auto w-full'}>
-                    <div className="text-center mb-10">
-                      <h3 className={`font-bold text-white mb-4 tracking-tight ${(lp.benefits?.length > 0 && lp.testimonials?.length > 0) ? 'text-3xl' : 'text-4xl md:text-5xl'}`}>O que dizem nossos alunos</h3>
-                      <div className="flex items-center justify-center gap-1 text-amber-500">
-                        {[1,2,3,4,5].map(i => <Star key={i} className="w-5 h-5 fill-current" />)}
-                        <span className="ml-2 text-slate-300 font-bold">4.9/5 de satisfação</span>
+        {/* Benefits Section - Full-Width Single Column */}
+        {lp.benefits?.length > 0 && (
+          <section id="vantagens" className="py-24 sm:py-32 bg-slate-900/50 border-b border-slate-800" style={getSectionStyle('features')}>
+            <div className="max-w-5xl mx-auto px-6 text-center space-y-12">
+              <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight typo-title">
+                O que você vai dominar
+              </h3>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-left">
+                {(lp.benefits || []).filter(Boolean).map((benefit: any, idx: number) => {
+                  const itemObj = typeof benefit === 'object' && benefit !== null ? benefit : { title: typeof benefit === 'string' ? benefit : '', description: '' };
+                  return (
+                    <div key={idx} className="bg-slate-800/40 p-6 sm:p-8 rounded-[28px] border border-slate-700 hover:border-primary/50 transition-colors group flex gap-4 items-start">
+                      <div className="w-10 h-10 bg-primary/10 text-primary rounded-2xl flex items-center justify-center shrink-0 mt-0.5">
+                        <CheckCircle className="w-5 h-5" />
+                      </div>
+                      <div className="space-y-1.5 flex-1">
+                        <h4 className="font-bold text-white text-lg leading-snug group-hover:text-primary transition-colors typo-title-3">{itemObj.title}</h4>
+                        {itemObj.description && (
+                          <p className="text-slate-400 text-sm leading-relaxed typo-body-3">{itemObj.description}</p>
+                        )}
                       </div>
                     </div>
-                    <TestimonialsCarousel testimonials={lp.testimonials} layout={layout} primaryColor={lp.primary_color} />
-                  </div>
-                )}
-
+                  );
+                })}
               </div>
+            </div>
+          </section>
+        )}
+
+        {/* Testimonials Section - Full-Width Single Column */}
+        {lp.testimonials?.length > 0 && (
+          <section id="depoimentos" className="py-24 sm:py-32 bg-slate-900 border-b border-slate-800 relative overflow-hidden" style={getSectionStyle('testimonials')}>
+            <div className="max-w-5xl mx-auto px-6 text-center space-y-8">
+              <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight typo-title">
+                O que dizem nossos alunos
+              </h3>
+              
+              <TestimonialsCarousel testimonials={lp.testimonials} layout={layout} primaryColor={lp.primary_color} />
             </div>
           </section>
         )}
