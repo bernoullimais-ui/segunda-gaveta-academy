@@ -1668,21 +1668,23 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
               </div>
 
               {/* Right Column: Photo with Play Button Overlay / Video Player */}
-              <div className="relative w-full h-full flex flex-col min-h-[450px] lg:min-h-[550px]">
-                <div className="relative w-full h-full min-h-[450px] lg:min-h-[550px] rounded-3xl overflow-hidden shadow-2xl border border-white/10 bg-slate-950 group">
+              <div className="relative w-full h-full flex flex-col self-stretch">
+                <div className="relative w-full h-full flex-1 min-h-[350px] rounded-3xl overflow-hidden shadow-2xl border border-white/10 bg-slate-950 group">
                   {isHeroPlaying && lp.hero_video_url ? (
-                    <ReactPlayer 
-                      url={lp.hero_video_url} 
-                      width="100%" 
-                      height="100%" 
-                      playing={true}
-                      controls={true}
-                      config={{
-                        youtube: {
-                          playerVars: { modestbranding: 1, rel: 0, showinfo: 0, autoplay: 1 }
-                        }
-                      }}
-                    />
+                    <div className="absolute inset-0 w-full h-full">
+                      <ReactPlayer 
+                        url={lp.hero_video_url} 
+                        width="100%" 
+                        height="100%" 
+                        playing={true}
+                        controls={true}
+                        config={{
+                          youtube: {
+                            playerVars: { modestbranding: 1, rel: 0, showinfo: 0, autoplay: 1 }
+                          }
+                        }}
+                      />
+                    </div>
                   ) : (
                     <div 
                       onClick={() => {
@@ -1690,7 +1692,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                           setIsHeroPlaying(true);
                         }
                       }}
-                      className={`relative w-full h-full ${lp.hero_video_url ? 'cursor-pointer' : ''}`}
+                      className={`absolute inset-0 w-full h-full ${lp.hero_video_url ? 'cursor-pointer' : ''}`}
                     >
                       <img 
                         src={lp.about_image_url || item.capa_url || item.thumbnail_url || lp.hero_image_url || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=1200'} 
