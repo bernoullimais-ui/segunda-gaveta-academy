@@ -137,13 +137,14 @@ interface FooterProps {
   layout: 'escuro' | 'claro';
   item: any;
   lp?: any;
+  style?: React.CSSProperties;
 }
 
-const Footer = ({ layout, item, lp = {} }: FooterProps) => {
+const Footer = ({ layout, item, lp = {}, style }: FooterProps) => {
   const specialistName = lp.instructor?.name || item.professor_nome || 'Especialista';
 
   return (
-    <footer className="py-16 sm:py-24 bg-slate-950 border-t border-slate-900 text-slate-300 font-sans">
+    <footer className="py-16 sm:py-24 bg-slate-950 border-t border-slate-900 text-slate-300 font-sans" style={style}>
       <div className="max-w-7xl mx-auto px-6 sm:px-8">
         
         {/* Main Grid */}
@@ -2193,7 +2194,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
            </div>
         </section>
 
-        <Footer layout={layout} item={item} lp={lp} />
+        <Footer layout={layout} item={item} lp={lp} style={getSectionStyle('footer')} />
         
         {/* Modals */}
         <ModalErrorBoundary>
