@@ -454,7 +454,7 @@ const EnrollmentModal = ({
   );
 };
 
-const TestimonialsCarousel = ({ testimonials, layout, primaryColor }: { testimonials: any[], layout: string, primaryColor: string }) => {
+const TestimonialsCarousel = ({ testimonials, layout, primaryColor, lp }: { testimonials: any[], layout: string, primaryColor: string, lp?: any }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   if (!testimonials || testimonials.length === 0) return null;
@@ -475,12 +475,18 @@ const TestimonialsCarousel = ({ testimonials, layout, primaryColor }: { testimon
       {/* Testimonial Active Card */}
       <div className="relative z-10 w-full max-w-2xl mx-auto px-8 sm:px-14 space-y-6 min-h-[220px] flex flex-col justify-center items-center">
         {/* Student Name */}
-        <h3 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-normal text-white tracking-tight">
+        <h3 
+          className={`text-3xl sm:text-4xl lg:text-5xl font-serif font-normal text-white tracking-tight ${lp?.testimonial_name_style || 'typo-title-2'}`}
+          style={lp?.testimonial_name_color ? { color: lp.testimonial_name_color } : undefined}
+        >
           {current.name}
         </h3>
 
         {/* Testimonial Text */}
-        <p className="text-base sm:text-lg lg:text-xl text-slate-300/90 leading-relaxed font-sans max-w-2xl text-center">
+        <p 
+          className={`text-base sm:text-lg lg:text-xl text-slate-300/90 leading-relaxed font-sans max-w-2xl text-center ${lp?.testimonial_text_style || 'typo-body-1'}`}
+          style={lp?.testimonial_text_color ? { color: lp.testimonial_text_color } : undefined}
+        >
           {current.text}
         </p>
       </div>
@@ -1630,12 +1636,18 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                     isNotLast ? 'md:border-r md:border-white/20' : ''
                   }`}
                 >
-                  <h4 className="text-5xl sm:text-6xl lg:text-7xl font-serif font-normal text-white leading-none tracking-tight">
+                  <h4 
+                    className={`text-5xl sm:text-6xl lg:text-7xl font-serif font-normal text-white leading-none tracking-tight ${lp.benefit_title_style || 'typo-title-2'}`}
+                    style={lp.benefit_title_color ? { color: lp.benefit_title_color } : undefined}
+                  >
                     {itemObj.title}
                   </h4>
 
                   {itemObj.description && (
-                    <p className="text-sm sm:text-base text-slate-300/90 leading-relaxed font-sans max-w-xs mx-auto text-center">
+                    <p 
+                      className={`text-sm sm:text-base text-slate-300/90 leading-relaxed font-sans max-w-xs mx-auto text-center ${lp.benefit_text_style || 'typo-body-2'}`}
+                      style={lp.benefit_text_color ? { color: lp.benefit_text_color } : undefined}
+                    >
                       {itemObj.description}
                     </p>
                   )}
@@ -1659,12 +1671,12 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
         </span>
 
         <div className="max-w-5xl mx-auto px-6 text-center space-y-8 relative z-10">
-          <TestimonialsCarousel testimonials={lp.testimonials} layout={layout} primaryColor={lp.primary_color} />
+          <TestimonialsCarousel testimonials={lp.testimonials} layout={layout} primaryColor={lp.primary_color} lp={lp} />
         </div>
       </section>
     ) : null,
     audience: (
-      <TargetAudienceSection key="audience" targetAudience={lp.target_audience} layout={layout} style={getSectionStyle('audience')} />
+      <TargetAudienceSection key="audience" targetAudience={lp.target_audience} layout={layout} style={getSectionStyle('audience')} lp={lp} />
     ),
     instructor: (
       <section key="instructor" id="instrutor" className="relative w-full overflow-hidden bg-slate-950 text-left" style={getSectionStyle('instructor')}>
@@ -1679,17 +1691,26 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
 
           <div className="p-8 sm:p-12 lg:p-20 xl:p-24 flex flex-col justify-center text-left space-y-6 sm:space-y-8">
             <div className="space-y-3">
-              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-[1.15] tracking-tight typo-title">
+              <h2 
+                className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-[1.15] tracking-tight ${lp.instructor_name_style || 'typo-title-1'}`}
+                style={lp.instructor_name_color ? { color: lp.instructor_name_color } : undefined}
+              >
                 {lp.instructor?.name || item.professor_nome || 'Especialista'}
               </h2>
               {Boolean(lp.instructor?.role?.trim()) && (
-                <p className="text-lg sm:text-xl text-primary font-medium tracking-wide">
+                <p 
+                  className={`text-lg sm:text-xl text-primary font-medium tracking-wide ${lp.instructor_role_style || ''}`}
+                  style={lp.instructor_role_color ? { color: lp.instructor_role_color } : undefined}
+                >
                   {lp.instructor.role}
                 </p>
               )}
             </div>
             
-            <div className="text-base sm:text-lg text-slate-300/90 leading-relaxed font-sans space-y-4 typo-body-2">
+            <div 
+              className={`text-base sm:text-lg text-slate-300/90 leading-relaxed font-sans space-y-4 ${lp.instructor_bio_style || 'typo-body-2'}`}
+              style={lp.instructor_bio_color ? { color: lp.instructor_bio_color } : undefined}
+            >
               <ReactMarkdown remarkPlugins={[remarkGfm]}>
                 {lp.instructor?.bio || item.professor_bio || 'Comprometido em guiar alunos na jornada de transformação profissional através de métodos validados no mercado.'}
               </ReactMarkdown>
@@ -1702,7 +1723,10 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
       <section key="curriculum" id="curriculo" className="relative w-full overflow-hidden bg-slate-950 text-left" style={getSectionStyle('curriculum')}>
         <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[550px] lg:min-h-[650px] w-full items-stretch">
           <div className="p-8 sm:p-12 lg:p-20 xl:p-24 flex flex-col justify-center text-left space-y-6 sm:space-y-8">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-[1.15] tracking-tight typo-title">
+            <h2 
+              className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-[1.15] tracking-tight ${lp.curriculum_title_style || 'typo-title-1'}`}
+              style={lp.curriculum_title_color ? { color: lp.curriculum_title_color } : undefined}
+            >
               {lp.curriculum_title || 'O que você verá por aqui:'}
             </h2>
             
@@ -1719,7 +1743,10 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                         <span className="font-serif text-2xl font-semibold text-white/90">
                           {String(idx + 1).padStart(2, '0')}
                         </span>
-                        <span className="font-medium text-white text-base sm:text-lg tracking-tight">
+                        <span 
+                          className={`font-medium text-white text-base sm:text-lg tracking-tight ${lp.curriculum_module_style || ''}`}
+                          style={lp.curriculum_module_color ? { color: lp.curriculum_module_color } : undefined}
+                        >
                           {modulo.nome}
                         </span>
                       </div>
@@ -1747,7 +1774,12 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                                   ) : (
                                     <FileText className="w-4 h-4 text-blue-400 shrink-0" />
                                   )}
-                                  <span className="text-sm font-medium">{etapa.nome}</span>
+                                  <span 
+                                    className={`text-sm font-medium ${lp.curriculum_lesson_style || ''}`}
+                                    style={lp.curriculum_lesson_color ? { color: lp.curriculum_lesson_color } : undefined}
+                                  >
+                                    {etapa.nome}
+                                  </span>
                                 </div>
                               </div>
                             ))
@@ -1765,7 +1797,8 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             <div className="pt-4 w-full">
               <button 
                 onClick={handleEnrollClick}
-                className="typo-btn w-full py-4 px-6 bg-primary text-white rounded-full font-serif italic text-lg sm:text-xl shadow-xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center text-center"
+                className={`w-full py-4 px-6 bg-primary text-white rounded-full font-serif italic text-lg sm:text-xl shadow-xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center text-center ${lp.curriculum_cta_style || 'typo-btn-1'}`}
+                style={lp.curriculum_cta_color ? { color: lp.curriculum_cta_color } : undefined}
               >
                 <span>{lp.copy_section_cta_text || lp.cta_text || 'Acesse agora'}</span>
               </button>
@@ -1785,7 +1818,10 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
     faq: lp.faq?.length > 0 ? (
       <section key="faq" id="faq" className="py-24 sm:py-32 bg-slate-950" style={getSectionStyle('faq')}>
         <div className="max-w-4xl mx-auto px-6 text-center space-y-10">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white tracking-tight typo-title">
+          <h2 
+            className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white tracking-tight ${lp.faq_title_style || 'typo-title-1'}`}
+            style={lp.faq_title_color ? { color: lp.faq_title_color } : undefined}
+          >
             Perguntas frequentes:
           </h2>
           
@@ -1802,7 +1838,10 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                       <span className="font-serif text-2xl font-semibold text-white/90">
                         {String(idx + 1).padStart(2, '0')}
                       </span>
-                      <span className="font-medium text-white text-base sm:text-lg tracking-tight">
+                      <span 
+                        className={`font-medium text-white text-base sm:text-lg tracking-tight ${lp.faq_question_style || ''}`}
+                        style={lp.faq_question_color ? { color: lp.faq_question_color } : undefined}
+                      >
                         {f.question}
                       </span>
                     </div>
@@ -1818,7 +1857,12 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                         transition={{ duration: 0.2 }}
                         className="overflow-hidden px-6 py-5 mt-2 bg-white/5 rounded-2xl border border-white/10 text-slate-300 text-base leading-relaxed"
                       >
-                        <p className="text-slate-300 leading-relaxed text-base sm:text-lg typo-text">{f.answer}</p>
+                        <p 
+                          className={`text-slate-300 leading-relaxed text-base sm:text-lg ${lp.faq_answer_style || 'typo-body-2'}`}
+                          style={lp.faq_answer_color ? { color: lp.faq_answer_color } : undefined}
+                        >
+                          {f.answer}
+                        </p>
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -1830,7 +1874,8 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
           <div className="pt-4 w-full">
             <button 
               onClick={handleEnrollClick}
-              className="typo-btn w-full py-4 px-6 bg-primary text-white rounded-full font-serif italic text-lg sm:text-xl shadow-xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center text-center"
+              className={`w-full py-4 px-6 bg-primary text-white rounded-full font-serif italic text-lg sm:text-xl shadow-xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center text-center ${lp.curriculum_cta_style || 'typo-btn-1'}`}
+              style={lp.curriculum_cta_color ? { color: lp.curriculum_cta_color } : undefined}
             >
               <span>{lp.copy_section_cta_text || lp.cta_text || 'Acesse agora'}</span>
             </button>

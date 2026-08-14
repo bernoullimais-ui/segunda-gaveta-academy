@@ -4735,7 +4735,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                 <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                   <div className="p-5 border-b border-slate-100 bg-slate-50/50">
                     <h4 className="font-bold text-slate-800">Seção Conteúdo Programático (Currículo)</h4>
-                    <p className="text-xs text-slate-500">Configure o título e a imagem de destaque exibidos ao lado dos módulos.</p>
+                    <p className="text-xs text-slate-500">Configure o título, nomes dos módulos/aulas e botões exibidos na seção.</p>
                   </div>
                   <div className="p-6 space-y-4">
                     <div>
@@ -4747,7 +4747,124 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                         className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all font-medium"
                         placeholder="Ex: O que você verá por aqui:"
                       />
+                      <div className="mt-2.5 flex flex-wrap sm:flex-nowrap items-center gap-3 p-2 bg-slate-50 border border-slate-200 rounded-lg">
+                        <div className="flex-1 flex items-center gap-2 min-w-[180px]">
+                          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider shrink-0">Estilo:</span>
+                          <select
+                            value={lpData.curriculum_title_style || ''}
+                            onChange={(e) => setLpData({...lpData, curriculum_title_style: e.target.value})}
+                            className="w-full text-xs bg-white border border-slate-200 rounded px-2.5 py-1.5 outline-none font-medium text-slate-700 focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                          >
+                            <option value="">Padrão (Título 1)</option>
+                            <option value="typo-title-1">Título 1</option>
+                            <option value="typo-title-2">Título 2</option>
+                            <option value="typo-title-3">Título 3</option>
+                            <option value="typo-body-1">Texto corrido 1</option>
+                            <option value="typo-body-2">Texto corrido 2</option>
+                            <option value="typo-body-3">Texto corrido 3</option>
+                            <option value="typo-body-4">Texto corrido 4</option>
+                            <option value="typo-btn-1">Texto Botão 1</option>
+                            <option value="typo-btn-2">Texto Botão 2</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider shrink-0">Cor:</span>
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="color"
+                              value={lpData.curriculum_title_color || '#ffffff'}
+                              onChange={(e) => setLpData({...lpData, curriculum_title_color: e.target.value})}
+                              className="w-7 h-7 p-0.5 border border-slate-200 rounded cursor-pointer shrink-0 bg-white"
+                            />
+                            <input
+                              type="text"
+                              value={lpData.curriculum_title_color || ''}
+                              onChange={(e) => setLpData({...lpData, curriculum_title_color: e.target.value})}
+                              placeholder="#ffffff"
+                              className="w-24 px-2 py-1 border border-slate-200 rounded text-xs outline-none bg-white font-mono"
+                            />
+                          </div>
+                        </div>
+                      </div>
                     </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2 border-t border-slate-100">
+                      <div>
+                        <span className="text-[11px] font-bold text-slate-700 block mb-1">Nome do Módulo:</span>
+                        <div className="flex flex-col gap-1.5 p-2 bg-slate-50 border border-slate-200 rounded-lg">
+                          <select
+                            value={lpData.curriculum_module_style || ''}
+                            onChange={(e) => setLpData({...lpData, curriculum_module_style: e.target.value})}
+                            className="w-full text-xs bg-white border border-slate-200 rounded px-2 py-1 outline-none font-medium"
+                          >
+                            <option value="">Estilo Padrão</option>
+                            <option value="typo-title-1">Título 1</option>
+                            <option value="typo-title-2">Título 2</option>
+                            <option value="typo-title-3">Título 3</option>
+                            <option value="typo-body-1">Texto corrido 1</option>
+                            <option value="typo-body-2">Texto corrido 2</option>
+                            <option value="typo-body-3">Texto corrido 3</option>
+                            <option value="typo-body-4">Texto corrido 4</option>
+                          </select>
+                          <input
+                            type="color"
+                            value={lpData.curriculum_module_color || '#ffffff'}
+                            onChange={(e) => setLpData({...lpData, curriculum_module_color: e.target.value})}
+                            className="w-full h-6 p-0.5 border border-slate-200 rounded cursor-pointer shrink-0 bg-white"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <span className="text-[11px] font-bold text-slate-700 block mb-1">Nome da Aula:</span>
+                        <div className="flex flex-col gap-1.5 p-2 bg-slate-50 border border-slate-200 rounded-lg">
+                          <select
+                            value={lpData.curriculum_lesson_style || ''}
+                            onChange={(e) => setLpData({...lpData, curriculum_lesson_style: e.target.value})}
+                            className="w-full text-xs bg-white border border-slate-200 rounded px-2 py-1 outline-none font-medium"
+                          >
+                            <option value="">Estilo Padrão</option>
+                            <option value="typo-title-1">Título 1</option>
+                            <option value="typo-title-2">Título 2</option>
+                            <option value="typo-title-3">Título 3</option>
+                            <option value="typo-body-1">Texto corrido 1</option>
+                            <option value="typo-body-2">Texto corrido 2</option>
+                            <option value="typo-body-3">Texto corrido 3</option>
+                            <option value="typo-body-4">Texto corrido 4</option>
+                          </select>
+                          <input
+                            type="color"
+                            value={lpData.curriculum_lesson_color || '#cbd5e1'}
+                            onChange={(e) => setLpData({...lpData, curriculum_lesson_color: e.target.value})}
+                            className="w-full h-6 p-0.5 border border-slate-200 rounded cursor-pointer shrink-0 bg-white"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <span className="text-[11px] font-bold text-slate-700 block mb-1">Botão CTA (Currículo):</span>
+                        <div className="flex flex-col gap-1.5 p-2 bg-slate-50 border border-slate-200 rounded-lg">
+                          <select
+                            value={lpData.curriculum_cta_style || ''}
+                            onChange={(e) => setLpData({...lpData, curriculum_cta_style: e.target.value})}
+                            className="w-full text-xs bg-white border border-slate-200 rounded px-2 py-1 outline-none font-medium"
+                          >
+                            <option value="">Estilo Botão 1</option>
+                            <option value="typo-btn-1">Texto Botão 1</option>
+                            <option value="typo-btn-2">Texto Botão 2</option>
+                            <option value="typo-title-1">Título 1</option>
+                            <option value="typo-title-2">Título 2</option>
+                          </select>
+                          <input
+                            type="color"
+                            value={lpData.curriculum_cta_color || '#ffffff'}
+                            onChange={(e) => setLpData({...lpData, curriculum_cta_color: e.target.value})}
+                            className="w-full h-6 p-0.5 border border-slate-200 rounded cursor-pointer shrink-0 bg-white"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
                     <div>
                       <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wider text-xs">Foto de Destaque da Seção (URL)</label>
                       <div className="relative">
@@ -4779,6 +4896,53 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                     </button>
                   </div>
                   <div className="p-6 space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200">
+                      <div>
+                        <span className="text-[11px] font-bold text-slate-700 block mb-1">Estilo & Cor do Título:</span>
+                        <div className="flex items-center gap-2">
+                          <select
+                            value={lpData.benefit_title_style || ''}
+                            onChange={(e) => setLpData({...lpData, benefit_title_style: e.target.value})}
+                            className="w-full text-xs bg-white border border-slate-200 rounded px-2 py-1 outline-none font-medium"
+                          >
+                            <option value="">Padrão (Título 2)</option>
+                            <option value="typo-title-1">Título 1</option>
+                            <option value="typo-title-2">Título 2</option>
+                            <option value="typo-title-3">Título 3</option>
+                            <option value="typo-body-1">Texto corrido 1</option>
+                          </select>
+                          <input
+                            type="color"
+                            value={lpData.benefit_title_color || '#ffffff'}
+                            onChange={(e) => setLpData({...lpData, benefit_title_color: e.target.value})}
+                            className="w-7 h-7 p-0.5 border border-slate-200 rounded cursor-pointer shrink-0 bg-white"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <span className="text-[11px] font-bold text-slate-700 block mb-1">Estilo & Cor do Detalhamento:</span>
+                        <div className="flex items-center gap-2">
+                          <select
+                            value={lpData.benefit_text_style || ''}
+                            onChange={(e) => setLpData({...lpData, benefit_text_style: e.target.value})}
+                            className="w-full text-xs bg-white border border-slate-200 rounded px-2 py-1 outline-none font-medium"
+                          >
+                            <option value="">Padrão (Texto corrido 2)</option>
+                            <option value="typo-body-1">Texto corrido 1</option>
+                            <option value="typo-body-2">Texto corrido 2</option>
+                            <option value="typo-body-3">Texto corrido 3</option>
+                            <option value="typo-body-4">Texto corrido 4</option>
+                          </select>
+                          <input
+                            type="color"
+                            value={lpData.benefit_text_color || '#cbd5e1'}
+                            onChange={(e) => setLpData({...lpData, benefit_text_color: e.target.value})}
+                            className="w-7 h-7 p-0.5 border border-slate-200 rounded cursor-pointer shrink-0 bg-white"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
                     {(lpData.benefits || []).map((benefit: any, idx: number) => {
                       const itemObj = typeof benefit === 'object' && benefit !== null ? benefit : { title: typeof benefit === 'string' ? benefit : '', description: '' };
 
@@ -4850,6 +5014,51 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                     </button>
                   </div>
                   <div className="p-6 space-y-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200">
+                      <div>
+                        <span className="text-[11px] font-bold text-slate-700 block mb-1">Estilo & Cor do Nome:</span>
+                        <div className="flex items-center gap-2">
+                          <select
+                            value={lpData.testimonial_name_style || ''}
+                            onChange={(e) => setLpData({...lpData, testimonial_name_style: e.target.value})}
+                            className="w-full text-xs bg-white border border-slate-200 rounded px-2 py-1 outline-none font-medium"
+                          >
+                            <option value="">Padrão (Título 2)</option>
+                            <option value="typo-title-1">Título 1</option>
+                            <option value="typo-title-2">Título 2</option>
+                            <option value="typo-title-3">Título 3</option>
+                          </select>
+                          <input
+                            type="color"
+                            value={lpData.testimonial_name_color || '#ffffff'}
+                            onChange={(e) => setLpData({...lpData, testimonial_name_color: e.target.value})}
+                            className="w-7 h-7 p-0.5 border border-slate-200 rounded cursor-pointer shrink-0 bg-white"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <span className="text-[11px] font-bold text-slate-700 block mb-1">Estilo & Cor do Comentário:</span>
+                        <div className="flex items-center gap-2">
+                          <select
+                            value={lpData.testimonial_text_style || ''}
+                            onChange={(e) => setLpData({...lpData, testimonial_text_style: e.target.value})}
+                            className="w-full text-xs bg-white border border-slate-200 rounded px-2 py-1 outline-none font-medium"
+                          >
+                            <option value="">Padrão (Texto corrido 1)</option>
+                            <option value="typo-body-1">Texto corrido 1</option>
+                            <option value="typo-body-2">Texto corrido 2</option>
+                            <option value="typo-body-3">Texto corrido 3</option>
+                          </select>
+                          <input
+                            type="color"
+                            value={lpData.testimonial_text_color || '#cbd5e1'}
+                            onChange={(e) => setLpData({...lpData, testimonial_text_color: e.target.value})}
+                            className="w-7 h-7 p-0.5 border border-slate-200 rounded cursor-pointer shrink-0 bg-white"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
                     {(lpData.testimonials || []).map((t: any, idx: number) => (
                       <div key={idx} className="p-4 border border-slate-100 rounded-xl space-y-4 relative group">
                         <button 
@@ -4926,6 +5135,71 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                     </button>
                   </div>
                   <div className="p-6 space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200">
+                      <div>
+                        <span className="text-[11px] font-bold text-slate-700 block mb-1">Título Bônus:</span>
+                        <div className="flex items-center gap-1.5">
+                          <select
+                            value={lpData.bonus_title_style || ''}
+                            onChange={(e) => setLpData({...lpData, bonus_title_style: e.target.value})}
+                            className="w-full text-xs bg-white border border-slate-200 rounded px-1.5 py-1 outline-none font-medium"
+                          >
+                            <option value="">Padrão (T3)</option>
+                            <option value="typo-title-1">Título 1</option>
+                            <option value="typo-title-2">Título 2</option>
+                            <option value="typo-title-3">Título 3</option>
+                          </select>
+                          <input
+                            type="color"
+                            value={lpData.bonus_title_color || '#ffffff'}
+                            onChange={(e) => setLpData({...lpData, bonus_title_color: e.target.value})}
+                            className="w-6 h-6 p-0.5 border border-slate-200 rounded cursor-pointer shrink-0 bg-white"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <span className="text-[11px] font-bold text-slate-700 block mb-1">Valor de Mercado:</span>
+                        <div className="flex items-center gap-1.5">
+                          <select
+                            value={lpData.bonus_value_style || ''}
+                            onChange={(e) => setLpData({...lpData, bonus_value_style: e.target.value})}
+                            className="w-full text-xs bg-white border border-slate-200 rounded px-1.5 py-1 outline-none font-medium"
+                          >
+                            <option value="">Padrão (TC4)</option>
+                            <option value="typo-body-3">TC 3</option>
+                            <option value="typo-body-4">TC 4</option>
+                          </select>
+                          <input
+                            type="color"
+                            value={lpData.bonus_value_color || '#a7f3d0'}
+                            onChange={(e) => setLpData({...lpData, bonus_value_color: e.target.value})}
+                            className="w-6 h-6 p-0.5 border border-slate-200 rounded cursor-pointer shrink-0 bg-white"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <span className="text-[11px] font-bold text-slate-700 block mb-1">O que recebe?:</span>
+                        <div className="flex items-center gap-1.5">
+                          <select
+                            value={lpData.bonus_text_style || ''}
+                            onChange={(e) => setLpData({...lpData, bonus_text_style: e.target.value})}
+                            className="w-full text-xs bg-white border border-slate-200 rounded px-1.5 py-1 outline-none font-medium"
+                          >
+                            <option value="">Padrão (TC2)</option>
+                            <option value="typo-body-1">TC 1</option>
+                            <option value="typo-body-2">TC 2</option>
+                            <option value="typo-body-3">TC 3</option>
+                          </select>
+                          <input
+                            type="color"
+                            value={lpData.bonus_text_color || '#d1fae5'}
+                            onChange={(e) => setLpData({...lpData, bonus_text_color: e.target.value})}
+                            className="w-6 h-6 p-0.5 border border-slate-200 rounded cursor-pointer shrink-0 bg-white"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
                     {(lpData.bonuses || []).map((b: any, idx: number) => (
                       <div key={idx} className="flex gap-4 items-start p-4 bg-emerald-50/30 rounded-xl border border-emerald-100 group">
                         <div className="flex-1 space-y-2">
@@ -4984,6 +5258,73 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                     <h4 className="font-bold text-slate-800">Instrutor(a)</h4>
                   </div>
                   <div className="p-6 space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200">
+                      <div>
+                        <span className="text-[11px] font-bold text-slate-700 block mb-1">Nome do Instrutor:</span>
+                        <div className="flex items-center gap-1.5">
+                          <select
+                            value={lpData.instructor_name_style || ''}
+                            onChange={(e) => setLpData({...lpData, instructor_name_style: e.target.value})}
+                            className="w-full text-xs bg-white border border-slate-200 rounded px-1.5 py-1 outline-none font-medium"
+                          >
+                            <option value="">Padrão (T1)</option>
+                            <option value="typo-title-1">Título 1</option>
+                            <option value="typo-title-2">Título 2</option>
+                            <option value="typo-title-3">Título 3</option>
+                          </select>
+                          <input
+                            type="color"
+                            value={lpData.instructor_name_color || '#ffffff'}
+                            onChange={(e) => setLpData({...lpData, instructor_name_color: e.target.value})}
+                            className="w-6 h-6 p-0.5 border border-slate-200 rounded cursor-pointer shrink-0 bg-white"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <span className="text-[11px] font-bold text-slate-700 block mb-1">Cargo / Título:</span>
+                        <div className="flex items-center gap-1.5">
+                          <select
+                            value={lpData.instructor_role_style || ''}
+                            onChange={(e) => setLpData({...lpData, instructor_role_style: e.target.value})}
+                            className="w-full text-xs bg-white border border-slate-200 rounded px-1.5 py-1 outline-none font-medium"
+                          >
+                            <option value="">Padrão (TC3)</option>
+                            <option value="typo-body-1">TC 1</option>
+                            <option value="typo-body-2">TC 2</option>
+                            <option value="typo-body-3">TC 3</option>
+                          </select>
+                          <input
+                            type="color"
+                            value={lpData.instructor_role_color || '#94a3b8'}
+                            onChange={(e) => setLpData({...lpData, instructor_role_color: e.target.value})}
+                            className="w-6 h-6 p-0.5 border border-slate-200 rounded cursor-pointer shrink-0 bg-white"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <span className="text-[11px] font-bold text-slate-700 block mb-1">Biografia:</span>
+                        <div className="flex items-center gap-1.5">
+                          <select
+                            value={lpData.instructor_bio_style || ''}
+                            onChange={(e) => setLpData({...lpData, instructor_bio_style: e.target.value})}
+                            className="w-full text-xs bg-white border border-slate-200 rounded px-1.5 py-1 outline-none font-medium"
+                          >
+                            <option value="">Padrão (TC2)</option>
+                            <option value="typo-body-1">TC 1</option>
+                            <option value="typo-body-2">TC 2</option>
+                            <option value="typo-body-3">TC 3</option>
+                            <option value="typo-body-4">TC 4</option>
+                          </select>
+                          <input
+                            type="color"
+                            value={lpData.instructor_bio_color || '#cbd5e1'}
+                            onChange={(e) => setLpData({...lpData, instructor_bio_color: e.target.value})}
+                            className="w-6 h-6 p-0.5 border border-slate-200 rounded cursor-pointer shrink-0 bg-white"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
                     <div className="flex gap-3 items-center">
                       <div className="w-12 h-12 rounded-full overflow-hidden bg-slate-100 shrink-0 border border-slate-200">
                         {lpData.instructor?.avatar_url ? (
@@ -4997,14 +5338,14 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                             type="text" 
                             value={lpData.instructor?.name}
                             onChange={(e) => setLpData({...lpData, instructor: {...lpData.instructor, name: e.target.value}})}
-                            className="w-full text-sm font-bold outline-none focus:text-blue-600"
+                            className="w-full text-sm font-bold outline-none focus:text-blue-600 border border-slate-200 rounded px-3 py-1.5"
                             placeholder="Nome Completo"
                          />
                          <input 
                             type="text" 
                             value={lpData.instructor?.role}
                             onChange={(e) => setLpData({...lpData, instructor: {...lpData.instructor, role: e.target.value}})}
-                            className="w-full text-xs text-slate-500 outline-none"
+                            className="w-full text-xs text-slate-500 outline-none border border-slate-200 rounded px-3 py-1.5 mt-1"
                             placeholder="Ex: Especialista em Design"
                          />
                       </div>
@@ -5142,6 +5483,43 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                       className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all min-h-[120px] text-sm"
                       placeholder="Para quem este curso foi desenhado?"
                     />
+                    <div className="mt-2.5 flex flex-wrap sm:flex-nowrap items-center gap-3 p-2 bg-slate-50 border border-slate-200 rounded-lg">
+                      <div className="flex-1 flex items-center gap-2 min-w-[180px]">
+                        <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider shrink-0">Estilo:</span>
+                        <select
+                          value={lpData.audience_text_style || ''}
+                          onChange={(e) => setLpData({...lpData, audience_text_style: e.target.value})}
+                          className="w-full text-xs bg-white border border-slate-200 rounded px-2.5 py-1.5 outline-none font-medium text-slate-700 focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                        >
+                          <option value="">Padrão (Texto corrido 1)</option>
+                          <option value="typo-title-1">Título 1</option>
+                          <option value="typo-title-2">Título 2</option>
+                          <option value="typo-title-3">Título 3</option>
+                          <option value="typo-body-1">Texto corrido 1</option>
+                          <option value="typo-body-2">Texto corrido 2</option>
+                          <option value="typo-body-3">Texto corrido 3</option>
+                          <option value="typo-body-4">Texto corrido 4</option>
+                        </select>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider shrink-0">Cor:</span>
+                        <div className="flex items-center gap-1">
+                          <input
+                            type="color"
+                            value={lpData.audience_text_color || '#cbd5e1'}
+                            onChange={(e) => setLpData({...lpData, audience_text_color: e.target.value})}
+                            className="w-7 h-7 p-0.5 border border-slate-200 rounded cursor-pointer shrink-0 bg-white"
+                          />
+                          <input
+                            type="text"
+                            value={lpData.audience_text_color || ''}
+                            onChange={(e) => setLpData({...lpData, audience_text_color: e.target.value})}
+                            placeholder="#cbd5e1"
+                            className="w-24 px-2 py-1 border border-slate-200 rounded text-xs outline-none bg-white font-mono"
+                          />
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -5157,6 +5535,71 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                     </button>
                   </div>
                   <div className="p-6 space-y-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200 mb-4">
+                      <div>
+                        <span className="text-[11px] font-bold text-slate-700 block mb-1">Título FAQ:</span>
+                        <div className="flex items-center gap-1.5">
+                          <select
+                            value={lpData.faq_title_style || ''}
+                            onChange={(e) => setLpData({...lpData, faq_title_style: e.target.value})}
+                            className="w-full text-xs bg-white border border-slate-200 rounded px-1.5 py-1 outline-none font-medium"
+                          >
+                            <option value="">Padrão (T1)</option>
+                            <option value="typo-title-1">Título 1</option>
+                            <option value="typo-title-2">Título 2</option>
+                            <option value="typo-title-3">Título 3</option>
+                          </select>
+                          <input
+                            type="color"
+                            value={lpData.faq_title_color || '#ffffff'}
+                            onChange={(e) => setLpData({...lpData, faq_title_color: e.target.value})}
+                            className="w-6 h-6 p-0.5 border border-slate-200 rounded cursor-pointer shrink-0 bg-white"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <span className="text-[11px] font-bold text-slate-700 block mb-1">Perguntas:</span>
+                        <div className="flex items-center gap-1.5">
+                          <select
+                            value={lpData.faq_question_style || ''}
+                            onChange={(e) => setLpData({...lpData, faq_question_style: e.target.value})}
+                            className="w-full text-xs bg-white border border-slate-200 rounded px-1.5 py-1 outline-none font-medium"
+                          >
+                            <option value="">Padrão (T3)</option>
+                            <option value="typo-title-2">T2</option>
+                            <option value="typo-title-3">T3</option>
+                            <option value="typo-body-1">TC 1</option>
+                          </select>
+                          <input
+                            type="color"
+                            value={lpData.faq_question_color || '#ffffff'}
+                            onChange={(e) => setLpData({...lpData, faq_question_color: e.target.value})}
+                            className="w-6 h-6 p-0.5 border border-slate-200 rounded cursor-pointer shrink-0 bg-white"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <span className="text-[11px] font-bold text-slate-700 block mb-1">Respostas:</span>
+                        <div className="flex items-center gap-1.5">
+                          <select
+                            value={lpData.faq_answer_style || ''}
+                            onChange={(e) => setLpData({...lpData, faq_answer_style: e.target.value})}
+                            className="w-full text-xs bg-white border border-slate-200 rounded px-1.5 py-1 outline-none font-medium"
+                          >
+                            <option value="">Padrão (TC2)</option>
+                            <option value="typo-body-1">TC 1</option>
+                            <option value="typo-body-2">TC 2</option>
+                            <option value="typo-body-3">TC 3</option>
+                          </select>
+                          <input
+                            type="color"
+                            value={lpData.faq_answer_color || '#cbd5e1'}
+                            onChange={(e) => setLpData({...lpData, faq_answer_color: e.target.value})}
+                            className="w-6 h-6 p-0.5 border border-slate-200 rounded cursor-pointer shrink-0 bg-white"
+                          />
+                        </div>
+                      </div>
+                    </div>
                     {lpData.faq.map((item: any, idx: number) => (
                       <div key={idx} className="space-y-2 border-l-2 border-slate-100 pl-4 py-1 relative group">
                         <button 
