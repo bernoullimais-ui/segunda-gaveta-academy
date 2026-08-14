@@ -1561,25 +1561,27 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                 {(lp.hero_title && (lp.hero_title.startsWith('data:image') || lp.hero_title.startsWith('http')) && !lp.hero_title.includes(' ')) ? (
                   <img src={lp.hero_title} alt={item.nome || "Título"} className="object-contain w-auto mx-auto lg:mx-0 max-w-full" style={{ height: lp.hero_title_image_height ? `${lp.hero_title_image_height}px` : '140px' }} />
                 ) : (
-                  <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-serif font-bold text-white leading-[1.1] tracking-tight uppercase typo-title typo-title-1">
-                    {lp.hero_title || item.nome}
-                  </h1>
+                  <>
+                    <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-serif font-bold text-white leading-[1.1] tracking-tight uppercase typo-title typo-title-1 mb-6">
+                      {lp.hero_title || item.nome}
+                    </h1>
+
+                    {/* Decorative Divider Line with Diamond/Sparkle Accent */}
+                    <div className="w-full flex items-center justify-center gap-4 py-2 opacity-80 max-w-lg mb-6">
+                      <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-white/50 to-transparent"></div>
+                      <span className="text-primary text-sm sm:text-base tracking-widest">✦</span>
+                      <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-white/50 to-transparent"></div>
+                    </div>
+
+                    {/* Tagline / Subtitle / Secondary Description */}
+                    {(lp.hero_subtitle || item.descricao) && (
+                      <p className="text-xl sm:text-2xl lg:text-3xl font-serif italic text-slate-200/95 leading-snug max-w-2xl typo-subtitle typo-body-1 hero-no-mobile-transform" style={{ transform: (lp.hero_subtitle_offset_x || lp.hero_subtitle_offset_y) ? `translate(${lp.hero_subtitle_offset_x || 0}px, ${lp.hero_subtitle_offset_y || 0}px)` : undefined }}>
+                        "{lp.hero_subtitle || item.descricao}"
+                      </p>
+                    )}
+                  </>
                 )}
               </div>
-
-              {/* Decorative Divider Line with Diamond/Sparkle Accent */}
-              <div className="w-full flex items-center justify-center gap-4 py-2 opacity-80 max-w-lg">
-                <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-white/50 to-transparent"></div>
-                <span className="text-primary text-sm sm:text-base tracking-widest">✦</span>
-                <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-white/50 to-transparent"></div>
-              </div>
-
-              {/* Tagline / Subtitle / Secondary Description */}
-              {(lp.hero_subtitle || item.descricao) && (
-                <p className="text-xl sm:text-2xl lg:text-3xl font-serif italic text-slate-200/95 leading-snug max-w-2xl typo-subtitle typo-body-1 hero-no-mobile-transform" style={{ transform: (lp.hero_subtitle_offset_x || lp.hero_subtitle_offset_y) ? `translate(${lp.hero_subtitle_offset_x || 0}px, ${lp.hero_subtitle_offset_y || 0}px)` : undefined }}>
-                  "{lp.hero_subtitle || item.descricao}"
-                </p>
-              )}
 
               {/* CTA Button & Instructor By Label */}
               <div className="flex flex-col items-center gap-3 pt-4 w-full hero-no-mobile-transform" style={{ transform: (lp.hero_cta_offset_x || lp.hero_cta_offset_y) ? `translate(${lp.hero_cta_offset_x || 0}px, ${lp.hero_cta_offset_y || 0}px)` : undefined }}>
