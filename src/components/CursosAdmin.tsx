@@ -4681,32 +4681,9 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                       <textarea
                         value={lpData.instructor?.bio || ''}
                         onChange={(e) => setLpData({...lpData, instructor: {...lpData.instructor, bio: e.target.value}})}
-                        className="w-full px-3 py-2 border border-slate-200 rounded text-sm min-h-[100px] mb-3"
+                        className="w-full px-3 py-2 border border-slate-200 rounded text-sm min-h-[100px]"
                         placeholder="Fale um pouco sobre sua trajetória profissional..."
                       />
-                      {/* #5 Configurable instructor stats */}
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="text-[10px] uppercase font-bold text-slate-400 tracking-widest block mb-1">Nº Alunos (ex: 10k+)</label>
-                          <input
-                            type="text"
-                            value={lpData.instructor?.students_count || ''}
-                            onChange={(e) => setLpData({...lpData, instructor: {...lpData.instructor, students_count: e.target.value}})}
-                            className="w-full px-3 py-2 border border-slate-200 rounded text-sm outline-none focus:border-blue-500"
-                            placeholder="Ex: 2.000+"
-                          />
-                        </div>
-                        <div>
-                          <label className="text-[10px] uppercase font-bold text-slate-400 tracking-widest block mb-1">Nº Projetos (ex: 15+)</label>
-                          <input
-                            type="text"
-                            value={lpData.instructor?.projects_count || ''}
-                            onChange={(e) => setLpData({...lpData, instructor: {...lpData.instructor, projects_count: e.target.value}})}
-                            className="w-full px-3 py-2 border border-slate-200 rounded text-sm outline-none focus:border-blue-500"
-                            placeholder="Ex: 30+"
-                          />
-                        </div>
-                      </div>
                     </div>
                   </div>
                 </div>

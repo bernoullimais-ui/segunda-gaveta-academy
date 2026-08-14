@@ -2393,23 +2393,6 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
               <p className="text-lg text-slate-600 leading-relaxed italic">
                 "{lp.instructor?.bio || 'Dedicado a transformar vidas através da educação prática e compartilhamento de experiências reais de mercado.'}"
               </p>
-              {/* #5 Only show instructor stats if configured */}
-              {(lp.instructor?.students_count || lp.instructor?.projects_count) && (
-                <div className="flex justify-center md:justify-start gap-8">
-                  {lp.instructor?.students_count && (
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-slate-900">{lp.instructor.students_count}</div>
-                      <div className="text-sm text-slate-400">Alunos</div>
-                    </div>
-                  )}
-                  {lp.instructor?.projects_count && (
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-slate-900">{lp.instructor.projects_count}</div>
-                      <div className="text-sm text-slate-400">Projetos</div>
-                    </div>
-                  )}
-                </div>
-              )}
             </div>
           </div>
         </div>
