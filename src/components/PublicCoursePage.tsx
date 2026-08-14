@@ -52,7 +52,8 @@ const Nav = ({ layout, item, lp, onEnrollClick, timeLeft }: NavProps) => {
 
   const pad = (num: number) => num.toString().padStart(2, '0');
   const whatsappNum = (lp?.whatsapp_number || item?.whatsapp_suporte || '').replace(/\D/g, '');
-  const whatsappUrl = whatsappNum ? `https://wa.me/${whatsappNum}` : '#';
+  const messageText = encodeURIComponent(`Quero informações sobre ${item?.nome || ''}`);
+  const whatsappUrl = whatsappNum ? `https://wa.me/${whatsappNum}?text=${messageText}` : '#';
 
   React.useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
