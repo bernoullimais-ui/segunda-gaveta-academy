@@ -1692,7 +1692,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                   <div key={idx} className="w-full">
                     <div 
                       onClick={() => toggleModule(idx)}
-                      className="px-6 py-4 rounded-full border border-white/20 bg-transparent backdrop-blur-sm hover:border-primary/60 hover:bg-white/10 transition-all flex items-center justify-between cursor-pointer select-none group"
+                      className="px-6 py-4 rounded-2xl border border-white/20 bg-transparent backdrop-blur-sm hover:border-primary/60 hover:bg-white/10 transition-all flex items-center justify-between cursor-pointer select-none group"
                     >
                       <div className="flex items-center gap-4 flex-1">
                         <span className="font-serif text-2xl font-semibold text-white/90">
@@ -1712,7 +1712,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                           animate={{ height: 'auto', opacity: 1 }}
                           exit={{ height: 0, opacity: 0 }}
                           transition={{ duration: 0.2 }}
-                          className="overflow-hidden px-6 py-4 mt-2 bg-white/5 rounded-3xl border border-white/10 space-y-2 text-slate-300"
+                          className="overflow-hidden px-6 py-4 mt-2 bg-white/5 rounded-2xl border border-white/10 space-y-2 text-slate-300"
                         >
                           {modulo.etapas && modulo.etapas.length > 0 ? (
                             modulo.etapas.map((etapa: any, sIdx: number) => (
@@ -1775,7 +1775,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                 <div key={idx} className="w-full text-left">
                   <div 
                     onClick={() => toggleFaq(idx)}
-                    className="px-6 py-4 rounded-full border border-white/20 bg-transparent backdrop-blur-sm hover:border-primary/60 hover:bg-white/10 transition-all flex items-center justify-between cursor-pointer select-none group"
+                    className="px-6 py-4 rounded-2xl border border-white/20 bg-transparent backdrop-blur-sm hover:border-primary/60 hover:bg-white/10 transition-all flex items-center justify-between cursor-pointer select-none group"
                   >
                     <div className="flex items-center gap-4 flex-1">
                       <span className="font-serif text-2xl font-semibold text-white/90">
@@ -1795,7 +1795,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.2 }}
-                        className="overflow-hidden px-6 py-5 mt-2 bg-white/5 rounded-3xl border border-white/10 text-slate-300 text-base leading-relaxed"
+                        className="overflow-hidden px-6 py-5 mt-2 bg-white/5 rounded-2xl border border-white/10 text-slate-300 text-base leading-relaxed"
                       >
                         <p className="text-slate-300 leading-relaxed text-base sm:text-lg typo-text">{f.answer}</p>
                       </motion.div>
