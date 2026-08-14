@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { X, Plus, Save, Eye, Image as ImageIcon, Type } from 'lucide-react';
+import { X, Plus, Save, Eye, Image as ImageIcon, Type, Layers, Trash2, Share2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 export function TrilhaModal({ isOpen, onClose, fetchTrilhas, editingTrilha, orgId }: { isOpen: boolean, onClose: () => void, fetchTrilhas: () => void, editingTrilha?: any, orgId?: string }) {
@@ -17,29 +17,98 @@ export function TrilhaModal({ isOpen, onClose, fetchTrilhas, editingTrilha, orgI
   const [cursosDisponiveis, setCursosDisponiveis] = useState<any[]>([]);
   const [cursosSelecionados, setCursosSelecionados] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
-  const [lpData, setLpData] = useState<any>({
-    enabled: true,
-    hero_title: '',
-    hero_subtitle: '',
-    hero_video_url: '',
-    about: '',
-    benefits: [''],
-    target_audience: '',
-    faq: [{ question: '', answer: '' }],
-    primary_color: '#059669',
-    instructor: {
-      name: '',
-      bio: '',
-      avatar_url: '',
-      role: 'Coordenador(a)'
-    },
-    testimonials: [],
-    bonuses: [],
-    guarantee_days: 7,
-    cta_text: 'Garantir minha vaga',
-    courses_title: 'Cursos inclusos nesta trilha',
-    courses_description: 'Confira os programas que fazem parte desta jornada completa.'
+  const [lpVersions, setLpVersions] = useState<Record<string, any>>({
+    v1: {
+      id: 'v1',
+      nome: 'Versão Principal',
+      status: 'publicada',
+      is_default: true,
+      enabled: true,
+      hero_title: '',
+      hero_subtitle: '',
+      hero_video_url: '',
+      about: '',
+      benefits: [''],
+      target_audience: '',
+      faq: [{ question: '', answer: '' }],
+      primary_color: '#059669',
+      instructor: {
+        name: '',
+        bio: '',
+        avatar_url: '',
+        role: 'Coordenador(a)'
+      },
+      testimonials: [],
+      bonuses: [],
+      guarantee_days: 7,
+      layout_tipo: 'escuro',
+      cta_text: 'Garantir minha vaga',
+      courses_title: 'Cursos inclusos nesta trilha',
+      courses_description: 'Confira os programas que fazem parte desta jornada completa.'
+    }
   });
+  const [currentVersionId, setCurrentVersionId] = useState<string>('v1');
+
+  const setLpData = (newDataOrFn: any) => {
+    setLpVersions(prev => {
+      const activeId = currentVersionId || 'v1';
+      const current = prev[activeId] || {};
+      const updated = typeof newDataOrFn === 'function' ? newDataOrFn(current) : newDataOrFn;
+      return {
+        ...prev,
+        [activeId]: {
+          ...updated,
+          id: activeId,
+          layout_tipo: 'escuro'
+        }
+      };
+    });
+  };
+
+  const lpData = lpVersions[currentVersionId] || lpVersions['v1'] || { layout_tipo: 'escuro' };
+  const defaultVersionId = Object.keys(lpVersions).find(k => lpVersions[k]?.is_default) || 'v1';
+
+  const addNewVersion = () => {
+    const keys = Object.keys(lpVersions);
+    const nextNum = keys.length + 1;
+    const newId = `v${nextNum}`;
+    const sourceVer = lpVersions[currentVersionId] || lpVersions[defaultVersionId] || {};
+
+    setLpVersions(prev => ({
+      ...prev,
+      [newId]: {
+        ...sourceVer,
+        id: newId,
+        nome: `Versão ${nextNum}`,
+        status: 'rascunho',
+        is_default: false,
+        layout_tipo: 'escuro'
+      }
+    }));
+    setCurrentVersionId(newId);
+  };
+
+  const setDefaultVersion = (verId: string) => {
+    setLpVersions(prev => {
+      const next = { ...prev };
+      Object.keys(next).forEach(k => {
+        next[k] = { ...next[k], is_default: k === verId };
+      });
+      return next;
+    });
+  };
+
+  const deleteVersion = (verId: string) => {
+    if (Object.keys(lpVersions).length <= 1) return;
+    if (lpVersions[verId]?.is_default) return;
+    const remainingKeys = Object.keys(lpVersions).filter(k => k !== verId);
+    setLpVersions(prev => {
+      const next = { ...prev };
+      delete next[verId];
+      return next;
+    });
+    setCurrentVersionId(remainingKeys[0] || 'v1');
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -72,35 +141,55 @@ export function TrilhaModal({ isOpen, onClose, fetchTrilhas, editingTrilha, orgI
               setDescricao(editingTrilha.descricao || '');
             }
 
-            if (editingTrilha.configuracao_json?.lp) {
-              setLpData({
-                ...lpData,
-                ...editingTrilha.configuracao_json.lp
+            const configLp = editingTrilha.configuracao_json;
+            if (configLp?.lp_versions && Object.keys(configLp.lp_versions).length > 0) {
+              setLpVersions(configLp.lp_versions);
+              const defaultKey = configLp.active_version_id || Object.keys(configLp.lp_versions).find(k => configLp.lp_versions[k]?.is_default) || Object.keys(configLp.lp_versions)[0];
+              setCurrentVersionId(defaultKey);
+            } else if (configLp?.lp) {
+              setLpVersions({
+                v1: {
+                  id: 'v1',
+                  nome: 'Versão Principal',
+                  status: 'publicada',
+                  is_default: true,
+                  layout_tipo: 'escuro',
+                  ...configLp.lp
+                }
               });
+              setCurrentVersionId('v1');
             } else {
-              setLpData({
-                enabled: true,
-                hero_title: editingTrilha.nome || '',
-                hero_subtitle: editingTrilha.descricao || '',
-                hero_video_url: '',
-                about: editingTrilha.descricao || '',
-                benefits: [''],
-                target_audience: '',
-                faq: [{ question: '', answer: '' }],
-                primary_color: '#059669',
-                instructor: {
-                  name: editingTrilha.coordenador_nome || '',
-                  bio: '',
-                  avatar_url: editingTrilha.coordenador_foto_url || '',
-                  role: 'Coordenador(a)'
-                },
-                testimonials: [],
-                bonuses: [],
-                guarantee_days: 7,
-                cta_text: 'Garantir minha vaga',
-                courses_title: 'Cursos inclusos nesta trilha',
-                courses_description: 'Confira os programas que fazem parte desta jornada completa.'
+              setLpVersions({
+                v1: {
+                  id: 'v1',
+                  nome: 'Versão Principal',
+                  status: 'publicada',
+                  is_default: true,
+                  enabled: true,
+                  hero_title: editingTrilha.nome || '',
+                  hero_subtitle: editingTrilha.descricao || '',
+                  hero_video_url: '',
+                  about: editingTrilha.descricao || '',
+                  benefits: [''],
+                  target_audience: '',
+                  faq: [{ question: '', answer: '' }],
+                  primary_color: '#059669',
+                  instructor: {
+                    name: editingTrilha.coordenador_nome || '',
+                    bio: '',
+                    avatar_url: editingTrilha.coordenador_foto_url || '',
+                    role: 'Coordenador(a)'
+                  },
+                  testimonials: [],
+                  bonuses: [],
+                  guarantee_days: 7,
+                  layout_tipo: 'escuro',
+                  cta_text: 'Garantir minha vaga',
+                  courses_title: 'Cursos inclusos nesta trilha',
+                  courses_description: 'Confira os programas que fazem parte desta jornada completa.'
+                }
               });
+              setCurrentVersionId('v1');
             }
 
             const { data: trilhaCursos } = await supabase.from('trilha_cursos').select('curso_id').eq('trilha_id', editingTrilha.id);
@@ -163,7 +252,10 @@ export function TrilhaModal({ isOpen, onClose, fetchTrilhas, editingTrilha, orgI
         professores_extra_json: profsValidos, // Salva a lista completa aqui
         descricao, 
         configuracao_json: {
-          lp: lpData
+          ...(editingTrilha?.configuracao_json || {}),
+          lp_versions: lpVersions,
+          active_version_id: defaultVersionId,
+          lp: lpVersions[defaultVersionId] || Object.values(lpVersions)[0] || {}
         },
         status: 'Rascunho'
     };

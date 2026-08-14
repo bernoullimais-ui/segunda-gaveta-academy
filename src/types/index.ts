@@ -247,3 +247,61 @@ export interface ProjetoResposta {
   usuarios?: Pick<Usuario, 'id' | 'nome' | 'email'>;
   projeto_conclusao_missoes?: Pick<ProjetoMissao, 'id' | 'titulo' | 'ordem'>;
 }
+
+// ─── Versões da Página de Vendas (LP) ───────────────────────────────────────
+
+export type LpVersionStatus = 'publicada' | 'rascunho';
+
+export interface LandingPageVersionConfig {
+  id: string;                      // ex: 'v1', 'v2'
+  nome: string;                    // ex: 'Versão Principal', 'Campanha Meta Ads'
+  status: LpVersionStatus;          // 'publicada' | 'rascunho'
+  is_default?: boolean;            // se é a versão carregada por padrão na URL raiz
+  enabled?: boolean;
+  hero_title?: string;
+  hero_subtitle?: string;
+  hero_video_url?: string;
+  hero_image_url?: string;
+  hero_title_image_height?: number;
+  hero_align_v?: string;
+  hero_align_h?: string;
+  hero_title_offset_x?: number;
+  hero_title_offset_y?: number;
+  hero_subtitle_offset_x?: number;
+  hero_subtitle_offset_y?: number;
+  hero_cta_offset_x?: number;
+  hero_cta_offset_y?: number;
+  about_title?: string;
+  about?: string;
+  benefits?: string[];
+  target_audience?: string;
+  faq?: Array<{ question: string; answer: string }>;
+  primary_color?: string;
+  logo_url?: string;
+  nav_logo_height?: number;
+  nav_bg_color?: string;
+  instructor?: {
+    name?: string;
+    role?: string;
+    bio?: string;
+    avatar_url?: string;
+    students_count?: string;
+    projects_count?: string;
+  };
+  testimonials?: Array<{ name: string; role: string; text: string; photo_url?: string }>;
+  bonuses?: Array<{ title: string; description: string; value?: string }>;
+  guarantee_days?: number;
+  cta_text?: string;
+  section_order?: string[];
+  countdown_enabled?: boolean;
+  countdown_title?: string;
+  countdown_end_date?: string;
+  layout_tipo?: 'escuro';           // Fixo em 'escuro'
+  [key: string]: any;
+}
+
+export interface LpConfigStorage {
+  active_version_id: string;        // ID da versão padrão (ex: 'v1')
+  versions: Record<string, LandingPageVersionConfig>;
+}
+

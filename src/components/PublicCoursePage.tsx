@@ -749,14 +749,31 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
   };
 
   const [timeLeft, setTimeLeft] = useState<{ hours: number, minutes: number, seconds: number } | null>(null);
-  const lpRaw = item?.configuracao_json?.lp;
+  
+  // Resolução dinâmica da versão da página de vendas (URL param ?v= ou ?version=)
+  const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
+  const versionParam = searchParams.get('v') || searchParams.get('version');
+  
+  const configJson = item?.configuracao_json;
+  const lpVersions = configJson?.lp_versions || {};
+  const activeVerId = configJson?.active_version_id || 'v1';
+
+  let lpRaw = null;
+  if (versionParam && lpVersions[versionParam]) {
+    lpRaw = lpVersions[versionParam];
+  } else if (Object.keys(lpVersions).length > 0) {
+    lpRaw = lpVersions[activeVerId] || Object.values(lpVersions).find((v: any) => v.is_default) || Object.values(lpVersions)[0];
+  } else {
+    lpRaw = configJson?.lp;
+  }
+
   const lp = {
     enabled: true,
     hero_title: item?.nome || '',
     hero_subtitle: item?.descricao || '',
     cta_text: 'Matricule-se Agora',
     primary_color: '#2563eb',
-    layout_tipo: 'claro',
+    layout_tipo: 'escuro' as const,
     benefits: [],
     testimonials: [],
     bonuses: [],
@@ -1360,7 +1377,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
       </div>
     );
   }
-  const layout = lp.layout_tipo || 'claro';
+  const layout = 'escuro';
 
   const hexToRgb = (hex: string) => {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);

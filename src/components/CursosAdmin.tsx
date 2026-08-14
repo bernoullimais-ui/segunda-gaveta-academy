@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { Settings, Users, BarChart2, BookOpen, Clock, Lock, PlayCircle, Plus, Eye, Share2, Download, Search, Filter, MoreHorizontal, MessageSquare, Mail, Award, CheckCircle, ChevronLeft, Calendar, FileText, Gift, DollarSign, Loader2, Image as ImageIcon, Minus, Code, Video as VideoIcon, ShoppingBag, User, CalendarCheck, List, Paperclip, Volume2, Pencil, Trash2, Check, X, Table, Bold, Italic, Underline, ListOrdered, GripVertical, AlertTriangle, Database, Upload, LayoutDashboard, Sparkles, AlertCircle, Info, Link as LinkIcon, BrainCircuit, Type } from 'lucide-react';
+import { Settings, Users, BarChart2, BookOpen, Clock, Lock, PlayCircle, Plus, Eye, Share2, Download, Search, Filter, MoreHorizontal, MessageSquare, Mail, Award, CheckCircle, ChevronLeft, Calendar, FileText, Gift, DollarSign, Loader2, Image as ImageIcon, Minus, Code, Video as VideoIcon, ShoppingBag, User, CalendarCheck, List, Paperclip, Volume2, Pencil, Trash2, Check, X, Table, Bold, Italic, Underline, ListOrdered, GripVertical, AlertTriangle, Database, Upload, LayoutDashboard, Sparkles, AlertCircle, Info, Link as LinkIcon, BrainCircuit, Type, Layers } from 'lucide-react';
 import { motion, AnimatePresence, Reorder } from 'motion/react';
 import { MarketingLinksModal } from './MarketingLinksModal';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
@@ -216,28 +216,111 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
   const [courseParticipants, setCourseParticipants] = useState<any[]>([]);
   const [participantSearch, setParticipantSearch] = useState('');
   const [participantStatusFilter, setParticipantStatusFilter] = useState('todos');
-  const [lpData, setLpData] = useState<any>({
-    enabled: true,
-    hero_title: '',
-    hero_subtitle: '',
-    hero_video_url: '',
-    about: '',
-    benefits: [''],
-    target_audience: '',
-    faq: [{ question: '', answer: '' }],
-    primary_color: '#2563eb',
-    instructor: {
-      name: '',
-      bio: '',
-      avatar_url: '',
-      role: ''
-    },
-    testimonials: [{ name: '', role: '', text: '', photo_url: '' }],
-    bonuses: [{ title: '', description: '' }],
-    guarantee_days: 7,
-    cta_text: 'Matricule-se Agora',
-    section_order: ['hero', 'about', 'features', 'instructor', 'curriculum', 'faq', 'pricing']
+  const [lpVersions, setLpVersions] = useState<Record<string, any>>({
+    v1: {
+      id: 'v1',
+      nome: 'Versão Principal',
+      status: 'publicada',
+      is_default: true,
+      enabled: true,
+      hero_title: '',
+      hero_subtitle: '',
+      hero_video_url: '',
+      about: '',
+      benefits: [''],
+      target_audience: '',
+      faq: [{ question: '', answer: '' }],
+      primary_color: '#2563eb',
+      instructor: {
+        name: '',
+        bio: '',
+        avatar_url: '',
+        role: ''
+      },
+      testimonials: [{ name: '', role: '', text: '', photo_url: '' }],
+      bonuses: [{ title: '', description: '' }],
+      guarantee_days: 7,
+      layout_tipo: 'escuro',
+      cta_text: 'Matricule-se Agora',
+      section_order: ['hero', 'about', 'features', 'instructor', 'curriculum', 'faq', 'pricing']
+    }
   });
+  const [currentVersionId, setCurrentVersionId] = useState<string>('v1');
+
+  const setLpData = (newDataOrFn: any) => {
+    setLpVersions(prev => {
+      const activeId = currentVersionId || 'v1';
+      const current = prev[activeId] || {};
+      const updated = typeof newDataOrFn === 'function' ? newDataOrFn(current) : newDataOrFn;
+      return {
+        ...prev,
+        [activeId]: {
+          ...updated,
+          id: activeId,
+          layout_tipo: 'escuro'
+        }
+      };
+    });
+  };
+
+  const lpData = lpVersions[currentVersionId] || lpVersions['v1'] || { layout_tipo: 'escuro' };
+
+  const defaultVersionId = Object.keys(lpVersions).find(k => lpVersions[k]?.is_default) || 'v1';
+
+  const addNewVersion = () => {
+    const keys = Object.keys(lpVersions);
+    const nextNum = keys.length + 1;
+    const newId = `v${nextNum}`;
+    const sourceVer = lpVersions[currentVersionId] || lpVersions[defaultVersionId] || {};
+
+    setLpVersions(prev => ({
+      ...prev,
+      [newId]: {
+        ...sourceVer,
+        id: newId,
+        nome: `Versão ${nextNum}`,
+        status: 'rascunho',
+        is_default: false,
+        layout_tipo: 'escuro'
+      }
+    }));
+    setCurrentVersionId(newId);
+    showToast(`Nova versão ${newId} criada como Rascunho!`, 'info');
+  };
+
+  const setDefaultVersion = (verId: string) => {
+    setLpVersions(prev => {
+      const next = { ...prev };
+      Object.keys(next).forEach(k => {
+        next[k] = {
+          ...next[k],
+          is_default: k === verId
+        };
+      });
+      return next;
+    });
+    showToast(`Versão ${verId} definida como Principal!`, 'success');
+  };
+
+  const deleteVersion = (verId: string) => {
+    if (Object.keys(lpVersions).length <= 1) {
+      showToast('Não é possível excluir a única versão.', 'error');
+      return;
+    }
+    if (lpVersions[verId]?.is_default) {
+      showToast('Não é possível excluir a versão principal.', 'error');
+      return;
+    }
+    const remainingKeys = Object.keys(lpVersions).filter(k => k !== verId);
+    setLpVersions(prev => {
+      const next = { ...prev };
+      delete next[verId];
+      return next;
+    });
+    setCurrentVersionId(remainingKeys[0] || 'v1');
+    showToast(`Versão ${verId} removida.`, 'info');
+  };
+
 
   const sectionLabels: Record<string, string> = {
     hero: 'Seção Principal (Hero)',
@@ -564,34 +647,55 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
         setAffiliateCommission(commValue != null ? Number(commValue) : 0);
         setPagarmeMarketplaceEnabled(!!freshCurso?.configuracao_json?.pagarme_marketplace_enabled);
 
-        if (freshCurso?.configuracao_json?.lp) {
-          setLpData(prev => ({
-            ...prev,
-            ...freshCurso.configuracao_json.lp
-          }));
+        const configLp = freshCurso?.configuracao_json;
+        if (configLp?.lp_versions && Object.keys(configLp.lp_versions).length > 0) {
+          setLpVersions(configLp.lp_versions);
+          const defaultKey = configLp.active_version_id || Object.keys(configLp.lp_versions).find(k => configLp.lp_versions[k]?.is_default) || Object.keys(configLp.lp_versions)[0];
+          setCurrentVersionId(defaultKey);
+        } else if (configLp?.lp) {
+          const initialVer = {
+            v1: {
+              id: 'v1',
+              nome: 'Versão Principal',
+              status: 'publicada',
+              is_default: true,
+              layout_tipo: 'escuro',
+              ...configLp.lp
+            }
+          };
+          setLpVersions(initialVer);
+          setCurrentVersionId('v1');
         } else {
-          setLpData({
-            enabled: true,
-            hero_title: freshCurso?.nome || '',
-            hero_subtitle: freshCurso?.descricao || '',
-            hero_video_url: '',
-            about: freshCurso?.descricao || '',
-            benefits: [''],
-            target_audience: '',
-            faq: [{ question: '', answer: '' }],
-            primary_color: '#2563eb',
-            instructor: {
-              name: freshCurso?.professor_nome || '',
-              bio: '',
-              avatar_url: freshCurso?.professor_foto_url || '',
-              role: 'Instrutor(a)'
-            },
-            testimonials: [],
-            bonuses: [],
-            guarantee_days: 7,
-            layout_tipo: 'claro',
-            cta_text: 'Matricule-se Agora'
-          });
+          const initialVer = {
+            v1: {
+              id: 'v1',
+              nome: 'Versão Principal',
+              status: 'publicada',
+              is_default: true,
+              enabled: true,
+              hero_title: freshCurso?.nome || '',
+              hero_subtitle: freshCurso?.descricao || '',
+              hero_video_url: '',
+              about: freshCurso?.descricao || '',
+              benefits: [''],
+              target_audience: '',
+              faq: [{ question: '', answer: '' }],
+              primary_color: '#2563eb',
+              instructor: {
+                name: freshCurso?.professor_nome || '',
+                bio: '',
+                avatar_url: freshCurso?.professor_foto_url || '',
+                role: 'Instrutor(a)'
+              },
+              testimonials: [],
+              bonuses: [],
+              guarantee_days: 7,
+              layout_tipo: 'escuro',
+              cta_text: 'Matricule-se Agora'
+            }
+          };
+          setLpVersions(initialVer);
+          setCurrentVersionId('v1');
         }
       })();
     }
@@ -602,9 +706,12 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
     setIsSaving(true);
     try {
       const activeCurso = (cursos || []).find(c => c.id === createdCourseId);
+      const defVerId = Object.keys(lpVersions).find(k => lpVersions[k]?.is_default) || currentVersionId || 'v1';
       const newConfig = {
         ...(activeCurso?.configuracao_json || {}),
-        lp: lpData
+        lp_versions: lpVersions,
+        active_version_id: defVerId,
+        lp: lpVersions[defVerId] || Object.values(lpVersions)[0] || {}
       };
       
       const { error } = await supabase
@@ -617,7 +724,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
       // Update local state
       const nextCursos = cursos.map(c => c.id === createdCourseId ? { ...c, configuracao_json: newConfig } : c);
       setCursos(nextCursos);
-      showToast('Página de venda salva com sucesso!', 'success');
+      showToast('Páginas de vendas salvas com sucesso!', 'success');
     } catch (err: any) {
       console.error('Error saving landing page:', err);
       showToast('Erro ao salvar página de venda: ' + err.message, 'error');
@@ -3755,14 +3862,18 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                     : orgSlug 
                       ? `https://${orgSlug}.segundagaveta.com.br` 
                       : window.location.origin;
-                  const finalUrl = `${baseUrl}/public/${editingTrilha ? 'trilha' : 'curso'}/${activeCurso?.slug || activeTrilha?.slug || createdCourseId}`;
+
+                  const currentVer = lpVersions[currentVersionId];
+                  const isDefaultVer = currentVer?.is_default || currentVersionId === defaultVersionId;
+                  const basePath = `${baseUrl}/public/${editingTrilha ? 'trilha' : 'curso'}/${activeCurso?.slug || activeTrilha?.slug || createdCourseId}`;
+                  const finalUrl = isDefaultVer ? basePath : `${basePath}?v=${currentVersionId}`;
                   
                   return (
                     <div className="flex gap-2">
                       <button 
                         onClick={() => {
                           navigator.clipboard.writeText(finalUrl);
-                          showToast('Link da página de vendas copiado!', 'success');
+                          showToast(`Link da ${currentVer?.nome || currentVersionId} copiado!`, 'success');
                         }}
                         className="px-6 py-2 border border-slate-200 text-slate-700 rounded-full font-medium hover:bg-slate-50 flex items-center gap-2 transition-colors"
                       >
@@ -3789,58 +3900,116 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
               </div>
             </div>
 
+            {/* Version Management Bar */}
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+                <div>
+                  <h4 className="font-bold text-slate-800 text-lg flex items-center gap-2">
+                    <Layers className="w-5 h-5 text-blue-600" /> Versões da Página de Vendas
+                  </h4>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Crie e publique diferentes versões simultaneamente. Cada versão possui link exclusivo para campanhas e ofertas.
+                  </p>
+                </div>
+                <button
+                  onClick={addNewVersion}
+                  className="px-4 py-2 bg-slate-900 text-white rounded-lg text-xs font-bold hover:bg-slate-800 flex items-center gap-2 shrink-0 self-start sm:self-auto transition-colors cursor-pointer"
+                >
+                  <Plus className="w-4 h-4" /> Nova Versão
+                </button>
+              </div>
+
+              {/* Version Selector Tabs */}
+              <div className="flex flex-wrap items-center gap-2">
+                {Object.keys(lpVersions).map((vKey) => {
+                  const ver = lpVersions[vKey];
+                  const isSelected = vKey === currentVersionId;
+                  const isDefault = ver?.is_default || vKey === defaultVersionId;
+                  const isPublished = ver?.status === 'publicada';
+
+                  return (
+                    <button
+                      key={vKey}
+                      onClick={() => setCurrentVersionId(vKey)}
+                      className={`group flex items-center gap-2 px-4 py-2.5 rounded-xl border text-xs font-bold transition-all relative cursor-pointer ${
+                        isSelected
+                          ? 'border-blue-600 bg-blue-50/60 text-blue-700 shadow-sm ring-1 ring-blue-500/20'
+                          : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+                      }`}
+                    >
+                      <span>{ver?.nome || vKey}</span>
+                      {isDefault && (
+                        <span className="px-1.5 py-0.5 bg-blue-600 text-white text-[10px] uppercase tracking-wider rounded font-extrabold" title="Versão padrão acessada na URL raiz">
+                          Principal
+                        </span>
+                      )}
+                      <span
+                        className={`w-2 h-2 rounded-full ${isPublished ? 'bg-emerald-500' : 'bg-amber-400'}`}
+                        title={isPublished ? 'Publicada (Ativa simultaneamente)' : 'Rascunho (Privado)'}
+                      />
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Version Control Settings Panel */}
+              {lpVersions[currentVersionId] && (
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4 mt-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-4 flex-1">
+                    <div className="flex-1 max-w-xs">
+                      <label className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Nome da Versão</label>
+                      <input
+                        type="text"
+                        value={lpVersions[currentVersionId]?.nome || ''}
+                        onChange={(e) => setLpData({ ...lpData, nome: e.target.value })}
+                        className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                        placeholder="Ex: Oferta Black Friday"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Status de Publicação</label>
+                      <button
+                        onClick={() => setLpData({ ...lpData, status: lpData.status === 'publicada' ? 'rascunho' : 'publicada' })}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 border transition-all cursor-pointer ${
+                          lpData.status === 'publicada'
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+                            : 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100'
+                        }`}
+                      >
+                        <span className={`w-2 h-2 rounded-full ${lpData.status === 'publicada' ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                        {lpData.status === 'publicada' ? 'Publicada (Ativa)' : 'Rascunho (Privado)'}
+                      </button>
+                    </div>
+
+                    {!(lpVersions[currentVersionId]?.is_default || currentVersionId === defaultVersionId) && (
+                      <div>
+                        <label className="text-[10px] uppercase font-bold text-slate-400 block mb-1">URL Raiz</label>
+                        <button
+                          onClick={() => setDefaultVersion(currentVersionId)}
+                          className="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 border border-slate-200 hover:bg-white hover:border-blue-500 transition-all cursor-pointer"
+                        >
+                          Definir como Principal
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  {Object.keys(lpVersions).length > 1 && !(lpVersions[currentVersionId]?.is_default || currentVersionId === defaultVersionId) && (
+                    <button
+                      onClick={() => deleteVersion(currentVersionId)}
+                      className="text-red-500 hover:text-red-700 text-xs font-bold flex items-center gap-1 self-end md:self-auto p-1.5 cursor-pointer"
+                      title="Excluir esta versão"
+                    >
+                      <Trash2 className="w-4 h-4" /> Excluir Versão
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="md:col-span-2 space-y-6">
-                {/* Layout Type selection */}
-                <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                  <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex items-center gap-2">
-                    <LayoutDashboard className="w-5 h-5 text-blue-600" />
-                    <h4 className="font-bold text-slate-800">Modelo de Layout</h4>
-                  </div>
-                  <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <button 
-                      onClick={() => setLpData({...lpData, layout_tipo: 'claro'})}
-                      className={`relative p-1 rounded-xl transition-all border-2 overflow-hidden group ${lpData.layout_tipo === 'claro' || !lpData.layout_tipo ? 'border-blue-600 shadow-md' : 'border-transparent hover:border-slate-200'}`}
-                    >
-                      <div className="bg-slate-50 aspect-video rounded-lg flex flex-col p-3 gap-2">
-                        <div className="w-2/3 h-2 bg-slate-300 rounded"></div>
-                        <div className="w-full h-1 bg-slate-200 rounded"></div>
-                        <div className="w-full h-1 bg-slate-200 rounded"></div>
-                        <div className="mt-auto flex justify-between items-center">
-                           <div className="w-8 h-8 rounded-full bg-slate-200"></div>
-                           <div className="w-16 h-4 bg-blue-600 rounded"></div>
-                        </div>
-                      </div>
-                      <div className="mt-2 flex items-center justify-center gap-2 pb-2">
-                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${lpData.layout_tipo === 'claro' || !lpData.layout_tipo ? 'border-blue-600' : 'border-slate-300'}`}>
-                          {(lpData.layout_tipo === 'claro' || !lpData.layout_tipo) && <div className="w-2 h-2 bg-blue-600 rounded-full"></div>}
-                        </div>
-                        <span className={`text-sm font-bold ${lpData.layout_tipo === 'claro' || !lpData.layout_tipo ? 'text-blue-600' : 'text-slate-500'}`}>Layout Claro (Padrão)</span>
-                      </div>
-                    </button>
-
-                    <button 
-                      onClick={() => setLpData({...lpData, layout_tipo: 'escuro'})}
-                      className={`relative p-1 rounded-xl transition-all border-2 overflow-hidden group ${lpData.layout_tipo === 'escuro' ? 'border-blue-600 shadow-md' : 'border-transparent hover:border-slate-200'}`}
-                    >
-                      <div className="bg-slate-900 aspect-video rounded-lg flex flex-col p-3 gap-2">
-                        <div className="w-2/3 h-2 bg-slate-700 rounded"></div>
-                        <div className="w-full h-1 bg-slate-800 rounded"></div>
-                        <div className="w-full h-1 bg-slate-800 rounded"></div>
-                        <div className="mt-auto flex justify-between items-center">
-                           <div className="w-20 h-2 bg-blue-600 rounded"></div>
-                           <div className="w-10 h-6 bg-slate-800 rounded"></div>
-                        </div>
-                      </div>
-                      <div className="mt-2 flex items-center justify-center gap-2 pb-2">
-                        <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${lpData.layout_tipo === 'escuro' ? 'border-blue-600' : 'border-slate-300'}`}>
-                          {lpData.layout_tipo === 'escuro' && <div className="w-2 h-2 bg-blue-600 rounded-full"></div>}
-                        </div>
-                        <span className={`text-sm font-bold ${lpData.layout_tipo === 'escuro' ? 'text-blue-600' : 'text-slate-500'}`}>Layout Escuro (Moderno)</span>
-                      </div>
-                    </button>
-                  </div>
-                </div>
 
                 {/* Navbar section */}
                 <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
