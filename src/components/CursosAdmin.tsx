@@ -4507,24 +4507,44 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                         className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all font-medium"
                         placeholder="Ex: Tudo o que você precisa em um só lugar"
                       />
-                      <div className="mt-2 flex items-center gap-2">
-                        <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider shrink-0">Estilo de Texto do Título:</span>
-                        <select
-                          value={lpData.about_title_style || ''}
-                          onChange={(e) => setLpData({...lpData, about_title_style: e.target.value})}
-                          className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 outline-none font-medium text-slate-700 focus:ring-2 focus:ring-blue-500"
-                        >
-                          <option value="">Padrão (Título 1)</option>
-                          <option value="typo-title-1">Título 1</option>
-                          <option value="typo-title-2">Título 2</option>
-                          <option value="typo-title-3">Título 3</option>
-                          <option value="typo-body-1">Texto corrido 1</option>
-                          <option value="typo-body-2">Texto corrido 2</option>
-                          <option value="typo-body-3">Texto corrido 3</option>
-                          <option value="typo-body-4">Texto corrido 4</option>
-                          <option value="typo-btn-1">Texto Botão 1</option>
-                          <option value="typo-btn-2">Texto Botão 2</option>
-                        </select>
+                      <div className="mt-2.5 flex flex-wrap sm:flex-nowrap items-center gap-3 p-2 bg-slate-50 border border-slate-200 rounded-lg">
+                        <div className="flex-1 flex items-center gap-2 min-w-[180px]">
+                          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider shrink-0">Estilo:</span>
+                          <select
+                            value={lpData.about_title_style || ''}
+                            onChange={(e) => setLpData({...lpData, about_title_style: e.target.value})}
+                            className="w-full text-xs bg-white border border-slate-200 rounded px-2.5 py-1.5 outline-none font-medium text-slate-700 focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                          >
+                            <option value="">Padrão (Título 1)</option>
+                            <option value="typo-title-1">Título 1</option>
+                            <option value="typo-title-2">Título 2</option>
+                            <option value="typo-title-3">Título 3</option>
+                            <option value="typo-body-1">Texto corrido 1</option>
+                            <option value="typo-body-2">Texto corrido 2</option>
+                            <option value="typo-body-3">Texto corrido 3</option>
+                            <option value="typo-body-4">Texto corrido 4</option>
+                            <option value="typo-btn-1">Texto Botão 1</option>
+                            <option value="typo-btn-2">Texto Botão 2</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider shrink-0">Cor:</span>
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="color"
+                              value={lpData.about_title_color || '#ffffff'}
+                              onChange={(e) => setLpData({...lpData, about_title_color: e.target.value})}
+                              className="w-7 h-7 p-0.5 border border-slate-200 rounded cursor-pointer shrink-0 bg-white"
+                            />
+                            <input
+                              type="text"
+                              value={lpData.about_title_color || ''}
+                              onChange={(e) => setLpData({...lpData, about_title_color: e.target.value})}
+                              placeholder="#ffffff"
+                              className="w-24 px-2 py-1 border border-slate-200 rounded text-xs outline-none bg-white font-mono"
+                            />
+                          </div>
+                        </div>
                       </div>
                     </div>
                     <div>
@@ -4561,24 +4581,44 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                         className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all min-h-[200px]"
                         placeholder="Fale mais sobre a metodologia, o que o aluno vai encontrar lá dentro..."
                       />
-                      <div className="mt-2 flex items-center gap-2">
-                        <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider shrink-0">Estilo de Texto da Descrição:</span>
-                        <select
-                          value={lpData.about_text_style || ''}
-                          onChange={(e) => setLpData({...lpData, about_text_style: e.target.value})}
-                          className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 outline-none font-medium text-slate-700 focus:ring-2 focus:ring-blue-500"
-                        >
-                          <option value="">Padrão (Texto corrido 1)</option>
-                          <option value="typo-title-1">Título 1</option>
-                          <option value="typo-title-2">Título 2</option>
-                          <option value="typo-title-3">Título 3</option>
-                          <option value="typo-body-1">Texto corrido 1</option>
-                          <option value="typo-body-2">Texto corrido 2</option>
-                          <option value="typo-body-3">Texto corrido 3</option>
-                          <option value="typo-body-4">Texto corrido 4</option>
-                          <option value="typo-btn-1">Texto Botão 1</option>
-                          <option value="typo-btn-2">Texto Botão 2</option>
-                        </select>
+                      <div className="mt-2.5 flex flex-wrap sm:flex-nowrap items-center gap-3 p-2 bg-slate-50 border border-slate-200 rounded-lg">
+                        <div className="flex-1 flex items-center gap-2 min-w-[180px]">
+                          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider shrink-0">Estilo:</span>
+                          <select
+                            value={lpData.about_text_style || ''}
+                            onChange={(e) => setLpData({...lpData, about_text_style: e.target.value})}
+                            className="w-full text-xs bg-white border border-slate-200 rounded px-2.5 py-1.5 outline-none font-medium text-slate-700 focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                          >
+                            <option value="">Padrão (Texto corrido 1)</option>
+                            <option value="typo-title-1">Título 1</option>
+                            <option value="typo-title-2">Título 2</option>
+                            <option value="typo-title-3">Título 3</option>
+                            <option value="typo-body-1">Texto corrido 1</option>
+                            <option value="typo-body-2">Texto corrido 2</option>
+                            <option value="typo-body-3">Texto corrido 3</option>
+                            <option value="typo-body-4">Texto corrido 4</option>
+                            <option value="typo-btn-1">Texto Botão 1</option>
+                            <option value="typo-btn-2">Texto Botão 2</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider shrink-0">Cor:</span>
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="color"
+                              value={lpData.about_text_color || '#cbd5e1'}
+                              onChange={(e) => setLpData({...lpData, about_text_color: e.target.value})}
+                              className="w-7 h-7 p-0.5 border border-slate-200 rounded cursor-pointer shrink-0 bg-white"
+                            />
+                            <input
+                              type="text"
+                              value={lpData.about_text_color || ''}
+                              onChange={(e) => setLpData({...lpData, about_text_color: e.target.value})}
+                              placeholder="#cbd5e1"
+                              className="w-24 px-2 py-1 border border-slate-200 rounded text-xs outline-none bg-white font-mono"
+                            />
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -4599,24 +4639,44 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                         className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all min-h-[100px] font-serif"
                         placeholder="Ex: Conheça a melhor versão da sua pele em poucos passos."
                       />
-                      <div className="mt-2 flex items-center gap-2">
-                        <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider shrink-0">Estilo da Frase:</span>
-                        <select
-                          value={lpData.copy_text_style || ''}
-                          onChange={(e) => setLpData({...lpData, copy_text_style: e.target.value})}
-                          className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 outline-none font-medium text-slate-700 focus:ring-2 focus:ring-blue-500"
-                        >
-                          <option value="">Padrão (Título 1)</option>
-                          <option value="typo-title-1">Título 1</option>
-                          <option value="typo-title-2">Título 2</option>
-                          <option value="typo-title-3">Título 3</option>
-                          <option value="typo-body-1">Texto corrido 1</option>
-                          <option value="typo-body-2">Texto corrido 2</option>
-                          <option value="typo-body-3">Texto corrido 3</option>
-                          <option value="typo-body-4">Texto corrido 4</option>
-                          <option value="typo-btn-1">Texto Botão 1</option>
-                          <option value="typo-btn-2">Texto Botão 2</option>
-                        </select>
+                      <div className="mt-2.5 flex flex-wrap sm:flex-nowrap items-center gap-3 p-2 bg-slate-50 border border-slate-200 rounded-lg">
+                        <div className="flex-1 flex items-center gap-2 min-w-[180px]">
+                          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider shrink-0">Estilo:</span>
+                          <select
+                            value={lpData.copy_text_style || ''}
+                            onChange={(e) => setLpData({...lpData, copy_text_style: e.target.value})}
+                            className="w-full text-xs bg-white border border-slate-200 rounded px-2.5 py-1.5 outline-none font-medium text-slate-700 focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                          >
+                            <option value="">Padrão (Título 1)</option>
+                            <option value="typo-title-1">Título 1</option>
+                            <option value="typo-title-2">Título 2</option>
+                            <option value="typo-title-3">Título 3</option>
+                            <option value="typo-body-1">Texto corrido 1</option>
+                            <option value="typo-body-2">Texto corrido 2</option>
+                            <option value="typo-body-3">Texto corrido 3</option>
+                            <option value="typo-body-4">Texto corrido 4</option>
+                            <option value="typo-btn-1">Texto Botão 1</option>
+                            <option value="typo-btn-2">Texto Botão 2</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider shrink-0">Cor:</span>
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="color"
+                              value={lpData.copy_text_color || '#ffffff'}
+                              onChange={(e) => setLpData({...lpData, copy_text_color: e.target.value})}
+                              className="w-7 h-7 p-0.5 border border-slate-200 rounded cursor-pointer shrink-0 bg-white"
+                            />
+                            <input
+                              type="text"
+                              value={lpData.copy_text_color || ''}
+                              onChange={(e) => setLpData({...lpData, copy_text_color: e.target.value})}
+                              placeholder="#ffffff"
+                              className="w-24 px-2 py-1 border border-slate-200 rounded text-xs outline-none bg-white font-mono"
+                            />
+                          </div>
+                        </div>
                       </div>
                     </div>
                     <div>
@@ -4628,24 +4688,44 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                         className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all font-medium"
                         placeholder="Ex: Acesse o guia"
                       />
-                      <div className="mt-2 flex items-center gap-2">
-                        <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider shrink-0">Estilo do Botão:</span>
-                        <select
-                          value={lpData.copy_cta_style || ''}
-                          onChange={(e) => setLpData({...lpData, copy_cta_style: e.target.value})}
-                          className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 outline-none font-medium text-slate-700 focus:ring-2 focus:ring-blue-500"
-                        >
-                          <option value="">Padrão (Texto Botão 1)</option>
-                          <option value="typo-title-1">Título 1</option>
-                          <option value="typo-title-2">Título 2</option>
-                          <option value="typo-title-3">Título 3</option>
-                          <option value="typo-body-1">Texto corrido 1</option>
-                          <option value="typo-body-2">Texto corrido 2</option>
-                          <option value="typo-body-3">Texto corrido 3</option>
-                          <option value="typo-body-4">Texto corrido 4</option>
-                          <option value="typo-btn-1">Texto Botão 1</option>
-                          <option value="typo-btn-2">Texto Botão 2</option>
-                        </select>
+                      <div className="mt-2.5 flex flex-wrap sm:flex-nowrap items-center gap-3 p-2 bg-slate-50 border border-slate-200 rounded-lg">
+                        <div className="flex-1 flex items-center gap-2 min-w-[180px]">
+                          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider shrink-0">Estilo:</span>
+                          <select
+                            value={lpData.copy_cta_style || ''}
+                            onChange={(e) => setLpData({...lpData, copy_cta_style: e.target.value})}
+                            className="w-full text-xs bg-white border border-slate-200 rounded px-2.5 py-1.5 outline-none font-medium text-slate-700 focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                          >
+                            <option value="">Padrão (Texto Botão 1)</option>
+                            <option value="typo-title-1">Título 1</option>
+                            <option value="typo-title-2">Título 2</option>
+                            <option value="typo-title-3">Título 3</option>
+                            <option value="typo-body-1">Texto corrido 1</option>
+                            <option value="typo-body-2">Texto corrido 2</option>
+                            <option value="typo-body-3">Texto corrido 3</option>
+                            <option value="typo-body-4">Texto corrido 4</option>
+                            <option value="typo-btn-1">Texto Botão 1</option>
+                            <option value="typo-btn-2">Texto Botão 2</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider shrink-0">Cor:</span>
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="color"
+                              value={lpData.copy_cta_color || '#ffffff'}
+                              onChange={(e) => setLpData({...lpData, copy_cta_color: e.target.value})}
+                              className="w-7 h-7 p-0.5 border border-slate-200 rounded cursor-pointer shrink-0 bg-white"
+                            />
+                            <input
+                              type="text"
+                              value={lpData.copy_cta_color || ''}
+                              onChange={(e) => setLpData({...lpData, copy_cta_color: e.target.value})}
+                              placeholder="#ffffff"
+                              className="w-24 px-2 py-1 border border-slate-200 rounded text-xs outline-none bg-white font-mono"
+                            />
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
