@@ -474,7 +474,7 @@ const TestimonialsCarousel = ({ testimonials, layout, primaryColor, lp }: { test
     <div className="relative w-full max-w-4xl mx-auto px-4 py-8 sm:py-12 flex flex-col items-center justify-center text-center">
 
       {/* Testimonial Active Card */}
-      <div className="relative z-10 w-full max-w-2xl mx-auto px-8 sm:px-14 py-6 min-h-[220px] flex flex-col justify-center items-center">
+      <div className="relative z-10 w-full max-w-2xl mx-auto px-8 sm:px-14 py-6 flex flex-col justify-center items-center">
         {/* Top-Left Double Quote */}
         <span 
           className="absolute -top-6 sm:-top-[320px] -left-4 sm:-left-[300px] text-[120px] sm:text-[1024px] font-serif select-none pointer-events-none leading-none z-0"
@@ -483,21 +483,36 @@ const TestimonialsCarousel = ({ testimonials, layout, primaryColor, lp }: { test
           “
         </span>
 
-        {/* Student Name */}
-        <h3 
-          className={`relative z-10 text-3xl sm:text-4xl lg:text-5xl font-serif font-normal text-white tracking-tight ${lp?.testimonial_name_style || 'typo-title-2'}`}
-          style={lp?.testimonial_name_color ? { color: lp.testimonial_name_color } : undefined}
-        >
-          {current.name}
-        </h3>
+        {/* Stacked Grid Container so section height is fixed to largest testimonial */}
+        <div className="w-full grid grid-cols-1 grid-rows-1 items-center justify-items-center">
+          {testimonials.map((t: any, idx: number) => {
+            const isActive = idx === currentIndex;
+            return (
+              <div 
+                key={idx}
+                className={`col-start-1 row-start-1 w-full flex flex-col items-center justify-center transition-all duration-300 ${
+                  isActive ? 'opacity-100 z-10 pointer-events-auto' : 'opacity-0 z-0 pointer-events-none invisible'
+                }`}
+              >
+                {/* Student Name */}
+                <h3 
+                  className={`relative z-10 text-3xl sm:text-4xl lg:text-5xl font-serif font-normal text-white tracking-tight text-center ${lp?.testimonial_name_style || 'typo-title-2'}`}
+                  style={lp?.testimonial_name_color ? { color: lp.testimonial_name_color } : undefined}
+                >
+                  {t.name}
+                </h3>
 
-        {/* Testimonial Text */}
-        <p 
-          className={`relative z-10 text-base sm:text-lg lg:text-xl text-slate-300/90 leading-relaxed font-sans max-w-2xl text-center mt-4 ${lp?.testimonial_text_style || 'typo-body-1'}`}
-          style={lp?.testimonial_text_color ? { color: lp.testimonial_text_color } : undefined}
-        >
-          {current.text}
-        </p>
+                {/* Testimonial Text */}
+                <p 
+                  className={`relative z-10 text-base sm:text-lg lg:text-xl text-slate-300/90 leading-relaxed font-sans max-w-2xl text-center mt-4 ${lp?.testimonial_text_style || 'typo-body-1'}`}
+                  style={lp?.testimonial_text_color ? { color: lp.testimonial_text_color } : undefined}
+                >
+                  {t.text}
+                </p>
+              </div>
+            );
+          })}
+        </div>
 
         {/* Bottom-Right Double Quote */}
         <span 
