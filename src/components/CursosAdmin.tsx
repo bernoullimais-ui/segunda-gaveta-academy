@@ -6560,10 +6560,31 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                         type="number" 
                         step="0.01"
                         value={editingSettingsData.valor_com_desconto || ''}
-                        onChange={(e) => setEditingSettingsData({...editingSettingsData, valor_com_desconto: e.target.value})}
+                        onChange={(e) => setLpData ? setEditingSettingsData({...editingSettingsData, valor_com_desconto: e.target.value}) : setEditingSettingsData({...editingSettingsData, valor_com_desconto: e.target.value})}
                         className="w-full px-3 py-2 border border-slate-300 rounded outline-none focus:border-blue-500 bg-white"
                         placeholder="Ex: 47.00"
                       />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Máximo de Parcelas Disponíveis</label>
+                      <select
+                        value={editingSettingsData.pagamento_parcelas_limite || '12'}
+                        onChange={(e) => setEditingSettingsData({...editingSettingsData, pagamento_parcelas_limite: e.target.value})}
+                        className="w-full px-3 py-2 border border-slate-300 rounded outline-none focus:border-blue-500 bg-white font-medium text-sm text-slate-800 cursor-pointer"
+                      >
+                        <option value="1">1x (À vista apenas)</option>
+                        <option value="2">Até 2x</option>
+                        <option value="3">Até 3x</option>
+                        <option value="4">Até 4x</option>
+                        <option value="5">Até 5x</option>
+                        <option value="6">Até 6x</option>
+                        <option value="7">Até 7x</option>
+                        <option value="8">Até 8x</option>
+                        <option value="9">Até 9x</option>
+                        <option value="10">Até 10x</option>
+                        <option value="11">Até 11x</option>
+                        <option value="12">Até 12x</option>
+                      </select>
                     </div>
                   </div>
                   
