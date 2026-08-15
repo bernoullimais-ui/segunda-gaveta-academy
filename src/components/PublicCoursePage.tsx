@@ -2011,7 +2011,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             <button 
               onClick={handleEnrollClick}
               className={`w-full py-4 px-6 bg-primary text-white rounded-2xl font-serif italic text-lg sm:text-xl shadow-xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center text-center ${lp.curriculum_cta_style || 'typo-btn-1'}`}
-              style={lp.curriculum_cta_color ? { color: lp.curriculum_cta_color } : undefined}
+              style={{ color: lp.section_about_bg_color || '#0f172a' }}
             >
               <span>{lp.copy_section_cta_text || lp.cta_text || 'Acesse agora'}</span>
             </button>
