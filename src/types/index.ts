@@ -336,6 +336,7 @@ export interface LandingPageVersionConfig {
   guarantee_days?: number;
   cta_text?: string;
   section_order?: string[];
+  visible_sections?: string[];
   countdown_enabled?: boolean;
   countdown_title?: string;
   countdown_end_date?: string;

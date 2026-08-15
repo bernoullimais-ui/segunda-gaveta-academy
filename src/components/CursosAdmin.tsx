@@ -369,6 +369,22 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
     setLpData({ ...lpData, section_order: newOrder });
   };
 
+  const isSectionVisible = (key: string) => {
+    if (!lpData.visible_sections) return true;
+    return lpData.visible_sections.includes(key);
+  };
+
+  const toggleSectionVisibility = (key: string) => {
+    const currentVisible = lpData.visible_sections !== undefined ? lpData.visible_sections : ALL_SECTION_KEYS;
+    let newVisible: string[];
+    if (currentVisible.includes(key)) {
+      newVisible = currentVisible.filter((k: string) => k !== key);
+    } else {
+      newVisible = [...currentVisible, key];
+    }
+    setLpData({ ...lpData, visible_sections: newVisible });
+  };
+
   const fetchCourseStats = async (cursoId: string) => {
     try {
       const { data, error } = await supabase.from('curso_participantes').select('*, usuarios(nome, email)').eq('curso_id', cursoId);
@@ -4285,34 +4301,60 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
 
                 {/* Section Order */}
                 <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                  <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex items-center gap-2">
-                    <ListOrdered className="w-5 h-5 text-blue-600" />
-                    <h4 className="font-bold text-slate-800">Ordem das Seções</h4>
+                  <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <ListOrdered className="w-5 h-5 text-blue-600" />
+                      <h4 className="font-bold text-slate-800">Ordem e Exibição das Seções</h4>
+                    </div>
                   </div>
                   <div className="p-6">
-                    <p className="text-sm text-slate-600 mb-4">Arraste as seções para definir a ordem em que aparecerão na página.</p>
+                    <p className="text-sm text-slate-600 mb-4">Arraste as seções para definir a ordem em que aparecerão na página. Marque a caixa de seleção para exibir a seção ou desmarque para ocultá-la.</p>
                     <DragDropContext onDragEnd={onSectionDragEnd}>
                       <Droppable droppableId="sections">
                         {(provided) => (
                           <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-3">
-                            {getFullSectionOrder(lpData.section_order).map((sectionKey: string, index: number) => (
-                              <Draggable key={sectionKey} draggableId={sectionKey} index={index}>
-                                {(provided, snapshot) => (
-                                  <div
-                                    ref={provided.innerRef}
-                                    {...provided.draggableProps}
-                                    className={`flex items-center gap-3 p-3 bg-white border rounded-xl transition-all ${snapshot.isDragging ? 'border-blue-500 shadow-lg scale-[1.02]' : 'border-slate-200 hover:border-slate-300'}`}
-                                  >
-                                    <div {...provided.dragHandleProps} className="text-slate-400 hover:text-slate-600 cursor-grab active:cursor-grabbing p-1">
-                                      <GripVertical className="w-5 h-5" />
+                            {getFullSectionOrder(lpData.section_order).map((sectionKey: string, index: number) => {
+                              const isVisible = isSectionVisible(sectionKey);
+                              return (
+                                <Draggable key={sectionKey} draggableId={sectionKey} index={index}>
+                                  {(provided, snapshot) => (
+                                    <div
+                                      ref={provided.innerRef}
+                                      {...provided.draggableProps}
+                                      className={`flex items-center gap-3 p-3.5 bg-white border rounded-xl transition-all ${
+                                        snapshot.isDragging 
+                                          ? 'border-blue-500 shadow-lg scale-[1.02] z-50' 
+                                          : isVisible 
+                                            ? 'border-slate-200 hover:border-slate-300' 
+                                            : 'border-slate-200 bg-slate-50/60 opacity-60'
+                                      }`}
+                                    >
+                                      <div {...provided.dragHandleProps} className="text-slate-400 hover:text-slate-600 cursor-grab active:cursor-grabbing p-1">
+                                        <GripVertical className="w-5 h-5" />
+                                      </div>
+                                      <label className="flex items-center gap-3 flex-1 cursor-pointer select-none">
+                                        <input
+                                          type="checkbox"
+                                          checked={isVisible}
+                                          onChange={() => toggleSectionVisibility(sectionKey)}
+                                          className="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer accent-blue-600"
+                                        />
+                                        <span className={`font-bold text-sm ${isVisible ? 'text-slate-700' : 'text-slate-400 line-through'}`}>
+                                          {sectionLabels[sectionKey] || sectionKey}
+                                        </span>
+                                      </label>
+                                      <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
+                                        isVisible 
+                                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
+                                          : 'bg-slate-100 text-slate-400 border border-slate-200'
+                                      }`}>
+                                        {isVisible ? 'Visível' : 'Oculto'}
+                                      </span>
                                     </div>
-                                    <div className="flex-1 font-bold text-sm text-slate-700">
-                                      {sectionLabels[sectionKey] || sectionKey}
-                                    </div>
-                                  </div>
-                                )}
-                              </Draggable>
-                            ))}
+                                  )}
+                                </Draggable>
+                              );
+                            })}
                             {provided.placeholder}
                           </div>
                         )}

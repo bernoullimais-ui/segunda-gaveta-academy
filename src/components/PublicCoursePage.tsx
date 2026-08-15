@@ -1953,6 +1953,11 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
   const missingKeys = defaultOrderKeys.filter(k => !filteredUserOrder.includes(k));
   const activeSectionOrder = [...filteredUserOrder, ...missingKeys];
 
+  const isSectionVisible = (key: string) => {
+    if (!lp.visible_sections) return true;
+    return lp.visible_sections.includes(key);
+  };
+
   if (layout === 'escuro') {
     return (
       <div className="min-h-screen bg-slate-900 selection:bg-primary/30 selection:text-white font-sans text-slate-300">
@@ -2114,75 +2119,77 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
         )}
 
         {/* Dark Hero Section - Full-bleed background banner layout */}
-        <section ref={heroRef} className="relative min-h-[92vh] flex items-center pt-28 pb-20 md:pt-36 md:pb-28 overflow-hidden bg-slate-950 text-left" style={getSectionStyle('hero')}>
-          {/* Full Bleed Background Image */}
-          <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
-            <img 
-              src={lp.hero_image_url || item.capa_url || item.thumbnail_url || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070'} 
-              alt="Banner Principal"
-              className="w-full h-full object-cover object-center"
-            />
-          </div>
-          
-          <div className="max-w-7xl mx-auto px-4 sm:px-8 relative z-10 w-full min-h-0 lg:min-h-[85vh] flex flex-col justify-center">
-            <div className={`w-full max-w-2xl flex flex-col ${
-              lp.hero_align_h === 'center' ? 'mx-auto text-center items-center' :
-              lp.hero_align_h === 'left' ? 'mr-auto text-left items-start' :
-              'lg:ml-auto text-center lg:text-right items-center lg:items-end'
-            } ${
-              lp.hero_align_v === 'top' ? 'mb-auto' :
-              lp.hero_align_v === 'bottom' ? 'mt-auto' :
-              'my-auto'
-            } space-y-6 sm:space-y-8 animate-in fade-in duration-1000`}>
-              
-              {/* Title or Title Image */}
-              <div className="w-full hero-no-mobile-transform" style={{ transform: (lp.hero_title_offset_x || lp.hero_title_offset_y) ? `translate(${lp.hero_title_offset_x || 0}px, ${lp.hero_title_offset_y || 0}px)` : undefined }}>
-                {(lp.hero_title && (lp.hero_title.startsWith('data:image') || lp.hero_title.startsWith('http')) && !lp.hero_title.includes(' ')) ? (
-                  <img src={lp.hero_title} alt={item.nome || "Título"} className="object-contain w-auto mx-auto lg:mx-0 max-w-full" style={{ height: lp.hero_title_image_height ? `${lp.hero_title_image_height}px` : '140px' }} />
-                ) : (
-                  <>
-                    <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-serif font-bold text-white leading-[1.1] tracking-tight uppercase typo-title typo-title-1 mb-6">
-                      {lp.hero_title || item.nome}
-                    </h1>
-
-                    {/* Decorative Divider Line with Diamond/Sparkle Accent */}
-                    <div className="w-full flex items-center justify-center gap-4 py-2 opacity-80 max-w-lg mb-6">
-                      <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-white/50 to-transparent"></div>
-                      <span className="text-primary text-sm sm:text-base tracking-widest">✦</span>
-                      <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-white/50 to-transparent"></div>
-                    </div>
-
-                    {/* Tagline / Subtitle / Secondary Description */}
-                    {(lp.hero_subtitle || item.descricao) && (
-                      <p className="text-xl sm:text-2xl lg:text-3xl font-serif italic text-slate-200/95 leading-snug max-w-2xl typo-subtitle typo-body-1 hero-no-mobile-transform" style={{ transform: (lp.hero_subtitle_offset_x || lp.hero_subtitle_offset_y) ? `translate(${lp.hero_subtitle_offset_x || 0}px, ${lp.hero_subtitle_offset_y || 0}px)` : undefined }}>
-                        "{lp.hero_subtitle || item.descricao}"
-                      </p>
-                    )}
-                  </>
-                )}
-              </div>
-
-              {/* CTA Button & Instructor By Label */}
-              <div className="flex flex-col items-center gap-3 pt-4 w-full hero-no-mobile-transform" style={{ transform: (lp.hero_cta_offset_x || lp.hero_cta_offset_y) ? `translate(${lp.hero_cta_offset_x || 0}px, ${lp.hero_cta_offset_y || 0}px)` : undefined }}>
-                <button 
-                  onClick={handleEnrollClick}
-                  className="typo-btn typo-btn-1 px-8 sm:px-12 py-4 sm:py-5 bg-primary text-white rounded-full font-serif italic text-lg sm:text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_15px_40px_rgba(var(--primary-rgb),0.4)] flex items-center justify-center gap-3 min-w-[240px]"
-                >
-                  {isEmBreve ? 'Cadastrar-se' : (lp.cta_text || 'Descubra o segredo')} <ArrowRight className="w-5 h-5" />
-                </button>
+        {isSectionVisible('hero') && (
+          <section ref={heroRef} className="relative min-h-[92vh] flex items-center pt-28 pb-20 md:pt-36 md:pb-28 overflow-hidden bg-slate-950 text-left" style={getSectionStyle('hero')}>
+            {/* Full Bleed Background Image */}
+            <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
+              <img 
+                src={lp.hero_image_url || item.capa_url || item.thumbnail_url || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070'} 
+                alt="Banner Principal"
+                className="w-full h-full object-cover object-center"
+              />
+            </div>
+            
+            <div className="max-w-7xl mx-auto px-4 sm:px-8 relative z-10 w-full min-h-0 lg:min-h-[85vh] flex flex-col justify-center">
+              <div className={`w-full max-w-2xl flex flex-col ${
+                lp.hero_align_h === 'center' ? 'mx-auto text-center items-center' :
+                lp.hero_align_h === 'left' ? 'mr-auto text-left items-start' :
+                'lg:ml-auto text-center lg:text-right items-center lg:items-end'
+              } ${
+                lp.hero_align_v === 'top' ? 'mb-auto' :
+                lp.hero_align_v === 'bottom' ? 'mt-auto' :
+                'my-auto'
+              } space-y-6 sm:space-y-8 animate-in fade-in duration-1000`}>
                 
-                {(lp.instructor?.name || item.professor_nome) && (
-                  <span className="text-xs sm:text-sm text-slate-300 font-serif italic tracking-wide">
-                    By {lp.instructor?.name || item.professor_nome}
-                  </span>
-                )}
+                {/* Title or Title Image */}
+                <div className="w-full hero-no-mobile-transform" style={{ transform: (lp.hero_title_offset_x || lp.hero_title_offset_y) ? `translate(${lp.hero_title_offset_x || 0}px, ${lp.hero_title_offset_y || 0}px)` : undefined }}>
+                  {(lp.hero_title && (lp.hero_title.startsWith('data:image') || lp.hero_title.startsWith('http')) && !lp.hero_title.includes(' ')) ? (
+                    <img src={lp.hero_title} alt={item.nome || "Título"} className="object-contain w-auto mx-auto lg:mx-0 max-w-full" style={{ height: lp.hero_title_image_height ? `${lp.hero_title_image_height}px` : '140px' }} />
+                  ) : (
+                    <>
+                      <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-serif font-bold text-white leading-[1.1] tracking-tight uppercase typo-title typo-title-1 mb-6">
+                        {lp.hero_title || item.nome}
+                      </h1>
+
+                      {/* Decorative Divider Line with Diamond/Sparkle Accent */}
+                      <div className="w-full flex items-center justify-center gap-4 py-2 opacity-80 max-w-lg mb-6">
+                        <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-white/50 to-transparent"></div>
+                        <span className="text-primary text-sm sm:text-base tracking-widest">✦</span>
+                        <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-white/50 to-transparent"></div>
+                      </div>
+
+                      {/* Tagline / Subtitle / Secondary Description */}
+                      {(lp.hero_subtitle || item.descricao) && (
+                        <p className="text-xl sm:text-2xl lg:text-3xl font-serif italic text-slate-200/95 leading-snug max-w-2xl typo-subtitle typo-body-1 hero-no-mobile-transform" style={{ transform: (lp.hero_subtitle_offset_x || lp.hero_subtitle_offset_y) ? `translate(${lp.hero_subtitle_offset_x || 0}px, ${lp.hero_subtitle_offset_y || 0}px)` : undefined }}>
+                          "{lp.hero_subtitle || item.descricao}"
+                        </p>
+                      )}
+                    </>
+                  )}
+                </div>
+
+                {/* CTA Button & Instructor By Label */}
+                <div className="flex flex-col items-center gap-3 pt-4 w-full hero-no-mobile-transform" style={{ transform: (lp.hero_cta_offset_x || lp.hero_cta_offset_y) ? `translate(${lp.hero_cta_offset_x || 0}px, ${lp.hero_cta_offset_y || 0}px)` : undefined }}>
+                  <button 
+                    onClick={handleEnrollClick}
+                    className="typo-btn typo-btn-1 px-8 sm:px-12 py-4 sm:py-5 bg-primary text-white rounded-full font-serif italic text-lg sm:text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_15px_40px_rgba(var(--primary-rgb),0.4)] flex items-center justify-center gap-3 min-w-[240px]"
+                  >
+                    {isEmBreve ? 'Cadastrar-se' : (lp.cta_text || 'Descubra o segredo')} <ArrowRight className="w-5 h-5" />
+                  </button>
+                  
+                  {(lp.instructor?.name || item.professor_nome) && (
+                    <span className="text-xs sm:text-sm text-slate-300 font-serif italic tracking-wide">
+                      By {lp.instructor?.name || item.professor_nome}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
         {/* Dynamic Section Ordering */}
-        {activeSectionOrder.map((key) => sectionMap[key])}
+        {activeSectionOrder.filter(isSectionVisible).map((key) => sectionMap[key])}
 
         <Footer layout={layout} item={item} lp={lp} style={getSectionStyle('footer')} />
         
