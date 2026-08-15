@@ -103,7 +103,7 @@ const Nav = ({ layout, item, lp, onEnrollClick, timeLeft }: NavProps) => {
         }`}
         style={{ backgroundColor: isScrolled && lp?.nav_bg_color ? lp.nav_bg_color : undefined }}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 h-20 sm:h-24 flex items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 h-20 sm:h-[144px] flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 shrink min-w-0">
             {(lp?.logo_url || item?.organizacoes?.logo_url) ? (
               <img 
