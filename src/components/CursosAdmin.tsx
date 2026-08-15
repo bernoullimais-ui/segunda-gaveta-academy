@@ -246,6 +246,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
     }
   });
   const [currentVersionId, setCurrentVersionId] = useState<string>('v1');
+  const [showFormatGuideModal, setShowFormatGuideModal] = useState(false);
 
   const setLpData = (newDataOrFn: any) => {
     setLpVersions(prev => {
@@ -4457,7 +4458,10 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                   </div>
                   <div className="p-6 space-y-6">
                     <div>
-                      <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wider text-xs">Título de Impacto (Texto ou Imagem)</label>
+                      <div className="flex items-center justify-between mb-2">
+                        <label className="block text-sm font-bold text-slate-700 uppercase tracking-wider text-xs mb-0">Título de Impacto (Texto ou Imagem)</label>
+                        <FormatGuideBtn onClick={() => setShowFormatGuideModal(true)} />
+                      </div>
                       <div className="flex gap-2">
                         <input 
                           type="text" 
@@ -4515,7 +4519,10 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wider text-xs">Texto do Botão (CTA)</label>
+                        <div className="flex items-center justify-between mb-2">
+                          <label className="block text-sm font-bold text-slate-700 uppercase tracking-wider text-xs mb-0">Texto do Botão (CTA)</label>
+                          <FormatGuideBtn onClick={() => setShowFormatGuideModal(true)} />
+                        </div>
                         <input 
                           type="text" 
                           value={lpData.cta_text || 'Matricule-se Agora'}
@@ -4627,7 +4634,10 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                   <div className="p-6 space-y-4">
                     {/* #7 about_title field */}
                     <div>
-                      <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wider text-xs">Título da Seção "Sobre"</label>
+                      <div className="flex items-center justify-between mb-2">
+                        <label className="block text-sm font-bold text-slate-700 uppercase tracking-wider text-xs mb-0">Título da Seção "Sobre"</label>
+                        <FormatGuideBtn onClick={() => setShowFormatGuideModal(true)} />
+                      </div>
                       <input
                         type="text"
                         value={lpData.about_title || ''}
@@ -4702,7 +4712,10 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wider text-xs">Descrição Detalhada</label>
+                      <div className="flex items-center justify-between mb-2">
+                        <label className="block text-sm font-bold text-slate-700 uppercase tracking-wider text-xs mb-0">Descrição Detalhada</label>
+                        <FormatGuideBtn onClick={() => setShowFormatGuideModal(true)} />
+                      </div>
                       <textarea
                         value={lpData.about}
                         onChange={(e) => setLpData({...lpData, about: e.target.value})}
@@ -4760,7 +4773,10 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                   </div>
                   <div className="p-6 space-y-4">
                     <div>
-                      <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wider text-xs">Frase de Impacto (Texto)</label>
+                      <div className="flex items-center justify-between mb-2">
+                        <label className="block text-sm font-bold text-slate-700 uppercase tracking-wider text-xs mb-0">Frase de Impacto (Texto)</label>
+                        <FormatGuideBtn onClick={() => setShowFormatGuideModal(true)} />
+                      </div>
                       <textarea
                         value={lpData.copy_section_text || ''}
                         onChange={(e) => setLpData({...lpData, copy_section_text: e.target.value})}
@@ -4808,7 +4824,10 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wider text-xs">Texto do Botão CTA</label>
+                      <div className="flex items-center justify-between mb-2">
+                        <label className="block text-sm font-bold text-slate-700 uppercase tracking-wider text-xs mb-0">Texto do Botão CTA</label>
+                        <FormatGuideBtn onClick={() => setShowFormatGuideModal(true)} />
+                      </div>
                       <input
                         type="text"
                         value={lpData.copy_section_cta_text || ''}
@@ -4867,7 +4886,10 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                   </div>
                   <div className="p-6 space-y-4">
                     <div>
-                      <label className="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wider text-xs">Título da Seção Currículo</label>
+                      <div className="flex items-center justify-between mb-2">
+                        <label className="block text-sm font-bold text-slate-700 uppercase tracking-wider text-xs mb-0">Título da Seção Currículo</label>
+                        <FormatGuideBtn onClick={() => setShowFormatGuideModal(true)} />
+                      </div>
                       <input
                         type="text"
                         value={lpData.curriculum_title || ''}
@@ -5487,7 +5509,10 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                         className="w-full px-3 py-2 border border-slate-200 rounded text-sm mb-3 outline-none focus:border-blue-500 transition-colors"
                         placeholder="Link da imagem (https://...)"
                       />
-                      <label className="text-[10px] uppercase font-bold text-slate-400 tracking-widest block mb-1">Membro desde / Bio Curta</label>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="text-[10px] uppercase font-bold text-slate-400 tracking-widest block mb-0">Biografia / Descrição do Especialista</label>
+                        <FormatGuideBtn onClick={() => setShowFormatGuideModal(true)} />
+                      </div>
                       <textarea
                         value={lpData.instructor?.bio || ''}
                         onChange={(e) => setLpData({...lpData, instructor: {...lpData.instructor, bio: e.target.value}})}
@@ -5592,7 +5617,10 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                   {lpData.countdown_enabled && (
                     <div className="p-6 space-y-4">
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Título do Alerta</label>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-0">Título do Alerta</label>
+                          <FormatGuideBtn onClick={() => setShowFormatGuideModal(true)} />
+                        </div>
                         <input 
                           type="text" 
                           value={lpData.countdown_title || ''}
@@ -7735,6 +7763,75 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
           targetName={createdCourseName}
           orgId={orgId}
         />
+      )}
+
+      {/* Modal Guia de Formatação de Texto */}
+      {showFormatGuideModal && (
+        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="p-5 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+              <div className="flex items-center gap-2.5 text-slate-800">
+                <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-600 flex items-center justify-center font-bold">
+                  <HelpCircle className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-base leading-tight">Guia de Formatação de Texto</h3>
+                  <p className="text-xs text-slate-500 font-medium">Como aplicar estilos em palavras específicas</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowFormatGuideModal(false)}
+                className="w-8 h-8 rounded-full bg-slate-200/60 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-6 overflow-y-auto space-y-4 text-sm text-slate-700">
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Você pode aplicar estilos como <strong>negrito</strong>, <em>itálico</em> ou <u>sublinhado</u> em qualquer campo de texto digitando os símbolos abaixo:
+              </p>
+
+              <div className="space-y-3">
+                {[
+                  { label: 'Negrito', code: '**texto em negrito**', result: <strong>texto em negrito</strong> },
+                  { label: 'Itálico', code: '*texto em itálico*', result: <em>texto em itálico</em> },
+                  { label: 'Sublinhado', code: '<u>texto sublinhado</u>', result: <u>texto sublinhado</u> },
+                  { label: 'Negrito + Sublinhado', code: '<u>**negrito e sublinhado**</u>', result: <u><strong>negrito e sublinhado</strong></u> },
+                  { label: 'Negrito + Itálico', code: '***negrito e itálico***', result: <em><strong>negrito e itálico</strong></em> },
+                  { label: 'Tachado / Riscado', code: '~~texto riscado~~', result: <del>texto riscado</del> },
+                ].map((item, idx) => (
+                  <div key={idx} className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between gap-3">
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">{item.label}</span>
+                      <code className="text-xs font-mono text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-100 w-fit select-all">{item.code}</code>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <span className="text-xs text-slate-500 block text-[10px] uppercase font-bold text-slate-400 mb-0.5">Resultado</span>
+                      <span className="text-sm text-slate-800">{item.result}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 space-y-1">
+                <span className="font-bold flex items-center gap-1 text-amber-900">💡 Dica de Pular Linha:</span>
+                <p>Para criar parágrafos separados, pressione <strong>Enter duas vezes</strong> ou adicione a tag <code>&lt;br/&gt;</code> no meio do texto.</p>
+              </div>
+            </div>
+
+            <div className="p-4 border-t border-slate-100 bg-slate-50 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setShowFormatGuideModal(false)}
+                className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer"
+              >
+                Entendi
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {renderActionModal()}
