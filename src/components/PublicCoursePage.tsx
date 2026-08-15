@@ -153,6 +153,16 @@ const Nav = ({ layout, item, lp, onEnrollClick, timeLeft }: NavProps) => {
   );
 };
 
+const ensureAbsoluteUrl = (url?: string) => {
+  if (!url || typeof url !== 'string') return '';
+  const trimmed = url.trim();
+  if (!trimmed || trimmed === '#' || trimmed === 'http://#' || trimmed === 'https://#') return '';
+  if (/^(f|ht)tps?:\/\//i.test(trimmed) || trimmed.startsWith('mailto:') || trimmed.startsWith('tel:')) {
+    return trimmed;
+  }
+  return `https://${trimmed}`;
+};
+
 interface FooterProps {
   layout: 'escuro' | 'claro';
   item: any;
@@ -162,6 +172,12 @@ interface FooterProps {
 
 const Footer = ({ layout, item, lp = {}, style }: FooterProps) => {
   const specialistName = item?.professor_nome || lp.instructor_name || lp.instructor?.name || 'Especialista';
+
+  const websiteUrl = ensureAbsoluteUrl(lp.instructor?.website_url || lp.instructor_website_url);
+  const instagramUrl = ensureAbsoluteUrl(lp.instructor?.instagram_url || lp.instructor_instagram_url);
+  const youtubeUrl = ensureAbsoluteUrl(lp.instructor?.youtube_url || lp.instructor_youtube_url);
+  const linkedinUrl = ensureAbsoluteUrl(lp.instructor?.linkedin_url || lp.instructor_linkedin_url);
+  const whatsappUrl = ensureAbsoluteUrl(lp.instructor?.whatsapp_url || lp.instructor_whatsapp_url);
 
   return (
     <footer className="py-16 sm:py-24 bg-slate-950 text-slate-300 font-sans" style={style}>
@@ -229,29 +245,49 @@ const Footer = ({ layout, item, lp = {}, style }: FooterProps) => {
               </h4>
               <ul className="space-y-2.5 text-sm sm:text-base text-slate-400">
                 <li>
-                  <a href={lp.instructor?.website_url || "#"} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
-                    Site
-                  </a>
+                  {websiteUrl ? (
+                    <a href={websiteUrl} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+                      Site
+                    </a>
+                  ) : (
+                    <span className="text-slate-600 cursor-not-allowed">Site</span>
+                  )}
                 </li>
                 <li>
-                  <a href={lp.instructor?.instagram_url || "#"} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
-                    Instagram
-                  </a>
+                  {instagramUrl ? (
+                    <a href={instagramUrl} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+                      Instagram
+                    </a>
+                  ) : (
+                    <span className="text-slate-600 cursor-not-allowed">Instagram</span>
+                  )}
                 </li>
                 <li>
-                  <a href={lp.instructor?.youtube_url || "#"} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
-                    YouTube
-                  </a>
+                  {youtubeUrl ? (
+                    <a href={youtubeUrl} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+                      YouTube
+                    </a>
+                  ) : (
+                    <span className="text-slate-600 cursor-not-allowed">YouTube</span>
+                  )}
                 </li>
                 <li>
-                  <a href={lp.instructor?.linkedin_url || "#"} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
-                    LinkedIn
-                  </a>
+                  {linkedinUrl ? (
+                    <a href={linkedinUrl} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+                      LinkedIn
+                    </a>
+                  ) : (
+                    <span className="text-slate-600 cursor-not-allowed">LinkedIn</span>
+                  )}
                 </li>
                 <li>
-                  <a href={lp.instructor?.whatsapp_url || "#"} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
-                    WhatsApp
-                  </a>
+                  {whatsappUrl ? (
+                    <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+                      WhatsApp
+                    </a>
+                  ) : (
+                    <span className="text-slate-600 cursor-not-allowed">WhatsApp</span>
+                  )}
                 </li>
               </ul>
             </div>

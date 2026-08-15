@@ -5413,36 +5413,51 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                           <input
                             type="text"
-                            value={lpData.instructor?.website_url || ''}
-                            onChange={(e) => setLpData({...lpData, instructor: {...lpData.instructor, website_url: e.target.value}})}
+                            value={lpData.instructor?.website_url || lpData.instructor_website_url || ''}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setLpData({...lpData, instructor_website_url: val, instructor: {...(lpData.instructor || {}), website_url: val}});
+                            }}
                             className="px-3 py-1.5 border border-slate-200 rounded text-xs outline-none focus:border-blue-500"
                             placeholder="Site URL"
                           />
                           <input
                             type="text"
-                            value={lpData.instructor?.instagram_url || ''}
-                            onChange={(e) => setLpData({...lpData, instructor: {...lpData.instructor, instagram_url: e.target.value}})}
+                            value={lpData.instructor?.instagram_url || lpData.instructor_instagram_url || ''}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setLpData({...lpData, instructor_instagram_url: val, instructor: {...(lpData.instructor || {}), instagram_url: val}});
+                            }}
                             className="px-3 py-1.5 border border-slate-200 rounded text-xs outline-none focus:border-blue-500"
                             placeholder="Instagram URL"
                           />
                           <input
                             type="text"
-                            value={lpData.instructor?.youtube_url || ''}
-                            onChange={(e) => setLpData({...lpData, instructor: {...lpData.instructor, youtube_url: e.target.value}})}
+                            value={lpData.instructor?.youtube_url || lpData.instructor_youtube_url || ''}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setLpData({...lpData, instructor_youtube_url: val, instructor: {...(lpData.instructor || {}), youtube_url: val}});
+                            }}
                             className="px-3 py-1.5 border border-slate-200 rounded text-xs outline-none focus:border-blue-500"
                             placeholder="YouTube URL"
                           />
                           <input
                             type="text"
-                            value={lpData.instructor?.linkedin_url || ''}
-                            onChange={(e) => setLpData({...lpData, instructor: {...lpData.instructor, linkedin_url: e.target.value}})}
+                            value={lpData.instructor?.linkedin_url || lpData.instructor_linkedin_url || ''}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setLpData({...lpData, instructor_linkedin_url: val, instructor: {...(lpData.instructor || {}), linkedin_url: val}});
+                            }}
                             className="px-3 py-1.5 border border-slate-200 rounded text-xs outline-none focus:border-blue-500"
                             placeholder="LinkedIn URL"
                           />
                           <input
                             type="text"
-                            value={lpData.instructor?.whatsapp_url || ''}
-                            onChange={(e) => setLpData({...lpData, instructor: {...lpData.instructor, whatsapp_url: e.target.value}})}
+                            value={lpData.instructor?.whatsapp_url || lpData.instructor_whatsapp_url || ''}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setLpData({...lpData, instructor_whatsapp_url: val, instructor: {...(lpData.instructor || {}), whatsapp_url: val}});
+                            }}
                             className="px-3 py-1.5 border border-slate-200 rounded text-xs outline-none focus:border-blue-500 sm:col-span-2"
                             placeholder="WhatsApp URL"
                           />
