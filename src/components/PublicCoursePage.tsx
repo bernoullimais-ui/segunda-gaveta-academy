@@ -477,7 +477,7 @@ const TestimonialsCarousel = ({ testimonials, layout, primaryColor, lp }: { test
       <div className="relative z-10 w-full max-w-2xl mx-auto px-8 sm:px-14 py-6 min-h-[220px] flex flex-col justify-center items-center">
         {/* Top-Left Double Quote */}
         <span 
-          className="absolute -top-6 sm:-top-[400px] -left-4 sm:-left-[350px] text-[120px] sm:text-[1024px] font-serif select-none pointer-events-none leading-none z-0"
+          className="absolute -top-6 sm:-top-[350px] -left-4 sm:-left-[300px] text-[120px] sm:text-[1024px] font-serif select-none pointer-events-none leading-none z-0"
           style={{ color: quoteColor }}
         >
           “
