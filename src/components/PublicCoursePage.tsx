@@ -1920,26 +1920,80 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
       <TrustAndGuarantee key="guarantee" layout={layout} guaranteeDays={lp.guarantee_days || 7} style={getSectionStyle('guarantee')} />
     ),
     pricing: (
-      <section key="pricing" className="py-40 bg-slate-900 relative overflow-hidden" style={getSectionStyle('pricing')}>
-         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full">
+      <section key="pricing" className="py-24 sm:py-32 bg-slate-900 relative overflow-hidden" style={getSectionStyle('pricing')}>
+         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full pointer-events-none">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-primary/20 rounded-full blur-[180px]"></div>
          </div>
 
-         <div className="max-w-4xl mx-auto px-6 text-center relative z-10 space-y-12">
-            <h2 className="text-5xl md:text-7xl font-bold text-white tracking-tighter leading-tight typo-title">Escolha o seu futuro hoje.</h2>
-            <p className="text-xl text-slate-700 max-w-2xl mx-auto typo-subtitle">Não deixe para depois a oportunidade de se tornar um especialista com quem realmente entende do assunto.</p>
-            
-            <div className="flex flex-col items-center gap-10">
-              <button 
-                onClick={handleEnrollClick}
-                className="typo-btn px-10 py-5 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white font-black text-xl rounded-2xl shadow-2xl shadow-blue-500/30 hover:scale-105 active:scale-95 transition-all flex items-center gap-3 mx-auto"
+         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center relative z-10 space-y-8 sm:space-y-10">
+            {/* Section Title */}
+            <h2 
+              className={`text-4xl sm:text-5xl md:text-6xl font-serif font-bold text-white tracking-tight ${lp.pricing_title_style || 'typo-title-1'}`}
+              style={lp.pricing_title_color ? { color: lp.pricing_title_color } : undefined}
+            >
+              {lp.pricing_title || 'Escolha o seu futuro hoje'}
+            </h2>
+
+            {/* Section Subtitle */}
+            {(lp.pricing_subtitle || 'Não deixe para depois a oportunidade de se tornar um especialista com quem realmente entende do assunto.') && (
+              <p 
+                className={`text-lg sm:text-xl text-slate-300/90 max-w-2xl mx-auto font-sans leading-relaxed ${lp.pricing_subtitle_style || 'typo-body-1'}`}
+                style={lp.pricing_subtitle_color ? { color: lp.pricing_subtitle_color } : undefined}
               >
-                {isEmBreve ? 'Cadastrar-se' : (lp.cta_text || 'QUERO MINHA VAGA AGORA')}
-                <ArrowRight className="w-6 h-6" />
-              </button>
-              <div className="flex flex-col md:flex-row items-center gap-8 text-slate-500 font-bold uppercase tracking-widest text-[10px]">
-                 <span className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-emerald-500" /> Garantia de {lp.guarantee_days || 7} dias</span>
-                 <span className="flex items-center gap-2"><Lock className="w-4 h-4 text-primary" /> Pagamento 100% Seguro</span>
+                {lp.pricing_subtitle || 'Não deixe para depois a oportunidade de se tornar um especialista com quem realmente entende do assunto.'}
+              </p>
+            )}
+
+            {/* Pricing Card */}
+            <div className="max-w-xl mx-auto bg-slate-950/80 backdrop-blur-md border border-slate-800 rounded-3xl p-6 sm:p-10 shadow-2xl shadow-primary/10 relative text-center">
+              <div className="space-y-6">
+                {/* Original Price (De R$) */}
+                {(lp.price_original || (itemPrice > 0 && discountedPrice !== null)) && (
+                  <div 
+                    className={`text-sm sm:text-base text-slate-400 line-through font-medium ${lp.price_original_style || 'typo-body-2'}`}
+                    style={lp.price_original_color ? { color: lp.price_original_color } : undefined}
+                  >
+                    {lp.price_original || `De R$ ${itemPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+                  </div>
+                )}
+
+                {/* Promo Price (Por R$) */}
+                <div 
+                  className={`text-3xl sm:text-5xl md:text-6xl font-serif font-extrabold text-white tracking-tight ${lp.price_promo_style || 'typo-title-1'}`}
+                  style={lp.price_promo_color ? { color: lp.price_promo_color } : undefined}
+                >
+                  {lp.price_promo || (isFree ? 'GRÁTIS' : `Por R$ ${finalPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} à vista`)}
+                </div>
+
+                {/* Installment Price */}
+                {(lp.price_installment || (finalPrice > 0 && !isFree)) && (
+                  <div 
+                    className={`text-base sm:text-lg text-emerald-400 font-semibold ${lp.price_installment_style || 'typo-body-1'}`}
+                    style={lp.price_installment_color ? { color: lp.price_installment_color } : undefined}
+                  >
+                    {lp.price_installment || `ou 10x de R$ ${(finalPrice / 10).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} sem juros`}
+                  </div>
+                )}
+
+                {/* CTA Button */}
+                <div className="pt-4">
+                  <button 
+                    onClick={handleEnrollClick}
+                    className={`w-full py-4 sm:py-5 px-8 bg-primary text-white font-black text-lg sm:text-xl rounded-2xl shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-3 ${lp.pricing_cta_style || 'typo-btn-1'}`}
+                    style={lp.pricing_cta_color ? { backgroundColor: lp.pricing_cta_color } : undefined}
+                  >
+                    {isEmBreve ? 'Cadastrar-se' : (lp.pricing_cta_text || lp.cta_text || 'GARANTIR MINHA VAGA AGORA')}
+                    <ArrowRight className="w-6 h-6" />
+                  </button>
+                </div>
+
+                {/* Notice / Footer Details */}
+                <div 
+                  className={`text-xs text-slate-400 pt-2 font-medium ${lp.pricing_notice_style || 'typo-body-3'}`}
+                  style={lp.pricing_notice_color ? { color: lp.pricing_notice_color } : undefined}
+                >
+                  {lp.pricing_notice || `Garantia Incondicional de ${lp.guarantee_days || 7} dias • Pagamento 100% Seguro • Acesso Imediato`}
+                </div>
               </div>
             </div>
          </div>

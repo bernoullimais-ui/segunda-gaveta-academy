@@ -351,7 +351,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
     faq: 'Perguntas Frequentes (FAQ)',
     bonuses: 'Bônus Exclusivos',
     guarantee: 'Garantia Incondicional',
-    pricing: 'Ambiente de Pagamento Seguro / Oferta Final'
+    pricing: 'Seção de Preço (Valor do Curso, Promoção e Parcelamento)'
   };
 
   const getFullSectionOrder = (savedOrder?: string[]) => {
@@ -5768,6 +5768,320 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                       </div>
                     )}
                   </div>
+                {/* Seção de Preço (Valor, Promoção e Parcelado) */}
+                <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden text-sm">
+                  <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                      <ShoppingBag className="w-5 h-5 text-emerald-600" />
+                      <h4 className="font-bold text-slate-800">Seção de Preço (Valores e Parcelamento)</h4>
+                    </div>
+                  </div>
+                  <div className="p-6 space-y-6">
+                    {/* Título da Seção */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Título da Seção de Preço</label>
+                      <input 
+                        type="text" 
+                        value={lpData.pricing_title || ''}
+                        onChange={(e) => setLpData({...lpData, pricing_title: e.target.value})}
+                        className="w-full px-4 py-2.5 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium"
+                        placeholder="Ex: Escolha o seu futuro hoje (ou Investimento Especial)"
+                      />
+                      <div className="mt-2.5 flex flex-wrap sm:flex-nowrap items-center gap-3 p-2 bg-slate-50 border border-slate-200 rounded-lg">
+                        <div className="flex-1 flex items-center gap-2 min-w-[180px]">
+                          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider shrink-0">Estilo:</span>
+                          <select
+                            value={lpData.pricing_title_style || ''}
+                            onChange={(e) => setLpData({...lpData, pricing_title_style: e.target.value})}
+                            className="w-full text-xs bg-white border border-slate-200 rounded px-2.5 py-1.5 outline-none font-medium text-slate-700 focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                          >
+                            <option value="">Padrão (Título 1)</option>
+                            <option value="typo-title-1">Título 1</option>
+                            <option value="typo-title-2">Título 2</option>
+                            <option value="typo-title-3">Título 3</option>
+                            <option value="typo-body-1">Texto corrido 1</option>
+                            <option value="typo-body-2">Texto corrido 2</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider shrink-0">Cor:</span>
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="color"
+                              value={lpData.pricing_title_color || '#ffffff'}
+                              onChange={(e) => setLpData({...lpData, pricing_title_color: e.target.value})}
+                              className="w-7 h-7 p-0.5 border border-slate-200 rounded cursor-pointer shrink-0 bg-white"
+                            />
+                            <input
+                              type="text"
+                              value={lpData.pricing_title_color || ''}
+                              onChange={(e) => setLpData({...lpData, pricing_title_color: e.target.value})}
+                              placeholder="#ffffff"
+                              className="w-24 px-2 py-1 border border-slate-200 rounded text-xs outline-none bg-white font-mono"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Subtítulo da Seção */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Subtítulo / Descrição</label>
+                      <input 
+                        type="text" 
+                        value={lpData.pricing_subtitle || ''}
+                        onChange={(e) => setLpData({...lpData, pricing_subtitle: e.target.value})}
+                        className="w-full px-4 py-2.5 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium"
+                        placeholder="Ex: Garanta seu acesso completo com a melhor oferta e bônus exclusivos"
+                      />
+                      <div className="mt-2.5 flex flex-wrap sm:flex-nowrap items-center gap-3 p-2 bg-slate-50 border border-slate-200 rounded-lg">
+                        <div className="flex-1 flex items-center gap-2 min-w-[180px]">
+                          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider shrink-0">Estilo:</span>
+                          <select
+                            value={lpData.pricing_subtitle_style || ''}
+                            onChange={(e) => setLpData({...lpData, pricing_subtitle_style: e.target.value})}
+                            className="w-full text-xs bg-white border border-slate-200 rounded px-2.5 py-1.5 outline-none font-medium text-slate-700 focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                          >
+                            <option value="">Padrão (Texto corrido 1)</option>
+                            <option value="typo-title-2">Título 2</option>
+                            <option value="typo-title-3">Título 3</option>
+                            <option value="typo-body-1">Texto corrido 1</option>
+                            <option value="typo-body-2">Texto corrido 2</option>
+                            <option value="typo-body-3">Texto corrido 3</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider shrink-0">Cor:</span>
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="color"
+                              value={lpData.pricing_subtitle_color || '#cbd5e1'}
+                              onChange={(e) => setLpData({...lpData, pricing_subtitle_color: e.target.value})}
+                              className="w-7 h-7 p-0.5 border border-slate-200 rounded cursor-pointer shrink-0 bg-white"
+                            />
+                            <input
+                              type="text"
+                              value={lpData.pricing_subtitle_color || ''}
+                              onChange={(e) => setLpData({...lpData, pricing_subtitle_color: e.target.value})}
+                              placeholder="#cbd5e1"
+                              className="w-24 px-2 py-1 border border-slate-200 rounded text-xs outline-none bg-white font-mono"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+                      {/* Valor do Curso (De / Original) */}
+                      <div className="p-4 border border-slate-200 rounded-xl bg-slate-50/50 space-y-3">
+                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">Valor Original (De)</label>
+                        <input 
+                          type="text" 
+                          value={lpData.price_original || ''}
+                          onChange={(e) => setLpData({...lpData, price_original: e.target.value})}
+                          className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium"
+                          placeholder="Ex: De R$ 997,00"
+                        />
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between gap-1 text-xs">
+                            <span className="font-bold text-slate-500 text-[10px] uppercase">Estilo:</span>
+                            <select
+                              value={lpData.price_original_style || ''}
+                              onChange={(e) => setLpData({...lpData, price_original_style: e.target.value})}
+                              className="w-full max-w-[140px] text-xs bg-white border border-slate-200 rounded px-2 py-1 outline-none font-medium"
+                            >
+                              <option value="">Texto corrido 2</option>
+                              <option value="typo-title-3">Título 3</option>
+                              <option value="typo-body-1">Texto corrido 1</option>
+                              <option value="typo-body-2">Texto corrido 2</option>
+                              <option value="typo-body-3">Texto corrido 3</option>
+                            </select>
+                          </div>
+                          <div className="flex items-center justify-between gap-1 text-xs">
+                            <span className="font-bold text-slate-500 text-[10px] uppercase">Cor:</span>
+                            <div className="flex items-center gap-1">
+                              <input
+                                type="color"
+                                value={lpData.price_original_color || '#94a3b8'}
+                                onChange={(e) => setLpData({...lpData, price_original_color: e.target.value})}
+                                className="w-6 h-6 p-0.5 border border-slate-200 rounded cursor-pointer shrink-0 bg-white"
+                              />
+                              <input
+                                type="text"
+                                value={lpData.price_original_color || ''}
+                                onChange={(e) => setLpData({...lpData, price_original_color: e.target.value})}
+                                placeholder="#94a3b8"
+                                className="w-20 px-1.5 py-0.5 border border-slate-200 rounded text-[11px] outline-none font-mono"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Valor Promocional / À Vista (Por) */}
+                      <div className="p-4 border border-emerald-200 rounded-xl bg-emerald-50/30 space-y-3">
+                        <label className="block text-xs font-bold text-emerald-800 uppercase tracking-wider">Valor Promocional (Por)</label>
+                        <input 
+                          type="text" 
+                          value={lpData.price_promo || ''}
+                          onChange={(e) => setLpData({...lpData, price_promo: e.target.value})}
+                          className="w-full px-3 py-2 border border-emerald-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-bold text-emerald-900"
+                          placeholder="Ex: Por R$ 497,00 à vista"
+                        />
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between gap-1 text-xs">
+                            <span className="font-bold text-slate-500 text-[10px] uppercase">Estilo:</span>
+                            <select
+                              value={lpData.price_promo_style || ''}
+                              onChange={(e) => setLpData({...lpData, price_promo_style: e.target.value})}
+                              className="w-full max-w-[140px] text-xs bg-white border border-slate-200 rounded px-2 py-1 outline-none font-medium"
+                            >
+                              <option value="">Título 1</option>
+                              <option value="typo-title-1">Título 1</option>
+                              <option value="typo-title-2">Título 2</option>
+                              <option value="typo-title-3">Título 3</option>
+                            </select>
+                          </div>
+                          <div className="flex items-center justify-between gap-1 text-xs">
+                            <span className="font-bold text-slate-500 text-[10px] uppercase">Cor:</span>
+                            <div className="flex items-center gap-1">
+                              <input
+                                type="color"
+                                value={lpData.price_promo_color || '#ffffff'}
+                                onChange={(e) => setLpData({...lpData, price_promo_color: e.target.value})}
+                                className="w-6 h-6 p-0.5 border border-slate-200 rounded cursor-pointer shrink-0 bg-white"
+                              />
+                              <input
+                                type="text"
+                                value={lpData.price_promo_color || ''}
+                                onChange={(e) => setLpData({...lpData, price_promo_color: e.target.value})}
+                                placeholder="#ffffff"
+                                className="w-20 px-1.5 py-0.5 border border-slate-200 rounded text-[11px] outline-none font-mono"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Valor Parcelado */}
+                      <div className="p-4 border border-slate-200 rounded-xl bg-slate-50/50 space-y-3">
+                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">Valor Parcelado</label>
+                        <input 
+                          type="text" 
+                          value={lpData.price_installment || ''}
+                          onChange={(e) => setLpData({...lpData, price_installment: e.target.value})}
+                          className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium"
+                          placeholder="Ex: ou 10x de R$ 49,70 sem juros"
+                        />
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between gap-1 text-xs">
+                            <span className="font-bold text-slate-500 text-[10px] uppercase">Estilo:</span>
+                            <select
+                              value={lpData.price_installment_style || ''}
+                              onChange={(e) => setLpData({...lpData, price_installment_style: e.target.value})}
+                              className="w-full max-w-[140px] text-xs bg-white border border-slate-200 rounded px-2 py-1 outline-none font-medium"
+                            >
+                              <option value="">Texto corrido 1</option>
+                              <option value="typo-title-3">Título 3</option>
+                              <option value="typo-body-1">Texto corrido 1</option>
+                              <option value="typo-body-2">Texto corrido 2</option>
+                              <option value="typo-body-3">Texto corrido 3</option>
+                            </select>
+                          </div>
+                          <div className="flex items-center justify-between gap-1 text-xs">
+                            <span className="font-bold text-slate-500 text-[10px] uppercase">Cor:</span>
+                            <div className="flex items-center gap-1">
+                              <input
+                                type="color"
+                                value={lpData.price_installment_color || '#34d399'}
+                                onChange={(e) => setLpData({...lpData, price_installment_color: e.target.value})}
+                                className="w-6 h-6 p-0.5 border border-slate-200 rounded cursor-pointer shrink-0 bg-white"
+                              />
+                              <input
+                                type="text"
+                                value={lpData.price_installment_color || ''}
+                                onChange={(e) => setLpData({...lpData, price_installment_color: e.target.value})}
+                                placeholder="#34d399"
+                                className="w-20 px-1.5 py-0.5 border border-slate-200 rounded text-[11px] outline-none font-mono"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Texto do Botão CTA & Aviso de Rodapé */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Texto do Botão (CTA)</label>
+                        <input 
+                          type="text" 
+                          value={lpData.pricing_cta_text || ''}
+                          onChange={(e) => setLpData({...lpData, pricing_cta_text: e.target.value})}
+                          className="w-full px-4 py-2.5 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium"
+                          placeholder="Ex: GARANTIR MINHA VAGA AGORA"
+                        />
+                        <div className="mt-2 flex items-center justify-between gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg">
+                          <div className="flex items-center gap-2 flex-1">
+                            <span className="text-[11px] font-bold text-slate-500 uppercase shrink-0">Estilo:</span>
+                            <select
+                              value={lpData.pricing_cta_style || ''}
+                              onChange={(e) => setLpData({...lpData, pricing_cta_style: e.target.value})}
+                              className="w-full text-xs bg-white border border-slate-200 rounded px-2 py-1 outline-none font-medium"
+                            >
+                              <option value="">Botão 1</option>
+                              <option value="typo-btn-1">Botão 1</option>
+                              <option value="typo-btn-2">Botão 2</option>
+                            </select>
+                          </div>
+                          <div className="flex items-center gap-1 shrink-0">
+                            <span className="text-[11px] font-bold text-slate-500 uppercase shrink-0">Cor:</span>
+                            <input
+                              type="color"
+                              value={lpData.pricing_cta_color || '#2563eb'}
+                              onChange={(e) => setLpData({...lpData, pricing_cta_color: e.target.value})}
+                              className="w-6 h-6 p-0.5 border border-slate-200 rounded cursor-pointer shrink-0 bg-white"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Aviso / Detalhes no Rodapé do Preço</label>
+                        <input 
+                          type="text" 
+                          value={lpData.pricing_notice || ''}
+                          onChange={(e) => setLpData({...lpData, pricing_notice: e.target.value})}
+                          className="w-full px-4 py-2.5 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium"
+                          placeholder="Ex: Garantia Incondicional de 7 Dias • Pagamento 100% Seguro"
+                        />
+                        <div className="mt-2 flex items-center justify-between gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg">
+                          <div className="flex items-center gap-2 flex-1">
+                            <span className="text-[11px] font-bold text-slate-500 uppercase shrink-0">Estilo:</span>
+                            <select
+                              value={lpData.pricing_notice_style || ''}
+                              onChange={(e) => setLpData({...lpData, pricing_notice_style: e.target.value})}
+                              className="w-full text-xs bg-white border border-slate-200 rounded px-2 py-1 outline-none font-medium"
+                            >
+                              <option value="">Texto corrido 3</option>
+                              <option value="typo-body-3">Texto corrido 3</option>
+                              <option value="typo-body-4">Texto corrido 4</option>
+                            </select>
+                          </div>
+                          <div className="flex items-center gap-1 shrink-0">
+                            <span className="text-[11px] font-bold text-slate-500 uppercase shrink-0">Cor:</span>
+                            <input
+                              type="color"
+                              value={lpData.pricing_notice_color || '#94a3b8'}
+                              onChange={(e) => setLpData({...lpData, pricing_notice_color: e.target.value})}
+                              className="w-6 h-6 p-0.5 border border-slate-200 rounded cursor-pointer shrink-0 bg-white"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  </div>
                 </div>
 
                 {/* Section Backgrounds */}
@@ -5795,7 +6109,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                       { key: 'faq', label: 'Seção "Perguntas Frequentes"' },
                       { key: 'bonuses', label: 'Seção "Bônus Exclusivos"' },
                       { key: 'guarantee', label: 'Seção "Garantia Incondicional"' },
-                      { key: 'pricing', label: 'Seção "Ambiente de Pagamento Seguro / Oferta Final"' },
+                      { key: 'pricing', label: 'Seção "Preço / Oferta Principal"' },
                       { key: 'footer', label: 'Seção "Rodapé"' }
                     ].map((section) => (
                       <div key={section.key} className="p-5 border border-slate-100 rounded-xl bg-slate-50 space-y-4">
