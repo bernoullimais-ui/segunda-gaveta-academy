@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { Settings, Users, BarChart2, BookOpen, Clock, Lock, PlayCircle, Plus, Eye, Share2, Download, Search, Filter, MoreHorizontal, MessageSquare, Mail, Award, CheckCircle, ChevronLeft, Calendar, FileText, Gift, DollarSign, Loader2, Image as ImageIcon, Minus, Code, Video as VideoIcon, ShoppingBag, User, CalendarCheck, List, Paperclip, Volume2, Pencil, Trash2, Check, X, Table, Bold, Italic, Underline, ListOrdered, GripVertical, AlertTriangle, Database, Upload, LayoutDashboard, Sparkles, AlertCircle, Info, Link as LinkIcon, BrainCircuit, Type, Layers } from 'lucide-react';
+import { Settings, Users, BarChart2, BookOpen, Clock, Lock, PlayCircle, Plus, Eye, Share2, Download, Search, Filter, MoreHorizontal, MessageSquare, Mail, Award, CheckCircle, ChevronLeft, Calendar, FileText, Gift, DollarSign, Loader2, Image as ImageIcon, Minus, Code, Video as VideoIcon, ShoppingBag, User, CalendarCheck, List, Paperclip, Volume2, Pencil, Trash2, Check, X, Table, Bold, Italic, Underline, ListOrdered, GripVertical, AlertTriangle, Database, Upload, LayoutDashboard, Sparkles, AlertCircle, Info, Link as LinkIcon, BrainCircuit, Type, Layers, HelpCircle } from 'lucide-react';
 import { motion, AnimatePresence, Reorder } from 'motion/react';
 import { MarketingLinksModal } from './MarketingLinksModal';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
@@ -17,6 +17,18 @@ import { ProjetoAdmin } from './ProjetoAdmin';
 // getFormattedVideoUrl migrado para src/lib/videoUtils.ts
 // A função é re-exportada aqui para compatibilidade com código interno ainda não migrado
 export { getFormattedVideoUrl };
+
+const FormatGuideBtn = ({ onClick }: { onClick: () => void }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-md transition-all cursor-pointer shrink-0 ml-auto"
+    title="Abrir Guia de Formatação de Texto (Negrito, Itálico, Sublinhado)"
+  >
+    <HelpCircle className="w-3 h-3 text-blue-500" />
+    <span>Guia de Formatação</span>
+  </button>
+);
 
 interface CursosAdminProps {
   loggedUser?: any;
