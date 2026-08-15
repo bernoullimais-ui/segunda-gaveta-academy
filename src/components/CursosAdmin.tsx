@@ -5652,6 +5652,27 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                           </div>
                         </div>
                       </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Cor do Ícone do Relógio</label>
+                        <div className="flex items-center gap-3 p-2 bg-slate-50 border border-slate-200 rounded-xl">
+                          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider shrink-0">Cor do Ícone:</span>
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="color"
+                              value={lpData.countdown_icon_color || '#3b82f6'}
+                              onChange={(e) => setLpData({...lpData, countdown_icon_color: e.target.value})}
+                              className="w-7 h-7 rounded border border-slate-200 cursor-pointer p-0.5 bg-white"
+                            />
+                            <input
+                              type="text"
+                              value={lpData.countdown_icon_color || ''}
+                              onChange={(e) => setLpData({...lpData, countdown_icon_color: e.target.value})}
+                              placeholder="Ex: #3b82f6"
+                              className="w-24 text-xs bg-white border border-slate-200 rounded px-2 py-1.5 outline-none font-mono"
+                            />
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>

@@ -92,7 +92,7 @@ const Nav = ({ layout, item, lp, onEnrollClick, timeLeft }: NavProps) => {
               className={`flex items-center gap-1.5 text-xs font-mono font-bold shrink-0 ${lp?.countdown_text_style || ''}`}
               style={lp?.countdown_text_color ? { color: lp.countdown_text_color } : undefined}
             >
-              <Clock className="w-3.5 h-3.5 text-primary shrink-0" style={lp?.countdown_text_color ? { color: lp.countdown_text_color } : undefined} />
+              <Clock className="w-3.5 h-3.5 text-primary shrink-0" style={{ color: lp?.countdown_icon_color || lp?.countdown_text_color || undefined }} />
               <span className="tracking-wider">
                 {timeLeft.days > 0 ? `${pad(timeLeft.days)}d ` : ''}{pad(timeLeft.hours)}h {pad(timeLeft.minutes)}m {pad(timeLeft.seconds)}s
               </span>
