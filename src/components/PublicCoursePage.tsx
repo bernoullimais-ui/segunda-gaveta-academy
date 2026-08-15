@@ -163,6 +163,28 @@ const ensureAbsoluteUrl = (url?: string) => {
   return `https://${trimmed}`;
 };
 
+const getCleanPhone = (phoneOrUrl?: string, fallbackOrgPhone?: string) => {
+  if (phoneOrUrl && typeof phoneOrUrl === 'string') {
+    const cleaned = phoneOrUrl.replace(/\D/g, '');
+    if (cleaned.length >= 8) {
+      if (cleaned.length === 10 || cleaned.length === 11) {
+        return `55${cleaned}`;
+      }
+      return cleaned;
+    }
+  }
+  if (fallbackOrgPhone && typeof fallbackOrgPhone === 'string') {
+    const cleanedOrg = fallbackOrgPhone.replace(/\D/g, '');
+    if (cleanedOrg.length >= 8) {
+      if (cleanedOrg.length === 10 || cleanedOrg.length === 11) {
+        return `55${cleanedOrg}`;
+      }
+      return cleanedOrg;
+    }
+  }
+  return '';
+};
+
 interface FooterProps {
   layout: 'escuro' | 'claro';
   item: any;
@@ -177,7 +199,21 @@ const Footer = ({ layout, item, lp = {}, style }: FooterProps) => {
   const instagramUrl = ensureAbsoluteUrl(lp.instructor?.instagram_url || lp.instructor_instagram_url);
   const youtubeUrl = ensureAbsoluteUrl(lp.instructor?.youtube_url || lp.instructor_youtube_url);
   const linkedinUrl = ensureAbsoluteUrl(lp.instructor?.linkedin_url || lp.instructor_linkedin_url);
-  const whatsappUrl = ensureAbsoluteUrl(lp.instructor?.whatsapp_url || lp.instructor_whatsapp_url);
+
+  // WhatsApp Segunda Gaveta (Organização)
+  const orgRawPhone = item?.organizacoes?.config_json?.suporte_telefone || item?.organizacoes?.config_json?.suporte_whatsapp || '71999511275';
+  const orgPhoneClean = getCleanPhone(orgRawPhone, '71999511275');
+  const segundaGavetaWaUrl = orgPhoneClean
+    ? `https://wa.me/${orgPhoneClean}?text=${encodeURIComponent("Olá. Quero informações sobre os serviços da Segunda Gaveta")}`
+    : '#';
+
+  // WhatsApp do Especialista (Relacionado ao curso da página)
+  const instructorRawPhone = lp.instructor?.whatsapp_url || lp.instructor_whatsapp_url;
+  const instructorPhoneClean = getCleanPhone(instructorRawPhone, orgRawPhone);
+  const courseTitle = item?.nome || 'este curso';
+  const specialistWaUrl = instructorPhoneClean
+    ? `https://wa.me/${instructorPhoneClean}?text=${encodeURIComponent(`Olá. Quero informações sobre o curso "${courseTitle}"`)}`
+    : '#';
 
   return (
     <footer className="py-16 sm:py-24 bg-slate-950 text-slate-300 font-sans" style={style}>
@@ -231,9 +267,13 @@ const Footer = ({ layout, item, lp = {}, style }: FooterProps) => {
                   </a>
                 </li>
                 <li>
-                  <a href="https://wa.me/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
-                    WhatsApp
-                  </a>
+                  {segundaGavetaWaUrl !== '#' ? (
+                    <a href={segundaGavetaWaUrl} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+                      WhatsApp
+                    </a>
+                  ) : (
+                    <span className="text-slate-600 cursor-not-allowed">WhatsApp</span>
+                  )}
                 </li>
               </ul>
             </div>
@@ -281,8 +321,8 @@ const Footer = ({ layout, item, lp = {}, style }: FooterProps) => {
                   )}
                 </li>
                 <li>
-                  {whatsappUrl ? (
-                    <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+                  {specialistWaUrl !== '#' ? (
+                    <a href={specialistWaUrl} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
                       WhatsApp
                     </a>
                   ) : (
