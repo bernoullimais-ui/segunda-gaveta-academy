@@ -848,29 +848,31 @@ const CountdownTimer = ({ timeLeft, title, layout }: { timeLeft: { days: number,
   );
 };
 
-const TargetAudienceSection = ({ targetAudience, layout, style }: { targetAudience: string, layout: string, style?: React.CSSProperties }) => {
-  if (!targetAudience?.trim()) return null;
+const TargetAudienceSection = ({ targetAudience, layout, style, lp, onEnrollClick }: { targetAudience?: string, layout?: string, style?: React.CSSProperties, lp?: any, onEnrollClick?: () => void }) => {
+  if (!targetAudience?.trim() && !lp?.audience_cta_text) return null;
 
   return (
-    <section className={`py-24 ${
-      layout === 'escuro' ? 'bg-slate-950/60' : 'bg-slate-50'
-    }`} style={style}>
-      <div className="max-w-4xl mx-auto px-6 text-center space-y-6">
-        <h2 className={`text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight typo-title ${
-          layout === 'escuro' ? 'text-white' : 'text-slate-900'
-        }`}>
-          Para quem é este programa?
-        </h2>
+    <section key="audience" id="para-quem" className="py-24 sm:py-32 bg-slate-900 relative text-center overflow-hidden" style={style}>
+      <div className="max-w-[768px] mx-auto px-6 flex flex-col items-center justify-center space-y-8 lg:space-y-10">
+        {targetAudience && (
+          <div 
+            className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif text-white font-normal leading-[1.25] tracking-tight ${lp?.audience_text_style || 'typo-title-1'}`}
+            style={lp?.audience_text_color ? { color: lp.audience_text_color } : undefined}
+          >
+            <FormattedTitle content={targetAudience} />
+          </div>
+        )}
         
-        <div className={`p-8 md:p-12 rounded-[35px] border ${
-          layout === 'escuro' 
-            ? 'bg-transparent border-white/20 text-slate-300/90' 
-            : 'bg-transparent border-slate-200 text-slate-700'
-        } backdrop-blur-sm text-center text-base sm:text-lg lg:text-xl leading-relaxed font-sans typo-body-1 space-y-4`}>
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>
-            {targetAudience}
-          </ReactMarkdown>
-        </div>
+        <button 
+          onClick={onEnrollClick}
+          className={`px-8 sm:px-10 py-4 text-white rounded-2xl font-serif italic text-lg sm:text-xl shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2 group ${lp?.audience_cta_style || lp?.copy_cta_style || 'typo-btn-1'}`}
+          style={{ 
+            backgroundColor: lp?.section_curriculum_bg_color || lp?.section_about_bg_color || '#0f172a',
+            color: lp?.audience_cta_color || lp?.copy_cta_color || '#ffffff'
+          }}
+        >
+          <span>{lp?.audience_cta_text || lp?.copy_section_cta_text || lp?.cta_text || 'Acesse o guia'}</span>
+        </button>
       </div>
     </section>
   );
@@ -1873,7 +1875,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
       </section>
     ) : null,
     audience: (
-      <TargetAudienceSection key="audience" targetAudience={lp.target_audience} layout={layout} style={getSectionStyle('audience')} lp={lp} />
+      <TargetAudienceSection key="audience" targetAudience={lp.target_audience} layout={layout} style={getSectionStyle('audience')} lp={lp} onEnrollClick={handleEnrollClick} />
     ),
     instructor: (
       <section key="instructor" id="instrutor" className="relative w-full overflow-hidden bg-slate-950 text-left [transform:translateZ(0)] [backface-visibility:hidden] antialiased" style={getSectionStyle('instructor')}>
@@ -2817,7 +2819,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
         </section>
       )}
 
-      <TargetAudienceSection targetAudience={lp.target_audience} layout={layout} />
+      <TargetAudienceSection targetAudience={lp.target_audience} layout={layout} style={getSectionStyle('audience')} lp={lp} onEnrollClick={handleEnrollClick} />
 
       {/* Additional CTA below Target Audience Section */}
       <section className={`py-16 ${

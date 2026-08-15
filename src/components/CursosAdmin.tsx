@@ -5743,54 +5743,69 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                   )}
                 </div>
 
-                {/* Publico alvo */}
+                {/* Publico alvo / Para quem e */}
                 <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                  <div className="p-5 border-b border-slate-100 bg-slate-50/50">
-                    <h4 className="font-bold text-slate-800">Público-alvo</h4>
+                  <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                    <h4 className="font-bold text-slate-800">Público-alvo / Para quem é</h4>
+                    <FormatGuideBtn onClick={() => setShowFormatGuideModal(true)} />
                   </div>
-                  <div className="p-6">
-                    <textarea 
-                      value={lpData.target_audience}
-                      onChange={(e) => setLpData({...lpData, target_audience: e.target.value})}
-                      className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all min-h-[120px] text-sm"
-                      placeholder="Para quem este curso foi desenhado?"
-                    />
-                    <div className="mt-2.5 flex flex-wrap sm:flex-nowrap items-center gap-3 p-2 bg-slate-50 border border-slate-200 rounded-lg">
-                      <div className="flex-1 flex items-center gap-2 min-w-[180px]">
-                        <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider shrink-0">Estilo:</span>
-                        <select
-                          value={lpData.audience_text_style || ''}
-                          onChange={(e) => setLpData({...lpData, audience_text_style: e.target.value})}
-                          className="w-full text-xs bg-white border border-slate-200 rounded px-2.5 py-1.5 outline-none font-medium text-slate-700 focus:ring-2 focus:ring-blue-500 cursor-pointer"
-                        >
-                          <option value="">Padrão (Texto corrido 1)</option>
-                          <option value="typo-title-1">Título 1</option>
-                          <option value="typo-title-2">Título 2</option>
-                          <option value="typo-title-3">Título 3</option>
-                          <option value="typo-body-1">Texto corrido 1</option>
-                          <option value="typo-body-2">Texto corrido 2</option>
-                          <option value="typo-body-3">Texto corrido 3</option>
-                          <option value="typo-body-4">Texto corrido 4</option>
-                        </select>
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider shrink-0">Cor:</span>
-                        <div className="flex items-center gap-1">
-                          <input
-                            type="color"
-                            value={lpData.audience_text_color || '#cbd5e1'}
-                            onChange={(e) => setLpData({...lpData, audience_text_color: e.target.value})}
-                            className="w-7 h-7 p-0.5 border border-slate-200 rounded cursor-pointer shrink-0 bg-white"
-                          />
-                          <input
-                            type="text"
-                            value={lpData.audience_text_color || ''}
-                            onChange={(e) => setLpData({...lpData, audience_text_color: e.target.value})}
-                            placeholder="#cbd5e1"
-                            className="w-24 px-2 py-1 border border-slate-200 rounded text-xs outline-none bg-white font-mono"
-                          />
+                  <div className="p-6 space-y-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Texto da Seção</label>
+                      <textarea 
+                        value={lpData.target_audience}
+                        onChange={(e) => setLpData({...lpData, target_audience: e.target.value})}
+                        className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all min-h-[120px] text-sm"
+                        placeholder="Para quem este curso foi desenhado?"
+                      />
+                      <div className="mt-2.5 flex flex-wrap sm:flex-nowrap items-center gap-3 p-2 bg-slate-50 border border-slate-200 rounded-lg">
+                        <div className="flex-1 flex items-center gap-2 min-w-[180px]">
+                          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider shrink-0">Estilo:</span>
+                          <select
+                            value={lpData.audience_text_style || ''}
+                            onChange={(e) => setLpData({...lpData, audience_text_style: e.target.value})}
+                            className="w-full text-xs bg-white border border-slate-200 rounded px-2.5 py-1.5 outline-none font-medium text-slate-700 focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                          >
+                            <option value="">Padrão (Título 1)</option>
+                            <option value="typo-title-1">Título 1</option>
+                            <option value="typo-title-2">Título 2</option>
+                            <option value="typo-title-3">Título 3</option>
+                            <option value="typo-body-1">Texto corrido 1</option>
+                            <option value="typo-body-2">Texto corrido 2</option>
+                            <option value="typo-body-3">Texto corrido 3</option>
+                            <option value="typo-body-4">Texto corrido 4</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider shrink-0">Cor:</span>
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="color"
+                              value={lpData.audience_text_color || '#ffffff'}
+                              onChange={(e) => setLpData({...lpData, audience_text_color: e.target.value})}
+                              className="w-7 h-7 p-0.5 border border-slate-200 rounded cursor-pointer shrink-0 bg-white"
+                            />
+                            <input
+                              type="text"
+                              value={lpData.audience_text_color || ''}
+                              onChange={(e) => setLpData({...lpData, audience_text_color: e.target.value})}
+                              placeholder="#ffffff"
+                              className="w-24 px-2 py-1 border border-slate-200 rounded text-xs outline-none bg-white font-mono"
+                            />
+                          </div>
                         </div>
                       </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Texto do Botão CTA</label>
+                      <input 
+                        type="text"
+                        value={lpData.audience_cta_text || ''}
+                        onChange={(e) => setLpData({...lpData, audience_cta_text: e.target.value})}
+                        className="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                        placeholder="Ex: Acesse o guia / Quero me inscrever (deixe em branco para usar o texto padrão)"
+                      />
                     </div>
                   </div>
                 </div>
