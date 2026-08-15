@@ -37,6 +37,24 @@ interface PublicCoursePageProps {
   isTrilha?: boolean;
 }
 
+const FormattedTitle = ({ content, className, style }: { content?: string; className?: string; style?: React.CSSProperties }) => {
+  if (!content) return null;
+  const html = String(content)
+    .replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>')
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    .replace(/_(.*?)_/g, '<em>$1</em>')
+    .replace(/~~(.*?)~~/g, '<del>$1</del>');
+
+  return (
+    <span 
+      className={className} 
+      style={style} 
+      dangerouslySetInnerHTML={{ __html: html }} 
+    />
+  );
+};
+
 const TopCountdownBar = ({ lp }: { lp: any }) => {
   const [timeLeft, setTimeLeft] = useState<{ days: number; hours: number; minutes: number; seconds: number } | null>(null);
 
@@ -636,7 +654,7 @@ const TestimonialsCarousel = ({ testimonials, layout, primaryColor, lp }: { test
                   className={`relative z-10 text-3xl sm:text-4xl lg:text-5xl font-serif font-normal text-white tracking-tight text-center ${lp?.testimonial_name_style || 'typo-title-2'}`}
                   style={lp?.testimonial_name_color ? { color: lp.testimonial_name_color } : undefined}
                 >
-                  {t.name}
+                  <FormattedTitle content={t.name} />
                 </h3>
 
                 {/* Testimonial Text */}
@@ -1724,7 +1742,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                 className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-[1.15] tracking-tight ${lp.about_title_style || 'typo-title-1'}`}
                 style={lp.about_title_color ? { color: lp.about_title_color } : undefined}
               >
-                {lp.about_title || item.nome}
+                <FormattedTitle content={lp.about_title || item.nome} />
               </h2>
             </div>
 
@@ -1793,9 +1811,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
               className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif text-white font-normal leading-[1.25] tracking-tight ${lp.copy_text_style || 'typo-title-1'}`}
               style={lp.copy_text_color ? { color: lp.copy_text_color } : undefined}
             >
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                {lp.copy_section_text}
-              </ReactMarkdown>
+              <FormattedTitle content={lp.copy_section_text} />
             </div>
           )}
           
@@ -1831,7 +1847,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                     className={`text-5xl sm:text-6xl lg:text-7xl font-serif font-normal text-white leading-none tracking-tight ${lp.benefit_title_style || 'typo-title-2'}`}
                     style={lp.benefit_title_color ? { color: lp.benefit_title_color } : undefined}
                   >
-                    {itemObj.title}
+                    <FormattedTitle content={itemObj.title} />
                   </h4>
 
                   {itemObj.description && (
@@ -1876,7 +1892,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                 className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-[1.15] tracking-tight ${lp.instructor_name_style || 'typo-title-1'}`}
                 style={lp.instructor_name_color ? { color: lp.instructor_name_color } : undefined}
               >
-                {lp.instructor?.name || item.professor_nome || 'Especialista'}
+                <FormattedTitle content={lp.instructor?.name || item.professor_nome || 'Especialista'} />
               </h2>
               {Boolean(lp.instructor?.role?.trim()) && (
                 <p 
@@ -1908,7 +1924,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
               className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-[1.15] tracking-tight max-w-[768px] ${lp.curriculum_title_style || 'typo-title-1'}`}
               style={lp.curriculum_title_color ? { color: lp.curriculum_title_color } : undefined}
             >
-              {lp.curriculum_title || 'O que você verá por aqui:'}
+              <FormattedTitle content={lp.curriculum_title || 'O que você verá por aqui:'} />
             </h2>
             
             <div className="space-y-4 w-full">
@@ -2010,7 +2026,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white tracking-tight ${lp.faq_title_style || 'typo-title-1'}`}
             style={lp.faq_title_color ? { color: lp.faq_title_color } : undefined}
           >
-            Perguntas frequentes:
+            <FormattedTitle content={lp.faq_title || 'Perguntas frequentes:'} />
           </h2>
           
           <div className="space-y-4 w-full">
@@ -2126,7 +2142,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
               className={`text-4xl sm:text-5xl md:text-6xl font-serif font-bold text-white tracking-tight ${lp.pricing_title_style || 'typo-title-1'}`}
               style={lp.pricing_title_color ? { color: lp.pricing_title_color } : undefined}
             >
-              {lp.pricing_title || 'Escolha o seu futuro hoje'}
+              <FormattedTitle content={lp.pricing_title || 'Escolha o seu futuro hoje'} />
             </h2>
 
             {/* Section Subtitle */}
@@ -2135,7 +2151,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                 className={`text-lg sm:text-xl text-slate-300/90 max-w-2xl mx-auto font-sans leading-relaxed ${lp.pricing_subtitle_style || 'typo-body-1'}`}
                 style={lp.pricing_subtitle_color ? { color: lp.pricing_subtitle_color } : undefined}
               >
-                {lp.pricing_subtitle || 'Não deixe para depois a oportunidade de se tornar um especialista com quem realmente entende do assunto.'}
+                <FormattedTitle content={lp.pricing_subtitle || 'Não deixe para depois a oportunidade de se tornar um especialista com quem realmente entende do assunto.'} />
               </p>
             )}
 
@@ -2404,7 +2420,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                     ) : (
                       <>
                         <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-serif font-bold text-white leading-[1.1] tracking-tight uppercase typo-title typo-title-1 mb-6 text-center mx-auto">
-                          {lp.hero_title || item.nome}
+                          <FormattedTitle content={lp.hero_title || item.nome} />
                         </h1>
 
                         {/* Decorative Divider Line with Diamond/Sparkle Accent */}
@@ -2417,7 +2433,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                         {/* Tagline / Subtitle / Secondary Description */}
                         {(lp.hero_subtitle || item.descricao) && (
                           <p className="text-xl sm:text-2xl lg:text-3xl font-serif italic text-slate-200/95 leading-snug max-w-2xl typo-subtitle typo-body-1 text-center mx-auto hero-no-mobile-transform" style={{ transform: (lp.hero_subtitle_offset_x || lp.hero_subtitle_offset_y) ? `translate3d(${lp.hero_subtitle_offset_x || 0}px, ${lp.hero_subtitle_offset_y || 0}px, 0)` : undefined }}>
-                            "{lp.hero_subtitle || item.descricao}"
+                            <FormattedTitle content={lp.hero_subtitle || item.descricao} />
                           </p>
                         )}
                       </>
@@ -2695,7 +2711,9 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
       <section id="sobre" className="py-24 bg-white" style={getSectionStyle('about')}>
         <div className="max-w-4xl mx-auto px-6 text-center space-y-8">
           {/* #7 Configurable about_title */}
-          <h2 className="text-4xl font-bold text-slate-900 mb-6 typo-title typo-title-2">{lp.about_title || 'Tudo o que você precisa em um só lugar.'}</h2>
+          <h2 className="text-4xl font-bold text-slate-900 mb-6 typo-title typo-title-2">
+            <FormattedTitle content={lp.about_title || 'Tudo o que você precisa em um só lugar.'} />
+          </h2>
           <div className="h-1.5 w-20 bg-primary rounded-full mx-auto mb-6"></div>
 
           {/* Vídeo Promocional (incorporado na seção Sobre) */}
@@ -2872,7 +2890,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             <div className="space-y-6 text-center md:text-left max-w-[672px] w-full">
               <div>
                 <span className="text-primary font-bold text-sm uppercase tracking-widest mb-2 block">Conheça seu mentor</span>
-                <h2 className="text-4xl font-bold text-slate-900 typo-title">{lp.instructor?.name || 'Professor Especialista'}</h2>
+                <h2 className="text-4xl font-bold text-slate-900 typo-title"><FormattedTitle content={lp.instructor?.name || 'Professor Especialista'} /></h2>
                 {Boolean(lp.instructor?.role?.trim()) && (
                   <p className="text-slate-700 font-medium typo-text">{lp.instructor.role}</p>
                 )}
@@ -2923,7 +2941,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
       {!isTrilha && (
         <section className="py-24 bg-white" style={getSectionStyle('curriculum')}>
           <div className="max-w-[768px] mx-auto px-6 text-center mb-16">
-            <h2 className="text-4xl font-bold text-slate-900 mb-4 typo-title">Grade Curricular</h2>
+            <h2 className="text-4xl font-bold text-slate-900 mb-4 typo-title"><FormattedTitle content={lp.curriculum_title || 'Grade Curricular'} /></h2>
             <p className="text-slate-700 text-lg typo-text">Confira os módulos que preparamos para acelerar seu aprendizado.</p>
           </div>
           
