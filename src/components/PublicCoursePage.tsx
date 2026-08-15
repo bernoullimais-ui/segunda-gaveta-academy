@@ -80,7 +80,7 @@ const Nav = ({ layout, item, lp, onEnrollClick, timeLeft }: NavProps) => {
     <header className="fixed top-0 left-0 right-0 z-50">
       {/* Top Countdown Bar - Title and Timer side-by-side in horizontal center */}
       {timeLeft && (
-        <div className="w-full bg-slate-950/95 border-b border-slate-800/80 py-2.5 px-4 shadow-md">
+        <div className="w-full bg-slate-950/95 py-2.5 px-4 shadow-md">
           <div className="max-w-7xl mx-auto flex items-center justify-center gap-3 sm:gap-6 text-white text-center">
             <span className="text-xs sm:text-sm font-semibold tracking-wide text-slate-200">
               {lp?.countdown_title || 'Oferta por tempo limitado'}
@@ -98,7 +98,7 @@ const Nav = ({ layout, item, lp, onEnrollClick, timeLeft }: NavProps) => {
       <nav 
         className={`w-full transition-all duration-300 ${
           isScrolled 
-            ? `backdrop-blur-md border-b ${layout === 'escuro' ? 'bg-slate-950/90 border-slate-800/80' : 'bg-white/90 border-slate-200/80'}`
+            ? `backdrop-blur-md ${layout === 'escuro' ? 'bg-slate-950/90' : 'bg-white/90'}`
             : 'bg-transparent border-transparent'
         }`}
         style={{ backgroundColor: isScrolled && lp?.nav_bg_color ? lp.nav_bg_color : undefined }}
@@ -390,7 +390,7 @@ const Footer = ({ layout, item, lp = {}, style }: FooterProps) => {
         </div>
 
         {/* Bottom Horizontal Line & Copyright */}
-        <div className="border-t border-white/15 mt-16 pt-8 text-center">
+        <div className="mt-16 pt-8 text-center">
           <p className="text-xs sm:text-sm text-slate-400 font-sans tracking-wide">
             2026 Segunda Gaveta Company | Todos os direitos reservados.
           </p>
@@ -2298,7 +2298,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
 
         {/* #2 Sticky CTA bar for mobile */}
         {showStickyCTA && (
-          <div className="fixed bottom-0 left-0 right-0 z-[80] md:hidden bg-slate-950/95 backdrop-blur-md border-t border-slate-800 px-4 py-3 flex items-center justify-between gap-3 animate-in slide-in-from-bottom-4 duration-300">
+          <div className="fixed bottom-0 left-0 right-0 z-[80] md:hidden bg-slate-950/95 backdrop-blur-md px-4 py-3 flex items-center justify-between gap-3 animate-in slide-in-from-bottom-4 duration-300">
             <div className="text-left">
               {isEmBreve ? (
                 <span className="text-amber-400 font-black text-sm uppercase tracking-wider">Em Breve</span>
@@ -2499,7 +2499,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
 
             {/* #2 Sticky CTA bar for mobile (light layout) */}
             {showStickyCTA && (
-              <div className="fixed bottom-0 left-0 right-0 z-[80] md:hidden bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 py-3 flex items-center justify-between gap-3 animate-in slide-in-from-bottom-4 duration-300 shadow-2xl">
+              <div className="fixed bottom-0 left-0 right-0 z-[80] md:hidden bg-white/95 backdrop-blur-md px-4 py-3 flex items-center justify-between gap-3 animate-in slide-in-from-bottom-4 duration-300 shadow-2xl">
                 <div className="text-left">
                   {isEmBreve ? (
                     <span className="text-amber-600 font-black text-sm uppercase tracking-wider">Em Breve</span>
