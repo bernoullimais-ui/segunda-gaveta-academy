@@ -91,7 +91,7 @@ const TopCountdownBar = ({ lp }: { lp: any }) => {
   const pad = (num: number) => num.toString().padStart(2, '0');
 
   return (
-    <div className="w-full bg-slate-950/95 py-2.5 px-4 shadow-md [transform:translateZ(0)]">
+    <div className="w-full bg-slate-950/95 py-[5px] px-4 shadow-md [transform:translateZ(0)]">
       <div className="max-w-7xl mx-auto flex items-center justify-center gap-3 sm:gap-6 text-white text-center">
         <span 
           className={`text-xs sm:text-sm font-semibold tracking-wide text-slate-200 ${lp?.countdown_text_style || ''}`}
