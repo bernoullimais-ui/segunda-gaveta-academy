@@ -1866,7 +1866,8 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                   <div key={idx} className="w-full">
                     <div 
                       onClick={() => toggleModule(idx)}
-                      className="px-6 py-4 rounded-2xl border border-white/20 bg-transparent backdrop-blur-sm hover:border-primary/60 hover:bg-white/10 transition-all flex items-center justify-between cursor-pointer select-none group"
+                      className="px-6 py-4 rounded-2xl border bg-transparent backdrop-blur-sm hover:border-primary/60 hover:bg-white/10 transition-all flex items-center justify-between cursor-pointer select-none group"
+                      style={lp.curriculum_module_color ? { borderColor: lp.curriculum_module_color } : { borderColor: 'rgba(255, 255, 255, 0.2)' }}
                     >
                       <div className="flex items-center gap-4 flex-1">
                         <span className="font-serif text-2xl font-semibold text-white/90">
@@ -2853,7 +2854,11 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             {item.curriculo_json?.map((modulo: any, idx: number) => {
               const isExpanded = !!openModules[idx];
               return (
-                <div key={idx} className="bg-slate-50 rounded-2xl border border-slate-100 overflow-hidden shadow-sm text-left transition-all duration-300">
+                <div 
+                  key={idx} 
+                  className="bg-slate-50 rounded-2xl border overflow-hidden shadow-sm text-left transition-all duration-300"
+                  style={lp.curriculum_module_color ? { borderColor: lp.curriculum_module_color } : { borderColor: '#f1f5f9' }}
+                >
                   {/* Header/Trigger */}
                   <div 
                     onClick={() => toggleModule(idx)}
