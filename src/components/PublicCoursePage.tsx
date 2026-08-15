@@ -161,7 +161,7 @@ interface FooterProps {
 }
 
 const Footer = ({ layout, item, lp = {}, style }: FooterProps) => {
-  const specialistName = lp.instructor?.name || item.professor_nome || 'Especialista';
+  const specialistName = item?.professor_nome || lp.instructor_name || lp.instructor?.name || 'Especialista';
 
   return (
     <footer className="py-16 sm:py-24 bg-slate-950 text-slate-300 font-sans" style={style}>
@@ -191,7 +191,7 @@ const Footer = ({ layout, item, lp = {}, style }: FooterProps) => {
             {/* Coluna 1: Redes Sociais da Segunda Gaveta */}
             <div className="space-y-4">
               <h4 className="font-bold text-white text-sm sm:text-base tracking-wider">
-                produtora
+                Segunda Gaveta
               </h4>
               <ul className="space-y-2.5 text-sm sm:text-base text-slate-400">
                 <li>
@@ -225,7 +225,7 @@ const Footer = ({ layout, item, lp = {}, style }: FooterProps) => {
             {/* Coluna 2: Redes Sociais do Especialista */}
             <div className="space-y-4">
               <h4 className="font-bold text-white text-sm sm:text-base tracking-wider">
-                especialista
+                {specialistName}
               </h4>
               <ul className="space-y-2.5 text-sm sm:text-base text-slate-400">
                 <li>
@@ -259,7 +259,7 @@ const Footer = ({ layout, item, lp = {}, style }: FooterProps) => {
             {/* Coluna 3: Navegação na Página */}
             <div className="space-y-4">
               <h4 className="font-bold text-white text-sm sm:text-base tracking-wider">
-                navegação
+                Navegação
               </h4>
               <ul className="space-y-2.5 text-sm sm:text-base text-slate-400">
                 <li>
