@@ -70,9 +70,10 @@ const Nav = ({ layout, item, lp, onEnrollClick, timeLeft }: NavProps) => {
     });
 
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+      const scrolled = window.scrollY > 20;
+      setIsScrolled(prev => (prev !== scrolled ? scrolled : prev));
     };
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [item]);
 
@@ -577,7 +578,7 @@ const TestimonialsCarousel = ({ testimonials, layout, primaryColor, lp }: { test
   };
 
   return (
-    <div className="relative w-full max-w-4xl mx-auto px-4 py-8 sm:py-12 flex flex-col items-center justify-center text-center">
+    <div className="relative w-full max-w-4xl mx-auto px-4 py-8 sm:py-12 flex flex-col items-center justify-center text-center [transform:translateZ(0)] [backface-visibility:hidden] antialiased">
 
       {/* Testimonial Active Card */}
       <div className="relative z-10 w-full max-w-2xl mx-auto px-8 sm:px-14 py-6 flex flex-col justify-center items-center">
@@ -1829,7 +1830,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
       <TargetAudienceSection key="audience" targetAudience={lp.target_audience} layout={layout} style={getSectionStyle('audience')} lp={lp} />
     ),
     instructor: (
-      <section key="instructor" id="instrutor" className="relative w-full overflow-hidden bg-slate-950 text-left [backface-visibility:hidden]" style={getSectionStyle('instructor')}>
+      <section key="instructor" id="instrutor" className="relative w-full overflow-hidden bg-slate-950 text-left [transform:translateZ(0)] [backface-visibility:hidden] antialiased" style={getSectionStyle('instructor')}>
         <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[550px] lg:min-h-[650px] w-full items-stretch">
           <div className="relative w-full h-full min-h-[400px] lg:min-h-full overflow-hidden bg-slate-900">
             <img 
@@ -1839,7 +1840,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             />
           </div>
 
-          <div className="p-8 sm:p-12 lg:p-20 xl:p-24 flex flex-col justify-center text-left space-y-6 sm:space-y-8 max-w-[672px] mx-auto w-full [backface-visibility:hidden]">
+          <div className="p-8 sm:p-12 lg:p-20 xl:p-24 flex flex-col justify-center text-left space-y-6 sm:space-y-8 max-w-[672px] mx-auto w-full [transform:translateZ(0)] [backface-visibility:hidden] antialiased">
             <div className="space-y-3 max-w-[768px]">
               <h2 
                 className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-[1.15] tracking-tight ${lp.instructor_name_style || 'typo-title-1'}`}
