@@ -1687,7 +1687,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
     about: (
       <section key="about" id="sobre" className="relative w-full overflow-hidden bg-slate-900 text-left" style={getSectionStyle('about')}>
         <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[550px] lg:min-h-[650px] w-full items-stretch">
-          <div className="p-8 sm:p-12 lg:p-20 xl:p-24 flex flex-col justify-center text-left space-y-6 sm:space-y-8">
+          <div className="p-8 sm:p-12 lg:p-20 xl:p-24 flex flex-col justify-center text-left space-y-6 sm:space-y-8 max-w-[550px] mx-auto w-full">
             <div className="space-y-3">
               <h2 
                 className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-[1.15] tracking-tight ${lp.about_title_style || 'typo-title-1'}`}
@@ -1839,7 +1839,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             />
           </div>
 
-          <div className="p-8 sm:p-12 lg:p-20 xl:p-24 flex flex-col justify-center text-left space-y-6 sm:space-y-8">
+          <div className="p-8 sm:p-12 lg:p-20 xl:p-24 flex flex-col justify-center text-left space-y-6 sm:space-y-8 max-w-[550px] mx-auto w-full">
             <div className="space-y-3">
               <h2 
                 className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-[1.15] tracking-tight ${lp.instructor_name_style || 'typo-title-1'}`}
@@ -1872,7 +1872,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
     curriculum: !isTrilha ? (
       <section key="curriculum" id="curriculo" className="relative w-full overflow-hidden bg-slate-950 text-left" style={getSectionStyle('curriculum')}>
         <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[550px] lg:min-h-[650px] w-full items-stretch">
-          <div className="p-8 sm:p-12 lg:p-20 xl:p-24 flex flex-col justify-center text-left space-y-6 sm:space-y-8">
+          <div className="p-8 sm:p-12 lg:p-20 xl:p-24 flex flex-col justify-center text-left space-y-6 sm:space-y-8 max-w-[550px] mx-auto w-full">
             <h2 
               className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-[1.15] tracking-tight ${lp.curriculum_title_style || 'typo-title-1'}`}
               style={lp.curriculum_title_color ? { color: lp.curriculum_title_color } : undefined}
@@ -2838,7 +2838,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                />
                <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
             </div>
-            <div className="space-y-6 text-center md:text-left">
+            <div className="space-y-6 text-center md:text-left max-w-[550px] w-full">
               <div>
                 <span className="text-primary font-bold text-sm uppercase tracking-widest mb-2 block">Conheça seu mentor</span>
                 <h2 className="text-4xl font-bold text-slate-900 typo-title">{lp.instructor?.name || 'Professor Especialista'}</h2>
