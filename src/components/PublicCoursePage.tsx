@@ -37,13 +37,63 @@ interface PublicCoursePageProps {
   isTrilha?: boolean;
 }
 
-interface NavProps {
-  layout: string;
-  item: any;
-  lp: any;
-  onEnrollClick: () => void;
-  timeLeft?: { days: number; hours: number; minutes: number; seconds: number } | null;
-}
+const TopCountdownBar = ({ lp }: { lp: any }) => {
+  const [timeLeft, setTimeLeft] = useState<{ days: number; hours: number; minutes: number; seconds: number } | null>(null);
+
+  useEffect(() => {
+    if (!lp?.countdown_enabled || !lp?.countdown_end_date) {
+      setTimeLeft(null);
+      return;
+    }
+    
+    const calculateTimeLeft = () => {
+      const difference = +new Date(lp.countdown_end_date) - +new Date();
+      if (difference <= 0) return null;
+      return {
+        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+        minutes: Math.floor((difference / 1000 / 60) % 60),
+        seconds: Math.floor((difference / 1000) % 60)
+      };
+    };
+
+    setTimeLeft(calculateTimeLeft());
+
+    const timer = setInterval(() => {
+      const updated = calculateTimeLeft();
+      setTimeLeft(updated);
+      if (!updated) clearInterval(timer);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [lp?.countdown_enabled, lp?.countdown_end_date]);
+
+  if (!timeLeft) return null;
+
+  const pad = (num: number) => num.toString().padStart(2, '0');
+
+  return (
+    <div className="w-full bg-slate-950/95 py-2.5 px-4 shadow-md [transform:translateZ(0)]">
+      <div className="max-w-7xl mx-auto flex items-center justify-center gap-3 sm:gap-6 text-white text-center">
+        <span 
+          className={`text-xs sm:text-sm font-semibold tracking-wide text-slate-200 ${lp?.countdown_text_style || ''}`}
+          style={lp?.countdown_text_color ? { color: lp.countdown_text_color } : undefined}
+        >
+          {lp?.countdown_title || 'Oferta por tempo limitado'}
+        </span>
+        <div 
+          className={`flex items-center gap-1.5 text-xs font-mono font-bold shrink-0 ${lp?.countdown_text_style || ''}`}
+          style={lp?.countdown_text_color ? { color: lp.countdown_text_color } : undefined}
+        >
+          <Clock className="w-3.5 h-3.5 text-primary shrink-0" style={{ color: lp?.countdown_icon_color || lp?.countdown_text_color || undefined }} />
+          <span className="tracking-wider">
+            {timeLeft.days > 0 ? `${pad(timeLeft.days)}d ` : ''}{pad(timeLeft.hours)}h {pad(timeLeft.minutes)}m {pad(timeLeft.seconds)}s
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const Nav = ({ layout, item, lp, onEnrollClick, timeLeft }: NavProps) => {
   const [loggedIn, setLoggedIn] = React.useState(false);
@@ -79,28 +129,8 @@ const Nav = ({ layout, item, lp, onEnrollClick, timeLeft }: NavProps) => {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50">
-      {/* Top Countdown Bar - Title and Timer side-by-side in horizontal center */}
-      {timeLeft && (
-        <div className="w-full bg-slate-950/95 py-2.5 px-4 shadow-md">
-          <div className="max-w-7xl mx-auto flex items-center justify-center gap-3 sm:gap-6 text-white text-center">
-            <span 
-              className={`text-xs sm:text-sm font-semibold tracking-wide text-slate-200 ${lp?.countdown_text_style || ''}`}
-              style={lp?.countdown_text_color ? { color: lp.countdown_text_color } : undefined}
-            >
-              {lp?.countdown_title || 'Oferta por tempo limitado'}
-            </span>
-            <div 
-              className={`flex items-center gap-1.5 text-xs font-mono font-bold shrink-0 ${lp?.countdown_text_style || ''}`}
-              style={lp?.countdown_text_color ? { color: lp.countdown_text_color } : undefined}
-            >
-              <Clock className="w-3.5 h-3.5 text-primary shrink-0" style={{ color: lp?.countdown_icon_color || lp?.countdown_text_color || undefined }} />
-              <span className="tracking-wider">
-                {timeLeft.days > 0 ? `${pad(timeLeft.days)}d ` : ''}{pad(timeLeft.hours)}h {pad(timeLeft.minutes)}m {pad(timeLeft.seconds)}s
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Top Countdown Bar - Isolated Component */}
+      <TopCountdownBar lp={lp} />
 
       <nav 
         className={`w-full transition-all duration-300 ${
@@ -2355,9 +2385,9 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                 <div className="hidden lg:block col-span-1"></div>
 
                 {/* Right Column (50% equal width on desktop) - Content centered horizontally & vertically */}
-                <div className="col-span-1 w-full flex flex-col items-center justify-center text-center space-y-6 sm:space-y-8 animate-in fade-in duration-1000">
+                <div className="col-span-1 w-full flex flex-col items-center justify-center text-center space-y-6 sm:space-y-8">
                   {/* Title or Title Image */}
-                  <div className="w-full flex flex-col items-center justify-center text-center hero-no-mobile-transform" style={{ transform: (lp.hero_title_offset_x || lp.hero_title_offset_y) ? `translate(${lp.hero_title_offset_x || 0}px, ${lp.hero_title_offset_y || 0}px)` : undefined }}>
+                  <div className="w-full flex flex-col items-center justify-center text-center hero-no-mobile-transform" style={{ transform: (lp.hero_title_offset_x || lp.hero_title_offset_y) ? `translate3d(${lp.hero_title_offset_x || 0}px, ${lp.hero_title_offset_y || 0}px, 0)` : undefined }}>
                     {(lp.hero_title && (lp.hero_title.startsWith('data:image') || lp.hero_title.startsWith('http')) && !lp.hero_title.includes(' ')) ? (
                       <div className="w-full flex items-center justify-center text-center">
                         <img 
@@ -2386,7 +2416,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
 
                         {/* Tagline / Subtitle / Secondary Description */}
                         {(lp.hero_subtitle || item.descricao) && (
-                          <p className="text-xl sm:text-2xl lg:text-3xl font-serif italic text-slate-200/95 leading-snug max-w-2xl typo-subtitle typo-body-1 text-center mx-auto hero-no-mobile-transform" style={{ transform: (lp.hero_subtitle_offset_x || lp.hero_subtitle_offset_y) ? `translate(${lp.hero_subtitle_offset_x || 0}px, ${lp.hero_subtitle_offset_y || 0}px)` : undefined }}>
+                          <p className="text-xl sm:text-2xl lg:text-3xl font-serif italic text-slate-200/95 leading-snug max-w-2xl typo-subtitle typo-body-1 text-center mx-auto hero-no-mobile-transform" style={{ transform: (lp.hero_subtitle_offset_x || lp.hero_subtitle_offset_y) ? `translate3d(${lp.hero_subtitle_offset_x || 0}px, ${lp.hero_subtitle_offset_y || 0}px, 0)` : undefined }}>
                             "{lp.hero_subtitle || item.descricao}"
                           </p>
                         )}
