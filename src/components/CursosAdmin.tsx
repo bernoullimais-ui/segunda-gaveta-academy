@@ -5770,13 +5770,60 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                   </div>
                 {/* Seção de Preço (Valor, Promoção e Parcelado) */}
                 <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden text-sm">
-                  <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                  <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex flex-wrap justify-between items-center gap-3">
                     <div className="flex items-center gap-2">
                       <ShoppingBag className="w-5 h-5 text-emerald-600" />
                       <h4 className="font-bold text-slate-800">Seção de Preço (Valores e Parcelamento)</h4>
                     </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const isFree = editingSettingsData.preco === 'gratuito';
+                        const valTotal = parseFloat(editingSettingsData.valor || '0');
+                        const valDesc = editingSettingsData.valor_com_desconto ? parseFloat(editingSettingsData.valor_com_desconto) : null;
+                        const finalVal = valDesc !== null ? valDesc : valTotal;
+                        const parcelas = parseInt(editingSettingsData.pagamento_parcelas_limite || '10') || 10;
+
+                        const originalStr = valDesc !== null ? `De R$ ${valTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : '';
+                        const promoStr = isFree ? 'GRÁTIS' : `Por R$ ${finalVal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} à vista`;
+                        const installmentStr = (finalVal > 0 && !isFree) ? `ou ${parcelas}x de R$ ${(finalVal / parcelas).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} sem juros` : '';
+
+                        setLpData({
+                          ...lpData,
+                          price_original: originalStr,
+                          price_promo: promoStr,
+                          price_installment: installmentStr
+                        });
+                        showToast("Valores preenchidos com base nos dados da Visão Geral!", "success");
+                      }}
+                      className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
+                    >
+                      <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+                      Sincronizar da Visão Geral
+                    </button>
                   </div>
                   <div className="p-6 space-y-6">
+                    {/* Badge de Associação com a Visão Geral */}
+                    <div className="p-3 bg-blue-50/60 border border-blue-100 rounded-xl flex flex-wrap items-center justify-between gap-2 text-xs text-blue-800">
+                      <div className="flex flex-wrap items-center gap-2 font-medium">
+                        <span className="font-bold text-blue-900 uppercase tracking-wider text-[10px] bg-blue-200/60 px-2 py-0.5 rounded">Dados da Visão Geral:</span>
+                        <span>
+                          {editingSettingsData.preco === 'gratuito' ? (
+                            <strong className="text-emerald-700">Curso Gratuito</strong>
+                          ) : (
+                            <>
+                              Valor Total: <strong>R$ {editingSettingsData.valor || '0,00'}</strong>
+                              {editingSettingsData.valor_com_desconto && (
+                                <span className="ml-2">| Com Desconto: <strong>R$ {editingSettingsData.valor_com_desconto}</strong></span>
+                              )}
+                              <span className="ml-2">| Parcelas: <strong>até {editingSettingsData.pagamento_parcelas_limite || '10'}x</strong></span>
+                            </>
+                          )}
+                        </span>
+                      </div>
+                      <span className="text-[11px] text-blue-600 italic">(Campos em branco no formulário usam estes valores automaticamente)</span>
+                    </div>
+
                     {/* Título da Seção */}
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Título da Seção de Preço</label>
@@ -5880,7 +5927,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                           value={lpData.price_original || ''}
                           onChange={(e) => setLpData({...lpData, price_original: e.target.value})}
                           className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium"
-                          placeholder="Ex: De R$ 997,00"
+                          placeholder={editingSettingsData.valor_com_desconto ? `De R$ ${parseFloat(editingSettingsData.valor || '0').toLocaleString('pt-BR', { minimumFractionDigits: 2 })} (da Visão Geral)` : "De R$ 0,00 (opcional)"}
                         />
                         <div className="space-y-2">
                           <div className="flex items-center justify-between gap-1 text-xs">
@@ -5926,7 +5973,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                           value={lpData.price_promo || ''}
                           onChange={(e) => setLpData({...lpData, price_promo: e.target.value})}
                           className="w-full px-3 py-2 border border-emerald-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-bold text-emerald-900"
-                          placeholder="Ex: Por R$ 497,00 à vista"
+                          placeholder={editingSettingsData.preco === 'gratuito' ? "GRÁTIS" : `Por R$ ${(parseFloat(editingSettingsData.valor_com_desconto || editingSettingsData.valor || '0')).toLocaleString('pt-BR', { minimumFractionDigits: 2 })} à vista (da Visão Geral)`}
                         />
                         <div className="space-y-2">
                           <div className="flex items-center justify-between gap-1 text-xs">
@@ -5971,7 +6018,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                           value={lpData.price_installment || ''}
                           onChange={(e) => setLpData({...lpData, price_installment: e.target.value})}
                           className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium"
-                          placeholder="Ex: ou 10x de R$ 49,70 sem juros"
+                          placeholder={`ou ${editingSettingsData.pagamento_parcelas_limite || 10}x de R$ ${((parseFloat(editingSettingsData.valor_com_desconto || editingSettingsData.valor || '0')) / (parseInt(editingSettingsData.pagamento_parcelas_limite || '10') || 10)).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} sem juros (da Visão Geral)`}
                         />
                         <div className="space-y-2">
                           <div className="flex items-center justify-between gap-1 text-xs">

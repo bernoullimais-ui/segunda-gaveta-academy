@@ -1971,7 +1971,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                     className={`text-base sm:text-lg text-emerald-400 font-semibold ${lp.price_installment_style || 'typo-body-1'}`}
                     style={lp.price_installment_color ? { color: lp.price_installment_color } : undefined}
                   >
-                    {lp.price_installment || `ou 10x de R$ ${(finalPrice / 10).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} sem juros`}
+                    {lp.price_installment || `ou ${(config.pagamento_parcelas_limite || '10')}x de R$ ${(finalPrice / (parseInt(config.pagamento_parcelas_limite || '10') || 10)).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} sem juros`}
                   </div>
                 )}
 
