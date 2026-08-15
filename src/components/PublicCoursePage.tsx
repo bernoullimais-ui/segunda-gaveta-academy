@@ -220,7 +220,7 @@ const Nav = ({ layout, item, lp, onEnrollClick, timeLeft }: NavProps) => {
             
             <button
               onClick={onEnrollClick}
-              className={`typo-btn px-5 sm:px-7 py-[5px] bg-primary text-white rounded-[15px] font-serif italic text-sm sm:text-base hover:opacity-95 hover:scale-105 active:scale-95 transition-all shadow-lg shadow-primary/25 whitespace-nowrap ${lp?.nav_cta_style || ''}`}
+              className={`typo-btn px-5 sm:px-7 py-[5px] bg-primary text-white rounded-[10px] font-serif italic text-sm sm:text-base hover:opacity-95 hover:scale-105 active:scale-95 transition-all shadow-lg shadow-primary/25 whitespace-nowrap ${lp?.nav_cta_style || ''}`}
               style={lp?.nav_cta_color ? { color: lp.nav_cta_color } : undefined}
             >
               {Boolean(item?.em_breve || item?.configuracao_json?.em_breve || item?.status === 'em_breve' || lp?.cta_text?.toLowerCase().includes('breve') || lp?.cta_text?.toLowerCase().includes('cadastrar') || lp?.cta_text?.toLowerCase().includes('espera')) ? 'Em Breve' : (lp?.cta_text || 'Acesse agora')}
