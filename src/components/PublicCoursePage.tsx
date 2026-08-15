@@ -2384,13 +2384,13 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                 <div className="flex flex-col items-center gap-3 pt-4 w-full hero-no-mobile-transform" style={{ transform: (lp.hero_cta_offset_x || lp.hero_cta_offset_y) ? `translate(${lp.hero_cta_offset_x || 0}px, ${lp.hero_cta_offset_y || 0}px)` : undefined }}>
                   <button 
                     onClick={handleEnrollClick}
-                    className="typo-btn typo-btn-1 px-8 sm:px-12 py-4 sm:py-5 bg-primary text-white rounded-2xl font-serif italic text-lg sm:text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_15px_40px_rgba(var(--primary-rgb),0.4)] flex items-center justify-center gap-3 min-w-[240px]"
+                    className="typo-btn typo-btn-1 px-8 sm:px-12 py-4 sm:py-5 bg-primary text-white rounded-2xl font-serif italic text-lg sm:text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_15px_40px_rgba(var(--primary-rgb),0.4)] flex items-center justify-center min-w-[240px]"
                   >
-                    {isEmBreve ? 'Cadastrar-se' : (lp.cta_text || 'Descubra o segredo')} <ArrowRight className="w-5 h-5" />
+                    {isEmBreve ? 'Cadastrar-se' : (lp.cta_text || 'Descubra o segredo')}
                   </button>
                   
                   {(lp.instructor?.name || item.professor_nome) && (
-                    <span className="text-xs sm:text-sm text-slate-300 font-serif italic tracking-wide">
+                    <span className="text-xs sm:text-sm text-primary font-serif italic tracking-wide font-bold">
                       By {lp.instructor?.name || item.professor_nome}
                     </span>
                   )}
@@ -2589,11 +2589,11 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                       onClick={handleEnrollClick}
                       className="typo-btn px-6 sm:px-8 py-3.5 sm:py-4 bg-primary text-white rounded-2xl font-bold text-base sm:text-lg hover:opacity-90 active:scale-95 transition-all shadow-xl shadow-primary/20 flex items-center gap-3"
                     >
-                      {isEmBreve ? 'Cadastrar-se' : (lp.cta_text || 'Quero Garantir Minha Vaga')} <ArrowRight className="w-5 h-5" />
+                      {isEmBreve ? 'Cadastrar-se' : (lp.cta_text || 'Quero Garantir Minha Vaga')}
                     </button>
-                    {lp.instructor?.name && (
-                      <span className={`text-sm ${layout === 'escuro' ? 'text-slate-400' : 'text-slate-500'} typo-text`}>
-                        By {lp.instructor.name}
+                    {(lp.instructor?.name || item.professor_nome) && (
+                      <span className="text-sm text-primary font-bold typo-text">
+                        By {lp.instructor?.name || item.professor_nome}
                       </span>
                     )}
                   </div>
