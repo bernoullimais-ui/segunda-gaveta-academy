@@ -1948,12 +1948,12 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             <div className="max-w-xl mx-auto bg-slate-950/80 backdrop-blur-md border border-slate-800 rounded-3xl p-6 sm:p-10 shadow-2xl shadow-primary/10 relative text-center">
               <div className="space-y-6">
                 {/* Original Price (De R$) */}
-                {(lp.price_original || (itemPrice > 0 && discountedPrice !== null)) && (
+                {discountedPrice !== null && itemPrice > 0 && (
                   <div 
                     className={`text-sm sm:text-base text-slate-400 line-through font-medium ${lp.price_original_style || 'typo-body-2'}`}
                     style={lp.price_original_color ? { color: lp.price_original_color } : undefined}
                   >
-                    {lp.price_original || `De R$ ${itemPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+                    {`De R$ ${itemPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
                   </div>
                 )}
 
@@ -1962,16 +1962,16 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                   className={`text-3xl sm:text-5xl md:text-6xl font-serif font-extrabold text-white tracking-tight ${lp.price_promo_style || 'typo-title-1'}`}
                   style={lp.price_promo_color ? { color: lp.price_promo_color } : undefined}
                 >
-                  {lp.price_promo || (isFree ? 'GRÁTIS' : `Por R$ ${finalPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} à vista`)}
+                  {isFree ? 'GRÁTIS' : `Por R$ ${finalPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} à vista`}
                 </div>
 
                 {/* Installment Price */}
-                {(lp.price_installment || (finalPrice > 0 && !isFree)) && (
+                {finalPrice > 0 && !isFree && (
                   <div 
                     className={`text-base sm:text-lg text-emerald-400 font-semibold ${lp.price_installment_style || 'typo-body-1'}`}
                     style={lp.price_installment_color ? { color: lp.price_installment_color } : undefined}
                   >
-                    {lp.price_installment || `ou ${(config.pagamento_parcelas_limite || '10')}x de R$ ${(finalPrice / (parseInt(config.pagamento_parcelas_limite || '10') || 10)).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} sem juros`}
+                    {`ou ${(config.pagamento_parcelas_limite || '10')}x de R$ ${(finalPrice / (parseInt(config.pagamento_parcelas_limite || '10') || 10)).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} sem juros`}
                   </div>
                 )}
 

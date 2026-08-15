@@ -5775,32 +5775,10 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                       <ShoppingBag className="w-5 h-5 text-emerald-600" />
                       <h4 className="font-bold text-slate-800">Seção de Preço (Valores e Parcelamento)</h4>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const isFree = editingSettingsData.preco === 'gratuito';
-                        const valTotal = parseFloat(editingSettingsData.valor || '0');
-                        const valDesc = editingSettingsData.valor_com_desconto ? parseFloat(editingSettingsData.valor_com_desconto) : null;
-                        const finalVal = valDesc !== null ? valDesc : valTotal;
-                        const parcelas = parseInt(editingSettingsData.pagamento_parcelas_limite || '10') || 10;
-
-                        const originalStr = valDesc !== null ? `De R$ ${valTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : '';
-                        const promoStr = isFree ? 'GRÁTIS' : `Por R$ ${finalVal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} à vista`;
-                        const installmentStr = (finalVal > 0 && !isFree) ? `ou ${parcelas}x de R$ ${(finalVal / parcelas).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} sem juros` : '';
-
-                        setLpData({
-                          ...lpData,
-                          price_original: originalStr,
-                          price_promo: promoStr,
-                          price_installment: installmentStr
-                        });
-                        showToast("Valores preenchidos com base nos dados da Visão Geral!", "success");
-                      }}
-                      className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
-                    >
-                      <Sparkles className="w-3.5 h-3.5 text-blue-600" />
-                      Sincronizar da Visão Geral
-                    </button>
+                    <span className="px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-xs font-bold flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                      Valores Vinculados à Visão Geral
+                    </span>
                   </div>
                   <div className="p-6 space-y-6">
                     {/* Badge de Associação com a Visão Geral */}
@@ -5821,7 +5799,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                           )}
                         </span>
                       </div>
-                      <span className="text-[11px] text-blue-600 italic">(Campos em branco no formulário usam estes valores automaticamente)</span>
+                      <span className="text-[11px] text-blue-600 italic">(Os valores são definidos exclusivamente na aba Visão Geral)</span>
                     </div>
 
                     {/* Título da Seção */}
@@ -5920,22 +5898,23 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
                       {/* Valor do Curso (De / Original) */}
-                      <div className="p-4 border border-slate-200 rounded-xl bg-slate-50/50 space-y-3">
-                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">Valor Original (De)</label>
-                        <input 
-                          type="text" 
-                          value={lpData.price_original || ''}
-                          onChange={(e) => setLpData({...lpData, price_original: e.target.value})}
-                          className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium"
-                          placeholder={editingSettingsData.valor_com_desconto ? `De R$ ${parseFloat(editingSettingsData.valor || '0').toLocaleString('pt-BR', { minimumFractionDigits: 2 })} (da Visão Geral)` : "De R$ 0,00 (opcional)"}
-                        />
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between gap-1 text-xs">
+                      <div className="p-4 border border-slate-200 rounded-xl bg-slate-50/50 space-y-3 min-w-0">
+                        <div className="flex items-center justify-between gap-1">
+                          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider truncate">Valor Original (De)</label>
+                          <span className="text-[9px] font-bold bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded uppercase shrink-0">Visão Geral</span>
+                        </div>
+                        <div className="px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-500 line-through truncate">
+                          {editingSettingsData.valor_com_desconto 
+                            ? `De R$ ${parseFloat(editingSettingsData.valor || '0').toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` 
+                            : 'Sem desconto na Visão Geral'}
+                        </div>
+                        <div className="space-y-2 pt-2 border-t border-slate-200/60">
+                          <div className="flex flex-col gap-1">
                             <span className="font-bold text-slate-500 text-[10px] uppercase">Estilo:</span>
                             <select
                               value={lpData.price_original_style || ''}
                               onChange={(e) => setLpData({...lpData, price_original_style: e.target.value})}
-                              className="w-full max-w-[140px] text-xs bg-white border border-slate-200 rounded px-2 py-1 outline-none font-medium"
+                              className="w-full text-xs bg-white border border-slate-200 rounded px-2 py-1.5 outline-none font-medium text-slate-700"
                             >
                               <option value="">Texto corrido 2</option>
                               <option value="typo-title-3">Título 3</option>
@@ -5944,21 +5923,21 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                               <option value="typo-body-3">Texto corrido 3</option>
                             </select>
                           </div>
-                          <div className="flex items-center justify-between gap-1 text-xs">
+                          <div className="flex flex-col gap-1">
                             <span className="font-bold text-slate-500 text-[10px] uppercase">Cor:</span>
-                            <div className="flex items-center gap-1">
+                            <div className="flex items-center gap-1.5 w-full min-w-0">
                               <input
                                 type="color"
                                 value={lpData.price_original_color || '#94a3b8'}
                                 onChange={(e) => setLpData({...lpData, price_original_color: e.target.value})}
-                                className="w-6 h-6 p-0.5 border border-slate-200 rounded cursor-pointer shrink-0 bg-white"
+                                className="w-7 h-7 p-0.5 border border-slate-200 rounded cursor-pointer shrink-0 bg-white"
                               />
                               <input
                                 type="text"
                                 value={lpData.price_original_color || ''}
                                 onChange={(e) => setLpData({...lpData, price_original_color: e.target.value})}
                                 placeholder="#94a3b8"
-                                className="w-20 px-1.5 py-0.5 border border-slate-200 rounded text-[11px] outline-none font-mono"
+                                className="flex-1 min-w-0 px-2 py-1 border border-slate-200 rounded text-xs outline-none font-mono bg-white text-slate-700"
                               />
                             </div>
                           </div>
@@ -5966,22 +5945,23 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                       </div>
 
                       {/* Valor Promocional / À Vista (Por) */}
-                      <div className="p-4 border border-emerald-200 rounded-xl bg-emerald-50/30 space-y-3">
-                        <label className="block text-xs font-bold text-emerald-800 uppercase tracking-wider">Valor Promocional (Por)</label>
-                        <input 
-                          type="text" 
-                          value={lpData.price_promo || ''}
-                          onChange={(e) => setLpData({...lpData, price_promo: e.target.value})}
-                          className="w-full px-3 py-2 border border-emerald-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-bold text-emerald-900"
-                          placeholder={editingSettingsData.preco === 'gratuito' ? "GRÁTIS" : `Por R$ ${(parseFloat(editingSettingsData.valor_com_desconto || editingSettingsData.valor || '0')).toLocaleString('pt-BR', { minimumFractionDigits: 2 })} à vista (da Visão Geral)`}
-                        />
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between gap-1 text-xs">
+                      <div className="p-4 border border-emerald-200 rounded-xl bg-emerald-50/30 space-y-3 min-w-0">
+                        <div className="flex items-center justify-between gap-1">
+                          <label className="block text-xs font-bold text-emerald-800 uppercase tracking-wider truncate">Valor Promocional (Por)</label>
+                          <span className="text-[9px] font-bold bg-emerald-200 text-emerald-800 px-1.5 py-0.5 rounded uppercase shrink-0">Visão Geral</span>
+                        </div>
+                        <div className="px-3 py-2 bg-white border border-emerald-200 rounded-lg text-xs font-bold text-emerald-900 truncate">
+                          {editingSettingsData.preco === 'gratuito'
+                            ? 'GRÁTIS'
+                            : `Por R$ ${(parseFloat(editingSettingsData.valor_com_desconto || editingSettingsData.valor || '0')).toLocaleString('pt-BR', { minimumFractionDigits: 2 })} à vista`}
+                        </div>
+                        <div className="space-y-2 pt-2 border-t border-emerald-200/60">
+                          <div className="flex flex-col gap-1">
                             <span className="font-bold text-slate-500 text-[10px] uppercase">Estilo:</span>
                             <select
                               value={lpData.price_promo_style || ''}
                               onChange={(e) => setLpData({...lpData, price_promo_style: e.target.value})}
-                              className="w-full max-w-[140px] text-xs bg-white border border-slate-200 rounded px-2 py-1 outline-none font-medium"
+                              className="w-full text-xs bg-white border border-slate-200 rounded px-2 py-1.5 outline-none font-medium text-slate-700"
                             >
                               <option value="">Título 1</option>
                               <option value="typo-title-1">Título 1</option>
@@ -5989,21 +5969,21 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                               <option value="typo-title-3">Título 3</option>
                             </select>
                           </div>
-                          <div className="flex items-center justify-between gap-1 text-xs">
+                          <div className="flex flex-col gap-1">
                             <span className="font-bold text-slate-500 text-[10px] uppercase">Cor:</span>
-                            <div className="flex items-center gap-1">
+                            <div className="flex items-center gap-1.5 w-full min-w-0">
                               <input
                                 type="color"
                                 value={lpData.price_promo_color || '#ffffff'}
                                 onChange={(e) => setLpData({...lpData, price_promo_color: e.target.value})}
-                                className="w-6 h-6 p-0.5 border border-slate-200 rounded cursor-pointer shrink-0 bg-white"
+                                className="w-7 h-7 p-0.5 border border-slate-200 rounded cursor-pointer shrink-0 bg-white"
                               />
                               <input
                                 type="text"
                                 value={lpData.price_promo_color || ''}
                                 onChange={(e) => setLpData({...lpData, price_promo_color: e.target.value})}
                                 placeholder="#ffffff"
-                                className="w-20 px-1.5 py-0.5 border border-slate-200 rounded text-[11px] outline-none font-mono"
+                                className="flex-1 min-w-0 px-2 py-1 border border-slate-200 rounded text-xs outline-none font-mono bg-white text-slate-700"
                               />
                             </div>
                           </div>
@@ -6011,22 +5991,23 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                       </div>
 
                       {/* Valor Parcelado */}
-                      <div className="p-4 border border-slate-200 rounded-xl bg-slate-50/50 space-y-3">
-                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">Valor Parcelado</label>
-                        <input 
-                          type="text" 
-                          value={lpData.price_installment || ''}
-                          onChange={(e) => setLpData({...lpData, price_installment: e.target.value})}
-                          className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium"
-                          placeholder={`ou ${editingSettingsData.pagamento_parcelas_limite || 10}x de R$ ${((parseFloat(editingSettingsData.valor_com_desconto || editingSettingsData.valor || '0')) / (parseInt(editingSettingsData.pagamento_parcelas_limite || '10') || 10)).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} sem juros (da Visão Geral)`}
-                        />
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between gap-1 text-xs">
+                      <div className="p-4 border border-slate-200 rounded-xl bg-slate-50/50 space-y-3 min-w-0">
+                        <div className="flex items-center justify-between gap-1">
+                          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider truncate">Valor Parcelado</label>
+                          <span className="text-[9px] font-bold bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded uppercase shrink-0">Visão Geral</span>
+                        </div>
+                        <div className="px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-700 truncate">
+                          {editingSettingsData.preco === 'gratuito'
+                            ? 'Indisponível (Curso Gratuito)'
+                            : `ou ${editingSettingsData.pagamento_parcelas_limite || 10}x de R$ ${((parseFloat(editingSettingsData.valor_com_desconto || editingSettingsData.valor || '0')) / (parseInt(editingSettingsData.pagamento_parcelas_limite || '10') || 10)).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} sem juros`}
+                        </div>
+                        <div className="space-y-2 pt-2 border-t border-slate-200/60">
+                          <div className="flex flex-col gap-1">
                             <span className="font-bold text-slate-500 text-[10px] uppercase">Estilo:</span>
                             <select
                               value={lpData.price_installment_style || ''}
                               onChange={(e) => setLpData({...lpData, price_installment_style: e.target.value})}
-                              className="w-full max-w-[140px] text-xs bg-white border border-slate-200 rounded px-2 py-1 outline-none font-medium"
+                              className="w-full text-xs bg-white border border-slate-200 rounded px-2 py-1.5 outline-none font-medium text-slate-700"
                             >
                               <option value="">Texto corrido 1</option>
                               <option value="typo-title-3">Título 3</option>
@@ -6035,21 +6016,21 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                               <option value="typo-body-3">Texto corrido 3</option>
                             </select>
                           </div>
-                          <div className="flex items-center justify-between gap-1 text-xs">
+                          <div className="flex flex-col gap-1">
                             <span className="font-bold text-slate-500 text-[10px] uppercase">Cor:</span>
-                            <div className="flex items-center gap-1">
+                            <div className="flex items-center gap-1.5 w-full min-w-0">
                               <input
                                 type="color"
                                 value={lpData.price_installment_color || '#34d399'}
                                 onChange={(e) => setLpData({...lpData, price_installment_color: e.target.value})}
-                                className="w-6 h-6 p-0.5 border border-slate-200 rounded cursor-pointer shrink-0 bg-white"
+                                className="w-7 h-7 p-0.5 border border-slate-200 rounded cursor-pointer shrink-0 bg-white"
                               />
                               <input
                                 type="text"
                                 value={lpData.price_installment_color || ''}
                                 onChange={(e) => setLpData({...lpData, price_installment_color: e.target.value})}
                                 placeholder="#34d399"
-                                className="w-20 px-1.5 py-0.5 border border-slate-200 rounded text-[11px] outline-none font-mono"
+                                className="flex-1 min-w-0 px-2 py-1 border border-slate-200 rounded text-xs outline-none font-mono bg-white text-slate-700"
                               />
                             </div>
                           </div>
