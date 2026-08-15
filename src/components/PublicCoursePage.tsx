@@ -2454,7 +2454,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                     {(lp.instructor?.name || item.professor_nome) && (
                       <div className="w-full flex items-center justify-center text-center">
                         <span className="text-xs sm:text-sm text-primary font-serif italic tracking-wide font-bold mt-[10px] text-center mx-auto block">
-                          By {lp.instructor?.name || item.professor_nome}
+                          By <FormattedTitle content={lp.instructor?.name || item.professor_nome} />
                         </span>
                       </div>
                     )}
@@ -2657,8 +2657,8 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                       {isEmBreve ? 'Cadastrar-se' : (lp.cta_text || 'Quero Garantir Minha Vaga')}
                     </button>
                     {(lp.instructor?.name || item.professor_nome) && (
-                      <span className="text-sm text-primary font-bold typo-text mt-[10px]">
-                        By {lp.instructor?.name || item.professor_nome}
+                      <span className="text-sm text-primary font-bold font-serif italic typo-text mt-[10px]">
+                        By <FormattedTitle content={lp.instructor?.name || item.professor_nome} />
                       </span>
                     )}
                   </div>
