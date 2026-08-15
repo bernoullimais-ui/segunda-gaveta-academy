@@ -853,7 +853,7 @@ const TargetAudienceSection = ({ targetAudience, layout, style, lp, onEnrollClic
 
   return (
     <section key="audience" id="para-quem" className="py-24 sm:py-32 bg-slate-900 relative text-center overflow-hidden" style={style}>
-      <div className="max-w-[768px] mx-auto px-6 flex flex-col items-center justify-center space-y-8 lg:space-y-10">
+      <div className="max-w-[850px] mx-auto px-6 flex flex-col items-center justify-center space-y-8 lg:space-y-10">
         {targetAudience && (
           <div 
             className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif text-white font-normal leading-[1.25] tracking-tight ${lp?.audience_text_style || 'typo-title-1'}`}
@@ -1807,7 +1807,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
     ),
     copy: (lp.copy_section_text || lp.copy_section_cta_text) ? (
       <section key="copy" id="copy-cta" className="py-24 sm:py-32 bg-slate-900 relative text-center overflow-hidden" style={getSectionStyle('copy')}>
-        <div className="max-w-[768px] mx-auto px-6 flex flex-col items-center justify-center space-y-8 lg:space-y-10">
+        <div className="max-w-[850px] mx-auto px-6 flex flex-col items-center justify-center space-y-8 lg:space-y-10">
           {lp.copy_section_text && (
             <div 
               className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif text-white font-normal leading-[1.25] tracking-tight ${lp.copy_text_style || 'typo-title-1'}`}
