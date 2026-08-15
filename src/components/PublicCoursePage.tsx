@@ -1646,15 +1646,19 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
               { icon: Clock, text: `${item.carga_horaria || '04'} horas de conteúdo` },
               { icon: Calendar, text: item.tempo === 'com_limite' ? `Acesso por ${item.duracao || ''} ${item.duracao_tipo || 'meses'}` : 'Acesso vitalício' },
               ...(item.tem_certificado ? [{ icon: Award, text: 'Certificado Incluso' }] : [])
-            ]).map((stat, i) => (
-              <div 
-                key={i} 
-                className="px-6 py-3.5 rounded-2xl border border-white/20 bg-transparent backdrop-blur-sm flex items-center gap-3.5 text-white hover:border-primary/60 hover:bg-white/10 transition-all shadow-sm"
-              >
-                <stat.icon className="w-5 h-5 sm:w-6 sm:h-6 text-primary shrink-0" />
-                <span className="text-sm sm:text-base font-semibold tracking-tight whitespace-nowrap">{stat.text}</span>
-              </div>
-            ))}
+            ]).map((stat, i) => {
+              const aboutSectionBgColor = lp.section_about_bg_color || '#0f172a';
+              return (
+                <div 
+                  key={i} 
+                  className="px-6 py-3.5 rounded-2xl border bg-transparent backdrop-blur-sm flex items-center gap-3.5 transition-all shadow-sm"
+                  style={{ borderColor: aboutSectionBgColor, color: aboutSectionBgColor }}
+                >
+                  <stat.icon className="w-5 h-5 sm:w-6 sm:h-6 shrink-0" style={{ color: aboutSectionBgColor }} />
+                  <span className="text-sm sm:text-base font-semibold tracking-tight whitespace-nowrap" style={{ color: aboutSectionBgColor }}>{stat.text}</span>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
