@@ -477,7 +477,7 @@ const TestimonialsCarousel = ({ testimonials, layout, primaryColor, lp }: { test
       <div className="relative z-10 w-full max-w-2xl mx-auto px-8 sm:px-14 py-6 min-h-[220px] flex flex-col justify-center items-center">
         {/* Top-Left Double Quote */}
         <span 
-          className="absolute -top-6 sm:-top-[350px] -left-4 sm:-left-[300px] text-[120px] sm:text-[1024px] font-serif select-none pointer-events-none leading-none z-0"
+          className="absolute -top-6 sm:-top-[320px] -left-4 sm:-left-[300px] text-[120px] sm:text-[1024px] font-serif select-none pointer-events-none leading-none z-0"
           style={{ color: quoteColor }}
         >
           “
@@ -529,7 +529,7 @@ const TestimonialsCarousel = ({ testimonials, layout, primaryColor, lp }: { test
       )}
 
       {/* Student Photos / Avatars Navigation Bar */}
-      <div className="relative z-10 flex items-center justify-center gap-3 mt-10">
+      <div className="relative z-10 flex items-center justify-center gap-4 mt-10">
         {testimonials.map((t: any, idx: number) => {
           const isActive = idx === currentIndex;
           return (
@@ -538,8 +538,8 @@ const TestimonialsCarousel = ({ testimonials, layout, primaryColor, lp }: { test
               onClick={() => setCurrentIndex(idx)}
               className={`relative rounded-full transition-all duration-300 cursor-pointer flex items-center justify-center ${
                 isActive 
-                  ? 'w-12 h-12 border-2 border-white scale-110 shadow-xl opacity-100 z-10' 
-                  : 'w-7 h-7 sm:w-8 sm:h-8 opacity-40 hover:opacity-80 scale-90'
+                  ? 'w-14 h-14 sm:w-16 sm:h-16 border-2 border-white scale-110 shadow-xl opacity-100 z-10' 
+                  : 'w-9 h-9 sm:w-10 sm:h-10 opacity-40 hover:opacity-80 scale-90'
               }`}
             >
               {t.photo_url ? (
@@ -549,7 +549,7 @@ const TestimonialsCarousel = ({ testimonials, layout, primaryColor, lp }: { test
                   className="w-full h-full rounded-full object-cover" 
                 />
               ) : (
-                <div className={`w-full h-full rounded-full flex items-center justify-center text-white font-bold ${isActive ? 'bg-primary text-xs' : 'bg-white/30 text-[10px]'}`}>
+                <div className={`w-full h-full rounded-full flex items-center justify-center text-white font-bold ${isActive ? 'bg-primary text-sm' : 'bg-white/30 text-xs'}`}>
                   {t.name?.[0]}
                 </div>
               )}
