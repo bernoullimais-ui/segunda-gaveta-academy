@@ -51,9 +51,15 @@ const Nav = ({ layout, item, lp, onEnrollClick, timeLeft }: NavProps) => {
   const [isScrolled, setIsScrolled] = React.useState(false);
 
   const pad = (num: number) => num.toString().padStart(2, '0');
-  const whatsappNum = (lp?.whatsapp_number || item?.whatsapp_suporte || '').replace(/\D/g, '');
-  const messageText = encodeURIComponent(`Quero informações sobre ${item?.nome || ''}`);
-  const whatsappUrl = whatsappNum ? `https://wa.me/${whatsappNum}?text=${messageText}` : '#';
+
+  const orgRawPhone = item?.organizacoes?.config_json?.suporte_telefone || item?.organizacoes?.config_json?.suporte_whatsapp || '71999511275';
+  const instructorRawPhone = lp?.instructor?.whatsapp_url || lp?.instructor_whatsapp_url || lp?.whatsapp_number || item?.whatsapp_suporte;
+  const instructorPhoneClean = getCleanPhone(instructorRawPhone, orgRawPhone);
+
+  const courseTitle = item?.nome || 'este curso';
+  const whatsappUrl = instructorPhoneClean
+    ? `https://wa.me/${instructorPhoneClean}?text=${encodeURIComponent(`Olá. Quero informações sobre o curso "${courseTitle}"`)}`
+    : '#';
 
   React.useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -797,16 +803,15 @@ const TargetAudienceSection = ({ targetAudience, layout, style }: { targetAudien
   );
 };
 
-const WhatsAppFloatingButton = ({ item }: { item: any }) => {
-  const org = item?.organizacoes;
-  const rawPhone = org?.config_json?.suporte_telefone || org?.config_json?.suporte_whatsapp || '';
+const WhatsAppFloatingButton = ({ item, lp }: { item: any, lp?: any }) => {
+  const orgRawPhone = item?.organizacoes?.config_json?.suporte_telefone || item?.organizacoes?.config_json?.suporte_whatsapp || '71999511275';
+  const instructorRawPhone = lp?.instructor?.whatsapp_url || lp?.instructor_whatsapp_url || lp?.whatsapp_number || item?.whatsapp_suporte;
+  const cleanPhone = getCleanPhone(instructorRawPhone, orgRawPhone);
   
-  if (!rawPhone) return null;
-
-  const cleanPhone = rawPhone.replace(/\D/g, '');
   if (!cleanPhone) return null;
 
-  const waUrl = `https://wa.me/55${cleanPhone}?text=Olá! Estou na página de vendas do curso *${encodeURIComponent(item.nome)}* e gostaria de tirar algumas dúvidas.`;
+  const courseTitle = item?.nome || 'este curso';
+  const waUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(`Olá. Quero informações sobre o curso "${courseTitle}"`)}`;
 
   return (
     <a 
@@ -2962,6 +2967,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
       </section>
 
       <Footer layout={layout} item={item} lp={lp} />
+      <WhatsAppFloatingButton item={item} lp={lp} />
       <ModalErrorBoundary>
         <EnrollmentModal 
           isOpen={showEnrollModal}
