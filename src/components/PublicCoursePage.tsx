@@ -1968,10 +1968,14 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                 <div key={idx} className="w-full text-left">
                   <div 
                     onClick={() => toggleFaq(idx)}
-                    className="px-6 py-4 rounded-2xl border border-white/20 bg-transparent backdrop-blur-sm hover:border-primary/60 hover:bg-white/10 transition-all flex items-center justify-between cursor-pointer select-none group"
+                    className="px-6 py-4 rounded-2xl border bg-transparent backdrop-blur-sm hover:border-primary/60 hover:bg-white/10 transition-all flex items-center justify-between cursor-pointer select-none group"
+                    style={lp.faq_question_color ? { borderColor: lp.faq_question_color } : { borderColor: 'rgba(255, 255, 255, 0.2)' }}
                   >
                     <div className="flex items-center gap-4 flex-1">
-                      <span className="font-serif text-2xl font-semibold text-white/90">
+                      <span 
+                        className="font-serif text-2xl font-semibold text-white/90"
+                        style={lp.faq_question_color ? { color: lp.faq_question_color } : undefined}
+                      >
                         {String(idx + 1).padStart(2, '0')}
                       </span>
                       <span 
@@ -1981,7 +1985,10 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                         {f.question}
                       </span>
                     </div>
-                    <ChevronDown className={`w-5 h-5 text-white/70 group-hover:text-white transition-transform duration-300 ${isFaqExpanded ? 'rotate-180 text-primary' : ''}`} />
+                    <ChevronDown 
+                      className={`w-5 h-5 transition-transform duration-300 ${isFaqExpanded ? 'rotate-180' : ''}`} 
+                      style={lp.faq_question_color ? { color: lp.faq_question_color } : undefined}
+                    />
                   </div>
 
                   <AnimatePresence initial={false}>
