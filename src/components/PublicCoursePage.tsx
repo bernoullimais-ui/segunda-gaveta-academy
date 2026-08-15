@@ -583,7 +583,7 @@ const TestimonialsCarousel = ({ testimonials, layout, primaryColor, lp }: { test
       <div className="relative z-10 w-full max-w-2xl mx-auto px-8 sm:px-14 py-6 flex flex-col justify-center items-center">
         {/* Top-Left Double Quote */}
         <span 
-          className="absolute -top-6 sm:-top-[320px] -left-4 sm:-left-[300px] text-[120px] sm:text-[1024px] font-serif select-none pointer-events-none leading-none z-0"
+          className="absolute -top-10 -left-6 sm:-top-16 sm:-left-10 text-7xl sm:text-9xl font-serif select-none pointer-events-none leading-none z-0 opacity-20"
           style={{ color: quoteColor }}
         >
           “
@@ -596,7 +596,7 @@ const TestimonialsCarousel = ({ testimonials, layout, primaryColor, lp }: { test
             return (
               <div 
                 key={idx}
-                className={`col-start-1 row-start-1 w-full flex flex-col items-center justify-center transition-all duration-300 ${
+                className={`col-start-1 row-start-1 w-full flex flex-col items-center justify-center transition-opacity duration-300 ease-in-out ${
                   isActive ? 'opacity-100 z-10 pointer-events-auto' : 'opacity-0 z-0 pointer-events-none invisible'
                 }`}
               >
@@ -622,7 +622,7 @@ const TestimonialsCarousel = ({ testimonials, layout, primaryColor, lp }: { test
 
         {/* Bottom-Right Double Quote */}
         <span 
-          className="absolute -bottom-8 sm:-bottom-[984px] -right-4 sm:-right-[400px] text-[120px] sm:text-[1024px] font-serif select-none pointer-events-none leading-none z-0"
+          className="absolute -bottom-10 -right-6 sm:-bottom-16 sm:-right-10 text-7xl sm:text-9xl font-serif select-none pointer-events-none leading-none z-0 opacity-20"
           style={{ color: quoteColor }}
         >
           ”
@@ -1829,7 +1829,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
       <TargetAudienceSection key="audience" targetAudience={lp.target_audience} layout={layout} style={getSectionStyle('audience')} lp={lp} />
     ),
     instructor: (
-      <section key="instructor" id="instrutor" className="relative w-full overflow-hidden bg-slate-950 text-left" style={getSectionStyle('instructor')}>
+      <section key="instructor" id="instrutor" className="relative w-full overflow-hidden bg-slate-950 text-left [backface-visibility:hidden]" style={getSectionStyle('instructor')}>
         <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[550px] lg:min-h-[650px] w-full items-stretch">
           <div className="relative w-full h-full min-h-[400px] lg:min-h-full overflow-hidden bg-slate-900">
             <img 
@@ -1839,7 +1839,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             />
           </div>
 
-          <div className="p-8 sm:p-12 lg:p-20 xl:p-24 flex flex-col justify-center text-left space-y-6 sm:space-y-8 max-w-[672px] mx-auto w-full">
+          <div className="p-8 sm:p-12 lg:p-20 xl:p-24 flex flex-col justify-center text-left space-y-6 sm:space-y-8 max-w-[672px] mx-auto w-full [backface-visibility:hidden]">
             <div className="space-y-3 max-w-[768px]">
               <h2 
                 className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-[1.15] tracking-tight ${lp.instructor_name_style || 'typo-title-1'}`}
