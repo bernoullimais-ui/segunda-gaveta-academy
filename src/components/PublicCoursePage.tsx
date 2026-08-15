@@ -1698,8 +1698,18 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                       className="w-full h-full object-cover object-center"
                     />
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="w-20 h-20 bg-primary/90 text-white rounded-full flex items-center justify-center shadow-2xl group-hover:scale-110 transition-all">
-                        <Play className="w-8 h-8 fill-current ml-1" />
+                      <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white/95 rounded-full flex items-center justify-center shadow-2xl group-hover:scale-110 transition-all">
+                        <svg 
+                          viewBox="0 0 24 24" 
+                          fill="none" 
+                          stroke={lp.section_about_bg_color || '#0f172a'} 
+                          strokeWidth="2.5" 
+                          strokeLinecap="round" 
+                          strokeLinejoin="round" 
+                          className="w-9 h-9 sm:w-11 sm:h-11 ml-1.5"
+                        >
+                          <polygon points="6 3 20 12 6 21 6 3" />
+                        </svg>
                       </div>
                     </div>
                   </div>
@@ -2614,8 +2624,18 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                   playIcon={
                     <div className="absolute inset-0 cursor-pointer flex items-center justify-center z-10 group">
                       <div className="absolute inset-0 bg-slate-900/40 group-hover:bg-slate-900/20 transition-colors" />
-                      <div className="relative z-20 w-20 h-20 bg-primary rounded-full flex items-center justify-center text-white shadow-2xl scale-100 group-hover:scale-110 transition-transform duration-300">
-                        <Play className="w-8 h-8 fill-current ml-1" />
+                      <div className="relative z-20 w-20 h-20 sm:w-24 sm:h-24 bg-white/95 rounded-full flex items-center justify-center shadow-2xl scale-100 group-hover:scale-110 transition-transform duration-300">
+                        <svg 
+                          viewBox="0 0 24 24" 
+                          fill="none" 
+                          stroke={lp.section_about_bg_color || '#0f172a'} 
+                          strokeWidth="2.5" 
+                          strokeLinecap="round" 
+                          strokeLinejoin="round" 
+                          className="w-9 h-9 sm:w-11 sm:h-11 ml-1.5"
+                        >
+                          <polygon points="6 3 20 12 6 21 6 3" />
+                        </svg>
                       </div>
                     </div>
                   }
