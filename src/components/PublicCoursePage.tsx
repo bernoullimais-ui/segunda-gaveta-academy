@@ -1749,8 +1749,11 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
           
           <button 
             onClick={handleEnrollClick}
-            className={`px-8 sm:px-10 py-4 bg-primary/90 hover:bg-primary text-white rounded-full font-serif italic text-lg sm:text-xl shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2 group ${lp.copy_cta_style || 'typo-btn-1'}`}
-            style={lp.copy_cta_color ? { color: lp.copy_cta_color } : undefined}
+            className={`px-8 sm:px-10 py-4 text-white rounded-full font-serif italic text-lg sm:text-xl shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2 group ${lp.copy_cta_style || 'typo-btn-1'}`}
+            style={{ 
+              backgroundColor: lp.section_curriculum_bg_color || lp.section_about_bg_color || '#0f172a',
+              color: lp.copy_cta_color || '#ffffff'
+            }}
           >
             <span>{lp.copy_section_cta_text || lp.cta_text || 'Acesse o guia'}</span>
           </button>
