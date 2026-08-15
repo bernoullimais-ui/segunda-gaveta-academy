@@ -82,11 +82,17 @@ const Nav = ({ layout, item, lp, onEnrollClick, timeLeft }: NavProps) => {
       {timeLeft && (
         <div className="w-full bg-slate-950/95 py-2.5 px-4 shadow-md">
           <div className="max-w-7xl mx-auto flex items-center justify-center gap-3 sm:gap-6 text-white text-center">
-            <span className="text-xs sm:text-sm font-semibold tracking-wide text-slate-200">
+            <span 
+              className={`text-xs sm:text-sm font-semibold tracking-wide text-slate-200 ${lp?.countdown_text_style || ''}`}
+              style={lp?.countdown_text_color ? { color: lp.countdown_text_color } : undefined}
+            >
               {lp?.countdown_title || 'Oferta por tempo limitado'}
             </span>
-            <div className="flex items-center gap-1.5 px-3 py-1 bg-white/10 border border-white/20 rounded-full text-white text-xs font-mono font-bold shrink-0 shadow-sm">
-              <Clock className="w-3.5 h-3.5 text-primary shrink-0" />
+            <div 
+              className={`flex items-center gap-1.5 text-xs font-mono font-bold shrink-0 ${lp?.countdown_text_style || ''}`}
+              style={lp?.countdown_text_color ? { color: lp.countdown_text_color } : undefined}
+            >
+              <Clock className="w-3.5 h-3.5 text-primary shrink-0" style={lp?.countdown_text_color ? { color: lp.countdown_text_color } : undefined} />
               <span className="tracking-wider">
                 {timeLeft.days > 0 ? `${pad(timeLeft.days)}d ` : ''}{pad(timeLeft.hours)}h {pad(timeLeft.minutes)}m {pad(timeLeft.seconds)}s
               </span>

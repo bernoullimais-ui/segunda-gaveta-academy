@@ -5610,6 +5610,48 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                           className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium"
                         />
                       </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Estilo e Cor do Texto do Cronômetro</label>
+                        <div className="flex flex-wrap sm:flex-nowrap items-center gap-3 p-2 bg-slate-50 border border-slate-200 rounded-xl">
+                          <div className="flex-1 flex items-center gap-2 min-w-[180px]">
+                            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider shrink-0">Estilo:</span>
+                            <select
+                              value={lpData.countdown_text_style || ''}
+                              onChange={(e) => setLpData({...lpData, countdown_text_style: e.target.value})}
+                              className="w-full text-xs bg-white border border-slate-200 rounded px-2.5 py-1.5 outline-none font-medium text-slate-700 focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                            >
+                              <option value="">Padrão (Texto 2)</option>
+                              <option value="typo-title-1">Título 1</option>
+                              <option value="typo-title-2">Título 2</option>
+                              <option value="typo-title-3">Título 3</option>
+                              <option value="typo-body-1">Texto corrido 1</option>
+                              <option value="typo-body-2">Texto corrido 2</option>
+                              <option value="typo-body-3">Texto corrido 3</option>
+                              <option value="typo-body-4">Texto corrido 4</option>
+                              <option value="typo-btn-1">Texto Botão 1</option>
+                              <option value="typo-btn-2">Texto Botão 2</option>
+                            </select>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider shrink-0">Cor:</span>
+                            <div className="flex items-center gap-1">
+                              <input
+                                type="color"
+                                value={lpData.countdown_text_color || '#ffffff'}
+                                onChange={(e) => setLpData({...lpData, countdown_text_color: e.target.value})}
+                                className="w-7 h-7 rounded border border-slate-200 cursor-pointer p-0.5 bg-white"
+                              />
+                              <input
+                                type="text"
+                                value={lpData.countdown_text_color || ''}
+                                onChange={(e) => setLpData({...lpData, countdown_text_color: e.target.value})}
+                                placeholder="Ex: #ffffff"
+                                className="w-24 text-xs bg-white border border-slate-200 rounded px-2 py-1.5 outline-none font-mono"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
