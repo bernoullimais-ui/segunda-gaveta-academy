@@ -109,8 +109,11 @@ const Nav = ({ layout, item, lp, onEnrollClick, timeLeft }: NavProps) => {
               <img 
                 src={lp?.logo_url || item?.organizacoes?.logo_url} 
                 alt="Logo" 
-                className="object-contain shrink min-w-0 max-w-[140px] sm:max-w-[240px] max-h-[44px] sm:max-h-[56px]" 
-                style={{ height: lp?.nav_logo_height ? `${lp.nav_logo_height}px` : '44px' }}
+                className="object-contain shrink min-w-0 max-w-[280px] sm:max-w-[440px]" 
+                style={{ 
+                  height: lp?.nav_logo_height ? `${lp.nav_logo_height}px` : '44px',
+                  maxHeight: '100%'
+                }}
               />
             ) : (
               <div 
