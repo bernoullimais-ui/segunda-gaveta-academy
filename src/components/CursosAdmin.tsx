@@ -3903,7 +3903,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
 
         {activeTab === 'landing_page' && (
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="flex justify-between items-center bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+            <div className="sticky top-0 z-40 bg-white/95 backdrop-blur-md p-5 sm:p-6 rounded-xl border border-slate-200 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all">
               <div>
                 <h3 className="font-bold text-2xl text-slate-900 flex items-center gap-2">
                   <ShoppingBag className="w-6 h-6 text-blue-600" /> Página de Venda Pública
