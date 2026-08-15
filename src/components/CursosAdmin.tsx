@@ -4940,6 +4940,32 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2 border-t border-slate-100">
                       <div>
+                        <span className="text-[11px] font-bold text-slate-700 block mb-1">Número do Módulo:</span>
+                        <div className="flex flex-col gap-1.5 p-2 bg-slate-50 border border-slate-200 rounded-lg">
+                          <select
+                            value={lpData.curriculum_number_style || ''}
+                            onChange={(e) => setLpData({...lpData, curriculum_number_style: e.target.value})}
+                            className="w-full text-xs bg-white border border-slate-200 rounded px-2 py-1 outline-none font-medium"
+                          >
+                            <option value="">Estilo Padrão (Serif Grande)</option>
+                            <option value="typo-title-1">Título 1</option>
+                            <option value="typo-title-2">Título 2</option>
+                            <option value="typo-title-3">Título 3</option>
+                            <option value="typo-body-1">Texto corrido 1</option>
+                            <option value="typo-body-2">Texto corrido 2</option>
+                            <option value="typo-body-3">Texto corrido 3</option>
+                            <option value="typo-body-4">Texto corrido 4</option>
+                          </select>
+                          <input
+                            type="color"
+                            value={lpData.curriculum_number_color || '#ffffff'}
+                            onChange={(e) => setLpData({...lpData, curriculum_number_color: e.target.value})}
+                            className="w-full h-6 p-0.5 border border-slate-200 rounded cursor-pointer shrink-0 bg-white"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
                         <span className="text-[11px] font-bold text-slate-700 block mb-1">Nome do Módulo:</span>
                         <div className="flex flex-col gap-1.5 p-2 bg-slate-50 border border-slate-200 rounded-lg">
                           <select

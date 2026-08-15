@@ -1923,8 +1923,8 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                     >
                       <div className="flex items-center gap-4 flex-1">
                         <span 
-                          className="font-serif text-2xl font-semibold text-white/90"
-                          style={lp.curriculum_module_color ? { color: lp.curriculum_module_color } : undefined}
+                          className={`font-serif text-2xl font-semibold text-white/90 ${lp.curriculum_number_style || ''}`}
+                          style={lp.curriculum_number_color ? { color: lp.curriculum_number_color } : (lp.curriculum_module_color ? { color: lp.curriculum_module_color } : undefined)}
                         >
                           {String(idx + 1).padStart(2, '0')}
                         </span>
@@ -2941,7 +2941,10 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                     onClick={() => toggleModule(idx)}
                     className="p-6 flex items-center gap-6 cursor-pointer hover:bg-slate-100/50 select-none transition-colors"
                   >
-                    <div className="w-12 h-12 bg-white text-primary rounded-xl flex items-center justify-center font-bold text-xl shrink-0 transition-all shadow-sm">
+                    <div 
+                      className={`w-12 h-12 bg-white text-primary rounded-xl flex items-center justify-center font-bold text-xl shrink-0 transition-all shadow-sm ${lp.curriculum_number_style || ''}`}
+                      style={lp.curriculum_number_color ? { color: lp.curriculum_number_color } : undefined}
+                    >
                       {idx + 1}
                     </div>
                     <div className="flex-1">
