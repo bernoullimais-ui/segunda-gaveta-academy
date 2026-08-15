@@ -98,7 +98,7 @@ const Nav = ({ layout, item, lp, onEnrollClick, timeLeft }: NavProps) => {
       <nav 
         className={`w-full transition-all duration-300 ${
           isScrolled 
-            ? `backdrop-blur-md border-b ${layout === 'escuro' ? 'bg-slate-950/90 border-slate-800/80 shadow-lg' : 'bg-white/90 border-slate-200/80 shadow-sm'}`
+            ? `backdrop-blur-md border-b ${layout === 'escuro' ? 'bg-slate-950/90 border-slate-800/80' : 'bg-white/90 border-slate-200/80'}`
             : 'bg-transparent border-transparent'
         }`}
         style={{ backgroundColor: isScrolled && lp?.nav_bg_color ? lp.nav_bg_color : undefined }}
