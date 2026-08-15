@@ -4594,29 +4594,37 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
 
                       <div className="space-y-4">
                         <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
-                          <label className="block text-xs font-bold text-slate-600 mb-3">Deslocamento do Título (X e Y)</label>
+                          <label className="block text-xs font-bold text-slate-600 mb-3">Deslocamento do Bloco Hero (X e Y)</label>
                           <div className="grid grid-cols-2 gap-4">
                             <div>
-                              <span className="text-[10px] text-slate-400 block mb-1">Horizontal (X): {lpData.hero_title_offset_x || 0}px</span>
-                              <input type="range" min="-500" max="500" step="10" value={lpData.hero_title_offset_x || 0} onChange={(e) => setLpData({...lpData, hero_title_offset_x: parseInt(e.target.value)})} className="w-full accent-blue-500" />
+                              <span className="text-[10px] text-slate-400 block mb-1">Horizontal (X): {lpData.hero_block_offset_x ?? lpData.hero_title_offset_x ?? 0}px</span>
+                              <input 
+                                type="range" 
+                                min="-500" 
+                                max="500" 
+                                step="10" 
+                                value={lpData.hero_block_offset_x ?? lpData.hero_title_offset_x ?? 0} 
+                                onChange={(e) => {
+                                  const val = parseInt(e.target.value);
+                                  setLpData({...lpData, hero_block_offset_x: val, hero_title_offset_x: val});
+                                }} 
+                                className="w-full accent-blue-500 cursor-pointer" 
+                              />
                             </div>
                             <div>
-                              <span className="text-[10px] text-slate-400 block mb-1">Vertical (Y): {lpData.hero_title_offset_y || 0}px</span>
-                              <input type="range" min="-500" max="500" step="10" value={lpData.hero_title_offset_y || 0} onChange={(e) => setLpData({...lpData, hero_title_offset_y: parseInt(e.target.value)})} className="w-full accent-blue-500" />
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
-                          <label className="block text-xs font-bold text-slate-600 mb-3">Deslocamento do Botão/CTA (X e Y)</label>
-                          <div className="grid grid-cols-2 gap-4">
-                            <div>
-                              <span className="text-[10px] text-slate-400 block mb-1">Horizontal (X): {lpData.hero_cta_offset_x || 0}px</span>
-                              <input type="range" min="-500" max="500" step="10" value={lpData.hero_cta_offset_x || 0} onChange={(e) => setLpData({...lpData, hero_cta_offset_x: parseInt(e.target.value)})} className="w-full accent-blue-500" />
-                            </div>
-                            <div>
-                              <span className="text-[10px] text-slate-400 block mb-1">Vertical (Y): {lpData.hero_cta_offset_y || 0}px</span>
-                              <input type="range" min="-500" max="500" step="10" value={lpData.hero_cta_offset_y || 0} onChange={(e) => setLpData({...lpData, hero_cta_offset_y: parseInt(e.target.value)})} className="w-full accent-blue-500" />
+                              <span className="text-[10px] text-slate-400 block mb-1">Vertical (Y): {lpData.hero_block_offset_y ?? lpData.hero_title_offset_y ?? 0}px</span>
+                              <input 
+                                type="range" 
+                                min="-500" 
+                                max="500" 
+                                step="10" 
+                                value={lpData.hero_block_offset_y ?? lpData.hero_title_offset_y ?? 0} 
+                                onChange={(e) => {
+                                  const val = parseInt(e.target.value);
+                                  setLpData({...lpData, hero_block_offset_y: val, hero_title_offset_y: val});
+                                }} 
+                                className="w-full accent-blue-500 cursor-pointer" 
+                              />
                             </div>
                           </div>
                         </div>

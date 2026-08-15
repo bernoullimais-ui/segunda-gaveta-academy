@@ -2403,9 +2403,16 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                 <div className="hidden lg:block col-span-1"></div>
 
                 {/* Right Column (50% equal width on desktop) - Content centered horizontally & vertically */}
-                <div className="col-span-1 w-full flex flex-col items-center justify-center text-center space-y-6 sm:space-y-8">
+                <div 
+                  className="col-span-1 w-full flex flex-col items-center justify-center text-center space-y-6 sm:space-y-8 hero-no-mobile-transform"
+                  style={{ 
+                    transform: (lp.hero_block_offset_x || lp.hero_block_offset_y || lp.hero_title_offset_x || lp.hero_title_offset_y) 
+                      ? `translate3d(${lp.hero_block_offset_x ?? lp.hero_title_offset_x ?? 0}px, ${lp.hero_block_offset_y ?? lp.hero_title_offset_y ?? 0}px, 0)` 
+                      : undefined 
+                  }}
+                >
                   {/* Title or Title Image */}
-                  <div className="w-full flex flex-col items-center justify-center text-center hero-no-mobile-transform" style={{ transform: (lp.hero_title_offset_x || lp.hero_title_offset_y) ? `translate3d(${lp.hero_title_offset_x || 0}px, ${lp.hero_title_offset_y || 0}px, 0)` : undefined }}>
+                  <div className="w-full flex flex-col items-center justify-center text-center">
                     {(lp.hero_title && (lp.hero_title.startsWith('data:image') || lp.hero_title.startsWith('http')) && !lp.hero_title.includes(' ')) ? (
                       <div className="w-full flex items-center justify-center text-center">
                         <img 
@@ -2434,7 +2441,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
 
                         {/* Tagline / Subtitle / Secondary Description */}
                         {(lp.hero_subtitle || item.descricao) && (
-                          <p className="text-xl sm:text-2xl lg:text-3xl font-serif italic text-slate-200/95 leading-snug max-w-2xl typo-subtitle typo-body-1 text-center mx-auto hero-no-mobile-transform" style={{ transform: (lp.hero_subtitle_offset_x || lp.hero_subtitle_offset_y) ? `translate3d(${lp.hero_subtitle_offset_x || 0}px, ${lp.hero_subtitle_offset_y || 0}px, 0)` : undefined }}>
+                          <p className="text-xl sm:text-2xl lg:text-3xl font-serif italic text-slate-200/95 leading-snug max-w-2xl typo-subtitle typo-body-1 text-center mx-auto">
                             <FormattedTitle content={lp.hero_subtitle || item.descricao} />
                           </p>
                         )}
@@ -2623,7 +2630,15 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
               'my-auto'
             }`}>
               {/* Text Content */}
-              <div className="space-y-6 lg:space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700 flex flex-col w-full" style={{ alignItems: !isMobileScreen ? (lp.hero_align_h === 'center' ? 'center' : lp.hero_align_h === 'right' ? 'flex-end' : 'flex-start') : 'flex-start' }}>
+              <div 
+                className="space-y-6 lg:space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700 flex flex-col w-full hero-no-mobile-transform" 
+                style={{ 
+                  alignItems: !isMobileScreen ? (lp.hero_align_h === 'center' ? 'center' : lp.hero_align_h === 'right' ? 'flex-end' : 'flex-start') : 'flex-start',
+                  transform: (lp.hero_block_offset_x || lp.hero_block_offset_y || lp.hero_title_offset_x || lp.hero_title_offset_y) 
+                    ? `translate3d(${lp.hero_block_offset_x ?? lp.hero_title_offset_x ?? 0}px, ${lp.hero_block_offset_y ?? lp.hero_title_offset_y ?? 0}px, 0)` 
+                    : undefined 
+                }}
+              >
 
                 {/* 1. Mobile Banner Image (Order 1 on mobile) */}
                 <div className="order-1 lg:hidden relative animate-in fade-in zoom-in-95 duration-1000 my-2 w-full">
@@ -2639,7 +2654,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                 </div>
 
                 {/* 2. Título (Order 2 on mobile) */}
-                <div className="order-2 lg:order-none hero-no-mobile-transform" style={{ transform: (lp.hero_title_offset_x || lp.hero_title_offset_y) ? `translate(${lp.hero_title_offset_x || 0}px, ${lp.hero_title_offset_y || 0}px)` : undefined }}>
+                <div className="order-2 lg:order-none">
                   {(lp.hero_title && (lp.hero_title.startsWith('data:image') || lp.hero_title.startsWith('http')) && !lp.hero_title.includes(' ')) ? (
                     <img src={lp.hero_title} alt={item.nome || "Título"} className="object-contain w-auto mb-4 max-w-full" style={{ height: lp.hero_title_image_height ? `${lp.hero_title_image_height}px` : '120px' }} />
                   ) : (
@@ -2650,7 +2665,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                 </div>
 
                 {/* 3. Botão de Ação / CTA (Order 3 on mobile - logo abaixo do título) */}
-                <div className="order-3 lg:order-none flex flex-col sm:flex-row items-center gap-4 pt-2 sm:pt-4 w-full hero-no-mobile-transform" style={{ transform: (lp.hero_cta_offset_x || lp.hero_cta_offset_y) ? `translate(${lp.hero_cta_offset_x || 0}px, ${lp.hero_cta_offset_y || 0}px)` : undefined, justifyContent: !isMobileScreen ? (lp.hero_align_h === 'center' ? 'center' : lp.hero_align_h === 'right' ? 'flex-end' : 'flex-start') : 'flex-start' }}>
+                <div className="order-3 lg:order-none flex flex-col sm:flex-row items-center gap-4 pt-2 sm:pt-4 w-full" style={{ justifyContent: !isMobileScreen ? (lp.hero_align_h === 'center' ? 'center' : lp.hero_align_h === 'right' ? 'flex-end' : 'flex-start') : 'flex-start' }}>
                   <div className="flex flex-col items-center gap-2 w-full sm:w-auto">
                     <button
                       onClick={handleEnrollClick}
