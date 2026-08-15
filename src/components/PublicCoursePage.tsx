@@ -1870,7 +1870,10 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                       style={lp.curriculum_module_color ? { borderColor: lp.curriculum_module_color } : { borderColor: 'rgba(255, 255, 255, 0.2)' }}
                     >
                       <div className="flex items-center gap-4 flex-1">
-                        <span className="font-serif text-2xl font-semibold text-white/90">
+                        <span 
+                          className="font-serif text-2xl font-semibold text-white/90"
+                          style={lp.curriculum_module_color ? { color: lp.curriculum_module_color } : undefined}
+                        >
                           {String(idx + 1).padStart(2, '0')}
                         </span>
                         <span 
@@ -1880,7 +1883,10 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                           {modulo.nome}
                         </span>
                       </div>
-                      <ChevronDown className={`w-5 h-5 text-white/70 group-hover:text-white transition-transform duration-300 ${isExpanded ? 'rotate-180 text-primary' : ''}`} />
+                      <ChevronDown 
+                        className={`w-5 h-5 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} 
+                        style={lp.curriculum_module_color ? { color: lp.curriculum_module_color } : undefined}
+                      />
                     </div>
 
                     <AnimatePresence initial={false}>
