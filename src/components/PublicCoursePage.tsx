@@ -460,6 +460,7 @@ const TestimonialsCarousel = ({ testimonials, layout, primaryColor, lp }: { test
   if (!testimonials || testimonials.length === 0) return null;
 
   const current = testimonials[currentIndex] || testimonials[0];
+  const quoteColor = lp?.section_about_bg_color || '#0f172a';
 
   const handlePrev = () => {
     setCurrentIndex(prev => (prev === 0 ? testimonials.length - 1 : prev - 1));
@@ -475,7 +476,10 @@ const TestimonialsCarousel = ({ testimonials, layout, primaryColor, lp }: { test
       {/* Testimonial Active Card */}
       <div className="relative z-10 w-full max-w-2xl mx-auto px-8 sm:px-14 py-6 min-h-[220px] flex flex-col justify-center items-center">
         {/* Top-Left Double Quote */}
-        <span className="absolute -top-6 sm:-top-[400px] -left-4 sm:-left-[300px] text-[120px] sm:text-[1024px] font-serif text-black select-none pointer-events-none leading-none z-0">
+        <span 
+          className="absolute -top-6 sm:-top-[400px] -left-4 sm:-left-[300px] text-[120px] sm:text-[1024px] font-serif select-none pointer-events-none leading-none z-0"
+          style={{ color: quoteColor }}
+        >
           “
         </span>
 
@@ -496,7 +500,10 @@ const TestimonialsCarousel = ({ testimonials, layout, primaryColor, lp }: { test
         </p>
 
         {/* Bottom-Right Double Quote */}
-        <span className="absolute -bottom-8 sm:-bottom-[984px] -right-4 sm:-right-[400px] text-[120px] sm:text-[1024px] font-serif text-black select-none pointer-events-none leading-none z-0">
+        <span 
+          className="absolute -bottom-8 sm:-bottom-[984px] -right-4 sm:-right-[400px] text-[120px] sm:text-[1024px] font-serif select-none pointer-events-none leading-none z-0"
+          style={{ color: quoteColor }}
+        >
           ”
         </span>
       </div>
@@ -2573,7 +2580,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                       <span className="ml-2 text-slate-900 font-bold">4.9/5 de satisfação</span>
                     </div>
                   </div>
-                  <TestimonialsCarousel testimonials={lp.testimonials} layout={layout} primaryColor={lp.primary_color} />
+                  <TestimonialsCarousel testimonials={lp.testimonials} layout={layout} primaryColor={lp.primary_color} lp={lp} />
                 </div>
               )}
 
