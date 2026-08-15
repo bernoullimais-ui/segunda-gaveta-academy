@@ -188,14 +188,14 @@ const Nav = ({ layout, item, lp, onEnrollClick, timeLeft }: NavProps) => {
             <div className="hidden lg:flex items-center gap-8">
               <a 
                 href="#sobre" 
-                className={`typo-link text-sm font-medium tracking-wide transition-colors ${lp?.nav_link_style || ''} ${layout === 'escuro' ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-900'}`}
+                className={`typo-link text-sm font-medium italic tracking-wide transition-colors ${lp?.nav_link_style || ''} ${layout === 'escuro' ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-900'}`}
                 style={lp?.nav_link_color ? { color: lp.nav_link_color } : undefined}
               >
                 Sobre
               </a>
               <a 
                 href="#instrutor" 
-                className={`typo-link text-sm font-medium tracking-wide transition-colors ${lp?.nav_link_style || ''} ${layout === 'escuro' ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-900'}`}
+                className={`typo-link text-sm font-medium italic tracking-wide transition-colors ${lp?.nav_link_style || ''} ${layout === 'escuro' ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-900'}`}
                 style={lp?.nav_link_color ? { color: lp.nav_link_color } : undefined}
               >
                 Expert
@@ -204,15 +204,15 @@ const Nav = ({ layout, item, lp, onEnrollClick, timeLeft }: NavProps) => {
                 href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`typo-link text-sm font-medium tracking-wide transition-colors ${lp?.nav_link_style || ''} ${layout === 'escuro' ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-900'}`}
+                className={`typo-link text-sm font-medium italic tracking-wide transition-colors ${lp?.nav_link_style || ''} ${layout === 'escuro' ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-900'}`}
                 style={lp?.nav_link_color ? { color: lp.nav_link_color } : undefined}
               >
                 Fale Conosco
               </a>
               <a
                 href={loggedIn && orgSlug ? `/projeto/${orgSlug}` : '/login'}
-                className={`typo-link text-sm font-medium underline underline-offset-4 decoration-slate-400/60 hover:decoration-white transition-colors ${lp?.nav_link_style || ''} ${layout === 'escuro' ? 'text-slate-200 hover:text-white' : 'text-slate-800 hover:text-slate-950'}`}
-                style={lp?.nav_link_color ? { color: lp.nav_link_color } : undefined}
+                className={`typo-link text-sm font-medium italic underline underline-offset-4 decoration-current transition-colors ${lp?.nav_link_style || ''} ${layout === 'escuro' ? 'text-slate-200 hover:text-white' : 'text-slate-800 hover:text-slate-950'}`}
+                style={lp?.nav_link_color ? { color: lp.nav_link_color, textDecorationColor: lp.nav_link_color } : undefined}
               >
                 Login
               </a>
