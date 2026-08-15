@@ -151,7 +151,7 @@ const Nav = ({ layout, item, lp, onEnrollClick, timeLeft }: NavProps) => {
             
             <button
               onClick={onEnrollClick}
-              className="typo-btn px-5 sm:px-7 py-2.5 sm:py-3 bg-primary text-white rounded-full font-serif italic text-sm sm:text-base hover:opacity-95 hover:scale-105 active:scale-95 transition-all shadow-lg shadow-primary/25 whitespace-nowrap"
+              className="typo-btn px-5 sm:px-7 py-2.5 sm:py-3 bg-primary text-white rounded-2xl font-serif italic text-sm sm:text-base hover:opacity-95 hover:scale-105 active:scale-95 transition-all shadow-lg shadow-primary/25 whitespace-nowrap"
             >
               {Boolean(item?.em_breve || item?.configuracao_json?.em_breve || item?.status === 'em_breve' || lp?.cta_text?.toLowerCase().includes('breve') || lp?.cta_text?.toLowerCase().includes('cadastrar') || lp?.cta_text?.toLowerCase().includes('espera')) ? 'Em Breve' : (lp?.cta_text || 'Acesse agora')}
             </button>
@@ -1749,7 +1749,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
           
           <button 
             onClick={handleEnrollClick}
-            className={`px-8 sm:px-10 py-4 text-white rounded-full font-serif italic text-lg sm:text-xl shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2 group ${lp.copy_cta_style || 'typo-btn-1'}`}
+            className={`px-8 sm:px-10 py-4 text-white rounded-2xl font-serif italic text-lg sm:text-xl shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2 group ${lp.copy_cta_style || 'typo-btn-1'}`}
             style={{ 
               backgroundColor: lp.section_curriculum_bg_color || lp.section_about_bg_color || '#0f172a',
               color: lp.copy_cta_color || '#ffffff'
@@ -1933,7 +1933,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             <div className="pt-4 w-full">
               <button 
                 onClick={handleEnrollClick}
-                className={`w-full py-4 px-6 bg-primary text-white rounded-full font-serif italic text-lg sm:text-xl shadow-xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center text-center ${lp.curriculum_cta_style || 'typo-btn-1'}`}
+                className={`w-full py-4 px-6 bg-primary text-white rounded-2xl font-serif italic text-lg sm:text-xl shadow-xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center text-center ${lp.curriculum_cta_style || 'typo-btn-1'}`}
                 style={{ color: lp.section_about_bg_color || '#0f172a' }}
               >
                 <span>{lp.copy_section_cta_text || lp.cta_text || 'Acesse agora'}</span>
@@ -2362,7 +2362,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                 <div className="flex flex-col items-center gap-3 pt-4 w-full hero-no-mobile-transform" style={{ transform: (lp.hero_cta_offset_x || lp.hero_cta_offset_y) ? `translate(${lp.hero_cta_offset_x || 0}px, ${lp.hero_cta_offset_y || 0}px)` : undefined }}>
                   <button 
                     onClick={handleEnrollClick}
-                    className="typo-btn typo-btn-1 px-8 sm:px-12 py-4 sm:py-5 bg-primary text-white rounded-full font-serif italic text-lg sm:text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_15px_40px_rgba(var(--primary-rgb),0.4)] flex items-center justify-center gap-3 min-w-[240px]"
+                    className="typo-btn typo-btn-1 px-8 sm:px-12 py-4 sm:py-5 bg-primary text-white rounded-2xl font-serif italic text-lg sm:text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_15px_40px_rgba(var(--primary-rgb),0.4)] flex items-center justify-center gap-3 min-w-[240px]"
                   >
                     {isEmBreve ? 'Cadastrar-se' : (lp.cta_text || 'Descubra o segredo')} <ArrowRight className="w-5 h-5" />
                   </button>
@@ -2988,7 +2988,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                   <div className="flex flex-col items-center gap-8">
                     <button 
                       onClick={handleEnrollClick}
-                      className="typo-btn w-full sm:w-auto px-16 py-7 bg-primary text-white rounded-3xl font-black text-2xl hover:opacity-90 shadow-2xl shadow-primary/40 active:scale-95 transition-all"
+                      className="typo-btn w-full sm:w-auto px-16 py-7 bg-primary text-white rounded-2xl font-black text-2xl hover:opacity-90 shadow-2xl shadow-primary/40 active:scale-95 transition-all"
                     >
                       {lp.cta_text || 'Matricule-se Agora'}
                     </button>
