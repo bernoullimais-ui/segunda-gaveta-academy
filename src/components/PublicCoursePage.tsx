@@ -971,10 +971,16 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
     guarantee_days: 7,
     ...(lpRaw || {}),
     instructor: { 
+      ...(lpRaw?.instructor || {}),
       name: lpRaw?.instructor?.name || item?.professor_nome || item?.instrutores?.[0]?.nome || item?.instrutores?.[0]?.usuarios?.nome || '', 
       bio: lpRaw?.instructor?.bio || item?.professor_bio || item?.instrutores?.[0]?.mini_bio || '', 
       avatar_url: lpRaw?.instructor?.avatar_url || item?.professor_foto_url || item?.instrutores?.[0]?.foto_url || item?.instrutores?.[0]?.usuarios?.avatar_url || '', 
-      role: lpRaw?.instructor?.role || '' 
+      role: lpRaw?.instructor?.role || '',
+      website_url: lpRaw?.instructor?.website_url || lpRaw?.instructor_website_url || '',
+      instagram_url: lpRaw?.instructor?.instagram_url || lpRaw?.instructor_instagram_url || '',
+      youtube_url: lpRaw?.instructor?.youtube_url || lpRaw?.instructor_youtube_url || '',
+      linkedin_url: lpRaw?.instructor?.linkedin_url || lpRaw?.instructor_linkedin_url || '',
+      whatsapp_url: lpRaw?.instructor?.whatsapp_url || lpRaw?.instructor_whatsapp_url || '',
     }
   };
 
