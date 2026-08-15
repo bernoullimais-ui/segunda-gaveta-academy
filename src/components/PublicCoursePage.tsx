@@ -1654,8 +1654,8 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                   className="px-6 py-3.5 rounded-2xl border bg-transparent backdrop-blur-sm flex items-center gap-3.5 transition-all shadow-sm"
                   style={{ borderColor: aboutSectionBgColor, color: aboutSectionBgColor }}
                 >
-                  <stat.icon className="w-5 h-5 sm:w-6 sm:h-6 shrink-0" style={{ color: aboutSectionBgColor }} />
-                  <span className="text-sm sm:text-base font-semibold tracking-tight whitespace-nowrap" style={{ color: aboutSectionBgColor }}>{stat.text}</span>
+                  <stat.icon className="w-5 h-5 sm:w-7 sm:h-7 shrink-0" style={{ color: aboutSectionBgColor }} />
+                  <span className="text-sm sm:text-xl font-semibold tracking-tight whitespace-nowrap" style={{ color: aboutSectionBgColor }}>{stat.text}</span>
                 </div>
               );
             })}
