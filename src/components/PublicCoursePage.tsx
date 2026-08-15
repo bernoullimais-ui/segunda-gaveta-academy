@@ -131,19 +131,33 @@ const Nav = ({ layout, item, lp, onEnrollClick, timeLeft }: NavProps) => {
 
           <div className="flex items-center gap-3 sm:gap-6 shrink-0">
             <div className="hidden lg:flex items-center gap-8">
-              <a href="#sobre" className={`typo-link text-sm font-medium tracking-wide transition-colors ${layout === 'escuro' ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-900'}`}>Sobre</a>
-              <a href="#instrutor" className={`typo-link text-sm font-medium tracking-wide transition-colors ${layout === 'escuro' ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-900'}`}>Expert</a>
+              <a 
+                href="#sobre" 
+                className={`typo-link text-sm font-medium tracking-wide transition-colors ${lp?.nav_link_style || ''} ${layout === 'escuro' ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-900'}`}
+                style={lp?.nav_link_color ? { color: lp.nav_link_color } : undefined}
+              >
+                Sobre
+              </a>
+              <a 
+                href="#instrutor" 
+                className={`typo-link text-sm font-medium tracking-wide transition-colors ${lp?.nav_link_style || ''} ${layout === 'escuro' ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-900'}`}
+                style={lp?.nav_link_color ? { color: lp.nav_link_color } : undefined}
+              >
+                Expert
+              </a>
               <a 
                 href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`typo-link text-sm font-medium tracking-wide transition-colors ${layout === 'escuro' ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-900'}`}
+                className={`typo-link text-sm font-medium tracking-wide transition-colors ${lp?.nav_link_style || ''} ${layout === 'escuro' ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-900'}`}
+                style={lp?.nav_link_color ? { color: lp.nav_link_color } : undefined}
               >
                 Fale Conosco
               </a>
               <a
                 href={loggedIn && orgSlug ? `/projeto/${orgSlug}` : '/login'}
-                className={`typo-link text-sm font-medium underline underline-offset-4 decoration-slate-400/60 hover:decoration-white transition-colors ${layout === 'escuro' ? 'text-slate-200 hover:text-white' : 'text-slate-800 hover:text-slate-950'}`}
+                className={`typo-link text-sm font-medium underline underline-offset-4 decoration-slate-400/60 hover:decoration-white transition-colors ${lp?.nav_link_style || ''} ${layout === 'escuro' ? 'text-slate-200 hover:text-white' : 'text-slate-800 hover:text-slate-950'}`}
+                style={lp?.nav_link_color ? { color: lp.nav_link_color } : undefined}
               >
                 Login
               </a>
@@ -151,7 +165,8 @@ const Nav = ({ layout, item, lp, onEnrollClick, timeLeft }: NavProps) => {
             
             <button
               onClick={onEnrollClick}
-              className="typo-btn px-5 sm:px-7 py-2.5 sm:py-3 bg-primary text-white rounded-2xl font-serif italic text-sm sm:text-base hover:opacity-95 hover:scale-105 active:scale-95 transition-all shadow-lg shadow-primary/25 whitespace-nowrap"
+              className={`typo-btn px-5 sm:px-7 py-2.5 sm:py-3 bg-primary text-white rounded-2xl font-serif italic text-sm sm:text-base hover:opacity-95 hover:scale-105 active:scale-95 transition-all shadow-lg shadow-primary/25 whitespace-nowrap ${lp?.nav_cta_style || ''}`}
+              style={lp?.nav_cta_color ? { color: lp.nav_cta_color } : undefined}
             >
               {Boolean(item?.em_breve || item?.configuracao_json?.em_breve || item?.status === 'em_breve' || lp?.cta_text?.toLowerCase().includes('breve') || lp?.cta_text?.toLowerCase().includes('cadastrar') || lp?.cta_text?.toLowerCase().includes('espera')) ? 'Em Breve' : (lp?.cta_text || 'Acesse agora')}
             </button>
