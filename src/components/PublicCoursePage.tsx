@@ -632,7 +632,7 @@ const TestimonialsCarousel = ({ testimonials, layout, primaryColor, lp }: { test
       <div className="relative z-10 w-full max-w-2xl mx-auto px-8 sm:px-14 py-6 flex flex-col justify-center items-center">
         {/* Top-Left Double Quote */}
         <span 
-          className="absolute -top-64 -left-32 text-[1024px] font-serif select-none pointer-events-none leading-none z-0 opacity-10 [transform:translateZ(0)] [backface-visibility:hidden]"
+          className="absolute -top-10 -left-6 sm:-top-16 sm:-left-10 text-7xl sm:text-9xl font-serif select-none pointer-events-none leading-none z-0 opacity-20 [transform:translateZ(0)] [backface-visibility:hidden]"
           style={{ color: quoteColor }}
         >
           “
@@ -671,7 +671,7 @@ const TestimonialsCarousel = ({ testimonials, layout, primaryColor, lp }: { test
 
         {/* Bottom-Right Double Quote */}
         <span 
-          className="absolute -bottom-64 -right-32 text-[1024px] font-serif select-none pointer-events-none leading-none z-0 opacity-10 [transform:translateZ(0)] [backface-visibility:hidden]"
+          className="absolute -bottom-10 -right-6 sm:-bottom-16 sm:-right-10 text-7xl sm:text-9xl font-serif select-none pointer-events-none leading-none z-0 opacity-20 [transform:translateZ(0)] [backface-visibility:hidden]"
           style={{ color: quoteColor }}
         >
           ”
