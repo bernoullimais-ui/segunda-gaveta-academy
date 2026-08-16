@@ -146,17 +146,17 @@ const Nav = ({ layout, item, lp, onEnrollClick, timeLeft }: NavProps) => {
   }, [item]);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-[9999] shadow-md w-full">
+    <header className={`fixed top-0 left-0 right-0 z-[9999] w-full transition-all duration-300 ${isScrolled ? 'shadow-md' : 'shadow-none'}`}>
       {/* Top Countdown Bar - Isolated Component */}
       <TopCountdownBar lp={lp} />
 
       <nav 
-        className={`w-full transition-colors duration-300 backdrop-blur-md border-b ${
-          layout === 'escuro' 
-            ? 'bg-slate-950/95 border-slate-800/80' 
-            : 'bg-white/95 border-slate-200/80'
+        className={`w-full transition-all duration-300 ${
+          isScrolled 
+            ? `backdrop-blur-md border-b ${layout === 'escuro' ? 'bg-slate-950/95 border-slate-800/80' : 'bg-white/95 border-slate-200/80'}`
+            : 'bg-transparent border-transparent backdrop-blur-none'
         }`}
-        style={{ backgroundColor: lp?.nav_bg_color || undefined }}
+        style={{ backgroundColor: isScrolled ? (lp?.nav_bg_color || undefined) : 'transparent' }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-8 h-20 sm:h-[65px] flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 shrink min-w-0">
