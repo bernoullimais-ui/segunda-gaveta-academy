@@ -146,7 +146,7 @@ const Nav = ({ layout, item, lp, onEnrollClick, timeLeft }: NavProps) => {
   }, [item]);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-[100] shadow-md">
+    <header className="fixed top-0 left-0 right-0 z-[9999] shadow-md w-full">
       {/* Top Countdown Bar - Isolated Component */}
       <TopCountdownBar lp={lp} />
 
@@ -2227,7 +2227,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
 
   if (layout === 'escuro') {
     return (
-      <div className="min-h-screen bg-slate-900 selection:bg-primary/30 selection:text-white font-sans text-slate-300 [transform:translateZ(0)] [backface-visibility:hidden]">
+      <div className="min-h-screen bg-slate-900 selection:bg-primary/30 selection:text-white font-sans text-slate-300">
         <style dangerouslySetInnerHTML={{ __html: `
           :root { 
             --primary: ${lp.primary_color || '#2563eb'};
