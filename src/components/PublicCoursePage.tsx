@@ -645,13 +645,13 @@ const TestimonialsCarousel = ({ testimonials, layout, primaryColor, lp }: { test
             return (
               <div 
                 key={idx}
-                className={`col-start-1 row-start-1 w-full flex flex-col items-center justify-center transition-opacity duration-300 ease-in-out ${
+                className={`col-start-1 row-start-1 w-full flex flex-col items-center justify-center transition-opacity duration-300 ease-in-out [transform:translateZ(0)] [backface-visibility:hidden] ${
                   isActive ? 'opacity-100 z-10 pointer-events-auto' : 'opacity-0 z-0 pointer-events-none invisible'
                 }`}
               >
                 {/* Student Name */}
                 <h3 
-                  className={`relative z-10 text-3xl sm:text-4xl lg:text-5xl font-serif font-normal text-white tracking-tight text-center ${lp?.testimonial_name_style || 'typo-title-2'}`}
+                  className={`relative z-10 text-3xl sm:text-4xl lg:text-5xl font-serif font-normal text-white tracking-tight text-center [transform:translateZ(0)] [backface-visibility:hidden] antialiased ${lp?.testimonial_name_style || 'typo-title-2'}`}
                   style={lp?.testimonial_name_color ? { color: lp.testimonial_name_color } : undefined}
                 >
                   <FormattedTitle content={t.name} />
@@ -659,7 +659,7 @@ const TestimonialsCarousel = ({ testimonials, layout, primaryColor, lp }: { test
 
                 {/* Testimonial Text */}
                 <p 
-                  className={`relative z-10 text-base sm:text-lg lg:text-xl text-slate-300/90 leading-relaxed font-sans max-w-2xl text-center mt-4 ${lp?.testimonial_text_style || 'typo-body-1'}`}
+                  className={`relative z-10 text-base sm:text-lg lg:text-xl text-slate-300/90 leading-relaxed font-sans max-w-2xl text-center mt-4 [transform:translateZ(0)] [backface-visibility:hidden] antialiased ${lp?.testimonial_text_style || 'typo-body-1'}`}
                   style={lp?.testimonial_text_color ? { color: lp.testimonial_text_color } : undefined}
                 >
                   {t.text}
@@ -1736,12 +1736,12 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
       </section>
     ),
     about: (
-      <section key="about" id="sobre" className="relative w-full overflow-hidden bg-slate-900 text-left" style={getSectionStyle('about')}>
+      <section key="about" id="sobre" className="relative w-full overflow-hidden bg-slate-900 text-left [transform:translateZ(0)] [backface-visibility:hidden] antialiased" style={getSectionStyle('about')}>
         <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[550px] lg:min-h-[650px] w-full items-stretch">
-          <div className="p-8 sm:p-12 lg:p-20 xl:p-24 flex flex-col justify-center text-left space-y-6 sm:space-y-8 max-w-[672px] mx-auto w-full">
+          <div className="p-8 sm:p-12 lg:p-20 xl:p-24 flex flex-col justify-center text-left space-y-6 sm:space-y-8 max-w-[672px] mx-auto w-full [transform:translateZ(0)] [backface-visibility:hidden] antialiased">
             <div className="space-y-3 max-w-[768px]">
               <h2 
-                className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-[1.15] tracking-tight ${lp.about_title_style || 'typo-title-1'}`}
+                className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-[1.15] tracking-tight [transform:translateZ(0)] [backface-visibility:hidden] antialiased ${lp.about_title_style || 'typo-title-1'}`}
                 style={lp.about_title_color ? { color: lp.about_title_color } : undefined}
               >
                 <FormattedTitle content={lp.about_title || item.nome} />
@@ -1749,7 +1749,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             </div>
 
             <div 
-              className={`text-base sm:text-lg lg:text-xl text-slate-300/90 leading-relaxed font-sans space-y-4 ${lp.about_text_style || 'typo-body-1'}`}
+              className={`text-base sm:text-lg lg:text-xl text-slate-300/90 leading-relaxed font-sans max-w-2xl [transform:translateZ(0)] [backface-visibility:hidden] antialiased ${lp.about_text_style || 'typo-body-1'}`}
               style={lp.about_text_color ? { color: lp.about_text_color } : undefined}
             >
               <ReactMarkdown remarkPlugins={[remarkGfm]}>
@@ -1831,7 +1831,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
       </section>
     ) : null,
     features: lp.benefits?.length > 0 ? (
-      <section key="features" id="vantagens" className="py-20 sm:py-28 bg-slate-900/60 text-center overflow-hidden" style={getSectionStyle('features')}>
+      <section key="features" id="vantagens" className="py-20 sm:py-28 bg-slate-900/60 text-center overflow-hidden [transform:translateZ(0)] [backface-visibility:hidden] antialiased" style={getSectionStyle('features')}>
         <div className="max-w-6xl mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-0 items-stretch text-center">
             {(lp.benefits || []).slice(0, 3).map((benefit: any, idx: number) => {
@@ -1841,12 +1841,12 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
               return (
                 <div 
                   key={idx} 
-                  className={`px-4 sm:px-8 py-4 flex flex-col items-center justify-start text-center space-y-4 ${
+                  className={`px-4 sm:px-8 py-4 flex flex-col items-center justify-start text-center space-y-4 [transform:translateZ(0)] [backface-visibility:hidden] antialiased ${
                     isNotLast ? 'md:border-r md:border-white/20' : ''
                   }`}
                 >
                   <h4 
-                    className={`text-5xl sm:text-6xl lg:text-7xl font-serif font-normal text-white leading-none tracking-tight ${lp.benefit_title_style || 'typo-title-2'}`}
+                    className={`text-5xl sm:text-6xl lg:text-7xl font-serif font-normal text-white leading-none tracking-tight [transform:translateZ(0)] [backface-visibility:hidden] antialiased ${lp.benefit_title_style || 'typo-title-2'}`}
                     style={lp.benefit_title_color ? { color: lp.benefit_title_color } : undefined}
                   >
                     <FormattedTitle content={itemObj.title} />
@@ -1854,7 +1854,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
 
                   {itemObj.description && (
                     <p 
-                      className={`text-sm sm:text-base text-slate-300/90 leading-relaxed font-sans max-w-xs mx-auto text-center ${lp.benefit_text_style || 'typo-body-2'}`}
+                      className={`text-sm sm:text-base text-slate-300/90 leading-relaxed font-sans max-w-xs mx-auto text-center [transform:translateZ(0)] [backface-visibility:hidden] antialiased ${lp.benefit_text_style || 'typo-body-2'}`}
                       style={lp.benefit_text_color ? { color: lp.benefit_text_color } : undefined}
                     >
                       {itemObj.description}
@@ -1891,14 +1891,14 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
           <div className="p-8 sm:p-12 lg:p-20 xl:p-24 flex flex-col justify-center text-left space-y-6 sm:space-y-8 max-w-[672px] mx-auto w-full [transform:translateZ(0)] [backface-visibility:hidden] antialiased">
             <div className="space-y-3 max-w-[768px]">
               <h2 
-                className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-[1.15] tracking-tight ${lp.instructor_name_style || 'typo-title-1'}`}
+                className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-[1.15] tracking-tight [transform:translateZ(0)] [backface-visibility:hidden] antialiased ${lp.instructor_name_style || 'typo-title-1'}`}
                 style={lp.instructor_name_color ? { color: lp.instructor_name_color } : undefined}
               >
                 <FormattedTitle content={lp.instructor?.name || item.professor_nome || 'Especialista'} />
               </h2>
               {Boolean(lp.instructor?.role?.trim()) && (
                 <p 
-                  className={`text-lg sm:text-xl text-primary font-medium tracking-wide ${lp.instructor_role_style || ''}`}
+                  className={`text-slate-300/90 font-medium font-sans [transform:translateZ(0)] [backface-visibility:hidden] antialiased ${lp.instructor_role_style || 'typo-body-2'}`}
                   style={lp.instructor_role_color ? { color: lp.instructor_role_color } : undefined}
                 >
                   {lp.instructor.role}
@@ -1907,7 +1907,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             </div>
             
             <div 
-              className={`text-base sm:text-lg text-slate-300/90 leading-relaxed font-sans space-y-4 ${lp.instructor_bio_style || 'typo-body-2'}`}
+              className={`text-base sm:text-lg lg:text-xl text-slate-300/90 leading-relaxed font-sans max-w-2xl [transform:translateZ(0)] [backface-visibility:hidden] antialiased ${lp.instructor_bio_style || 'typo-body-1'}`}
               style={lp.instructor_bio_color ? { color: lp.instructor_bio_color } : undefined}
             >
               <ReactMarkdown remarkPlugins={[remarkGfm]}>
@@ -1936,7 +1936,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                   <div key={idx} className="w-full">
                     <div 
                       onClick={() => toggleModule(idx)}
-                      className="px-6 py-4 rounded-2xl border bg-transparent backdrop-blur-sm hover:border-primary/60 hover:bg-white/10 transition-all flex items-center justify-between cursor-pointer select-none group"
+                      className="px-6 py-4 rounded-2xl border bg-transparent backdrop-blur-sm hover:border-primary/60 hover:bg-white/10 transition-colors duration-200 flex items-center justify-between cursor-pointer select-none group [transform:translateZ(0)] [backface-visibility:hidden]"
                       style={lp.curriculum_module_color ? { borderColor: lp.curriculum_module_color } : { borderColor: 'rgba(255, 255, 255, 0.2)' }}
                     >
                       <div className="flex items-center gap-4 flex-1">
