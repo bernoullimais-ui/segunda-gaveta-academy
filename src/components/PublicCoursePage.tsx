@@ -1723,7 +1723,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
               return (
                 <div 
                   key={i} 
-                  className="px-6 py-3.5 rounded-2xl border bg-transparent backdrop-blur-sm flex items-center gap-3.5 transition-all shadow-sm"
+                  className="px-6 py-3.5 rounded-2xl border bg-slate-950/80 flex items-center gap-3.5 transition-colors shadow-sm [transform:translateZ(0)] [backface-visibility:hidden]"
                   style={{ borderColor: aboutSectionBgColor, color: aboutSectionBgColor }}
                 >
                   <stat.icon className="w-5 h-5 sm:w-7 sm:h-7 shrink-0" style={{ color: aboutSectionBgColor }} />
@@ -1936,7 +1936,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                   <div key={idx} className="w-full">
                     <div 
                       onClick={() => toggleModule(idx)}
-                      className="px-6 py-4 rounded-2xl border bg-transparent backdrop-blur-sm hover:border-primary/60 hover:bg-white/10 transition-colors duration-200 flex items-center justify-between cursor-pointer select-none group [transform:translateZ(0)] [backface-visibility:hidden]"
+                      className="px-6 py-4 rounded-2xl border bg-slate-950/80 hover:border-primary/60 hover:bg-slate-900 transition-colors duration-200 flex items-center justify-between cursor-pointer select-none group [transform:translateZ(0)] [backface-visibility:hidden]"
                       style={lp.curriculum_module_color ? { borderColor: lp.curriculum_module_color } : { borderColor: 'rgba(255, 255, 255, 0.2)' }}
                     >
                       <div className="flex items-center gap-4 flex-1">
@@ -2229,8 +2229,6 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
     return (
       <div className="min-h-screen bg-slate-900 selection:bg-primary/30 selection:text-white font-sans text-slate-300 [transform:translateZ(0)] [backface-visibility:hidden]">
         <style dangerouslySetInnerHTML={{ __html: `
-          @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300..900;1,300..900&family=Outfit:wght@300..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=Roboto:ital,wght@0,300;0,400;0,500;0,700;0,900&family=Space+Grotesk:wght@300..700&display=swap');
-
           :root { 
             --primary: ${lp.primary_color || '#2563eb'};
             --primary-rgb: ${primaryRgb};
