@@ -1704,7 +1704,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
 
   const sectionMap: Record<string, React.ReactNode> = {
     info: (
-      <section key="info" className="bg-slate-950/60 py-10" style={getSectionStyle('info')}>
+      <section key="info" className="bg-transparent py-10" style={getSectionStyle('info')}>
         <div className="max-w-7xl mx-auto px-4 sm:px-8 flex flex-col items-center gap-8">
           <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-6 w-full">
             {(isTrilha ? [
@@ -1723,7 +1723,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
               return (
                 <div 
                   key={i} 
-                  className="px-6 py-3.5 rounded-2xl border bg-slate-950/80 flex items-center gap-3.5 transition-colors shadow-sm [transform:translateZ(0)] [backface-visibility:hidden]"
+                  className="px-6 py-3.5 rounded-2xl border bg-transparent flex items-center gap-3.5 transition-colors shadow-sm [transform:translateZ(0)] [backface-visibility:hidden]"
                   style={{ borderColor: aboutSectionBgColor, color: aboutSectionBgColor }}
                 >
                   <stat.icon className="w-5 h-5 sm:w-7 sm:h-7 shrink-0" style={{ color: aboutSectionBgColor }} />
