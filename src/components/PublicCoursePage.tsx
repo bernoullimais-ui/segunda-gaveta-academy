@@ -1936,7 +1936,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                   <div key={idx} className="w-full">
                     <div 
                       onClick={() => toggleModule(idx)}
-                      className="px-6 py-4 rounded-2xl border bg-slate-950/80 hover:border-primary/60 hover:bg-slate-900 transition-colors duration-200 flex items-center justify-between cursor-pointer select-none group [transform:translateZ(0)] [backface-visibility:hidden]"
+                      className="px-6 py-4 rounded-2xl border bg-transparent hover:border-primary/60 hover:bg-white/5 transition-colors duration-200 flex items-center justify-between cursor-pointer select-none group [transform:translateZ(0)] [backface-visibility:hidden]"
                       style={lp.curriculum_module_color ? { borderColor: lp.curriculum_module_color } : { borderColor: 'rgba(255, 255, 255, 0.2)' }}
                     >
                       <div className="flex items-center gap-4 flex-1">
@@ -1966,7 +1966,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                           animate={{ height: 'auto', opacity: 1 }}
                           exit={{ height: 0, opacity: 0 }}
                           transition={{ duration: 0.2 }}
-                          className="overflow-hidden px-6 py-4 mt-2 bg-white/5 rounded-2xl border border-white/10 space-y-2 text-slate-300"
+                          className="overflow-hidden px-6 py-4 mt-2 bg-transparent rounded-2xl border border-white/10 space-y-2 text-slate-300"
                         >
                           {modulo.etapas && modulo.etapas.length > 0 ? (
                             modulo.etapas.map((etapa: any, sIdx: number) => (
@@ -2966,16 +2966,16 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
               return (
                 <div 
                   key={idx} 
-                  className="bg-slate-50 rounded-2xl border overflow-hidden shadow-sm text-left transition-all duration-300"
+                  className="bg-transparent rounded-2xl border overflow-hidden shadow-sm text-left transition-all duration-300"
                   style={lp.curriculum_module_color ? { borderColor: lp.curriculum_module_color } : { borderColor: '#f1f5f9' }}
                 >
                   {/* Header/Trigger */}
                   <div 
                     onClick={() => toggleModule(idx)}
-                    className="p-6 flex items-center gap-6 cursor-pointer hover:bg-slate-100/50 select-none transition-colors"
+                    className="p-6 flex items-center gap-6 cursor-pointer hover:bg-slate-100/20 select-none transition-colors"
                   >
                     <div 
-                      className={`w-12 h-12 bg-white text-primary rounded-xl flex items-center justify-center font-bold text-xl shrink-0 transition-all shadow-sm ${lp.curriculum_number_style || ''}`}
+                      className={`w-12 h-12 bg-transparent text-primary rounded-xl flex items-center justify-center font-bold text-xl shrink-0 transition-all shadow-sm ${lp.curriculum_number_style || ''}`}
                       style={lp.curriculum_number_color ? { color: lp.curriculum_number_color } : undefined}
                     >
                       {idx + 1}
@@ -2999,7 +2999,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.2 }}
-                        className="border-t border-slate-200/50 bg-white px-8 py-3 divide-y divide-slate-100"
+                        className="border-t border-slate-200/50 bg-transparent px-8 py-3 divide-y divide-slate-100"
                       >
                         {modulo.etapas && modulo.etapas.length > 0 ? (
                           modulo.etapas.map((etapa: any, sIdx: number) => (
