@@ -14,6 +14,8 @@ import { getFormattedVideoUrl } from '../lib/videoUtils';
 import { TrafegoAdmin } from './TrafegoAdmin';
 import { ProjetoAdmin } from './ProjetoAdmin';
 
+import { DEFAULT_TYPOGRAPHY, DEFAULT_SECTION_STYLES } from '../constants/lpDefaults';
+
 // getFormattedVideoUrl migrado para src/lib/videoUtils.ts
 // A função é re-exportada aqui para compatibilidade com código interno ainda não migrado
 export { getFormattedVideoUrl };
@@ -4228,18 +4230,18 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                       </thead>
                       <tbody>
                         {[
-                          { key: 'titulo_1', label: 'Título 1', defaultSize: '48px', defaultWeight: '800', defaultLineHeight: '1.1', defaultLetterSpacing: '-0.03em' },
-                          { key: 'titulo_2', label: 'Título 2', defaultSize: '32px', defaultWeight: '700', defaultLineHeight: '1.2', defaultLetterSpacing: '-0.02em' },
-                          { key: 'titulo_3', label: 'Título 3', defaultSize: '22px', defaultWeight: '600', defaultLineHeight: '1.3', defaultLetterSpacing: '0em' },
-                          { key: 'texto_corrido_1', label: 'Texto corrido 1', defaultSize: '20px', defaultWeight: '400', defaultLineHeight: '1.5', defaultLetterSpacing: '0em' },
-                          { key: 'texto_corrido_2', label: 'Texto corrido 2', defaultSize: '16px', defaultWeight: '400', defaultLineHeight: '1.5', defaultLetterSpacing: '0em' },
-                          { key: 'texto_corrido_3', label: 'Texto corrido 3', defaultSize: '14px', defaultWeight: '400', defaultLineHeight: '1.4', defaultLetterSpacing: '0em' },
-                          { key: 'texto_corrido_4', label: 'Texto corrido 4', defaultSize: '12px', defaultWeight: '500', defaultLineHeight: '1.4', defaultLetterSpacing: '0.05em' },
-                          { key: 'texto_botao_1', label: 'Texto Botão 1', defaultSize: '18px', defaultWeight: '800', defaultLineHeight: '1.2', defaultLetterSpacing: '0.02em' },
-                          { key: 'texto_botao_2', label: 'Texto botão 2', defaultSize: '14px', defaultWeight: '700', defaultLineHeight: '1.2', defaultLetterSpacing: '0em' }
+                          { key: 'titulo_1', label: 'Título 1', defaultFamily: DEFAULT_TYPOGRAPHY.titulo_1.font_family, defaultSize: DEFAULT_TYPOGRAPHY.titulo_1.font_size, defaultWeight: DEFAULT_TYPOGRAPHY.titulo_1.font_weight, defaultLineHeight: DEFAULT_TYPOGRAPHY.titulo_1.line_height, defaultLetterSpacing: DEFAULT_TYPOGRAPHY.titulo_1.letter_spacing },
+                          { key: 'titulo_2', label: 'Título 2', defaultFamily: DEFAULT_TYPOGRAPHY.titulo_2.font_family, defaultSize: DEFAULT_TYPOGRAPHY.titulo_2.font_size, defaultWeight: DEFAULT_TYPOGRAPHY.titulo_2.font_weight, defaultLineHeight: DEFAULT_TYPOGRAPHY.titulo_2.line_height, defaultLetterSpacing: DEFAULT_TYPOGRAPHY.titulo_2.letter_spacing },
+                          { key: 'titulo_3', label: 'Título 3', defaultFamily: DEFAULT_TYPOGRAPHY.titulo_3.font_family, defaultSize: DEFAULT_TYPOGRAPHY.titulo_3.font_size, defaultWeight: DEFAULT_TYPOGRAPHY.titulo_3.font_weight, defaultLineHeight: DEFAULT_TYPOGRAPHY.titulo_3.line_height, defaultLetterSpacing: DEFAULT_TYPOGRAPHY.titulo_3.letter_spacing },
+                          { key: 'texto_corrido_1', label: 'Texto corrido 1', defaultFamily: DEFAULT_TYPOGRAPHY.texto_corrido_1.font_family, defaultSize: DEFAULT_TYPOGRAPHY.texto_corrido_1.font_size, defaultWeight: DEFAULT_TYPOGRAPHY.texto_corrido_1.font_weight, defaultLineHeight: DEFAULT_TYPOGRAPHY.texto_corrido_1.line_height, defaultLetterSpacing: DEFAULT_TYPOGRAPHY.texto_corrido_1.letter_spacing },
+                          { key: 'texto_corrido_2', label: 'Texto corrido 2', defaultFamily: DEFAULT_TYPOGRAPHY.texto_corrido_2.font_family, defaultSize: DEFAULT_TYPOGRAPHY.texto_corrido_2.font_size, defaultWeight: DEFAULT_TYPOGRAPHY.texto_corrido_2.font_weight, defaultLineHeight: DEFAULT_TYPOGRAPHY.texto_corrido_2.line_height, defaultLetterSpacing: DEFAULT_TYPOGRAPHY.texto_corrido_2.letter_spacing },
+                          { key: 'texto_corrido_3', label: 'Texto corrido 3', defaultFamily: DEFAULT_TYPOGRAPHY.texto_corrido_3.font_family, defaultSize: DEFAULT_TYPOGRAPHY.texto_corrido_3.font_size, defaultWeight: DEFAULT_TYPOGRAPHY.texto_corrido_3.font_weight, defaultLineHeight: DEFAULT_TYPOGRAPHY.texto_corrido_3.line_height, defaultLetterSpacing: DEFAULT_TYPOGRAPHY.texto_corrido_3.letter_spacing },
+                          { key: 'texto_corrido_4', label: 'Texto corrido 4', defaultFamily: DEFAULT_TYPOGRAPHY.texto_corrido_4.font_family, defaultSize: DEFAULT_TYPOGRAPHY.texto_corrido_4.font_size, defaultWeight: DEFAULT_TYPOGRAPHY.texto_corrido_4.font_weight, defaultLineHeight: DEFAULT_TYPOGRAPHY.texto_corrido_4.line_height, defaultLetterSpacing: DEFAULT_TYPOGRAPHY.texto_corrido_4.letter_spacing },
+                          { key: 'texto_botao_1', label: 'Texto Botão 1', defaultFamily: DEFAULT_TYPOGRAPHY.texto_botao_1.font_family, defaultSize: DEFAULT_TYPOGRAPHY.texto_botao_1.font_size, defaultWeight: DEFAULT_TYPOGRAPHY.texto_botao_1.font_weight, defaultLineHeight: DEFAULT_TYPOGRAPHY.texto_botao_1.line_height, defaultLetterSpacing: DEFAULT_TYPOGRAPHY.texto_botao_1.letter_spacing },
+                          { key: 'texto_botao_2', label: 'Texto botão 2', defaultFamily: DEFAULT_TYPOGRAPHY.texto_botao_2.font_family, defaultSize: DEFAULT_TYPOGRAPHY.texto_botao_2.font_size, defaultWeight: DEFAULT_TYPOGRAPHY.texto_botao_2.font_weight, defaultLineHeight: DEFAULT_TYPOGRAPHY.texto_botao_2.line_height, defaultLetterSpacing: DEFAULT_TYPOGRAPHY.texto_botao_2.letter_spacing }
                         ].map((item) => {
                           const typoObj = lpData.typography?.[item.key] || {};
-                          const fontFamily = typoObj.font_family || 'Inter';
+                          const fontFamily = typoObj.font_family || item.defaultFamily || 'Inter';
                           const fontWeight = typoObj.font_weight || item.defaultWeight;
                           const fontSize = typoObj.font_size || item.defaultSize;
                           const lineHeight = typoObj.line_height || item.defaultLineHeight;

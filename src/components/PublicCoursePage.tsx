@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { DEFAULT_TYPOGRAPHY, DEFAULT_SECTION_STYLES } from '../constants/lpDefaults';
 import { supabase } from '../lib/supabase';
 import { 
   Play, 
@@ -1710,7 +1711,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
           <div className="p-8 sm:p-12 lg:p-20 xl:p-24 flex flex-col justify-center text-left space-y-6 sm:space-y-8 max-w-[672px] mx-auto w-full [transform:translateZ(0)] [backface-visibility:hidden] antialiased">
             <div className="space-y-3 max-w-[768px]">
               <h2 
-                className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-[1.15] tracking-tight [transform:translateZ(0)] [backface-visibility:hidden] antialiased ${lp.about_title_style || 'typo-title-1'}`}
+                className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-[1.15] tracking-tight [transform:translateZ(0)] [backface-visibility:hidden] antialiased ${lp.about_title_style || DEFAULT_SECTION_STYLES.about_title_style}`}
                 style={lp.about_title_color ? { color: lp.about_title_color } : undefined}
               >
                 <FormattedTitle content={lp.about_title || item.nome} />
@@ -2260,75 +2261,75 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
 
           /* Regras da Tabela de Tipografia */
           .typo-title-1 {
-            font-family: ${(lp.typography?.titulo_1?.font_family === 'Times New Roman' ? "'Times New Roman', Times, serif" : lp.typography?.titulo_1?.font_family === 'Playfair Display' ? "'Playfair Display', Georgia, serif" : `'${lp.typography?.titulo_1?.font_family || 'Inter'}', sans-serif`)} !important;
-            font-weight: ${lp.typography?.titulo_1?.font_weight || '800'} !important;
-            font-size: ${lp.typography?.titulo_1?.font_size || '48px'} !important;
-            line-height: ${lp.typography?.titulo_1?.line_height || '1.1'} !important;
-            letter-spacing: ${lp.typography?.titulo_1?.letter_spacing || '-0.03em'} !important;
+            font-family: ${(lp.typography?.titulo_1?.font_family || DEFAULT_TYPOGRAPHY.titulo_1.font_family) === 'Times New Roman' ? "'Times New Roman', Times, serif" : (lp.typography?.titulo_1?.font_family || DEFAULT_TYPOGRAPHY.titulo_1.font_family) === 'Playfair Display' ? "'Playfair Display', Georgia, serif" : `'${lp.typography?.titulo_1?.font_family || DEFAULT_TYPOGRAPHY.titulo_1.font_family}', sans-serif`} !important;
+            font-weight: ${lp.typography?.titulo_1?.font_weight || DEFAULT_TYPOGRAPHY.titulo_1.font_weight} !important;
+            font-size: ${lp.typography?.titulo_1?.font_size || DEFAULT_TYPOGRAPHY.titulo_1.font_size} !important;
+            line-height: ${lp.typography?.titulo_1?.line_height || DEFAULT_TYPOGRAPHY.titulo_1.line_height} !important;
+            letter-spacing: ${lp.typography?.titulo_1?.letter_spacing || DEFAULT_TYPOGRAPHY.titulo_1.letter_spacing} !important;
             ${lp.typography?.titulo_1?.color ? `color: ${lp.typography.titulo_1.color} !important;` : ''}
           }
           .typo-title-2 {
-            font-family: ${(lp.typography?.titulo_2?.font_family === 'Times New Roman' ? "'Times New Roman', Times, serif" : lp.typography?.titulo_2?.font_family === 'Playfair Display' ? "'Playfair Display', Georgia, serif" : `'${lp.typography?.titulo_2?.font_family || 'Inter'}', sans-serif`)} !important;
-            font-weight: ${lp.typography?.titulo_2?.font_weight || '700'} !important;
-            font-size: ${lp.typography?.titulo_2?.font_size || '32px'} !important;
-            line-height: ${lp.typography?.titulo_2?.line_height || '1.2'} !important;
-            letter-spacing: ${lp.typography?.titulo_2?.letter_spacing || '-0.02em'} !important;
+            font-family: ${(lp.typography?.titulo_2?.font_family || DEFAULT_TYPOGRAPHY.titulo_2.font_family) === 'Times New Roman' ? "'Times New Roman', Times, serif" : (lp.typography?.titulo_2?.font_family || DEFAULT_TYPOGRAPHY.titulo_2.font_family) === 'Playfair Display' ? "'Playfair Display', Georgia, serif" : `'${lp.typography?.titulo_2?.font_family || DEFAULT_TYPOGRAPHY.titulo_2.font_family}', sans-serif`} !important;
+            font-weight: ${lp.typography?.titulo_2?.font_weight || DEFAULT_TYPOGRAPHY.titulo_2.font_weight} !important;
+            font-size: ${lp.typography?.titulo_2?.font_size || DEFAULT_TYPOGRAPHY.titulo_2.font_size} !important;
+            line-height: ${lp.typography?.titulo_2?.line_height || DEFAULT_TYPOGRAPHY.titulo_2.line_height} !important;
+            letter-spacing: ${lp.typography?.titulo_2?.letter_spacing || DEFAULT_TYPOGRAPHY.titulo_2.letter_spacing} !important;
             ${lp.typography?.titulo_2?.color ? `color: ${lp.typography.titulo_2.color} !important;` : ''}
           }
           .typo-title-3 {
-            font-family: ${(lp.typography?.titulo_3?.font_family === 'Times New Roman' ? "'Times New Roman', Times, serif" : lp.typography?.titulo_3?.font_family === 'Playfair Display' ? "'Playfair Display', Georgia, serif" : `'${lp.typography?.titulo_3?.font_family || 'Inter'}', sans-serif`)} !important;
-            font-weight: ${lp.typography?.titulo_3?.font_weight || '600'} !important;
-            font-size: ${lp.typography?.titulo_3?.font_size || '22px'} !important;
-            line-height: ${lp.typography?.titulo_3?.line_height || '1.3'} !important;
-            letter-spacing: ${lp.typography?.titulo_3?.letter_spacing || '0em'} !important;
+            font-family: ${(lp.typography?.titulo_3?.font_family || DEFAULT_TYPOGRAPHY.titulo_3.font_family) === 'Times New Roman' ? "'Times New Roman', Times, serif" : (lp.typography?.titulo_3?.font_family || DEFAULT_TYPOGRAPHY.titulo_3.font_family) === 'Playfair Display' ? "'Playfair Display', Georgia, serif" : `'${lp.typography?.titulo_3?.font_family || DEFAULT_TYPOGRAPHY.titulo_3.font_family}', sans-serif`} !important;
+            font-weight: ${lp.typography?.titulo_3?.font_weight || DEFAULT_TYPOGRAPHY.titulo_3.font_weight} !important;
+            font-size: ${lp.typography?.titulo_3?.font_size || DEFAULT_TYPOGRAPHY.titulo_3.font_size} !important;
+            line-height: ${lp.typography?.titulo_3?.line_height || DEFAULT_TYPOGRAPHY.titulo_3.line_height} !important;
+            letter-spacing: ${lp.typography?.titulo_3?.letter_spacing || DEFAULT_TYPOGRAPHY.titulo_3.letter_spacing} !important;
             ${lp.typography?.titulo_3?.color ? `color: ${lp.typography.titulo_3.color} !important;` : ''}
           }
           .typo-body-1 {
-            font-family: ${(lp.typography?.texto_corrido_1?.font_family === 'Times New Roman' ? "'Times New Roman', Times, serif" : lp.typography?.texto_corrido_1?.font_family === 'Playfair Display' ? "'Playfair Display', Georgia, serif" : `'${lp.typography?.texto_corrido_1?.font_family || 'Inter'}', sans-serif`)} !important;
-            font-weight: ${lp.typography?.texto_corrido_1?.font_weight || '400'} !important;
-            font-size: ${lp.typography?.texto_corrido_1?.font_size || '20px'} !important;
-            line-height: ${lp.typography?.texto_corrido_1?.line_height || '1.5'} !important;
-            letter-spacing: ${lp.typography?.texto_corrido_1?.letter_spacing || '0em'} !important;
+            font-family: ${(lp.typography?.texto_corrido_1?.font_family || DEFAULT_TYPOGRAPHY.texto_corrido_1.font_family) === 'Times New Roman' ? "'Times New Roman', Times, serif" : (lp.typography?.texto_corrido_1?.font_family || DEFAULT_TYPOGRAPHY.texto_corrido_1.font_family) === 'Playfair Display' ? "'Playfair Display', Georgia, serif" : (lp.typography?.texto_corrido_1?.font_family || DEFAULT_TYPOGRAPHY.texto_corrido_1.font_family) === 'Roboto' ? "'Roboto', sans-serif" : `'${lp.typography?.texto_corrido_1?.font_family || DEFAULT_TYPOGRAPHY.texto_corrido_1.font_family}', sans-serif`} !important;
+            font-weight: ${lp.typography?.texto_corrido_1?.font_weight || DEFAULT_TYPOGRAPHY.texto_corrido_1.font_weight} !important;
+            font-size: ${lp.typography?.texto_corrido_1?.font_size || DEFAULT_TYPOGRAPHY.texto_corrido_1.font_size} !important;
+            line-height: ${lp.typography?.texto_corrido_1?.line_height || DEFAULT_TYPOGRAPHY.texto_corrido_1.line_height} !important;
+            letter-spacing: ${lp.typography?.texto_corrido_1?.letter_spacing || DEFAULT_TYPOGRAPHY.texto_corrido_1.letter_spacing} !important;
             ${lp.typography?.texto_corrido_1?.color ? `color: ${lp.typography.texto_corrido_1.color} !important;` : ''}
           }
           .typo-body-2 {
-            font-family: ${(lp.typography?.texto_corrido_2?.font_family === 'Times New Roman' ? "'Times New Roman', Times, serif" : lp.typography?.texto_corrido_2?.font_family === 'Playfair Display' ? "'Playfair Display', Georgia, serif" : `'${lp.typography?.texto_corrido_2?.font_family || 'Inter'}', sans-serif`)} !important;
-            font-weight: ${lp.typography?.texto_corrido_2?.font_weight || '400'} !important;
-            font-size: ${lp.typography?.texto_corrido_2?.font_size || '16px'} !important;
-            line-height: ${lp.typography?.texto_corrido_2?.line_height || '1.5'} !important;
-            letter-spacing: ${lp.typography?.texto_corrido_2?.letter_spacing || '0em'} !important;
+            font-family: ${(lp.typography?.texto_corrido_2?.font_family || DEFAULT_TYPOGRAPHY.texto_corrido_2.font_family) === 'Times New Roman' ? "'Times New Roman', Times, serif" : (lp.typography?.texto_corrido_2?.font_family || DEFAULT_TYPOGRAPHY.texto_corrido_2.font_family) === 'Playfair Display' ? "'Playfair Display', Georgia, serif" : (lp.typography?.texto_corrido_2?.font_family || DEFAULT_TYPOGRAPHY.texto_corrido_2.font_family) === 'Roboto' ? "'Roboto', sans-serif" : `'${lp.typography?.texto_corrido_2?.font_family || DEFAULT_TYPOGRAPHY.texto_corrido_2.font_family}', sans-serif`} !important;
+            font-weight: ${lp.typography?.texto_corrido_2?.font_weight || DEFAULT_TYPOGRAPHY.texto_corrido_2.font_weight} !important;
+            font-size: ${lp.typography?.texto_corrido_2?.font_size || DEFAULT_TYPOGRAPHY.texto_corrido_2.font_size} !important;
+            line-height: ${lp.typography?.texto_corrido_2?.line_height || DEFAULT_TYPOGRAPHY.texto_corrido_2.line_height} !important;
+            letter-spacing: ${lp.typography?.texto_corrido_2?.letter_spacing || DEFAULT_TYPOGRAPHY.texto_corrido_2.letter_spacing} !important;
             ${lp.typography?.texto_corrido_2?.color ? `color: ${lp.typography.texto_corrido_2.color} !important;` : ''}
           }
           .typo-body-3 {
-            font-family: ${(lp.typography?.texto_corrido_3?.font_family === 'Times New Roman' ? "'Times New Roman', Times, serif" : lp.typography?.texto_corrido_3?.font_family === 'Playfair Display' ? "'Playfair Display', Georgia, serif" : `'${lp.typography?.texto_corrido_3?.font_family || 'Inter'}', sans-serif`)} !important;
-            font-weight: ${lp.typography?.texto_corrido_3?.font_weight || '400'} !important;
-            font-size: ${lp.typography?.texto_corrido_3?.font_size || '14px'} !important;
-            line-height: ${lp.typography?.texto_corrido_3?.line_height || '1.4'} !important;
-            letter-spacing: ${lp.typography?.texto_corrido_3?.letter_spacing || '0em'} !important;
+            font-family: ${(lp.typography?.texto_corrido_3?.font_family || DEFAULT_TYPOGRAPHY.texto_corrido_3.font_family) === 'Times New Roman' ? "'Times New Roman', Times, serif" : (lp.typography?.texto_corrido_3?.font_family || DEFAULT_TYPOGRAPHY.texto_corrido_3.font_family) === 'Playfair Display' ? "'Playfair Display', Georgia, serif" : `'${lp.typography?.texto_corrido_3?.font_family || DEFAULT_TYPOGRAPHY.texto_corrido_3.font_family}', sans-serif`} !important;
+            font-weight: ${lp.typography?.texto_corrido_3?.font_weight || DEFAULT_TYPOGRAPHY.texto_corrido_3.font_weight} !important;
+            font-size: ${lp.typography?.texto_corrido_3?.font_size || DEFAULT_TYPOGRAPHY.texto_corrido_3.font_size} !important;
+            line-height: ${lp.typography?.texto_corrido_3?.line_height || DEFAULT_TYPOGRAPHY.texto_corrido_3.line_height} !important;
+            letter-spacing: ${lp.typography?.texto_corrido_3?.letter_spacing || DEFAULT_TYPOGRAPHY.texto_corrido_3.letter_spacing} !important;
             ${lp.typography?.texto_corrido_3?.color ? `color: ${lp.typography.texto_corrido_3.color} !important;` : ''}
           }
           .typo-body-4 {
-            font-family: ${(lp.typography?.texto_corrido_4?.font_family === 'Times New Roman' ? "'Times New Roman', Times, serif" : lp.typography?.texto_corrido_4?.font_family === 'Playfair Display' ? "'Playfair Display', Georgia, serif" : `'${lp.typography?.texto_corrido_4?.font_family || 'Inter'}', sans-serif`)} !important;
-            font-weight: ${lp.typography?.texto_corrido_4?.font_weight || '500'} !important;
-            font-size: ${lp.typography?.texto_corrido_4?.font_size || '12px'} !important;
-            line-height: ${lp.typography?.texto_corrido_4?.line_height || '1.4'} !important;
-            letter-spacing: ${lp.typography?.texto_corrido_4?.letter_spacing || '0.05em'} !important;
+            font-family: ${(lp.typography?.texto_corrido_4?.font_family || DEFAULT_TYPOGRAPHY.texto_corrido_4.font_family) === 'Times New Roman' ? "'Times New Roman', Times, serif" : (lp.typography?.texto_corrido_4?.font_family || DEFAULT_TYPOGRAPHY.texto_corrido_4.font_family) === 'Playfair Display' ? "'Playfair Display', Georgia, serif" : `'${lp.typography?.texto_corrido_4?.font_family || DEFAULT_TYPOGRAPHY.texto_corrido_4.font_family}', sans-serif`} !important;
+            font-weight: ${lp.typography?.texto_corrido_4?.font_weight || DEFAULT_TYPOGRAPHY.texto_corrido_4.font_weight} !important;
+            font-size: ${lp.typography?.texto_corrido_4?.font_size || DEFAULT_TYPOGRAPHY.texto_corrido_4.font_size} !important;
+            line-height: ${lp.typography?.texto_corrido_4?.line_height || DEFAULT_TYPOGRAPHY.texto_corrido_4.line_height} !important;
+            letter-spacing: ${lp.typography?.texto_corrido_4?.letter_spacing || DEFAULT_TYPOGRAPHY.texto_corrido_4.letter_spacing} !important;
             ${lp.typography?.texto_corrido_4?.color ? `color: ${lp.typography.texto_corrido_4.color} !important;` : ''}
           }
           .typo-btn-1 {
-            font-family: ${(lp.typography?.texto_botao_1?.font_family === 'Times New Roman' ? "'Times New Roman', Times, serif" : lp.typography?.texto_botao_1?.font_family === 'Playfair Display' ? "'Playfair Display', Georgia, serif" : `'${lp.typography?.texto_botao_1?.font_family || 'Inter'}', sans-serif`)} !important;
-            font-weight: ${lp.typography?.texto_botao_1?.font_weight || '800'} !important;
-            font-size: ${lp.typography?.texto_botao_1?.font_size || '18px'} !important;
-            line-height: ${lp.typography?.texto_botao_1?.line_height || '1.2'} !important;
-            letter-spacing: ${lp.typography?.texto_botao_1?.letter_spacing || '0.02em'} !important;
+            font-family: ${(lp.typography?.texto_botao_1?.font_family || DEFAULT_TYPOGRAPHY.texto_botao_1.font_family) === 'Times New Roman' ? "'Times New Roman', Times, serif" : (lp.typography?.texto_botao_1?.font_family || DEFAULT_TYPOGRAPHY.texto_botao_1.font_family) === 'Playfair Display' ? "'Playfair Display', Georgia, serif" : `'${lp.typography?.texto_botao_1?.font_family || DEFAULT_TYPOGRAPHY.texto_botao_1.font_family}', sans-serif`} !important;
+            font-weight: ${lp.typography?.texto_botao_1?.font_weight || DEFAULT_TYPOGRAPHY.texto_botao_1.font_weight} !important;
+            font-size: ${lp.typography?.texto_botao_1?.font_size || DEFAULT_TYPOGRAPHY.texto_botao_1.font_size} !important;
+            line-height: ${lp.typography?.texto_botao_1?.line_height || DEFAULT_TYPOGRAPHY.texto_botao_1.line_height} !important;
+            letter-spacing: ${lp.typography?.texto_botao_1?.letter_spacing || DEFAULT_TYPOGRAPHY.texto_botao_1.letter_spacing} !important;
             ${lp.typography?.texto_botao_1?.color ? `color: ${lp.typography.texto_botao_1.color} !important;` : ''}
           }
           .typo-btn-2 {
-            font-family: ${(lp.typography?.texto_botao_2?.font_family === 'Times New Roman' ? "'Times New Roman', Times, serif" : lp.typography?.texto_botao_2?.font_family === 'Playfair Display' ? "'Playfair Display', Georgia, serif" : `'${lp.typography?.texto_botao_2?.font_family || 'Inter'}', sans-serif`)} !important;
-            font-weight: ${lp.typography?.texto_botao_2?.font_weight || '700'} !important;
-            font-size: ${lp.typography?.texto_botao_2?.font_size || '14px'} !important;
-            line-height: ${lp.typography?.texto_botao_2?.line_height || '1.2'} !important;
-            letter-spacing: ${lp.typography?.texto_botao_2?.letter_spacing || '0em'} !important;
+            font-family: ${(lp.typography?.texto_botao_2?.font_family || DEFAULT_TYPOGRAPHY.texto_botao_2.font_family) === 'Times New Roman' ? "'Times New Roman', Times, serif" : (lp.typography?.texto_botao_2?.font_family || DEFAULT_TYPOGRAPHY.texto_botao_2.font_family) === 'Playfair Display' ? "'Playfair Display', Georgia, serif" : `'${lp.typography?.texto_botao_2?.font_family || DEFAULT_TYPOGRAPHY.texto_botao_2.font_family}', sans-serif`} !important;
+            font-weight: ${lp.typography?.texto_botao_2?.font_weight || DEFAULT_TYPOGRAPHY.texto_botao_2.font_weight} !important;
+            font-size: ${lp.typography?.texto_botao_2?.font_size || DEFAULT_TYPOGRAPHY.texto_botao_2.font_size} !important;
+            line-height: ${lp.typography?.texto_botao_2?.line_height || DEFAULT_TYPOGRAPHY.texto_botao_2.line_height} !important;
+            letter-spacing: ${lp.typography?.texto_botao_2?.letter_spacing || DEFAULT_TYPOGRAPHY.texto_botao_2.letter_spacing} !important;
             ${lp.typography?.texto_botao_2?.color ? `color: ${lp.typography.texto_botao_2.color} !important;` : ''}
           }
 
