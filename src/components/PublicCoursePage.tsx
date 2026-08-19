@@ -1727,9 +1727,9 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
               </ReactMarkdown>
             </div>
 
-            {/* Faixa de Informações Rápidas (na parte inferior da coluna à esquerda em linha única no desktop) */}
-            <div className="pt-2 sm:pt-4 w-full">
-              <div className="flex flex-wrap lg:flex-nowrap items-center gap-2 sm:gap-2.5 w-full overflow-x-auto lg:overflow-x-visible pb-1 lg:pb-0">
+            {/* Faixa de Informações Rápidas (centralizada horizontalmente na coluna à esquerda em linha única no desktop) */}
+            <div className="pt-2 sm:pt-4 w-full flex justify-center">
+              <div className="flex flex-wrap lg:flex-nowrap items-center justify-center gap-2 sm:gap-2.5 w-full overflow-x-auto lg:overflow-x-visible pb-1 lg:pb-0">
                 {(isTrilha ? [
                   { icon: BookOpen, text: `${cursosTrilha.length} Cursos` },
                   { icon: Clock, text: `${item.carga_horaria || '04'} horas de conteúdo` },
