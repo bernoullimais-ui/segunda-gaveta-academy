@@ -335,19 +335,19 @@ export function DashboardAluno({ loggedUser, onNavigateToCourse }: DashboardAlun
             <p className="text-slate-500 mb-6">Explore nossa vitrine e comece a aprender hoje mesmo!</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {courses.map((course) => (
               <motion.div 
                 key={course.id}
                 whileHover={{ y: -5 }}
-                className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden flex flex-col group cursor-pointer"
+                className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden flex flex-col group cursor-pointer max-w-[280px] w-full mx-auto"
                 onClick={() => onNavigateToCourse(course)}
               >
                 <div 
-                  className="aspect-video w-full bg-slate-100 bg-cover bg-center flex items-center justify-center font-bold text-slate-300"
-                  style={{ backgroundImage: course.thumbnail_url ? `url(${course.thumbnail_url})` : undefined }}
+                  className="aspect-[9/16] w-full bg-slate-100 bg-cover bg-center flex items-center justify-center font-bold text-slate-300"
+                  style={{ backgroundImage: (course.thumbnail_url || course.capa_url) ? `url(${course.thumbnail_url || course.capa_url})` : undefined }}
                 >
-                  {!course.thumbnail_url && "Sem Thumbnail"}
+                  {!(course.thumbnail_url || course.capa_url) && "Sem Capa"}
                 </div>
                 <div className="p-6 flex flex-col flex-1">
                   <h3 className="font-bold text-slate-900 mb-2 line-clamp-1 group-hover:text-indigo-600 transition-colors">
