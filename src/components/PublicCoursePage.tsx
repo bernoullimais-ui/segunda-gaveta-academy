@@ -1726,9 +1726,9 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
               </ReactMarkdown>
             </div>
 
-            {/* Faixa de Informações Rápidas (na parte inferior da coluna à esquerda) */}
-            <div className="pt-2 sm:pt-4">
-              <div className="flex flex-wrap items-center gap-3 w-full">
+            {/* Faixa de Informações Rápidas (na parte inferior da coluna à esquerda em linha única no desktop) */}
+            <div className="pt-2 sm:pt-4 w-full">
+              <div className="flex flex-wrap lg:flex-nowrap items-center gap-2 sm:gap-2.5 w-full overflow-x-auto lg:overflow-x-visible pb-1 lg:pb-0">
                 {(isTrilha ? [
                   { icon: BookOpen, text: `${cursosTrilha.length} Cursos` },
                   { icon: Clock, text: `${item.carga_horaria || '04'} horas de conteúdo` },
@@ -1745,10 +1745,10 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                   return (
                     <div 
                       key={i} 
-                      className="px-4 py-2.5 rounded-xl border bg-transparent flex items-center gap-2.5 transition-colors shadow-sm [transform:translateZ(0)] [backface-visibility:hidden]"
+                      className="px-3 sm:px-3.5 py-2 rounded-xl border bg-transparent flex items-center gap-2 transition-colors shadow-sm shrink-0 lg:shrink [transform:translateZ(0)] [backface-visibility:hidden]"
                       style={{ borderColor: copySectionBgColor, color: copySectionBgColor }}
                     >
-                      <stat.icon className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" style={{ color: copySectionBgColor }} />
+                      <stat.icon className="w-4 h-4 shrink-0" style={{ color: copySectionBgColor }} />
                       <span className="text-xs sm:text-sm font-semibold tracking-tight whitespace-nowrap" style={{ color: copySectionBgColor }}>{stat.text}</span>
                     </div>
                   );
