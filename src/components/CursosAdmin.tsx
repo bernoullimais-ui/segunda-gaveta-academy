@@ -511,7 +511,7 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
         artigoTextareaRef.current.innerHTML = editingStep.descricao || '';
       }
     }
-  }, [editingStep.descricao]);
+  }, [editingStep.descricao, editingStep.id, viewConteudo]);
 
   const applyCommand = (command: string, value: string = '') => {
     if (artigoTextareaRef.current) {
@@ -2735,10 +2735,12 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                       <div className="flex gap-2 text-slate-400 mb-4 cursor-text flex-1">
                         <div className="w-5 h-5 bg-blue-50 rounded text-blue-500 flex items-center justify-center mt-1"><Plus className="w-3 h-3"/></div>
                         <div 
+                          key={editingStep.id || editingStep.nome || 'video-desc'}
                           ref={artigoTextareaRef}
                           contentEditable
-                          onInput={(e) => setEditingStep({...editingStep, descricao: e.currentTarget.innerHTML})}
-                          onBlur={(e) => setEditingStep({...editingStep, descricao: e.currentTarget.innerHTML})}
+                          dangerouslySetInnerHTML={{ __html: editingStep.descricao || '' }}
+                          onInput={(e) => setEditingStep(prev => ({...prev, descricao: e.currentTarget.innerHTML}))}
+                          onBlur={(e) => setEditingStep(prev => ({...prev, descricao: e.currentTarget.innerHTML}))}
                           className="w-full text-slate-700 outline-none min-h-[300px] prose prose-slate max-w-none focus:outline-none"
                         />
                       </div>
@@ -3178,10 +3180,12 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                       <div className="flex gap-2 text-slate-400 mb-4 cursor-text flex-1">
                         <div className="w-5 h-5 bg-blue-50 rounded text-blue-500 flex items-center justify-center mt-1"><Plus className="w-3 h-3"/></div>
                         <div 
+                          key={editingStep.id || editingStep.nome || 'artigo-desc'}
                           ref={artigoTextareaRef}
                           contentEditable
-                          onInput={(e) => setEditingStep({...editingStep, descricao: e.currentTarget.innerHTML})}
-                          onBlur={(e) => setEditingStep({...editingStep, descricao: e.currentTarget.innerHTML})}
+                          dangerouslySetInnerHTML={{ __html: editingStep.descricao || '' }}
+                          onInput={(e) => setEditingStep(prev => ({...prev, descricao: e.currentTarget.innerHTML}))}
+                          onBlur={(e) => setEditingStep(prev => ({...prev, descricao: e.currentTarget.innerHTML}))}
                           className="w-full text-slate-700 outline-none min-h-[300px] prose prose-slate max-w-none focus:outline-none"
                         />
                       </div>
@@ -3536,10 +3540,12 @@ export function CursosAdmin({ loggedUser, orgId }: CursosAdminProps) {
                       <div className="flex gap-2 text-slate-400 mb-4 cursor-text flex-1">
                         <div className="w-5 h-5 bg-blue-50 rounded text-blue-500 flex items-center justify-center mt-1"><Plus className="w-3 h-3"/></div>
                         <div 
+                          key={editingStep.id || editingStep.nome || 'other-desc'}
                           ref={artigoTextareaRef}
                           contentEditable
-                          onInput={(e) => setEditingStep({...editingStep, descricao: e.currentTarget.innerHTML})}
-                          onBlur={(e) => setEditingStep({...editingStep, descricao: e.currentTarget.innerHTML})}
+                          dangerouslySetInnerHTML={{ __html: editingStep.descricao || '' }}
+                          onInput={(e) => setEditingStep(prev => ({...prev, descricao: e.currentTarget.innerHTML}))}
+                          onBlur={(e) => setEditingStep(prev => ({...prev, descricao: e.currentTarget.innerHTML}))}
                           className="w-full text-slate-700 outline-none min-h-[300px] prose prose-slate max-w-none focus:outline-none"
                         />
                       </div>
