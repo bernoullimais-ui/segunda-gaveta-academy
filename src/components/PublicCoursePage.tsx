@@ -1741,15 +1741,15 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                   { icon: Calendar, text: item.tempo === 'com_limite' ? `Acesso por ${item.duracao || ''} ${item.duracao_tipo || 'meses'}` : 'Acesso vitalício' },
                   ...(item.tem_certificado ? [{ icon: Award, text: 'Certificado Incluso' }] : [])
                 ]).map((stat, i) => {
-                  const aboutSectionBgColor = lp.section_about_bg_color || '#0f172a';
+                  const copySectionBgColor = lp.section_copy_bg_color || '#0f172a';
                   return (
                     <div 
                       key={i} 
                       className="px-4 py-2.5 rounded-xl border bg-transparent flex items-center gap-2.5 transition-colors shadow-sm [transform:translateZ(0)] [backface-visibility:hidden]"
-                      style={{ borderColor: aboutSectionBgColor, color: aboutSectionBgColor }}
+                      style={{ borderColor: copySectionBgColor, color: copySectionBgColor }}
                     >
-                      <stat.icon className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" style={{ color: aboutSectionBgColor }} />
-                      <span className="text-xs sm:text-sm font-semibold tracking-tight whitespace-nowrap" style={{ color: aboutSectionBgColor }}>{stat.text}</span>
+                      <stat.icon className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" style={{ color: copySectionBgColor }} />
+                      <span className="text-xs sm:text-sm font-semibold tracking-tight whitespace-nowrap" style={{ color: copySectionBgColor }}>{stat.text}</span>
                     </div>
                   );
                 })}
