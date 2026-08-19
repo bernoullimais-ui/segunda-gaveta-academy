@@ -1703,38 +1703,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
   const primaryRgb = hexToRgb(lp.primary_color || '#2563eb');
 
   const sectionMap: Record<string, React.ReactNode> = {
-    info: (
-      <section key="info" className="bg-transparent py-10" style={getSectionStyle('info')}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 flex flex-col items-center gap-8">
-          <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-6 w-full">
-            {(isTrilha ? [
-              { icon: BookOpen, text: `${cursosTrilha.length} Cursos` },
-              { icon: Clock, text: `${item.carga_horaria || '04'} horas de conteúdo` },
-              { icon: Calendar, text: item.tempo === 'com_limite' ? `Acesso por ${item.duracao || ''} ${item.duracao_tipo || 'meses'}` : 'Acesso vitalício' },
-              ...(item.tem_certificado ? [{ icon: Award, text: 'Certificado Incluso' }] : [])
-            ] : [
-              { icon: BookOpen, text: `${item.curriculo_json?.length || 0} Módulos` },
-              { icon: Play, text: `${item.curriculo_json?.reduce((acc: number, secao: any) => acc + (secao.etapas?.length || 0), 0) || 0} Aulas` },
-              { icon: Clock, text: `${item.carga_horaria || '04'} horas de conteúdo` },
-              { icon: Calendar, text: item.tempo === 'com_limite' ? `Acesso por ${item.duracao || ''} ${item.duracao_tipo || 'meses'}` : 'Acesso vitalício' },
-              ...(item.tem_certificado ? [{ icon: Award, text: 'Certificado Incluso' }] : [])
-            ]).map((stat, i) => {
-              const aboutSectionBgColor = lp.section_about_bg_color || '#0f172a';
-              return (
-                <div 
-                  key={i} 
-                  className="px-6 py-3.5 rounded-2xl border bg-transparent flex items-center gap-3.5 transition-colors shadow-sm [transform:translateZ(0)] [backface-visibility:hidden]"
-                  style={{ borderColor: aboutSectionBgColor, color: aboutSectionBgColor }}
-                >
-                  <stat.icon className="w-5 h-5 sm:w-7 sm:h-7 shrink-0" style={{ color: aboutSectionBgColor }} />
-                  <span className="text-sm sm:text-xl font-semibold tracking-tight whitespace-nowrap" style={{ color: aboutSectionBgColor }}>{stat.text}</span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-    ),
+    info: null,
     about: (
       <section key="about" id="sobre" className="relative w-full overflow-hidden bg-slate-900 text-left [transform:translateZ(0)] [backface-visibility:hidden] antialiased" style={getSectionStyle('about')}>
         <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[550px] lg:min-h-[650px] w-full items-stretch">
@@ -1755,6 +1724,36 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
               <ReactMarkdown remarkPlugins={[remarkGfm]}>
                 {lp.about || item.descricao}
               </ReactMarkdown>
+            </div>
+
+            {/* Faixa de Informações Rápidas (na parte inferior da coluna à esquerda) */}
+            <div className="pt-2 sm:pt-4">
+              <div className="flex flex-wrap items-center gap-3 w-full">
+                {(isTrilha ? [
+                  { icon: BookOpen, text: `${cursosTrilha.length} Cursos` },
+                  { icon: Clock, text: `${item.carga_horaria || '04'} horas de conteúdo` },
+                  { icon: Calendar, text: item.tempo === 'com_limite' ? `Acesso por ${item.duracao || ''} ${item.duracao_tipo || 'meses'}` : 'Acesso vitalício' },
+                  ...(item.tem_certificado ? [{ icon: Award, text: 'Certificado Incluso' }] : [])
+                ] : [
+                  { icon: BookOpen, text: `${item.curriculo_json?.length || 0} Módulos` },
+                  { icon: Play, text: `${item.curriculo_json?.reduce((acc: number, secao: any) => acc + (secao.etapas?.length || 0), 0) || 0} Aulas` },
+                  { icon: Clock, text: `${item.carga_horaria || '04'} horas de conteúdo` },
+                  { icon: Calendar, text: item.tempo === 'com_limite' ? `Acesso por ${item.duracao || ''} ${item.duracao_tipo || 'meses'}` : 'Acesso vitalício' },
+                  ...(item.tem_certificado ? [{ icon: Award, text: 'Certificado Incluso' }] : [])
+                ]).map((stat, i) => {
+                  const aboutSectionBgColor = lp.section_about_bg_color || '#0f172a';
+                  return (
+                    <div 
+                      key={i} 
+                      className="px-4 py-2.5 rounded-xl border bg-transparent flex items-center gap-2.5 transition-colors shadow-sm [transform:translateZ(0)] [backface-visibility:hidden]"
+                      style={{ borderColor: aboutSectionBgColor, color: aboutSectionBgColor }}
+                    >
+                      <stat.icon className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" style={{ color: aboutSectionBgColor }} />
+                      <span className="text-xs sm:text-sm font-semibold tracking-tight whitespace-nowrap" style={{ color: aboutSectionBgColor }}>{stat.text}</span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
 
