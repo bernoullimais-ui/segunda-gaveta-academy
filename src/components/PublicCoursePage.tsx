@@ -2440,9 +2440,9 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
 
         {/* Dark Hero Section - Full-bleed background banner layout */}
         {isSectionVisible('hero') && (
-          <section ref={heroRef} className="relative h-[100dvh] lg:min-h-[92vh] flex flex-col justify-end lg:justify-center overflow-hidden bg-slate-950 text-left" style={getSectionStyle('hero')}>
+          <section ref={heroRef} className="relative h-[calc(100dvh+10px)] lg:min-h-[92vh] flex flex-col justify-end lg:justify-center overflow-hidden bg-slate-950 text-left" style={getSectionStyle('hero')}>
             {/* Full Bleed Background Image */}
-            <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
+            <div className="absolute inset-0 bottom-[10px] lg:bottom-0 w-full overflow-hidden pointer-events-none">
               <img 
                 src={lp.hero_image_url || item.capa_url || item.thumbnail_url || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070'} 
                 alt="Banner Principal"
@@ -2452,7 +2452,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent lg:hidden pointer-events-none" style={lp.section_hero_bg_color ? { background: `linear-gradient(to top, ${lp.section_hero_bg_color} 0%, ${lp.section_hero_bg_color}99 50%, transparent 100%)` } : undefined}></div>
             </div>
             
-            <div className="max-w-7xl mx-auto px-6 sm:px-8 relative z-10 w-full min-h-0 lg:min-h-[85vh] flex flex-col justify-end lg:justify-center pb-[2px] lg:pb-0">
+            <div className="max-w-7xl mx-auto px-6 sm:px-8 relative z-10 w-full min-h-0 lg:min-h-[85vh] flex flex-col justify-end lg:justify-center pb-[12px] lg:pb-0">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full items-center lg:my-auto">
                 {/* Left Column (50% equal width on desktop) */}
                 <div className="hidden lg:block col-span-1"></div>
