@@ -2452,7 +2452,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent lg:hidden pointer-events-none" style={lp.section_hero_bg_color ? { background: `linear-gradient(to top, ${lp.section_hero_bg_color} 0%, ${lp.section_hero_bg_color}99 50%, transparent 100%)` } : undefined}></div>
             </div>
             
-            <div className="max-w-7xl mx-auto px-6 sm:px-8 relative z-10 w-full min-h-0 lg:min-h-[85vh] flex flex-col justify-end lg:justify-center pb-[10px] lg:pb-0">
+            <div className="max-w-7xl mx-auto px-6 sm:px-8 relative z-10 w-full min-h-0 lg:min-h-[85vh] flex flex-col justify-end lg:justify-center pb-[2px] lg:pb-0">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full items-center lg:my-auto">
                 {/* Left Column (50% equal width on desktop) */}
                 <div className="hidden lg:block col-span-1"></div>
