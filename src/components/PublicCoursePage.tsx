@@ -2289,6 +2289,15 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
     return `${mobileNum}${unit}`;
   };
 
+  const getHeroMobileFontSize = (sizeStr?: string, defaultStr: string = '100px') => {
+    const valStr = sizeStr || defaultStr;
+    const num = parseFloat(valStr);
+    if (isNaN(num)) return valStr;
+    const unit = valStr.replace(/[0-9.]/g, '') || 'px';
+    const mobileNum = Math.round(num * 0.7 * 10) / 10;
+    return `${mobileNum}${unit}`;
+  };
+
   if (layout === 'escuro') {
     return (
       <div className="min-h-screen bg-slate-900 selection:bg-primary/30 selection:text-white font-sans text-slate-300">
@@ -2321,6 +2330,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             .hero-no-mobile-transform {
               transform: none !important;
             }
+            .hero-title-mobile { font-size: ${getHeroMobileFontSize(lp.typography?.titulo_1?.font_size, DEFAULT_TYPOGRAPHY.titulo_1.font_size)} !important; }
             .typo-title-1 { font-size: ${getMobileFontSize(lp.typography?.titulo_1?.font_size, DEFAULT_TYPOGRAPHY.titulo_1.font_size)} !important; }
             .typo-title-2 { font-size: ${getMobileFontSize(lp.typography?.titulo_2?.font_size, DEFAULT_TYPOGRAPHY.titulo_2.font_size)} !important; }
             .typo-title-3 { font-size: ${getMobileFontSize(lp.typography?.titulo_3?.font_size, DEFAULT_TYPOGRAPHY.titulo_3.font_size)} !important; }
@@ -2501,7 +2511,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                       </div>
                     ) : (
                       <>
-                        <h1 className="text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-serif font-bold text-white leading-[1.1] tracking-tight uppercase typo-title typo-title-1 mb-3 lg:mb-6 text-center mx-auto max-w-xs sm:max-w-md lg:max-w-none">
+                        <h1 className="text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-serif font-bold text-white leading-[1.1] tracking-tight uppercase typo-title typo-title-1 hero-title-mobile mb-3 lg:mb-6 text-center mx-auto max-w-xs sm:max-w-md lg:max-w-none">
                           <FormattedTitle content={lp.hero_title || item.nome} />
                         </h1>
 
