@@ -24,7 +24,8 @@ import {
   CreditCard,
   LayoutDashboard,
   FileText,
-  HelpCircle
+  HelpCircle,
+  Menu
 } from 'lucide-react';
 import ReactPlayer from 'react-player';
 import { PaymentModal } from './PaymentModal';
@@ -118,6 +119,7 @@ const Nav = ({ layout, item, lp, onEnrollClick, timeLeft }: NavProps) => {
   const [loggedIn, setLoggedIn] = React.useState(false);
   const [orgSlug, setOrgSlug] = React.useState('');
   const [isScrolled, setIsScrolled] = React.useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
 
   const pad = (num: number) => num.toString().padStart(2, '0');
 
@@ -221,13 +223,66 @@ const Nav = ({ layout, item, lp, onEnrollClick, timeLeft }: NavProps) => {
             
             <button
               onClick={onEnrollClick}
-              className={`typo-btn px-5 sm:px-7 py-[5px] bg-primary text-white rounded-[10px] font-serif italic text-sm sm:text-base hover:opacity-95 hover:scale-105 active:scale-95 transition-all shadow-lg shadow-primary/25 whitespace-nowrap ${lp?.nav_cta_style || ''}`}
+              className={`typo-btn px-4 sm:px-7 py-[5px] bg-primary text-white rounded-[10px] font-serif italic text-xs sm:text-base hover:opacity-95 hover:scale-105 active:scale-95 transition-all shadow-lg shadow-primary/25 whitespace-nowrap ${lp?.nav_cta_style || ''}`}
               style={lp?.nav_cta_color ? { color: lp.nav_cta_color } : undefined}
             >
               {Boolean(item?.em_breve || item?.configuracao_json?.em_breve || item?.status === 'em_breve' || lp?.cta_text?.toLowerCase().includes('breve') || lp?.cta_text?.toLowerCase().includes('cadastrar') || lp?.cta_text?.toLowerCase().includes('espera')) ? 'Em Breve' : (lp?.cta_text || 'Acesse agora')}
             </button>
+
+            {/* Ícone de 3 traços (Menu Hamburger) no Mobile */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="lg:hidden p-2 text-white hover:opacity-80 transition-opacity flex flex-col justify-center gap-[5px] w-9 h-9 items-center rounded-lg bg-white/10 backdrop-blur-md border border-white/10"
+              aria-label="Abrir Menu"
+            >
+              {isMobileMenuOpen ? (
+                <X className="w-5 h-5 text-white" />
+              ) : (
+                <>
+                  <span className="w-5 h-[2px] bg-white rounded-full transition-all"></span>
+                  <span className="w-5 h-[2px] bg-white rounded-full transition-all"></span>
+                  <span className="w-5 h-[2px] bg-white rounded-full transition-all"></span>
+                </>
+              )}
+            </button>
           </div>
         </div>
+
+        {/* Menu Responsivo Mobile em 3 Traços */}
+        {isMobileMenuOpen && (
+          <div className="lg:hidden bg-slate-950/95 backdrop-blur-xl border-b border-white/10 px-6 py-6 space-y-4 animate-in slide-in-from-top-4 duration-200 shadow-2xl">
+            <a 
+              href="#sobre" 
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="block text-base font-serif italic text-slate-200 hover:text-white transition-colors"
+            >
+              Sobre
+            </a>
+            <a 
+              href="#instrutor" 
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="block text-base font-serif italic text-slate-200 hover:text-white transition-colors"
+            >
+              Expert
+            </a>
+            <a 
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="block text-base font-serif italic text-slate-200 hover:text-white transition-colors"
+            >
+              Fale Conosco
+            </a>
+            <a
+              href={loggedIn && orgSlug ? `/projeto/${orgSlug}` : '/login'}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="block text-base font-serif italic text-slate-200 hover:text-white underline underline-offset-4 transition-colors"
+            >
+              Login
+            </a>
+          </div>
+        )}
       </nav>
     </header>
   );
