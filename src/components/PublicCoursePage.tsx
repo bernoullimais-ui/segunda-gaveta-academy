@@ -2330,6 +2330,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             .hero-no-mobile-transform {
               transform: none !important;
             }
+            .hero-title-img-mobile { height: ${Math.round((parseInt(lp.hero_title_image_height || '140', 10) || 140) * 0.7)}px !important; }
             .hero-title-mobile { font-size: ${getHeroMobileFontSize(lp.typography?.titulo_1?.font_size, DEFAULT_TYPOGRAPHY.titulo_1.font_size)} !important; }
             .typo-title-1 { font-size: ${getMobileFontSize(lp.typography?.titulo_1?.font_size, DEFAULT_TYPOGRAPHY.titulo_1.font_size)} !important; }
             .typo-title-2 { font-size: ${getMobileFontSize(lp.typography?.titulo_2?.font_size, DEFAULT_TYPOGRAPHY.titulo_2.font_size)} !important; }
@@ -2501,7 +2502,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                         <img 
                           src={lp.hero_title} 
                           alt={item.nome || "Título"} 
-                          className="object-contain w-auto block mx-auto max-w-full" 
+                          className="object-contain w-auto block mx-auto max-w-full hero-title-img-mobile" 
                           style={{ 
                             height: lp.hero_title_image_height ? `${lp.hero_title_image_height}px` : '140px',
                             display: 'block',
@@ -2739,7 +2740,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                 {/* 2. Título (Order 2 on mobile) */}
                 <div className="order-2 lg:order-none">
                   {(lp.hero_title && (lp.hero_title.startsWith('data:image') || lp.hero_title.startsWith('http')) && !lp.hero_title.includes(' ')) ? (
-                    <img src={lp.hero_title} alt={item.nome || "Título"} className="object-contain w-auto mb-4 max-w-full" style={{ height: lp.hero_title_image_height ? `${lp.hero_title_image_height}px` : '120px' }} />
+                    <img src={lp.hero_title} alt={item.nome || "Título"} className="object-contain w-auto mb-4 max-w-full hero-title-img-mobile" style={{ height: lp.hero_title_image_height ? `${lp.hero_title_image_height}px` : '120px' }} />
                   ) : (
                     <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 leading-[1.15] tracking-tight drop-shadow-sm typo-title">
                       {lp.hero_title || item.nome}
