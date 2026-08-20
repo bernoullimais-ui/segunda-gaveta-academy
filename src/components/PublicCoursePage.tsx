@@ -2385,24 +2385,26 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
 
         {/* Dark Hero Section - Full-bleed background banner layout */}
         {isSectionVisible('hero') && (
-          <section ref={heroRef} className="relative min-h-[92vh] flex items-center pt-28 pb-20 md:pt-36 md:pb-28 overflow-hidden bg-slate-950 text-left" style={getSectionStyle('hero')}>
+          <section ref={heroRef} className="relative h-[100dvh] lg:min-h-[92vh] flex flex-col justify-end lg:justify-center overflow-hidden bg-slate-950 text-left" style={getSectionStyle('hero')}>
             {/* Full Bleed Background Image */}
             <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
               <img 
                 src={lp.hero_image_url || item.capa_url || item.thumbnail_url || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070'} 
                 alt="Banner Principal"
-                className="w-full h-full object-cover object-center"
+                className="w-full h-full object-cover object-top lg:object-center"
               />
+              {/* Gradient Overlay for Mobile readability at bottom */}
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent lg:hidden pointer-events-none" style={lp.section_hero_bg_color ? { background: `linear-gradient(to top, ${lp.section_hero_bg_color} 0%, ${lp.section_hero_bg_color}99 50%, transparent 100%)` } : undefined}></div>
             </div>
             
-            <div className="max-w-7xl mx-auto px-4 sm:px-8 relative z-10 w-full min-h-0 lg:min-h-[85vh] flex flex-col justify-center">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full items-center my-auto">
+            <div className="max-w-7xl mx-auto px-6 sm:px-8 relative z-10 w-full min-h-0 lg:min-h-[85vh] flex flex-col justify-end lg:justify-center pb-12 lg:pb-0">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full items-center lg:my-auto">
                 {/* Left Column (50% equal width on desktop) */}
                 <div className="hidden lg:block col-span-1"></div>
 
                 {/* Right Column (50% equal width on desktop) - Content centered horizontally & vertically */}
                 <div 
-                  className="col-span-1 w-full flex flex-col items-center justify-center text-center space-y-6 sm:space-y-8 hero-no-mobile-transform"
+                  className="col-span-1 w-full flex flex-col items-center justify-center text-center space-y-4 sm:space-y-6 lg:space-y-8 hero-no-mobile-transform"
                   style={{ 
                     transform: (lp.hero_block_offset_x || lp.hero_block_offset_y || lp.hero_title_offset_x || lp.hero_title_offset_y) 
                       ? `translate3d(${lp.hero_block_offset_x ?? lp.hero_title_offset_x ?? 0}px, ${lp.hero_block_offset_y ?? lp.hero_title_offset_y ?? 0}px, 0)` 
@@ -2426,20 +2428,20 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                       </div>
                     ) : (
                       <>
-                        <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-serif font-bold text-white leading-[1.1] tracking-tight uppercase typo-title typo-title-1 mb-6 text-center mx-auto">
+                        <h1 className="text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-serif font-bold text-white leading-[1.1] tracking-tight uppercase typo-title typo-title-1 mb-3 lg:mb-6 text-center mx-auto max-w-xs sm:max-w-md lg:max-w-none">
                           <FormattedTitle content={lp.hero_title || item.nome} />
                         </h1>
 
                         {/* Decorative Divider Line with Diamond/Sparkle Accent */}
-                        <div className="w-full flex items-center justify-center gap-4 py-2 opacity-80 max-w-lg mb-6 mx-auto">
+                        <div className="w-full flex items-center justify-center gap-3 sm:gap-4 py-1 sm:py-2 opacity-80 max-w-xs sm:max-w-lg mb-3 lg:mb-6 mx-auto">
                           <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-white/50 to-transparent"></div>
-                          <span className="text-primary text-sm sm:text-base tracking-widest">✦</span>
+                          <span className="text-primary text-xs sm:text-base tracking-widest">✦</span>
                           <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-white/50 to-transparent"></div>
                         </div>
 
                         {/* Tagline / Subtitle / Secondary Description */}
                         {(lp.hero_subtitle || item.descricao) && (
-                          <p className="text-xl sm:text-2xl lg:text-3xl font-serif italic text-slate-200/95 leading-snug max-w-2xl typo-subtitle typo-body-1 text-center mx-auto">
+                          <p className="text-lg sm:text-2xl lg:text-3xl font-serif italic text-slate-200/95 leading-snug max-w-sm sm:max-w-2xl typo-subtitle typo-body-1 text-center mx-auto">
                             <FormattedTitle content={lp.hero_subtitle || item.descricao} />
                           </p>
                         )}
@@ -2447,8 +2449,8 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                     )}
                   </div>
 
-                  {/* CTA Button & Instructor By Label */}
-                  <div className="w-full flex flex-col items-center justify-center text-center gap-3 pt-4 hero-no-mobile-transform">
+                  {/* CTA Button & Instructor By Label (Desktop display / Optional on Mobile if CTA button disabled or enabled) */}
+                  <div className="w-full hidden lg:flex flex-col items-center justify-center text-center gap-3 pt-4 hero-no-mobile-transform">
                     <div className="w-full flex items-center justify-center text-center">
                       <button 
                         onClick={handleEnrollClick}
