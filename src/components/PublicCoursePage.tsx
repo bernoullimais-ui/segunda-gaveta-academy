@@ -2499,10 +2499,10 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
               <img 
                 src={lp.hero_image_url || item.capa_url || item.thumbnail_url || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070'} 
                 alt="Banner Principal"
-                className="w-full h-full object-cover object-[20.83%_top] lg:object-center"
+                className="w-full h-full object-cover object-[20.83%_top] lg:object-center opacity-100 filter-none"
               />
-              {/* Gradient Overlay for Mobile readability at bottom */}
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent lg:hidden pointer-events-none" style={lp.section_hero_bg_color ? { background: `linear-gradient(to top, ${lp.section_hero_bg_color} 0%, ${lp.section_hero_bg_color}99 50%, transparent 100%)` } : undefined}></div>
+              {/* Gradient Overlay (exibido apenas no desktop) */}
+              <div className="hidden lg:block absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent pointer-events-none" style={lp.section_hero_bg_color ? { background: `linear-gradient(to top, ${lp.section_hero_bg_color} 0%, ${lp.section_hero_bg_color}99 50%, transparent 100%)` } : undefined}></div>
             </div>
             
             <div className="max-w-7xl mx-auto px-6 sm:px-8 relative z-10 w-full min-h-0 lg:min-h-[85vh] flex flex-col justify-end lg:justify-center pb-[2px] lg:pb-0">
