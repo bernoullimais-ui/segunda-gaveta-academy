@@ -2350,7 +2350,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             .hero-no-mobile-transform {
               transform: none !important;
             }
-            .about-title-mobile { font-size: 24px !important; line-height: 1.2 !important; }
+            .about-title-mobile { font-size: 20px !important; line-height: 1.25 !important; }
             .about-text-mobile { font-size: 16px !important; line-height: 1.55 !important; }
             .copy-title-mobile { font-size: 24px !important; line-height: 1.25 !important; }
             .hero-title-img-mobile { height: ${Math.round((parseInt(lp.hero_title_image_height || '140', 10) || 140) * 0.4)}px !important; }
@@ -2680,7 +2680,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
           .hero-no-mobile-transform {
             transform: none !important;
           }
-          .about-title-mobile { font-size: 24px !important; line-height: 1.2 !important; }
+          .about-title-mobile { font-size: 20px !important; line-height: 1.25 !important; }
           .about-text-mobile { font-size: 16px !important; line-height: 1.55 !important; }
           .copy-title-mobile { font-size: 24px !important; line-height: 1.25 !important; }
           .hero-title-img-mobile { height: ${Math.round((parseInt(lp.hero_title_image_height || '140', 10) || 140) * 0.4)}px !important; }
