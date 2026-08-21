@@ -2294,7 +2294,16 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
     const num = parseFloat(valStr);
     if (isNaN(num)) return valStr;
     const unit = valStr.replace(/[0-9.]/g, '') || 'px';
-    const mobileNum = Math.round(num * 0.5 * 10) / 10;
+    const mobileNum = Math.round(num * 0.4 * 10) / 10;
+    return `${mobileNum}${unit}`;
+  };
+
+  const getHeroBtnMobileFontSize = (sizeStr?: string, defaultStr: string = '24px') => {
+    const valStr = sizeStr || defaultStr;
+    const num = parseFloat(valStr);
+    if (isNaN(num)) return valStr;
+    const unit = valStr.replace(/[0-9.]/g, '') || 'px';
+    const mobileNum = Math.round(num * 0.8 * 10) / 10;
     return `${mobileNum}${unit}`;
   };
 
@@ -2341,8 +2350,9 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             .hero-no-mobile-transform {
               transform: none !important;
             }
-            .hero-title-img-mobile { height: ${Math.round((parseInt(lp.hero_title_image_height || '140', 10) || 140) * 0.5)}px !important; }
+            .hero-title-img-mobile { height: ${Math.round((parseInt(lp.hero_title_image_height || '140', 10) || 140) * 0.4)}px !important; }
             .hero-title-mobile { font-size: ${getHeroMobileFontSize(lp.typography?.titulo_1?.font_size, DEFAULT_TYPOGRAPHY.titulo_1.font_size)} !important; }
+            .hero-btn-mobile { font-size: ${getHeroBtnMobileFontSize(lp.typography?.texto_botao_1?.font_size, DEFAULT_TYPOGRAPHY.texto_botao_1.font_size)} !important; padding: 10px 24px !important; min-width: 160px !important; }
             .typo-title-1 { font-size: ${getMobileFontSize(lp.typography?.titulo_1?.font_size, DEFAULT_TYPOGRAPHY.titulo_1.font_size)} !important; }
             .typo-title-2 { font-size: ${getMobileFontSize(lp.typography?.titulo_2?.font_size, DEFAULT_TYPOGRAPHY.titulo_2.font_size)} !important; }
             .typo-title-3 { font-size: ${getMobileFontSize(lp.typography?.titulo_3?.font_size, DEFAULT_TYPOGRAPHY.titulo_3.font_size)} !important; }
@@ -2549,7 +2559,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                     <div className="w-full flex items-center justify-center text-center">
                       <button 
                         onClick={handleEnrollClick}
-                        className="typo-btn typo-btn-1 px-6 sm:px-12 py-3 sm:py-5 bg-primary text-white rounded-2xl font-serif italic text-sm sm:text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_15px_40px_rgba(var(--primary-rgb),0.4)] flex items-center justify-center min-w-[180px] sm:min-w-[240px] mx-auto text-center"
+                        className="typo-btn typo-btn-1 hero-btn-mobile px-6 sm:px-12 py-3 sm:py-5 bg-primary text-white rounded-2xl font-serif italic text-sm sm:text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_15px_40px_rgba(var(--primary-rgb),0.4)] flex items-center justify-center min-w-[180px] sm:min-w-[240px] mx-auto text-center"
                       >
                         {isEmBreve ? 'Cadastrar-se' : (lp.cta_text || 'Descubra o segredo')}
                       </button>
