@@ -2285,7 +2285,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
     const num = parseFloat(valStr);
     if (isNaN(num)) return valStr;
     const unit = valStr.replace(/[0-9.]/g, '') || 'px';
-    const mobileNum = Math.round(num * 0.15 * 10) / 10;
+    const mobileNum = Math.round(num * 0.4 * 10) / 10;
     return `${mobileNum}${unit}`;
   };
 
@@ -2294,7 +2294,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
     const num = parseFloat(valStr);
     if (isNaN(num)) return valStr;
     const unit = valStr.replace(/[0-9.]/g, '') || 'px';
-    const mobileNum = Math.round(num * 0.15 * 10) / 10;
+    const mobileNum = Math.round(num * 0.4 * 10) / 10;
     return `${mobileNum}${unit}`;
   };
 
@@ -2350,7 +2350,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             .hero-no-mobile-transform {
               transform: none !important;
             }
-            .hero-title-img-mobile { height: ${Math.round((parseInt(lp.hero_title_image_height || '140', 10) || 140) * 0.15)}px !important; }
+            .hero-title-img-mobile { height: ${Math.round((parseInt(lp.hero_title_image_height || '140', 10) || 140) * 0.4)}px !important; }
             .hero-title-mobile { font-size: ${getHeroMobileFontSize(lp.typography?.titulo_1?.font_size, DEFAULT_TYPOGRAPHY.titulo_1.font_size)} !important; }
             .hero-btn-mobile { font-size: ${getHeroBtnMobileFontSize(lp.typography?.texto_botao_1?.font_size, DEFAULT_TYPOGRAPHY.texto_botao_1.font_size)} !important; padding: 9px 20px !important; min-width: 150px !important; }
             .typo-title-1 { font-size: ${getMobileFontSize(lp.typography?.titulo_1?.font_size, DEFAULT_TYPOGRAPHY.titulo_1.font_size)} !important; }
