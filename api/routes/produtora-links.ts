@@ -131,7 +131,7 @@ router.post('/create-link', async (req, res) => {
     }
 
     if (aceita_pix) {
-      checkoutConfig.pix = { expires_in: 3600 };
+      checkoutConfig.pix = { expires_at: new Date(Date.now() + 24 * 3600 * 1000).toISOString() };
     }
 
     if (aceita_boleto) {
