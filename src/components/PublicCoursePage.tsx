@@ -912,7 +912,7 @@ const TargetAudienceSection = ({ targetAudience, layout, style, lp, onEnrollClic
       <div className="max-w-[1024px] mx-auto px-6 flex flex-col items-center justify-center space-y-8 lg:space-y-10">
         {targetAudience && (
           <div 
-            className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif text-white font-normal leading-[1.25] tracking-tight ${lp?.audience_text_style || 'typo-title-1'}`}
+            className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif text-white font-normal leading-none tracking-tight audience-title-mobile ${lp?.audience_text_style || 'typo-title-1'}`}
             style={lp?.audience_text_color ? { color: lp.audience_text_color } : undefined}
           >
             <FormattedTitle content={targetAudience} />
@@ -1865,7 +1865,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
         <div className="max-w-[1024px] mx-auto px-6 flex flex-col items-center justify-center space-y-8 lg:space-y-10">
           {lp.copy_section_text && (
             <div 
-              className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif text-white font-normal leading-[1.25] tracking-tight copy-title-mobile ${lp.copy_text_style || 'typo-title-1'}`}
+              className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif text-white font-normal leading-none tracking-tight copy-title-mobile ${lp.copy_text_style || 'typo-title-1'}`}
               style={lp.copy_text_color ? { color: lp.copy_text_color } : undefined}
             >
               <FormattedTitle content={lp.copy_section_text} />
@@ -2362,6 +2362,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             .hero-title-img-mobile { height: ${Math.round((parseInt(lp.hero_title_image_height || '140', 10) || 140) * 0.6)}px !important; }
             .hero-title-mobile, .hero-title-mobile * { font-size: ${getHeroMobileFontSize(lp.typography?.titulo_1?.font_size, DEFAULT_TYPOGRAPHY.titulo_1.font_size)} !important; }
             .hero-btn-mobile, .hero-btn-mobile * { font-size: ${getHeroBtnMobileFontSize(lp.typography?.texto_botao_1?.font_size, DEFAULT_TYPOGRAPHY.texto_botao_1.font_size)} !important; padding: 9px 20px !important; min-width: 150px !important; }
+            .copy-title-mobile, .copy-title-mobile *, .audience-title-mobile, .audience-title-mobile * { line-height: 1 !important; }
           }
 
           /* Regras da Tabela de Tipografia */
@@ -2689,6 +2690,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
           .hero-title-img-mobile { height: ${Math.round((parseInt(lp.hero_title_image_height || '140', 10) || 140) * 0.6)}px !important; }
           .hero-title-mobile, .hero-title-mobile * { font-size: ${getHeroMobileFontSize(lp.typography?.titulo_1?.font_size, DEFAULT_TYPOGRAPHY.titulo_1.font_size)} !important; }
           .hero-btn-mobile, .hero-btn-mobile * { font-size: ${getHeroBtnMobileFontSize(lp.typography?.texto_botao_1?.font_size, DEFAULT_TYPOGRAPHY.texto_botao_1.font_size)} !important; padding: 9px 20px !important; min-width: 150px !important; }
+          .copy-title-mobile, .copy-title-mobile *, .audience-title-mobile, .audience-title-mobile * { line-height: 1 !important; }
         }
       ` }} />
       
