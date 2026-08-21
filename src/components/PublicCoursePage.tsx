@@ -229,19 +229,19 @@ const Nav = ({ layout, item, lp, onEnrollClick, timeLeft }: NavProps) => {
               {Boolean(item?.em_breve || item?.configuracao_json?.em_breve || item?.status === 'em_breve' || lp?.cta_text?.toLowerCase().includes('breve') || lp?.cta_text?.toLowerCase().includes('cadastrar') || lp?.cta_text?.toLowerCase().includes('espera')) ? 'Em Breve' : (lp?.cta_text || 'Acesse agora')}
             </button>
 
-            {/* Ícone de 3 traços (Menu Hamburger) no Mobile */}
+            {/* Ícone de 3 traços (Menu Hamburger) no Mobile - sem caixa e na cor do botão de ação */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden p-2 text-white hover:opacity-80 transition-opacity flex flex-col justify-center gap-[5px] w-9 h-9 items-center rounded-lg bg-white/10 backdrop-blur-md border border-white/10"
+              className="lg:hidden p-1.5 hover:opacity-80 transition-opacity flex flex-col justify-center gap-[5px] w-8 h-8 items-center bg-transparent border-0 outline-none shadow-none focus:outline-none"
               aria-label="Abrir Menu"
             >
               {isMobileMenuOpen ? (
-                <X className="w-5 h-5 text-white" />
+                <X className="w-6 h-6 text-primary" style={lp?.nav_cta_color ? { color: lp.nav_cta_color } : undefined} />
               ) : (
                 <>
-                  <span className="w-5 h-[2px] bg-white rounded-full transition-all"></span>
-                  <span className="w-5 h-[2px] bg-white rounded-full transition-all"></span>
-                  <span className="w-5 h-[2px] bg-white rounded-full transition-all"></span>
+                  <span className="w-6 h-[2.5px] bg-primary rounded-full transition-all" style={lp?.nav_cta_color ? { backgroundColor: lp.nav_cta_color } : undefined}></span>
+                  <span className="w-6 h-[2.5px] bg-primary rounded-full transition-all" style={lp?.nav_cta_color ? { backgroundColor: lp.nav_cta_color } : undefined}></span>
+                  <span className="w-6 h-[2.5px] bg-primary rounded-full transition-all" style={lp?.nav_cta_color ? { backgroundColor: lp.nav_cta_color } : undefined}></span>
                 </>
               )}
             </button>
