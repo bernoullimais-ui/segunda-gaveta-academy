@@ -17,3 +17,12 @@
   --color-indigo-900: var(--brand-color-900, #312e81);
   --color-indigo-950: var(--brand-color-950, #1e1b4b);
 }
+
+html, body {
+  overflow-x: hidden !important;
+  max-width: 100vw !important;
+  width: 100% !important;
+  margin: 0;
+  padding: 0;
+  position: relative;
+}

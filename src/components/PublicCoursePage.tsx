@@ -93,7 +93,7 @@ const TopCountdownBar = ({ lp }: { lp: any }) => {
   const pad = (num: number) => num.toString().padStart(2, '0');
 
   return (
-    <div className="w-full bg-slate-950/95 py-[5px] px-4 shadow-md [transform:translateZ(0)]">
+    <div className="w-full max-w-[100vw] overflow-x-hidden bg-slate-950/95 py-[5px] px-4 shadow-md [transform:translateZ(0)]">
       <div className="max-w-7xl mx-auto flex items-center justify-center gap-3 sm:gap-6 text-white text-center">
         <span 
           className={`text-xs sm:text-sm font-semibold tracking-wide text-slate-200 ${lp?.countdown_text_style || ''}`}
@@ -149,7 +149,7 @@ const Nav = ({ layout, item, lp, onEnrollClick, timeLeft }: NavProps) => {
   }, [item]);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-[9999] w-full">
+    <header className="fixed top-0 left-0 right-0 z-[9999] w-full max-w-[100vw] overflow-x-hidden">
       {/* Top Countdown Bar - Isolated Component */}
       <TopCountdownBar lp={lp} />
 
@@ -2077,7 +2077,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
       </section>
     ) : null,
     faq: lp.faq?.length > 0 ? (
-      <section key="faq" id="faq" className="py-24 sm:py-32 bg-slate-950" style={getSectionStyle('faq')}>
+      <section key="faq" id="faq" className="py-24 sm:py-32 bg-slate-950 overflow-x-hidden w-full max-w-[100vw]" style={getSectionStyle('faq')}>
         <div className="max-w-[768px] mx-auto px-6 text-center space-y-10">
           <h2 
             className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white tracking-tight ${lp.faq_title_style || 'typo-title-1'}`}
@@ -2300,8 +2300,19 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
 
   if (layout === 'escuro') {
     return (
-      <div className="min-h-screen bg-slate-900 selection:bg-primary/30 selection:text-white font-sans text-slate-300">
+      <div className="min-h-screen bg-slate-900 selection:bg-primary/30 selection:text-white font-sans text-slate-300 overflow-x-hidden w-full max-w-[100vw] relative">
         <style dangerouslySetInnerHTML={{ __html: `
+          html, body {
+            overflow-x: hidden !important;
+            max-width: 100vw !important;
+            width: 100% !important;
+            margin: 0;
+            padding: 0;
+            position: relative;
+          }
+          * {
+            box-sizing: border-box;
+          }
           :root { 
             --primary: ${lp.primary_color || '#2563eb'};
             --primary-rgb: ${primaryRgb};
@@ -2615,8 +2626,19 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
 
   // --- BEGIN LIGHT LAYOUT (Original) ---
   return (
-    <div className="min-h-screen bg-white selection:bg-primary/20 selection:text-primary font-sans text-left">
+    <div className="min-h-screen bg-white selection:bg-primary/20 selection:text-primary font-sans text-left overflow-x-hidden w-full max-w-[100vw] relative">
       <style dangerouslySetInnerHTML={{ __html: `
+        html, body {
+          overflow-x: hidden !important;
+          max-width: 100vw !important;
+          width: 100% !important;
+          margin: 0;
+          padding: 0;
+          position: relative;
+        }
+        * {
+          box-sizing: border-box;
+        }
         :root { 
           --primary: ${lp.primary_color || '#2563eb'};
           --primary-rgb: ${primaryRgb};
