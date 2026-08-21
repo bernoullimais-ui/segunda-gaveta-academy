@@ -2677,6 +2677,18 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
           .hero-no-mobile-transform {
             transform: none !important;
           }
+          .hero-title-img-mobile { height: ${Math.round((parseInt(lp.hero_title_image_height || '140', 10) || 140) * 0.4)}px !important; }
+          .hero-title-mobile { font-size: ${getHeroMobileFontSize(lp.typography?.titulo_1?.font_size, DEFAULT_TYPOGRAPHY.titulo_1.font_size)} !important; }
+          .hero-btn-mobile { font-size: ${getHeroBtnMobileFontSize(lp.typography?.texto_botao_1?.font_size, DEFAULT_TYPOGRAPHY.texto_botao_1.font_size)} !important; padding: 9px 20px !important; min-width: 150px !important; }
+          .typo-title-1 { font-size: ${getMobileFontSize(lp.typography?.titulo_1?.font_size, DEFAULT_TYPOGRAPHY.titulo_1.font_size)} !important; }
+          .typo-title-2 { font-size: ${getMobileFontSize(lp.typography?.titulo_2?.font_size, DEFAULT_TYPOGRAPHY.titulo_2.font_size)} !important; }
+          .typo-title-3 { font-size: ${getMobileFontSize(lp.typography?.titulo_3?.font_size, DEFAULT_TYPOGRAPHY.titulo_3.font_size)} !important; }
+          .typo-body-1 { font-size: ${getMobileFontSize(lp.typography?.texto_corrido_1?.font_size, DEFAULT_TYPOGRAPHY.texto_corrido_1.font_size)} !important; }
+          .typo-body-2 { font-size: ${getMobileFontSize(lp.typography?.texto_corrido_2?.font_size, DEFAULT_TYPOGRAPHY.texto_corrido_2.font_size)} !important; }
+          .typo-body-3 { font-size: ${getMobileFontSize(lp.typography?.texto_corrido_3?.font_size, DEFAULT_TYPOGRAPHY.texto_corrido_3.font_size)} !important; }
+          .typo-body-4 { font-size: ${getMobileFontSize(lp.typography?.texto_corrido_4?.font_size, DEFAULT_TYPOGRAPHY.texto_corrido_4.font_size)} !important; }
+          .typo-btn-1 { font-size: ${getMobileFontSize(lp.typography?.texto_botao_1?.font_size, DEFAULT_TYPOGRAPHY.texto_botao_1.font_size)} !important; }
+          .typo-btn-2 { font-size: ${getMobileFontSize(lp.typography?.texto_botao_2?.font_size, DEFAULT_TYPOGRAPHY.texto_botao_2.font_size)} !important; }
         }
       ` }} />
       
