@@ -2533,12 +2533,12 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                     )}
                   </div>
 
-                  {/* CTA Button & Instructor By Label (Desktop display / Optional on Mobile if CTA button disabled or enabled) */}
-                  <div className="w-full hidden lg:flex flex-col items-center justify-center text-center gap-3 pt-4 hero-no-mobile-transform">
+                  {/* CTA Button & Instructor By Label */}
+                  <div className="w-full flex flex-col items-center justify-center text-center gap-2 sm:gap-3 pt-2 sm:pt-4 hero-no-mobile-transform">
                     <div className="w-full flex items-center justify-center text-center">
                       <button 
                         onClick={handleEnrollClick}
-                        className="typo-btn typo-btn-1 px-8 sm:px-12 py-4 sm:py-5 bg-primary text-white rounded-2xl font-serif italic text-lg sm:text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_15px_40px_rgba(var(--primary-rgb),0.4)] flex items-center justify-center min-w-[240px] mx-auto text-center"
+                        className="typo-btn typo-btn-1 px-6 sm:px-12 py-3 sm:py-5 bg-primary text-white rounded-2xl font-serif italic text-sm sm:text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_15px_40px_rgba(var(--primary-rgb),0.4)] flex items-center justify-center min-w-[180px] sm:min-w-[240px] mx-auto text-center"
                       >
                         {isEmBreve ? 'Cadastrar-se' : (lp.cta_text || 'Descubra o segredo')}
                       </button>
@@ -2546,7 +2546,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                     
                     {(lp.instructor?.name || item.professor_nome) && (
                       <div className="w-full flex items-center justify-center text-center">
-                        <span className="text-xs sm:text-sm text-primary font-serif italic tracking-wide font-bold mt-[10px] text-center mx-auto block">
+                        <span className="text-xs sm:text-sm text-primary font-serif italic tracking-wide font-bold mt-1 sm:mt-[10px] text-center mx-auto block">
                           By <FormattedTitle content={lp.instructor?.name || item.professor_nome} />
                         </span>
                       </div>
