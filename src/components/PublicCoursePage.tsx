@@ -1161,7 +1161,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
   };
 
   const getSectionStyle = (sectionKey: string, defaultStyle: React.CSSProperties = {}) => {
-    const bgColor = lp[`section_${sectionKey}_bg_color`];
+    const bgColor = sectionKey === 'hero' ? (lp.section_hero_bg_color || lp.section_about_bg_color) : lp[`section_${sectionKey}_bg_color`];
     const bgImage = lp[`section_${sectionKey}_bg_image`];
     
     let style: React.CSSProperties = { ...defaultStyle };
@@ -2491,7 +2491,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
 
         {/* Dark Hero Section - Full-bleed background banner layout */}
         {isSectionVisible('hero') && (
-          <section ref={heroRef} className="relative h-[calc(100dvh+50px)] lg:min-h-[92vh] flex flex-col justify-end lg:justify-center overflow-hidden bg-slate-950 text-left" style={getSectionStyle('hero')}>
+          <section ref={heroRef} className="relative h-[calc(100dvh+50px)] lg:min-h-[92vh] flex flex-col justify-end lg:justify-center overflow-hidden bg-slate-900 text-left" style={getSectionStyle('hero')}>
             {/* Full Bleed Background Image */}
             <div className="absolute inset-0 bottom-[50px] lg:bottom-0 w-full overflow-hidden pointer-events-none">
               <img 
