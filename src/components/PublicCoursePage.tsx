@@ -2285,7 +2285,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
     const num = parseFloat(valStr);
     if (isNaN(num)) return valStr;
     const unit = valStr.replace(/[0-9.]/g, '') || 'px';
-    const mobileNum = Math.round(num * 0.6 * 10) / 10;
+    const mobileNum = Math.round(num * 0.4 * 10) / 10;
     return `${mobileNum}${unit}`;
   };
 
