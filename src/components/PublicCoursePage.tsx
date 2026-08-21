@@ -2285,7 +2285,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
     const num = parseFloat(valStr);
     if (isNaN(num)) return valStr;
     const unit = valStr.replace(/[0-9.]/g, '') || 'px';
-    const mobileNum = Math.round(num * 0.4 * 10) / 10;
+    const mobileNum = Math.round(num * 0.6 * 10) / 10;
     return `${mobileNum}${unit}`;
   };
 
@@ -2294,7 +2294,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
     const num = parseFloat(valStr);
     if (isNaN(num)) return valStr;
     const unit = valStr.replace(/[0-9.]/g, '') || 'px';
-    const mobileNum = Math.round(num * 0.4 * 10) / 10;
+    const mobileNum = Math.round(num * 0.6 * 10) / 10;
     return `${mobileNum}${unit}`;
   };
 
@@ -2359,14 +2359,9 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             .typo-body-4, .typo-body-4 *, .typo-body-4 p { font-size: ${getMobileFontSize(lp.typography?.texto_corrido_4?.font_size, DEFAULT_TYPOGRAPHY.texto_corrido_4.font_size)} !important; }
             .typo-btn-1, .typo-btn-1 * { font-size: ${getMobileFontSize(lp.typography?.texto_botao_1?.font_size, DEFAULT_TYPOGRAPHY.texto_botao_1.font_size)} !important; }
             .typo-btn-2, .typo-btn-2 * { font-size: ${getMobileFontSize(lp.typography?.texto_botao_2?.font_size, DEFAULT_TYPOGRAPHY.texto_botao_2.font_size)} !important; }
-            .hero-title-img-mobile { height: ${Math.round((parseInt(lp.hero_title_image_height || '140', 10) || 140) * 0.4)}px !important; }
+            .hero-title-img-mobile { height: ${Math.round((parseInt(lp.hero_title_image_height || '140', 10) || 140) * 0.6)}px !important; }
             .hero-title-mobile, .hero-title-mobile * { font-size: ${getHeroMobileFontSize(lp.typography?.titulo_1?.font_size, DEFAULT_TYPOGRAPHY.titulo_1.font_size)} !important; }
             .hero-btn-mobile, .hero-btn-mobile * { font-size: ${getHeroBtnMobileFontSize(lp.typography?.texto_botao_1?.font_size, DEFAULT_TYPOGRAPHY.texto_botao_1.font_size)} !important; padding: 9px 20px !important; min-width: 150px !important; }
-
-            /* Regras de sobreposição específicas (vem por último para garantir prioridade) */
-            h2.about-title-mobile, .about-title-mobile, .about-title-mobile * { font-size: 20px !important; line-height: 1.25 !important; }
-            .about-text-mobile, .about-text-mobile p, .about-text-mobile * { font-size: 16px !important; line-height: 1.55 !important; }
-            .copy-title-mobile, .copy-title-mobile * { font-size: 24px !important; line-height: 1.25 !important; }
           }
 
           /* Regras da Tabela de Tipografia */
@@ -2691,14 +2686,9 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
           .typo-body-4, .typo-body-4 *, .typo-body-4 p { font-size: ${getMobileFontSize(lp.typography?.texto_corrido_4?.font_size, DEFAULT_TYPOGRAPHY.texto_corrido_4.font_size)} !important; }
           .typo-btn-1, .typo-btn-1 * { font-size: ${getMobileFontSize(lp.typography?.texto_botao_1?.font_size, DEFAULT_TYPOGRAPHY.texto_botao_1.font_size)} !important; }
           .typo-btn-2, .typo-btn-2 * { font-size: ${getMobileFontSize(lp.typography?.texto_botao_2?.font_size, DEFAULT_TYPOGRAPHY.texto_botao_2.font_size)} !important; }
-          .hero-title-img-mobile { height: ${Math.round((parseInt(lp.hero_title_image_height || '140', 10) || 140) * 0.4)}px !important; }
+          .hero-title-img-mobile { height: ${Math.round((parseInt(lp.hero_title_image_height || '140', 10) || 140) * 0.6)}px !important; }
           .hero-title-mobile, .hero-title-mobile * { font-size: ${getHeroMobileFontSize(lp.typography?.titulo_1?.font_size, DEFAULT_TYPOGRAPHY.titulo_1.font_size)} !important; }
           .hero-btn-mobile, .hero-btn-mobile * { font-size: ${getHeroBtnMobileFontSize(lp.typography?.texto_botao_1?.font_size, DEFAULT_TYPOGRAPHY.texto_botao_1.font_size)} !important; padding: 9px 20px !important; min-width: 150px !important; }
-
-          /* Regras de sobreposição específicas (vem por último para garantir prioridade) */
-          h2.about-title-mobile, .about-title-mobile, .about-title-mobile * { font-size: 20px !important; line-height: 1.25 !important; }
-          .about-text-mobile, .about-text-mobile p, .about-text-mobile * { font-size: 16px !important; line-height: 1.55 !important; }
-          .copy-title-mobile, .copy-title-mobile * { font-size: 24px !important; line-height: 1.25 !important; }
         }
       ` }} />
       
