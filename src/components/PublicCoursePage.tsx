@@ -2294,7 +2294,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
     const num = parseFloat(valStr);
     if (isNaN(num)) return valStr;
     const unit = valStr.replace(/[0-9.]/g, '') || 'px';
-    const mobileNum = Math.round(num * 0.7 * 10) / 10;
+    const mobileNum = Math.round(num * 0.5 * 10) / 10;
     return `${mobileNum}${unit}`;
   };
 
@@ -2330,7 +2330,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             .hero-no-mobile-transform {
               transform: none !important;
             }
-            .hero-title-img-mobile { height: ${Math.round((parseInt(lp.hero_title_image_height || '140', 10) || 140) * 0.7)}px !important; }
+            .hero-title-img-mobile { height: ${Math.round((parseInt(lp.hero_title_image_height || '140', 10) || 140) * 0.5)}px !important; }
             .hero-title-mobile { font-size: ${getHeroMobileFontSize(lp.typography?.titulo_1?.font_size, DEFAULT_TYPOGRAPHY.titulo_1.font_size)} !important; }
             .typo-title-1 { font-size: ${getMobileFontSize(lp.typography?.titulo_1?.font_size, DEFAULT_TYPOGRAPHY.titulo_1.font_size)} !important; }
             .typo-title-2 { font-size: ${getMobileFontSize(lp.typography?.titulo_2?.font_size, DEFAULT_TYPOGRAPHY.titulo_2.font_size)} !important; }
