@@ -1763,10 +1763,10 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
     about: (
       <section key="about" id="sobre" className="relative w-full overflow-hidden bg-slate-900 text-left [transform:translateZ(0)] [backface-visibility:hidden] antialiased" style={getSectionStyle('about')}>
         <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[550px] lg:min-h-[650px] w-full items-stretch">
-          <div className="p-8 sm:p-12 lg:p-20 xl:p-24 flex flex-col justify-center text-left space-y-6 sm:space-y-8 max-w-[672px] mx-auto w-full [transform:translateZ(0)] [backface-visibility:hidden] antialiased">
+          <div className="p-6 sm:p-12 lg:p-20 xl:p-24 flex flex-col justify-center text-left space-y-5 sm:space-y-8 max-w-[672px] mx-auto w-full [transform:translateZ(0)] [backface-visibility:hidden] antialiased">
             <div className="space-y-3 max-w-[768px]">
               <h2 
-                className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-[1.15] tracking-tight [transform:translateZ(0)] [backface-visibility:hidden] antialiased ${lp.about_title_style || DEFAULT_SECTION_STYLES.about_title_style}`}
+                className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white leading-[1.15] tracking-tight about-title-mobile [transform:translateZ(0)] [backface-visibility:hidden] antialiased ${lp.about_title_style || DEFAULT_SECTION_STYLES.about_title_style}`}
                 style={lp.about_title_color ? { color: lp.about_title_color } : undefined}
               >
                 <FormattedTitle content={lp.about_title || item.nome} />
@@ -1774,7 +1774,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             </div>
 
             <div 
-              className={`text-base sm:text-lg lg:text-xl text-slate-300/90 leading-relaxed font-sans max-w-2xl [transform:translateZ(0)] [backface-visibility:hidden] antialiased ${lp.about_text_style || 'typo-body-1'}`}
+              className={`text-base sm:text-lg lg:text-xl text-slate-300/90 leading-relaxed font-sans max-w-2xl about-text-mobile [transform:translateZ(0)] [backface-visibility:hidden] antialiased ${lp.about_text_style || 'typo-body-1'}`}
               style={lp.about_text_color ? { color: lp.about_text_color } : undefined}
             >
               <ReactMarkdown remarkPlugins={[remarkGfm]}>
@@ -1782,9 +1782,9 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
               </ReactMarkdown>
             </div>
 
-            {/* Faixa de Informações Rápidas (centralizada horizontalmente na coluna à esquerda em linha única no desktop) */}
-            <div className="pt-2 sm:pt-4 w-full flex justify-center">
-              <div className="flex flex-wrap lg:flex-nowrap items-center justify-center gap-2 sm:gap-2.5 w-full overflow-x-auto lg:overflow-x-visible pb-1 lg:pb-0">
+            {/* Faixa de Informações Rápidas em Pílulas (responsivo 2 colunas no mobile) */}
+            <div className="pt-2 sm:pt-4 w-full flex justify-start sm:justify-center">
+              <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 sm:gap-2.5 w-full">
                 {(isTrilha ? [
                   { icon: BookOpen, text: `${cursosTrilha.length} Cursos` },
                   { icon: Clock, text: `${item.carga_horaria || '04'} horas de conteúdo` },
@@ -1797,15 +1797,15 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                   { icon: Calendar, text: item.tempo === 'com_limite' ? `Acesso por ${item.duracao || ''} ${item.duracao_tipo || 'meses'}` : 'Acesso vitalício' },
                   ...(item.tem_certificado ? [{ icon: Award, text: 'Certificado Incluso' }] : [])
                 ]).map((stat, i) => {
-                  const copySectionBgColor = lp.section_copy_bg_color || '#0f172a';
+                  const badgeColor = lp.primary_color || lp.section_copy_bg_color || '#ec4899';
                   return (
                     <div 
                       key={i} 
-                      className="px-3 sm:px-3.5 py-2 rounded-xl border bg-transparent flex items-center gap-2 transition-colors shadow-sm shrink-0 lg:shrink [transform:translateZ(0)] [backface-visibility:hidden]"
-                      style={{ borderColor: copySectionBgColor, color: copySectionBgColor }}
+                      className="px-3 py-2 rounded-[14px] border border-primary/40 bg-primary/10 flex items-center justify-start gap-2 transition-colors shadow-sm shrink-0 [transform:translateZ(0)] [backface-visibility:hidden]"
+                      style={{ borderColor: `${badgeColor}66`, color: badgeColor }}
                     >
-                      <stat.icon className="w-4 h-4 shrink-0" style={{ color: copySectionBgColor }} />
-                      <span className="text-xs sm:text-sm font-semibold tracking-tight whitespace-nowrap" style={{ color: copySectionBgColor }}>{stat.text}</span>
+                      <stat.icon className="w-4 h-4 shrink-0" style={{ color: badgeColor }} />
+                      <span className="text-xs sm:text-sm font-semibold tracking-tight whitespace-nowrap" style={{ color: badgeColor }}>{stat.text}</span>
                     </div>
                   );
                 })}
@@ -2350,6 +2350,8 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             .hero-no-mobile-transform {
               transform: none !important;
             }
+            .about-title-mobile { font-size: 32px !important; line-height: 1.15 !important; }
+            .about-text-mobile { font-size: 16px !important; line-height: 1.55 !important; }
             .hero-title-img-mobile { height: ${Math.round((parseInt(lp.hero_title_image_height || '140', 10) || 140) * 0.4)}px !important; }
             .hero-title-mobile { font-size: ${getHeroMobileFontSize(lp.typography?.titulo_1?.font_size, DEFAULT_TYPOGRAPHY.titulo_1.font_size)} !important; }
             .hero-btn-mobile { font-size: ${getHeroBtnMobileFontSize(lp.typography?.texto_botao_1?.font_size, DEFAULT_TYPOGRAPHY.texto_botao_1.font_size)} !important; padding: 9px 20px !important; min-width: 150px !important; }
@@ -2677,6 +2679,8 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
           .hero-no-mobile-transform {
             transform: none !important;
           }
+          .about-title-mobile { font-size: 32px !important; line-height: 1.15 !important; }
+          .about-text-mobile { font-size: 16px !important; line-height: 1.55 !important; }
           .hero-title-img-mobile { height: ${Math.round((parseInt(lp.hero_title_image_height || '140', 10) || 140) * 0.4)}px !important; }
           .hero-title-mobile { font-size: ${getHeroMobileFontSize(lp.typography?.titulo_1?.font_size, DEFAULT_TYPOGRAPHY.titulo_1.font_size)} !important; }
           .hero-btn-mobile { font-size: ${getHeroBtnMobileFontSize(lp.typography?.texto_botao_1?.font_size, DEFAULT_TYPOGRAPHY.texto_botao_1.font_size)} !important; padding: 9px 20px !important; min-width: 150px !important; }
