@@ -115,14 +115,6 @@ const TopCountdownBar = ({ lp }: { lp: any }) => {
   );
 };
 
-interface NavProps {
-  layout: 'escuro' | 'claro';
-  item: any;
-  lp?: any;
-  onEnrollClick: () => void;
-  timeLeft?: { days: number; hours: number; minutes: number; seconds: number } | null;
-}
-
 const Nav = ({ layout, item, lp, onEnrollClick, timeLeft }: NavProps) => {
   const [loggedIn, setLoggedIn] = React.useState(false);
   const [orgSlug, setOrgSlug] = React.useState('');
@@ -1593,7 +1585,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             body: JSON.stringify({
               name: enrollData.nome,
               email: enrollData.email,
-              phone: (enrollData as any).telefone || '',
+              phone: enrollData.telefone,
               itemType: isTrilha ? 'trilha' : 'curso',
               itemId: item.id,
               itemName: item.nome,
@@ -2500,25 +2492,19 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
           </div>
         )}
 
-        {/* Dark Hero Section - Full-bleed background banner layout matching Figma mobile design */}
+        {/* Dark Hero Section - Full-bleed background banner layout */}
         {isSectionVisible('hero') && (
-          <section ref={heroRef} className="relative min-h-[100dvh] lg:min-h-[92vh] flex flex-col justify-end lg:justify-center overflow-hidden text-left" style={{ backgroundColor: lp.section_hero_bg_color || lp.section_about_bg_color || '#3d0c1e', ...getSectionStyle('hero') }}>
-            {/* Full Bleed Background Image with Smooth Gradient Overlay */}
-            <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none z-0">
+          <section ref={heroRef} className="relative h-[calc(100dvh+50px)] lg:min-h-[92vh] flex flex-col justify-end lg:justify-center overflow-hidden bg-slate-900 text-left" style={getSectionStyle('hero')}>
+            {/* Full Bleed Background Image */}
+            <div className="absolute inset-0 bottom-[50px] lg:bottom-0 w-full overflow-hidden pointer-events-none">
               <img 
                 src={lp.hero_image_url || item.capa_url || item.thumbnail_url || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070'} 
                 alt="Banner Principal"
-                className="w-full h-full object-cover object-[center_top] lg:object-center opacity-100 filter-none"
-              />
-              <div 
-                className="absolute inset-0 pointer-events-none"
-                style={{
-                  background: `linear-gradient(to top, ${lp.section_hero_bg_color || lp.section_about_bg_color || '#3d0c1e'} 0%, ${lp.section_hero_bg_color || lp.section_about_bg_color || '#3d0c1e'}e6 35%, ${lp.section_hero_bg_color || lp.section_about_bg_color || '#3d0c1e'}66 65%, transparent 100%)`
-                }}
+                className="w-full h-full object-cover object-[20.83%_top] lg:object-center opacity-100 filter-none"
               />
             </div>
             
-            <div className="max-w-7xl mx-auto px-6 sm:px-8 relative z-10 w-full min-h-0 lg:min-h-[85vh] flex flex-col justify-end lg:justify-center pb-10 lg:pb-0 pt-28 lg:pt-0">
+            <div className="max-w-7xl mx-auto px-6 sm:px-8 relative z-10 w-full min-h-0 lg:min-h-[85vh] flex flex-col justify-end lg:justify-center pb-[2px] lg:pb-0">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full items-center lg:my-auto">
                 {/* Left Column (50% equal width on desktop) */}
                 <div className="hidden lg:block col-span-1"></div>
@@ -2554,7 +2540,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                         </h1>
 
                         {/* Decorative Divider Line with Diamond/Sparkle Accent */}
-                        <div className="w-full flex items-center justify-center gap-3 sm:gap-4 py-1 sm:py-2 opacity-90 max-w-xs sm:max-w-lg mb-3 lg:mb-6 mx-auto">
+                        <div className="w-full flex items-center justify-center gap-3 sm:gap-4 py-1 sm:py-2 opacity-80 max-w-xs sm:max-w-lg mb-3 lg:mb-6 mx-auto">
                           <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-white/50 to-transparent"></div>
                           <span className="text-primary text-xs sm:text-base tracking-widest">✦</span>
                           <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-white/50 to-transparent"></div>
@@ -2575,9 +2561,9 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                     <div className="w-full flex items-center justify-center text-center">
                       <button 
                         onClick={handleEnrollClick}
-                        className="typo-btn typo-btn-1 hero-btn-mobile px-8 sm:px-12 py-3.5 sm:py-5 bg-primary text-white rounded-full sm:rounded-2xl font-serif italic text-base sm:text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_15px_40px_rgba(var(--primary-rgb),0.4)] flex items-center justify-center min-w-[200px] sm:min-w-[240px] mx-auto text-center"
+                        className="typo-btn typo-btn-1 hero-btn-mobile px-6 sm:px-12 py-3 sm:py-5 bg-primary text-white rounded-2xl font-serif italic text-sm sm:text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_15px_40px_rgba(var(--primary-rgb),0.4)] flex items-center justify-center min-w-[180px] sm:min-w-[240px] mx-auto text-center"
                       >
-                        {isEmBreve ? 'Cadastrar-se' : (lp.cta_text || 'Acesse o guia')}
+                        {isEmBreve ? 'Cadastrar-se' : (lp.cta_text || 'Descubra o segredo')}
                       </button>
                     </div>
                     
@@ -2848,34 +2834,26 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
         </section>
 
       {/* Info bar */}
-      {(() => {
-        const totalModulos = item?.curriculo_json?.length || 0;
-        const totalAulas = item?.curriculo_json?.reduce((acc: number, secao: any) => acc + (secao.etapas?.length || 0), 0) || 0;
-        const totalDuracao = item?.carga_horaria || '04';
-        const formatDuration = (d: any) => `${d}h`;
-        return (
-          <section className="bg-slate-900 py-10 shadow-xl relative z-10" style={getSectionStyle('info')}>
-            <div className="max-w-6xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-              <div className="flex flex-col items-center">
-                <span className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Módulos</span>
-                <span className="text-2xl font-extrabold text-white">{totalModulos} Módulos</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <span className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1 font-medium">Aulas</span>
-                <span className="text-2xl font-extrabold text-white">{totalAulas} Aulas</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <span className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1 font-medium">Duração</span>
-                <span className="text-2xl font-extrabold text-white">{formatDuration(totalDuracao)}</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <span className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1 font-medium">Acesso</span>
-                <span className="text-2xl font-extrabold text-white">Vitalício</span>
-              </div>
-            </div>
-          </section>
-        );
-      })()}
+      <section className="bg-slate-900 py-10 shadow-xl relative z-10" style={getSectionStyle('info')}>
+        <div className="max-w-6xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          <div className="flex flex-col items-center">
+            <span className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Módulos</span>
+            <span className="text-2xl font-extrabold text-white">{totalModulos} Módulos</span>
+          </div>
+          <div className="flex flex-col items-center">
+            <span className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1 font-medium">Aulas</span>
+            <span className="text-2xl font-extrabold text-white">{totalAulas} Aulas</span>
+          </div>
+          <div className="flex flex-col items-center">
+            <span className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1 font-medium">Duração</span>
+            <span className="text-2xl font-extrabold text-white">{formatDuration(totalDuracao)}</span>
+          </div>
+          <div className="flex flex-col items-center">
+            <span className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1 font-medium">Acesso</span>
+            <span className="text-2xl font-extrabold text-white">Vitalício</span>
+          </div>
+        </div>
+      </section>
 
       {/* About Section */}
       <section id="sobre" className="py-24 bg-white" style={getSectionStyle('about')}>
