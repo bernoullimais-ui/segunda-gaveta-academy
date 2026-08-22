@@ -2520,13 +2520,10 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             </div>
             
             <div className="max-w-7xl mx-auto px-6 sm:px-8 relative z-10 w-full min-h-0 lg:min-h-[85vh] flex flex-col justify-end lg:justify-center pb-[2px] lg:pb-0">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full items-center lg:my-auto">
-                {/* Left Column (50% equal width on desktop) */}
-                <div className="hidden lg:block col-span-1"></div>
-
-                {/* Right Column (50% equal width on desktop) - Content centered horizontally & vertically */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-8 w-full items-center lg:my-auto">
+                {/* Hero Block (Title, Subtitle, Divider, Button, Signature) - Centered horizontally in columns 2, 3, 4 */}
                 <div 
-                  className="col-span-1 w-full flex flex-col items-center justify-center text-center space-y-4 sm:space-y-6 lg:space-y-8 translate-y-[30px] lg:translate-y-0"
+                  className="col-span-1 lg:col-start-2 lg:col-span-3 w-full flex flex-col items-center justify-center text-center space-y-4 sm:space-y-6 lg:space-y-8 translate-y-[30px] lg:translate-y-0"
                   style={{ 
                     transform: (lp.hero_block_offset_x || lp.hero_block_offset_y || lp.hero_title_offset_x || lp.hero_title_offset_y) 
                       ? `translate3d(${lp.hero_block_offset_x ?? lp.hero_title_offset_x ?? 0}px, ${(lp.hero_block_offset_y ?? lp.hero_title_offset_y ?? 0) + (isMobileScreen ? 30 : 0)}px, 0)` 
