@@ -2510,9 +2510,9 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                 alt="Banner Principal"
                 className="w-full h-full object-cover object-[20.83%_top] lg:object-center opacity-100 filter-none"
               />
-              {/* Figma Gradient Overlay (Node 39:689 - Rectangle 4) */}
+              {/* Figma Gradient Overlay (Node 39:689 - Rectangle 4) - Somente no Mobile */}
               <div 
-                className="absolute inset-0 pointer-events-none"
+                className="absolute inset-0 pointer-events-none lg:hidden"
                 style={{
                   background: `linear-gradient(to bottom, transparent 0%, transparent 24%, ${lp.section_hero_bg_color || lp.section_about_bg_color || '#490e1f'} 60%, ${lp.section_hero_bg_color || lp.section_about_bg_color || '#490e1f'} 100%)`
                 }}
