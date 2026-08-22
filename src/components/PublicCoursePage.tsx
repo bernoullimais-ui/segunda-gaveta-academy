@@ -2576,23 +2576,6 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                       </div>
                     )}
                   </div>
-
-                  {/* 3. Divisor Ornamental & Subtítulo */}
-                  <div className="w-full flex flex-col items-center justify-center text-center space-y-3 mt-[24px]">
-                    {/* Decorative Divider Line with Diamond/Sparkle Accent */}
-                    <div className="w-full flex items-center justify-center gap-3 sm:gap-4 py-1 opacity-90 max-w-xs sm:max-w-lg mx-auto">
-                      <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-white/50 to-transparent"></div>
-                      <span className="text-primary text-xs sm:text-base tracking-widest">✦</span>
-                      <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-white/50 to-transparent"></div>
-                    </div>
-
-                    {/* Tagline / Subtitle / Secondary Description */}
-                    {(lp.hero_subtitle || item.descricao) && (
-                      <p className="text-lg sm:text-2xl lg:text-3xl font-serif italic text-slate-200/95 leading-snug max-w-sm sm:max-w-2xl typo-subtitle typo-body-1 text-center mx-auto">
-                        <FormattedTitle content={lp.hero_subtitle || item.descricao} />
-                      </p>
-                    )}
-                  </div>
                 </div>
               </div>
             </div>
