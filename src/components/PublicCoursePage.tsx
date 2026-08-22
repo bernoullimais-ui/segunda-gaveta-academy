@@ -2370,7 +2370,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             .typo-body-4, .typo-body-4 *, .typo-body-4 p { font-size: ${getMobileFontSize(lp.typography?.texto_corrido_4?.font_size, DEFAULT_TYPOGRAPHY.texto_corrido_4.font_size)} !important; }
             .typo-btn-1, .typo-btn-1 * { font-size: ${getMobileFontSize(lp.typography?.texto_botao_1?.font_size, DEFAULT_TYPOGRAPHY.texto_botao_1.font_size)} !important; }
             .typo-btn-2, .typo-btn-2 * { font-size: ${getMobileFontSize(lp.typography?.texto_botao_2?.font_size, DEFAULT_TYPOGRAPHY.texto_botao_2.font_size)} !important; }
-            .hero-title-img-mobile { height: ${Math.round((parseInt(lp.hero_title_image_height || '140', 10) || 140) * 0.6)}px !important; }
+            .hero-title-img-mobile { max-height: ${Math.round((parseInt(lp.hero_title_image_height || '140', 10) || 140) * 0.6)}px !important; height: auto !important; }
             .hero-title-mobile, .hero-title-mobile * { font-size: ${getHeroMobileFontSize(lp.typography?.titulo_1?.font_size, DEFAULT_TYPOGRAPHY.titulo_1.font_size)} !important; }
             .hero-btn-mobile, .hero-btn-mobile * { font-size: ${getHeroBtnMobileFontSize(lp.typography?.texto_botao_1?.font_size, DEFAULT_TYPOGRAPHY.texto_botao_1.font_size)} !important; padding: 9px 20px !important; min-width: 150px !important; }
             .typo-title-1, .typo-title-1 *, .typo-title-2, .typo-title-2 *, .typo-title-3, .typo-title-3 *, .hero-title-mobile, .hero-title-mobile *, .about-title-mobile, .about-title-mobile *, .copy-title-mobile, .copy-title-mobile *, .audience-title-mobile, .audience-title-mobile * { line-height: 1 !important; }
@@ -2689,7 +2689,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
           .typo-body-4, .typo-body-4 *, .typo-body-4 p { font-size: ${getMobileFontSize(lp.typography?.texto_corrido_4?.font_size, DEFAULT_TYPOGRAPHY.texto_corrido_4.font_size)} !important; }
           .typo-btn-1, .typo-btn-1 * { font-size: ${getMobileFontSize(lp.typography?.texto_botao_1?.font_size, DEFAULT_TYPOGRAPHY.texto_botao_1.font_size)} !important; }
           .typo-btn-2, .typo-btn-2 * { font-size: ${getMobileFontSize(lp.typography?.texto_botao_2?.font_size, DEFAULT_TYPOGRAPHY.texto_botao_2.font_size)} !important; }
-          .hero-title-img-mobile { height: ${Math.round((parseInt(lp.hero_title_image_height || '140', 10) || 140) * 0.6)}px !important; }
+          .hero-title-img-mobile { max-height: ${Math.round((parseInt(lp.hero_title_image_height || '140', 10) || 140) * 0.6)}px !important; height: auto !important; }
           .hero-title-mobile, .hero-title-mobile * { font-size: ${getHeroMobileFontSize(lp.typography?.titulo_1?.font_size, DEFAULT_TYPOGRAPHY.titulo_1.font_size)} !important; }
           .hero-btn-mobile, .hero-btn-mobile * { font-size: ${getHeroBtnMobileFontSize(lp.typography?.texto_botao_1?.font_size, DEFAULT_TYPOGRAPHY.texto_botao_1.font_size)} !important; padding: 9px 20px !important; min-width: 150px !important; }
           .typo-title-1, .typo-title-1 *, .typo-title-2, .typo-title-2 *, .typo-title-3, .typo-title-3 *, .hero-title-mobile, .hero-title-mobile *, .about-title-mobile, .about-title-mobile *, .copy-title-mobile, .copy-title-mobile *, .audience-title-mobile, .audience-title-mobile * { line-height: 1 !important; }
