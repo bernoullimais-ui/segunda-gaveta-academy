@@ -2524,13 +2524,15 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                 {/* Left Column (50% equal width on desktop) */}
                 <div className="hidden lg:block col-span-1"></div>
 
-                {/* Content Block - Centered on mobile, 50% right column on desktop */}
+                {/* Content Block - 100% Centered on mobile, 50% right column on desktop */}
                 <div 
-                  className="col-span-1 w-full flex flex-col items-center justify-center text-center space-y-4 sm:space-y-6 lg:space-y-8 translate-y-[30px] lg:translate-y-0"
+                  className="col-span-1 w-full flex flex-col items-center justify-center text-center space-y-4 sm:space-y-6 lg:space-y-8 translate-y-[30px] lg:translate-y-0 mx-auto max-w-sm sm:max-w-xl lg:max-w-none"
                   style={{ 
-                    transform: (lp.hero_block_offset_x || lp.hero_block_offset_y || lp.hero_title_offset_x || lp.hero_title_offset_y) 
-                      ? `translate3d(${lp.hero_block_offset_x ?? lp.hero_title_offset_x ?? 0}px, ${(lp.hero_block_offset_y ?? lp.hero_title_offset_y ?? 0) + (isMobileScreen ? 30 : 0)}px, 0)` 
-                      : undefined 
+                    transform: isMobileScreen 
+                      ? undefined 
+                      : (lp.hero_block_offset_x || lp.hero_block_offset_y || lp.hero_title_offset_x || lp.hero_title_offset_y) 
+                        ? `translate3d(${lp.hero_block_offset_x ?? lp.hero_title_offset_x ?? 0}px, ${lp.hero_block_offset_y ?? lp.hero_title_offset_y ?? 0}px, 0)` 
+                        : undefined 
                   }}
                 >
                   {/* Title or Title Image */}
@@ -2555,7 +2557,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                         </h1>
 
                         {/* Decorative Divider Line with Diamond/Sparkle Accent */}
-                        <div className="w-full flex items-center justify-center gap-3 sm:gap-4 py-1 sm:py-2 opacity-80 max-w-xs sm:max-w-lg mb-3 lg:mb-6 mx-auto">
+                        <div className="w-full flex items-center justify-center gap-3 sm:gap-4 py-1 sm:py-2 opacity-90 max-w-xs sm:max-w-lg mb-3 lg:mb-6 mx-auto">
                           <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-white/50 to-transparent"></div>
                           <span className="text-primary text-xs sm:text-base tracking-widest">✦</span>
                           <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-white/50 to-transparent"></div>
@@ -2572,13 +2574,13 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                   </div>
 
                   {/* CTA Button & Instructor By Label */}
-                  <div className="w-full flex flex-col items-center justify-center text-center gap-2 sm:gap-3 pt-2 sm:pt-4 hero-no-mobile-transform">
+                  <div className="w-full flex flex-col items-center justify-center text-center gap-2 sm:gap-3 pt-2 sm:pt-4">
                     <div className="w-full flex items-center justify-center text-center">
                       <button 
                         onClick={handleEnrollClick}
-                        className="typo-btn typo-btn-1 hero-btn-mobile px-6 sm:px-12 py-3 sm:py-5 bg-primary text-white rounded-2xl font-serif italic text-sm sm:text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_15px_40px_rgba(var(--primary-rgb),0.4)] flex items-center justify-center min-w-[180px] sm:min-w-[240px] mx-auto text-center"
+                        className="typo-btn typo-btn-1 hero-btn-mobile px-8 sm:px-12 py-3.5 sm:py-5 bg-primary text-white rounded-full sm:rounded-2xl font-serif italic text-base sm:text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_15px_40px_rgba(var(--primary-rgb),0.4)] flex items-center justify-center min-w-[200px] sm:min-w-[240px] mx-auto text-center"
                       >
-                        {isEmBreve ? 'Cadastrar-se' : (lp.cta_text || 'Descubra o segredo')}
+                        {isEmBreve ? 'Cadastrar-se' : (lp.cta_text || 'Acesse o guia')}
                       </button>
                     </div>
                     
