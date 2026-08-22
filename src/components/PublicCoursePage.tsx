@@ -2557,12 +2557,15 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                     )}
                   </div>
 
-                  {/* 2. CTA Button & Instructor Signature (Distâncias travadas em 10px exatos) */}
+                  {/* 2. CTA Button & Instructor Signature (Distâncias travadas em 10px exatos, mesma cor entre botão e assinatura) */}
                   <div className="w-full flex flex-col items-center justify-center text-center mt-[10px]">
                     <div className="w-full flex items-center justify-center text-center">
                       <button 
                         onClick={handleEnrollClick}
                         className="typo-btn typo-btn-1 hero-btn-mobile px-8 sm:px-12 py-3.5 sm:py-5 bg-primary text-white rounded-full sm:rounded-2xl font-serif italic text-base sm:text-xl hover:scale-105 active:scale-95 transition-all shadow-[0_15px_40px_rgba(var(--primary-rgb),0.4)] flex items-center justify-center min-w-[200px] sm:min-w-[240px] mx-auto text-center"
+                        style={{
+                          backgroundColor: (lp as any).button_color || (lp as any).primary_color || undefined
+                        }}
                       >
                         {isEmBreve ? 'Cadastrar-se' : (lp.cta_text || 'Acesse o guia')}
                       </button>
@@ -2573,7 +2576,12 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                       if (!name) return null;
                       return (
                         <div className="w-full flex items-center justify-center text-center mt-[10px] relative z-10">
-                          <span className="text-xs sm:text-sm text-primary font-serif italic tracking-wide font-bold text-center mx-auto block">
+                          <span 
+                            className="text-xs sm:text-sm text-primary font-serif italic tracking-wide font-bold text-center mx-auto block"
+                            style={{
+                              color: (lp as any).button_color || (lp as any).primary_color || undefined
+                            }}
+                          >
                             By <FormattedTitle content={name} />
                           </span>
                         </div>
