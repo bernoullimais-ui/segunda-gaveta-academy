@@ -155,11 +155,11 @@ const Nav = ({ layout, item, lp, onEnrollClick, timeLeft }: NavProps) => {
 
       <nav 
         className={`w-full transition-colors duration-300 ${
-          isScrolled 
-            ? (layout === 'escuro' ? 'bg-slate-950' : 'bg-white')
+          (isScrolled || isMobileMenuOpen) 
+            ? (!lp?.nav_bg_color ? (layout === 'escuro' ? 'bg-slate-950' : 'bg-white') : '')
             : 'bg-transparent'
         }`}
-        style={{ backgroundColor: isScrolled ? (lp?.nav_bg_color || undefined) : 'transparent' }}
+        style={{ backgroundColor: (isScrolled || isMobileMenuOpen) ? (lp?.nav_bg_color || undefined) : 'transparent' }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-8 h-20 sm:h-[65px] flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 shrink min-w-0">
@@ -250,7 +250,10 @@ const Nav = ({ layout, item, lp, onEnrollClick, timeLeft }: NavProps) => {
 
         {/* Menu Responsivo Mobile em 3 Traços */}
         {isMobileMenuOpen && (
-          <div className="lg:hidden bg-slate-950/95 backdrop-blur-xl border-b border-white/10 px-6 py-6 space-y-4 animate-in slide-in-from-top-4 duration-200 shadow-2xl">
+          <div 
+            className={`lg:hidden border-b border-white/10 px-6 py-6 space-y-4 animate-in slide-in-from-top-4 duration-200 shadow-2xl ${!lp?.nav_bg_color ? (layout === 'escuro' ? 'bg-slate-950/95' : 'bg-white/95') : ''}`}
+            style={{ backgroundColor: lp?.nav_bg_color || undefined }}
+          >
             <a 
               href="#sobre" 
               onClick={() => setIsMobileMenuOpen(false)}
