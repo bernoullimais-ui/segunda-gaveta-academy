@@ -115,6 +115,14 @@ const TopCountdownBar = ({ lp }: { lp: any }) => {
   );
 };
 
+interface NavProps {
+  layout: 'escuro' | 'claro';
+  item: any;
+  lp?: any;
+  onEnrollClick: () => void;
+  timeLeft?: { days: number; hours: number; minutes: number; seconds: number } | null;
+}
+
 const Nav = ({ layout, item, lp, onEnrollClick, timeLeft }: NavProps) => {
   const [loggedIn, setLoggedIn] = React.useState(false);
   const [orgSlug, setOrgSlug] = React.useState('');
@@ -1585,7 +1593,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
             body: JSON.stringify({
               name: enrollData.nome,
               email: enrollData.email,
-              phone: enrollData.telefone,
+              phone: (enrollData as any).telefone || '',
               itemType: isTrilha ? 'trilha' : 'curso',
               itemId: item.id,
               itemName: item.nome,
@@ -2502,6 +2510,13 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                 alt="Banner Principal"
                 className="w-full h-full object-cover object-[20.83%_top] lg:object-center opacity-100 filter-none"
               />
+              {/* Figma Gradient Overlay (Node 39:689 - Rectangle 4) */}
+              <div 
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  background: `linear-gradient(to bottom, transparent 0%, transparent 24%, ${lp.section_hero_bg_color || lp.section_about_bg_color || '#490e1f'} 60%, ${lp.section_hero_bg_color || lp.section_about_bg_color || '#490e1f'} 100%)`
+                }}
+              />
             </div>
             
             <div className="max-w-7xl mx-auto px-6 sm:px-8 relative z-10 w-full min-h-0 lg:min-h-[85vh] flex flex-col justify-end lg:justify-center pb-[2px] lg:pb-0">
@@ -2834,26 +2849,34 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
         </section>
 
       {/* Info bar */}
-      <section className="bg-slate-900 py-10 shadow-xl relative z-10" style={getSectionStyle('info')}>
-        <div className="max-w-6xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-          <div className="flex flex-col items-center">
-            <span className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Módulos</span>
-            <span className="text-2xl font-extrabold text-white">{totalModulos} Módulos</span>
-          </div>
-          <div className="flex flex-col items-center">
-            <span className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1 font-medium">Aulas</span>
-            <span className="text-2xl font-extrabold text-white">{totalAulas} Aulas</span>
-          </div>
-          <div className="flex flex-col items-center">
-            <span className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1 font-medium">Duração</span>
-            <span className="text-2xl font-extrabold text-white">{formatDuration(totalDuracao)}</span>
-          </div>
-          <div className="flex flex-col items-center">
-            <span className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1 font-medium">Acesso</span>
-            <span className="text-2xl font-extrabold text-white">Vitalício</span>
-          </div>
-        </div>
-      </section>
+      {(() => {
+        const totalModulos = item?.curriculo_json?.length || 0;
+        const totalAulas = item?.curriculo_json?.reduce((acc: number, secao: any) => acc + (secao.etapas?.length || 0), 0) || 0;
+        const totalDuracao = item?.carga_horaria || '04';
+        const formatDuration = (d: any) => `${d}h`;
+        return (
+          <section className="bg-slate-900 py-10 shadow-xl relative z-10" style={getSectionStyle('info')}>
+            <div className="max-w-6xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+              <div className="flex flex-col items-center">
+                <span className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Módulos</span>
+                <span className="text-2xl font-extrabold text-white">{totalModulos} Módulos</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <span className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1 font-medium">Aulas</span>
+                <span className="text-2xl font-extrabold text-white">{totalAulas} Aulas</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <span className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1 font-medium">Duração</span>
+                <span className="text-2xl font-extrabold text-white">{formatDuration(totalDuracao)}</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <span className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1 font-medium">Acesso</span>
+                <span className="text-2xl font-extrabold text-white">Vitalício</span>
+              </div>
+            </div>
+          </section>
+        );
+      })()}
 
       {/* About Section */}
       <section id="sobre" className="py-24 bg-white" style={getSectionStyle('about')}>
