@@ -2557,8 +2557,8 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                     )}
                   </div>
 
-                  {/* 2. CTA Button & Instructor Signature (Distância travada: 24px abaixo do título, 8px entre botão e assinatura) */}
-                  <div className="w-full flex flex-col items-center justify-center text-center mt-[24px]">
+                  {/* 2. CTA Button & Instructor Signature (Distâncias travadas em 10px) */}
+                  <div className="w-full flex flex-col items-center justify-center text-center mt-[10px]">
                     <div className="w-full flex items-center justify-center text-center">
                       <button 
                         onClick={handleEnrollClick}
@@ -2569,7 +2569,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                     </div>
                     
                     {(lp.instructor?.name || item.professor_nome) && (
-                      <div className="w-full flex items-center justify-center text-center mt-[8px]">
+                      <div className="w-full flex items-center justify-center text-center mt-[10px]">
                         <span className="text-xs sm:text-sm text-primary font-serif italic tracking-wide font-bold text-center mx-auto block">
                           By <FormattedTitle content={lp.instructor?.name || item.professor_nome} />
                         </span>
