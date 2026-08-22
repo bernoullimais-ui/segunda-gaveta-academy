@@ -2535,7 +2535,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                         : undefined 
                   }}
                 >
-                  {/* Title or Title Image */}
+                  {/* 1. Title or Title Image */}
                   <div className="w-full flex flex-col items-center justify-center text-center">
                     {(lp.hero_title && (lp.hero_title.startsWith('data:image') || lp.hero_title.startsWith('http')) && !lp.hero_title.includes(' ')) ? (
                       <div className="w-full flex items-center justify-center text-center">
@@ -2551,30 +2551,14 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                         />
                       </div>
                     ) : (
-                      <>
-                        <h1 className="text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-serif font-bold text-white leading-[1.1] tracking-tight uppercase typo-title typo-title-1 hero-title-mobile mb-3 lg:mb-6 text-center mx-auto max-w-xs sm:max-w-md lg:max-w-none">
-                          <FormattedTitle content={lp.hero_title || item.nome} />
-                        </h1>
-
-                        {/* Decorative Divider Line with Diamond/Sparkle Accent */}
-                        <div className="w-full flex items-center justify-center gap-3 sm:gap-4 py-1 sm:py-2 opacity-90 max-w-xs sm:max-w-lg mb-3 lg:mb-6 mx-auto">
-                          <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-white/50 to-transparent"></div>
-                          <span className="text-primary text-xs sm:text-base tracking-widest">✦</span>
-                          <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-white/50 to-transparent"></div>
-                        </div>
-
-                        {/* Tagline / Subtitle / Secondary Description */}
-                        {(lp.hero_subtitle || item.descricao) && (
-                          <p className="text-lg sm:text-2xl lg:text-3xl font-serif italic text-slate-200/95 leading-snug max-w-sm sm:max-w-2xl typo-subtitle typo-body-1 text-center mx-auto">
-                            <FormattedTitle content={lp.hero_subtitle || item.descricao} />
-                          </p>
-                        )}
-                      </>
+                      <h1 className="text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-serif font-bold text-white leading-[1.1] tracking-tight uppercase typo-title typo-title-1 hero-title-mobile mb-2 lg:mb-4 text-center mx-auto max-w-xs sm:max-w-md lg:max-w-none">
+                        <FormattedTitle content={lp.hero_title || item.nome} />
+                      </h1>
                     )}
                   </div>
 
-                  {/* CTA Button & Instructor By Label */}
-                  <div className="w-full flex flex-col items-center justify-center text-center gap-2 sm:gap-3 pt-2 sm:pt-4">
+                  {/* 2. CTA Button & Instructor Signature (Posicionados LOGO ABAIXO do Título tanto em Desktop quanto Mobile) */}
+                  <div className="w-full flex flex-col items-center justify-center text-center gap-2 sm:gap-3 py-1 sm:py-2">
                     <div className="w-full flex items-center justify-center text-center">
                       <button 
                         onClick={handleEnrollClick}
@@ -2586,10 +2570,27 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                     
                     {(lp.instructor?.name || item.professor_nome) && (
                       <div className="w-full flex items-center justify-center text-center">
-                        <span className="text-xs sm:text-sm text-primary font-serif italic tracking-wide font-bold mt-1 sm:mt-[10px] text-center mx-auto block">
+                        <span className="text-xs sm:text-sm text-primary font-serif italic tracking-wide font-bold mt-1 text-center mx-auto block">
                           By <FormattedTitle content={lp.instructor?.name || item.professor_nome} />
                         </span>
                       </div>
+                    )}
+                  </div>
+
+                  {/* 3. Divisor Ornamental & Subtítulo */}
+                  <div className="w-full flex flex-col items-center justify-center text-center space-y-3">
+                    {/* Decorative Divider Line with Diamond/Sparkle Accent */}
+                    <div className="w-full flex items-center justify-center gap-3 sm:gap-4 py-1 opacity-90 max-w-xs sm:max-w-lg mx-auto">
+                      <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-white/50 to-transparent"></div>
+                      <span className="text-primary text-xs sm:text-base tracking-widest">✦</span>
+                      <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-white/50 to-transparent"></div>
+                    </div>
+
+                    {/* Tagline / Subtitle / Secondary Description */}
+                    {(lp.hero_subtitle || item.descricao) && (
+                      <p className="text-lg sm:text-2xl lg:text-3xl font-serif italic text-slate-200/95 leading-snug max-w-sm sm:max-w-2xl typo-subtitle typo-body-1 text-center mx-auto">
+                        <FormattedTitle content={lp.hero_subtitle || item.descricao} />
+                      </p>
                     )}
                   </div>
                 </div>
