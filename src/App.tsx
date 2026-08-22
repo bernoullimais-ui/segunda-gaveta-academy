@@ -3,25 +3,57 @@ import React, { useState, useEffect, useCallback } from 'react';
 class AppErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean, error: any}> {
   constructor(props: any) { super(props); this.state = { hasError: false, error: null }; }
   static getDerivedStateFromError(error: any) { return { hasError: true, error }; }
-  componentDidCatch(error: any, errorInfo: any) { console.error('AppErrorBoundary caught error:', error, errorInfo); }
+  
+  componentDidCatch(error: any, errorInfo: any) { 
+    console.error('AppErrorBoundary caught error:', error, errorInfo);
+    const errorStr = String(error?.stack || error?.message || error || '').toLowerCase();
+    if (
+      errorStr.includes('failed to fetch dynamically imported module') ||
+      errorStr.includes('importing a module script failed') ||
+      errorStr.includes('chunkloaderror')
+    ) {
+      const isReloaded = sessionStorage.getItem('chunk_auto_reloaded');
+      if (!isReloaded) {
+        sessionStorage.setItem('chunk_auto_reloaded', 'true');
+        window.location.reload();
+      }
+    }
+  }
+
   render() { 
     if (this.state.hasError) {
+      const errorMsg = String(this.state.error?.stack || this.state.error?.message || this.state.error || '');
+      const isChunkError = errorMsg.toLowerCase().includes('failed to fetch dynamically imported module') ||
+                           errorMsg.toLowerCase().includes('importing a module script failed') ||
+                           errorMsg.toLowerCase().includes('chunkloaderror');
+
       return (
-        <div className="bg-red-50/50 border border-red-200 rounded-3xl p-8 max-w-3xl mx-auto my-8 text-slate-800 shadow-xl space-y-4">
-          <div className="flex items-center gap-3 text-red-600">
-            <svg className="w-8 h-8 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-            <h2 className="text-xl font-bold">Ocorreu um erro ao carregar esta seção</h2>
+        <div className="bg-amber-50/80 border border-amber-200 rounded-3xl p-8 max-w-3xl mx-auto my-8 text-slate-800 shadow-xl space-y-4">
+          <div className="flex items-center gap-3 text-amber-700">
+            <svg className="w-8 h-8 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            <h2 className="text-xl font-bold">
+              {isChunkError ? 'Nova Atualização do Sistema Disponível!' : 'Ocorreu um erro ao carregar esta seção'}
+            </h2>
           </div>
-          <p className="text-slate-600 text-sm">Foi detectada uma falha na renderização. Clique no botão abaixo para tentar recarregar.</p>
+          <p className="text-slate-600 text-sm leading-relaxed">
+            {isChunkError 
+              ? 'Uma nova versão do painel foi publicada no servidor. Clique no botão abaixo para atualizar a página e carregar os recursos mais recentes.'
+              : 'Foi detectada uma falha temporária na renderização desta página. Clique no botão abaixo para tentar recarregar.'}
+          </p>
           <pre className="text-xs bg-slate-900 text-slate-200 p-4 rounded-xl overflow-x-auto max-h-48 border border-slate-800 font-mono">
-            {String(this.state.error?.stack || this.state.error)}
+            {errorMsg}
           </pre>
           <div className="pt-2">
             <button
-              onClick={() => this.setState({ hasError: false, error: null })}
-              className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm transition-all shadow-md"
+              onClick={() => {
+                sessionStorage.removeItem('chunk_auto_reloaded');
+                window.location.reload();
+              }}
+              className="px-6 py-2.5 bg-primary hover:opacity-90 text-white rounded-xl font-bold text-sm transition-all shadow-md flex items-center gap-2"
             >
-              🔄 Recarregar Seção
+              🔄 {isChunkError ? 'Atualizar Sistema Agora' : 'Recarregar Seção'}
             </button>
           </div>
         </div>
@@ -42,10 +74,37 @@ import { DashboardCenso } from './components/DashboardCenso';
 import { AreaAfiliados } from './components/AreaAfiliados';
 import { Toast } from './components/Toast';
 
-const CursosAdmin = React.lazy(() => 
+// Helper robusto para carregamento dinamico com auto-retry e suporte a atualizacoes de build no servidor
+function safeLazy<T extends React.ComponentType<any>>(
+  importFn: () => Promise<{ default: T }>
+) {
+  return React.lazy(async () => {
+    try {
+      return await importFn();
+    } catch (error: any) {
+      const errorStr = String(error?.message || error?.stack || error || '').toLowerCase();
+      if (
+        errorStr.includes('failed to fetch dynamically imported module') ||
+        errorStr.includes('importing a module script failed') ||
+        errorStr.includes('chunkloaderror') ||
+        errorStr.includes('loading chunk')
+      ) {
+        const isReloaded = sessionStorage.getItem('chunk_auto_reloaded');
+        if (!isReloaded) {
+          sessionStorage.setItem('chunk_auto_reloaded', 'true');
+          window.location.reload();
+          return new Promise<{ default: T }>(() => {});
+        }
+      }
+      throw error;
+    }
+  });
+}
+
+const CursosAdmin = safeLazy(() => 
   import('./components/CursosAdmin').then(module => ({ default: module.CursosAdmin }))
 );
-const SuperAdminPanel = React.lazy(() => 
+const SuperAdminPanel = safeLazy(() => 
   import('./components/SuperAdminPanel').then(module => ({ default: module.SuperAdminPanel }))
 );
 import { PublicCoursePage } from './components/PublicCoursePage';
@@ -75,7 +134,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
-const AtendimentoIA = React.lazy(() =>
+const AtendimentoIA = safeLazy(() =>
   import('./components/AtendimentoIA').then(module => ({ default: module.AtendimentoIA }))
 );
 
@@ -163,6 +222,7 @@ export default function App() {
   const [isLoadingOrg, setIsLoadingOrg] = useState(true);
   
   useEffect(() => {
+    sessionStorage.removeItem('chunk_auto_reloaded');
     const savedImp = localStorage.getItem('impersonatedUser');
     if (savedImp) {
       try {
