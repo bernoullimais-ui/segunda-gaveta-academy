@@ -2526,10 +2526,10 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
 
                 {/* Right Column (50% equal width on desktop) - Content centered horizontally & vertically */}
                 <div 
-                  className="col-span-1 w-full flex flex-col items-center justify-center text-center space-y-4 sm:space-y-6 lg:space-y-8 hero-no-mobile-transform"
+                  className="col-span-1 w-full flex flex-col items-center justify-center text-center space-y-4 sm:space-y-6 lg:space-y-8 translate-y-[30px] lg:translate-y-0"
                   style={{ 
                     transform: (lp.hero_block_offset_x || lp.hero_block_offset_y || lp.hero_title_offset_x || lp.hero_title_offset_y) 
-                      ? `translate3d(${lp.hero_block_offset_x ?? lp.hero_title_offset_x ?? 0}px, ${lp.hero_block_offset_y ?? lp.hero_title_offset_y ?? 0}px, 0)` 
+                      ? `translate3d(${lp.hero_block_offset_x ?? lp.hero_title_offset_x ?? 0}px, ${(lp.hero_block_offset_y ?? lp.hero_title_offset_y ?? 0) + (isMobileScreen ? 30 : 0)}px, 0)` 
                       : undefined 
                   }}
                 >
