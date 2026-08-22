@@ -2526,7 +2526,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
 
                 {/* Content Block - 100% Centered on mobile, 50% right column on desktop */}
                 <div 
-                  className="col-span-1 w-full flex flex-col items-center justify-center text-center space-y-4 sm:space-y-6 lg:space-y-8 translate-y-[30px] lg:translate-y-0 mx-auto max-w-sm sm:max-w-xl lg:max-w-none"
+                  className="col-span-1 w-full flex flex-col items-center justify-center text-center translate-y-[30px] lg:translate-y-0 mx-auto max-w-sm sm:max-w-xl lg:max-w-none"
                   style={{ 
                     transform: isMobileScreen 
                       ? undefined 
@@ -2542,9 +2542,9 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                         <img 
                           src={lp.hero_title} 
                           alt={item.nome || "Título"} 
-                          className="object-contain w-auto block mx-auto max-w-full hero-title-img-mobile" 
+                          className="object-contain w-auto h-auto max-h-[160px] sm:max-h-[220px] lg:max-h-[260px] block mx-auto hero-title-img-mobile" 
                           style={{ 
-                            height: lp.hero_title_image_height ? `${lp.hero_title_image_height}px` : '140px',
+                            maxHeight: lp.hero_title_image_height ? `${lp.hero_title_image_height}px` : undefined,
                             display: 'block',
                             margin: '0 auto'
                           }} 
@@ -2557,7 +2557,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                     )}
                   </div>
 
-                  {/* 2. CTA Button & Instructor Signature (Distâncias travadas em 10px) */}
+                  {/* 2. CTA Button & Instructor Signature (Distâncias travadas em 10px exatos) */}
                   <div className="w-full flex flex-col items-center justify-center text-center mt-[10px]">
                     <div className="w-full flex items-center justify-center text-center">
                       <button 
