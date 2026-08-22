@@ -2551,14 +2551,14 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                         />
                       </div>
                     ) : (
-                      <h1 className="text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-serif font-bold text-white leading-[1.1] tracking-tight uppercase typo-title typo-title-1 hero-title-mobile mb-2 lg:mb-4 text-center mx-auto max-w-xs sm:max-w-md lg:max-w-none">
+                      <h1 className="text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-serif font-bold text-white leading-[1.1] tracking-tight uppercase typo-title typo-title-1 hero-title-mobile text-center mx-auto max-w-xs sm:max-w-md lg:max-w-none">
                         <FormattedTitle content={lp.hero_title || item.nome} />
                       </h1>
                     )}
                   </div>
 
-                  {/* 2. CTA Button & Instructor Signature (Posicionados LOGO ABAIXO do Título tanto em Desktop quanto Mobile) */}
-                  <div className="w-full flex flex-col items-center justify-center text-center gap-2 sm:gap-3 py-1 sm:py-2">
+                  {/* 2. CTA Button & Instructor Signature (Distância travada: 24px abaixo do título, 8px entre botão e assinatura) */}
+                  <div className="w-full flex flex-col items-center justify-center text-center mt-[24px]">
                     <div className="w-full flex items-center justify-center text-center">
                       <button 
                         onClick={handleEnrollClick}
@@ -2569,8 +2569,8 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                     </div>
                     
                     {(lp.instructor?.name || item.professor_nome) && (
-                      <div className="w-full flex items-center justify-center text-center">
-                        <span className="text-xs sm:text-sm text-primary font-serif italic tracking-wide font-bold mt-1 text-center mx-auto block">
+                      <div className="w-full flex items-center justify-center text-center mt-[8px]">
+                        <span className="text-xs sm:text-sm text-primary font-serif italic tracking-wide font-bold text-center mx-auto block">
                           By <FormattedTitle content={lp.instructor?.name || item.professor_nome} />
                         </span>
                       </div>
@@ -2578,7 +2578,7 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                   </div>
 
                   {/* 3. Divisor Ornamental & Subtítulo */}
-                  <div className="w-full flex flex-col items-center justify-center text-center space-y-3">
+                  <div className="w-full flex flex-col items-center justify-center text-center space-y-3 mt-[24px]">
                     {/* Decorative Divider Line with Diamond/Sparkle Accent */}
                     <div className="w-full flex items-center justify-center gap-3 sm:gap-4 py-1 opacity-90 max-w-xs sm:max-w-lg mx-auto">
                       <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-white/50 to-transparent"></div>
