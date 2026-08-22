@@ -2568,13 +2568,17 @@ export const PublicCoursePage: React.FC<PublicCoursePageProps> = ({ courseId, is
                       </button>
                     </div>
                     
-                    {(lp.instructor?.name || item.professor_nome) && (
-                      <div className="w-full flex items-center justify-center text-center mt-[10px]">
-                        <span className="text-xs sm:text-sm text-primary font-serif italic tracking-wide font-bold text-center mx-auto block">
-                          By <FormattedTitle content={lp.instructor?.name || item.professor_nome} />
-                        </span>
-                      </div>
-                    )}
+                    {(() => {
+                      const name = lp.instructor?.name || (lp as any).instructor_name || item.professor_nome || (item.instrutores && item.instrutores[0]?.nome) || (item.instrutores && item.instrutores[0]?.usuarios?.nome) || (typeof item.professor === 'string' ? item.professor : undefined);
+                      if (!name) return null;
+                      return (
+                        <div className="w-full flex items-center justify-center text-center mt-[10px] relative z-10">
+                          <span className="text-xs sm:text-sm text-primary font-serif italic tracking-wide font-bold text-center mx-auto block">
+                            By <FormattedTitle content={name} />
+                          </span>
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
               </div>
